@@ -2,12 +2,19 @@
  * Writing the exclusively-owned generated tree.
  *
  * The generator owns exactly one directory and never reaches outside it. It
- * does not `rm -rf` that directory either: it writes this run's files, then
- * removes only the leftovers that (a) live under the owned root, (b) end in
- * `.mdx`, and (c) carry the generated marker. A file failing (c) is reported
- * as a fatal error rather than deleted — that is the case where someone
- * hand-authored content into a generated tree, and destroying it silently
- * would be the worst possible outcome.
+ * does not `rm -rf` that directory either. `emit` runs in four passes:
+ *
+ *   1. plan     — resolve every target and every leftover, touching nothing
+ *   2. validate — collect EVERY ownership conflict; any conflict aborts here,
+ *                 before a single byte changes
+ *   3. write    — this run's pages
+ *   4. remove   — the pre-validated leftovers
+ *
+ * A conflict is a file under the owned root that this generator did not write:
+ * a target or a leftover `.mdx` without a generated marker, or any non-`.mdx`
+ * file. That is the case where someone hand-authored content into a generated
+ * tree, and overwriting or deleting it silently would be the worst possible
+ * outcome — as would failing half-way through with some pages already written.
  */
 
 import { mkdir, lstat, readdir, readFile, rm, writeFile } from "node:fs/promises";
@@ -15,12 +22,14 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 import { fail } from "./errors.ts";
 import { byCodeUnit } from "./ids.ts";
-import { isGeneratedContents, type GeneratedPage } from "./page.ts";
+import { GENERATED_MARKER, isGeneratedContents, type GeneratedPage } from "./page.ts";
 
 export type EmitPlan = {
   /** Absolute path of the exclusively-owned generated root. */
   readonly root: string;
   readonly pages: readonly GeneratedPage[];
+  /** Marker this run writes; defaults to `GENERATED_MARKER`. Legacy markers are always recognized. */
+  readonly generatedMarker?: string;
 };
 
 export type EmitResult = {
@@ -93,35 +102,94 @@ export async function assertPathNotSymlinked(root: string, target: string): Prom
   }
 }
 
-export async function emit(plan: EmitPlan): Promise<EmitResult> {
-  const root = resolve(plan.root);
-  await mkdir(root, { recursive: true });
+type PlannedTarget = {
+  readonly page: GeneratedPage;
+  readonly target: string;
+  readonly existing: string | null;
+};
 
-  const written: string[] = [];
-  const unchanged: string[] = [];
+type Ownership = {
+  readonly root: string;
+  readonly targets: readonly PlannedTarget[];
+  /** Generated `.mdx` files under the root that this run does not produce. */
+  readonly leftovers: readonly string[];
+  /** Relative paths this generator does not own, sorted. */
+  readonly conflicts: readonly string[];
+};
+
+/**
+ * Read-only pass shared by `emit` and `diffAgainstDisk`: containment and
+ * symlink refusal for every target, then an ownership verdict for every file
+ * under the root. Creates no directory and writes nothing.
+ */
+async function planOwnership(plan: EmitPlan): Promise<Ownership> {
+  const root = resolve(plan.root);
+  const marker = plan.generatedMarker ?? GENERATED_MARKER;
+  const targets: PlannedTarget[] = [];
+  const conflicts: string[] = [];
   const owned = new Set<string>();
+
+  await assertNotSymlink(root);
 
   for (const page of plan.pages) {
     const target = assertContained(root, join(root, page.relativePath), page.relativePath);
     owned.add(target);
-
-    // Before mkdir, not after: mkdir -p happily traverses an existing symlinked
+    // Before any mkdir: mkdir -p happily traverses an existing symlinked
     // parent, so a check that runs afterwards has already let the directory be
     // created outside the owned tree.
     await assertPathNotSymlinked(root, target);
-    await mkdir(dirname(target), { recursive: true });
-    await assertNotSymlink(target);
-
     const existing = await readIfPresent(target);
+    if (existing !== null && existing !== page.contents && !isGeneratedContents(existing, marker)) {
+      conflicts.push(page.relativePath);
+    }
+    targets.push({ page, target, existing });
+  }
+
+  const leftovers: string[] = [];
+  const { mdx, other } = await walkTree(root);
+  for (const path of mdx) {
+    if (owned.has(path)) continue;
+    const contents = await readIfPresent(path);
+    if (contents === null) continue;
+    if (isGeneratedContents(contents, marker)) leftovers.push(path);
+    else conflicts.push(toPosix(root, path));
+  }
+  for (const path of other) conflicts.push(toPosix(root, path));
+
+  return { root, targets, leftovers, conflicts: conflicts.sort(byCodeUnit) };
+}
+
+export async function emit(plan: EmitPlan): Promise<EmitResult> {
+  const { root, targets, leftovers, conflicts } = await planOwnership(plan);
+
+  if (conflicts.length > 0) {
+    fail("PATH_CONTAINMENT", "files not written by this generator found inside the generated tree", {
+      paths: conflicts,
+      hint: `move them out of ${root} — this directory is generated and exclusively owned`,
+    });
+  }
+
+  await mkdir(root, { recursive: true });
+
+  const written: string[] = [];
+  const unchanged: string[] = [];
+
+  for (const { page, target, existing } of targets) {
     if (existing === page.contents) {
       unchanged.push(page.relativePath);
       continue;
     }
+    await mkdir(dirname(target), { recursive: true });
+    await assertNotSymlink(target);
     await writeFile(target, page.contents, "utf8");
     written.push(page.relativePath);
   }
 
-  const removed = await prune(root, owned);
+  const removed: string[] = [];
+  for (const path of leftovers) {
+    await rm(path);
+    removed.push(toPosix(root, path));
+  }
 
   return {
     written: written.sort(byCodeUnit),
@@ -132,53 +200,28 @@ export async function emit(plan: EmitPlan): Promise<EmitResult> {
 
 /** Compare a plan against what is on disk without touching anything. */
 export async function diffAgainstDisk(plan: EmitPlan): Promise<readonly string[]> {
-  const root = resolve(plan.root);
-  const drift: string[] = [];
-  const owned = new Set<string>();
+  // A symlinked parent would point the drift read at a file outside the owned
+  // tree, so a drift check could report "up to date" against content this
+  // generator does not own. `planOwnership` applies the same guard as the write
+  // path, for the same reason.
+  const { root, targets, leftovers, conflicts } = await planOwnership(plan);
+  const conflicting = new Set(conflicts);
+  const drift: string[] = conflicts.map((path) => `conflict: ${path}`);
 
-  for (const page of plan.pages) {
-    const target = assertContained(root, join(root, page.relativePath), page.relativePath);
-    owned.add(target);
-    // A symlinked parent would point the drift read at a file outside the owned
-    // tree, so `check:components` could report "up to date" against content this
-    // generator does not own. Same guard as the write path, same reason.
-    await assertPathNotSymlinked(root, target);
-    const existing = await readIfPresent(target);
+  for (const { page, existing } of targets) {
+    if (conflicting.has(page.relativePath)) continue;
     if (existing === null) drift.push(`missing: ${page.relativePath}`);
     else if (existing !== page.contents) drift.push(`changed: ${page.relativePath}`);
   }
-
-  for (const path of await walkMdx(root)) {
-    if (!owned.has(path)) drift.push(`stale: ${relative(root, path).split(sep).join("/")}`);
-  }
+  for (const path of leftovers) drift.push(`stale: ${toPosix(root, path)}`);
 
   return drift.sort(byCodeUnit);
 }
 
-async function prune(root: string, owned: ReadonlySet<string>): Promise<string[]> {
-  const removed: string[] = [];
-
-  for (const path of await walkMdx(root)) {
-    if (owned.has(path)) continue;
-    const contents = await readIfPresent(path);
-    if (contents === null) continue;
-
-    if (!isGeneratedContents(contents)) {
-      fail("PATH_CONTAINMENT", "hand-authored file found inside the generated tree", {
-        path: relative(root, path).split(sep).join("/"),
-        hint: "move it out of doc/src/content/docs/components/ — this tree is generated",
-      });
-    }
-    await rm(path);
-    removed.push(relative(root, path).split(sep).join("/"));
-  }
-
-  return removed;
-}
-
-/** Depth-first walk of `.mdx` files, refusing to follow symlinks. */
-async function walkMdx(root: string): Promise<string[]> {
-  const found: string[] = [];
+/** Depth-first walk of the owned tree, refusing to follow symlinks. */
+async function walkTree(root: string): Promise<{ mdx: string[]; other: string[] }> {
+  const mdx: string[] = [];
+  const other: string[] = [];
   const stack = [root];
 
   while (stack.length > 0) {
@@ -194,15 +237,20 @@ async function walkMdx(root: string): Promise<string[]> {
       const path = join(current, entry.name);
       if (entry.isSymbolicLink()) {
         fail("PATH_CONTAINMENT", "symlink inside the generated tree", {
-          path: relative(root, path).split(sep).join("/"),
+          path: toPosix(root, path),
         });
       }
       if (entry.isDirectory()) stack.push(path);
-      else if (entry.isFile() && entry.name.endsWith(".mdx")) found.push(path);
+      else if (entry.isFile() && entry.name.endsWith(".mdx")) mdx.push(path);
+      else other.push(path);
     }
   }
 
-  return found;
+  return { mdx, other };
+}
+
+function toPosix(root: string, path: string): string {
+  return relative(root, path).split(sep).join("/");
 }
 
 async function readIfPresent(path: string): Promise<string | null> {

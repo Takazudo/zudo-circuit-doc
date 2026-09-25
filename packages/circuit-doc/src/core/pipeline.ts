@@ -31,13 +31,15 @@ import {
   type PublicViewModel,
 } from "./view-model.ts";
 import type { ComponentDataAdapter } from "./adapter.ts";
-import type { GeneratedPage } from "./page.ts";
+import { applyGeneratedMarker, GENERATED_MARKER, type GeneratedPage } from "./page.ts";
 
 export type PipelineOptions = {
   /** Absolute path of the exclusively-owned generated root. */
   readonly generatedRoot: string;
   /** `true` reports drift and writes nothing. */
   readonly dryRun: boolean;
+  /** Marker line for generated pages; defaults to `GENERATED_MARKER` (ADR-011). */
+  readonly generatedMarker?: string;
 };
 
 export type PipelineResult = {
@@ -175,6 +177,7 @@ export async function runPipeline(
   const recordIndex = buildRecordIndex(model);
   assertAnchorIntegrity(model, recordIndex);
 
+  const generatedMarker = options.generatedMarker ?? GENERATED_MARKER;
   const pages: GeneratedPage[] = [
     renderLanding(model, policy),
     renderCatalog(model),
@@ -184,11 +187,11 @@ export async function runPipeline(
     // is reported by `assertLinkIntegrity` against a complete page set rather
     // than by ordering luck.
     renderIntegration(model, recordIndex),
-  ];
+  ].map((page) => applyGeneratedMarker(page, generatedMarker));
   assertUnique("generated path", pages.map((page) => page.relativePath));
   assertLinkIntegrity(pages);
 
-  const plan = { root: options.generatedRoot, pages };
+  const plan = { root: options.generatedRoot, pages, generatedMarker };
   const emitted = options.dryRun ? null : await emit(plan);
   const drift = options.dryRun ? await diffAgainstDisk(plan) : [];
 
