@@ -58,6 +58,52 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
+  examples/empty:
+    devDependencies:
+      '@takazudo/zudo-circuit-doc':
+        specifier: workspace:*
+        version: link:../../packages/circuit-doc
+
+  examples/empty/doc:
+    dependencies:
+      '@takazudo/zfb':
+        specifier: 2.21.0
+        version: 2.21.0
+      '@takazudo/zfb-md-wasm':
+        specifier: 2.21.0
+        version: 2.21.0
+      '@takazudo/zfb-runtime':
+        specifier: 2.21.0
+        version: 2.21.0(@takazudo/zfb@2.21.0)
+      '@takazudo/zudo-circuit-doc':
+        specifier: workspace:*
+        version: link:../../../packages/circuit-doc
+      '@takazudo/zudo-doc':
+        specifier: 5.27.0
+        version: 5.27.0(@takazudo/zfb-md-wasm@2.21.0)(@takazudo/zfb-runtime@2.21.0(@takazudo/zfb@2.21.0))(@takazudo/zfb@2.21.0)(@takazudo/zudo-doc-history-server@5.27.0)(@types/node@22.20.4)(diff@8.0.4)(preact@10.29.8)(zod@4.6.5)
+      '@takazudo/zudo-doc-history-server':
+        specifier: 5.27.0
+        version: 5.27.0
+      diff:
+        specifier: ^8.0.3
+        version: 8.0.4
+      preact:
+        specifier: ^10.29.1
+        version: 10.29.8(preact-render-to-string@6.7.0)
+      preact-render-to-string:
+        specifier: ^6.6.6
+        version: 6.7.0(preact@10.29.8)
+      zod:
+        specifier: ^4.3.6
+        version: 4.6.5
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.4
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+
   packages/circuit-doc:
     dependencies:
       mdast-util-gfm-table:
