@@ -47,6 +47,10 @@ directory's README).
 record — it is a stub target owned by #13 (package UI / MDX components), not a
 copy of upstream core.
 
+`site.ts` is likewise **not** covered — it is new code introduced by #14,
+consolidating the route and asset-URL constants that used to be duplicated
+across `render/shared.ts`, `links.ts` and the two descriptor modules.
+
 ## Test fixtures
 
 `test/fixtures/view-model-fixtures.ts` is copied from LED
@@ -62,3 +66,9 @@ deliberately. Each records its allowed paths in
 `src/core/provenance-allowed/<issue-slug>.txt` (one relative path per line, see
 that directory's README) so the check tolerates only those files, and parallel
 branches never touch the same file.
+
+#14 (`provenance-allowed/render-options.txt`) moved the route/asset-URL
+constants into the new, unhashed `site.ts`, added `RenderOptions`
+(`agentResources`, `integrationDomainGloss`, `generatedNotice`) threaded
+through every renderer and `pipeline.ts`, and rewrote the catalog/landing/
+integration zero-state copy.

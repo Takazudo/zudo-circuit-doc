@@ -1,4 +1,6 @@
-export const MODEL_ASSET_BASE = "/assets/component-previews/models/";
+import { MODEL_ASSET_BASE } from "./site.ts";
+
+export { MODEL_ASSET_BASE };
 
 export type ModelVector = { readonly x: number; readonly y: number; readonly z: number };
 
@@ -13,7 +15,11 @@ export type ModelViewerDescriptor = {
 };
 
 const SAFE_TEXT = /^[A-Za-z0-9][A-Za-z0-9 ._+(),/-]*$/u;
-const SAFE_MODEL_URL = /^\/assets\/component-previews\/models\/[A-Za-z0-9][A-Za-z0-9._+-]*\.wrl$/u;
+// `MODEL_ASSET_BASE` (from `./site.ts`, the single source of truth for this
+// path) contains no regex metacharacters, so it is safe to splice straight
+// into the pattern rather than duplicating the literal here — the accepted
+// URL set is unchanged from before this moved (v1 descriptor contract).
+const SAFE_MODEL_URL = new RegExp(`^${MODEL_ASSET_BASE}[A-Za-z0-9][A-Za-z0-9._+-]*\\.wrl$`, "u");
 const HEX = /^(?:[0-9a-f]{2})+$/u;
 
 export function encodeModelDescriptor(descriptor: ModelViewerDescriptor): string {

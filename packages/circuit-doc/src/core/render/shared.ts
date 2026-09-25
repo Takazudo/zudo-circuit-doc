@@ -23,17 +23,21 @@
  */
 
 import { byCodeUnit, type Anchor, type Slug } from "../ids.ts";
+import { code, paragraph, routeCodeLink, space, text, type Route } from "../mdx.ts";
 import {
-  code,
-  fragmentRoute,
-  route,
-  routeCodeLink,
-  space,
-  text,
-  type Route,
-} from "../mdx.ts";
+  AGENT_RESOURCES_HUB_ROUTE,
+  CATALOG_ROUTE,
+  COMPONENTS_ROUTE,
+  INTEGRATION_ROUTE,
+  RECORDS_ROUTE,
+  agentResourceRoute,
+  catalogEntryRoute,
+  integrationRoute,
+  recordRoute,
+  samePage,
+} from "../site.ts";
 import { joinSafe, literal, safeText, type SafeText } from "../text.ts";
-import type { PhrasingContent } from "mdast";
+import type { PhrasingContent, RootContent } from "mdast";
 import type {
   PublicCoverage,
   PublicFact,
@@ -44,44 +48,25 @@ import type {
   PublicViewModel,
 } from "../view-model.ts";
 
-// --- routes ----------------------------------------------------------------
+// --- routes ------------------------------------------------------------
+//
+// The routes and asset bases themselves live in `../site.ts` (#14): it is the
+// single place every render file, `links.ts` and the descriptor guards read
+// them from. Re-exported here unchanged so every existing import of a route
+// helper from this module keeps compiling and keeps meaning the same thing.
 
-export const COMPONENTS_ROUTE: Route = route("/docs/components/");
-export const CATALOG_ROUTE: Route = route("/docs/components/catalog/");
-export const RECORDS_ROUTE: Route = route("/docs/components/records/");
-export const INTEGRATION_ROUTE: Route = route("/docs/components/integration/");
-
-/** `/docs/components/records/<slug>/`, optionally at one anchor inside it. */
-export function recordRoute(slug: Slug, fragment?: Anchor): Route {
-  return route(`/docs/components/records/${slug}/`, fragment);
-}
-
-/** One rule's, or one conditioned calculation's, place on the integration page. */
-export function integrationRoute(fragment: Anchor): Route {
-  return route("/docs/components/integration/", fragment);
-}
-
-/** The record's entry on the catalog page. */
-export function catalogEntryRoute(fragment: Anchor): Route {
-  return route("/docs/components/catalog/", fragment);
-}
-
-/**
- * The raw agent resource a record's evidence actually lives in.
- *
- * The doc site already publishes every `.claude/skills/<name>/SKILL.md` at this
- * route (`claudeResources` in `zfb.config.ts`), so this links the projection
- * back to the thing it is a projection OF. It is deliberately a link and not a
- * copy: the bundle is the source of truth and these pages must not restate it.
- */
-export function agentResourceRoute(ownerSkill: string): Route {
-  return route(`/docs/claude-skills/${ownerSkill}/`);
-}
-
-/** A destination inside the page currently being rendered. */
-export function samePage(fragment: Anchor): Route {
-  return fragmentRoute(fragment);
-}
+export {
+  AGENT_RESOURCES_HUB_ROUTE,
+  CATALOG_ROUTE,
+  COMPONENTS_ROUTE,
+  INTEGRATION_ROUTE,
+  RECORDS_ROUTE,
+  agentResourceRoute,
+  catalogEntryRoute,
+  integrationRoute,
+  recordRoute,
+  samePage,
+};
 
 // --- cross-record index ----------------------------------------------------
 
@@ -573,27 +558,16 @@ export const SOURCE_STATE_GLOSS: Readonly<Record<string, string>> = {
  * A domain with no entry still publishes and simply has no gloss, the same way
  * an unknown verdict does — the ruleset must be able to grow without a code
  * change hiding a rule.
+ *
+ * This table used to be hard-coded to the LED corpus's six domains. It is now
+ * supplied per project as `RenderOptions.integrationDomainGloss` (#14): the
+ * package default below is empty, so an unglossed domain still publishes —
+ * just with no "What this rule asks" paragraph and `MISSING_GLOSS` in the
+ * legend, exactly like any other term this module has no wording for yet. The
+ * LED project config carries the moved wording so its goldens stay
+ * byte-identical (#21).
  */
-export const INTEGRATION_DOMAIN_GLOSS: Readonly<Record<string, string>> = {
-  "rail-envelope":
-    "Whether every part on the input rail stays inside its own recorded limits across a legal " +
-    "power contract, a mis-contract, and a transient clamp event.",
-  "usb-pd-nvm-load-switch":
-    "How the power-delivery controller's stored configuration and its enable output drive the " +
-    "load switch, through every state from detached to fault.",
-  "al8860-led-stage":
-    "How the LED driver, its sense resistor, inductor, catch diode and per-branch ballast " +
-    "behave together across the LED forward-voltage, tolerance and temperature envelope.",
-  "ap63203-logic-stage":
-    "How the logic-rail converter, its inductor and its output capacitor behave together under " +
-    "the real load the microcontroller presents.",
-  "ntc-adc-firmware":
-    "How the thermistor, its divider, the analog-to-digital input and the firmware that reads " +
-    "them combine into a temperature the design can act on.",
-  "source-to-bench-chain":
-    "How far each claim has travelled from a manufacturer document towards a measurement on " +
-    "real hardware, stage by stage.",
-};
+export const DEFAULT_INTEGRATION_DOMAIN_GLOSS: Readonly<Record<string, string>> = {};
 
 /**
  * The stages a claim passes through, from a vendor document to a measurement.
@@ -667,22 +641,111 @@ export function ownerSkillOf(record: PublicRecord): SafeText | null {
 }
 
 /**
- * The hub above `/docs/claude-skills/` and `/docs/claude-md/`.
+ * Where a record's raw evidence bundle is published, when the owner is known.
  *
- * #61 gave the sixth header slot to `Components`, so this hub is reached
- * through that item's dropdown rather than a header entry of its own. The
- * landing page also links to it, so the raw agent-resource tree stays
- * reachable by navigation and not only by search or a remembered URL.
- *
- * This is a browse-everything link on a section landing page, NOT the
- * owner-skill fallback that `agentResourceDestination` deliberately refuses to
- * have — the reasoning below applies to a link that claims to be one record's
- * bundle, and this one never claims that.
+ * `AGENT_RESOURCES_HUB_ROUTE` (the browse-everything link a section landing
+ * page uses) is NOT this: it lives in `../site.ts` and is re-exported above.
+ * The reasoning in the module doc there applies to a link that claims to be
+ * one record's bundle, and the hub never claims that.
  */
-export const AGENT_RESOURCES_HUB_ROUTE: Route = route("/docs/claude/");
-
-/** Where a record's raw evidence bundle is published, when the owner is known. */
 export function agentResourceDestination(record: PublicRecord): Route | null {
   const ownerSkill = ownerSkillOf(record);
   return ownerSkill === null ? null : agentResourceRoute(ownerSkill);
+}
+
+// --- render options ----------------------------------------------------
+
+/**
+ * Render-time toggles a project supplies through `circuit.config.ts`
+ * (ADR-011, ADR-020). Every renderer defaults to `DEFAULT_RENDER_OPTIONS` when
+ * a caller passes none, so every call site written before these toggles
+ * existed — including every test in this package — keeps producing exactly
+ * the output it always did.
+ */
+export type RenderOptions = {
+  /**
+   * `false` suppresses every `/docs/claude*` link this section would emit —
+   * the landing hub link, the integration page's owning-bundle links and each
+   * record's own. The owning bundle is still NAMED in every case; only the
+   * link is withheld, for a project that has not published that route.
+   */
+  readonly agentResources: boolean;
+  /** Cross-component rule domain -> plain-language gloss. Package default: `{}`. */
+  readonly integrationDomainGloss: Readonly<Record<string, string>>;
+  /**
+   * ADR-020: a one-line notice at the top of every generated page, so a
+   * generated page reads as visibly distinct from an authored one. Default
+   * `true`; the LED fixture sets it `false` to keep its goldens
+   * byte-identical.
+   */
+  readonly generatedNotice: boolean;
+};
+
+export const DEFAULT_RENDER_OPTIONS: RenderOptions = {
+  agentResources: true,
+  integrationDomainGloss: DEFAULT_INTEGRATION_DOMAIN_GLOSS,
+  generatedNotice: true,
+};
+
+/**
+ * ADR-020's notice text, verbatim: "Generated from the component evidence
+ * records — edit the records, not this page." A plain paragraph, never a new
+ * MDX component — the allow-list and the host binding registry stay
+ * untouched, and the sentence still reaches the search index and
+ * `llms-full.txt` like any other body text.
+ */
+const GENERATED_NOTICE_TEXT = literal(
+  "Generated from the component evidence records — edit the records, not this page.",
+);
+
+/** The notice block, or nothing when the project has turned it off. */
+export function generatedNotice(options: RenderOptions): readonly RootContent[] {
+  return options.generatedNotice ? [paragraph([text(GENERATED_NOTICE_TEXT)])] : [];
+}
+
+/**
+ * The zero-state guidance shown on the catalog and landing pages when the
+ * project has not published a single component record yet (epic #1, M1's
+ * "genuine zero-component state"). Shared so the two pages say the same
+ * thing rather than drifting into two different promises about what to do
+ * next.
+ */
+export function zeroPublishedRecordsNotice(): readonly RootContent[] {
+  return [
+    paragraph([
+      text(
+        literal(
+          "No component record is published yet. Add the first exact component with " +
+            "Workflow B in",
+        ),
+      ),
+      space(),
+      code(literal("circuit/WORKFLOW.md")),
+      text(literal(", then select it in")),
+      space(),
+      code(literal("circuit/publication/selection.json")),
+      text(literal(".")),
+    ]),
+  ];
+}
+
+/**
+ * The agent-resource reciprocal statement when `agentResources` is off: names
+ * the owning bundle without linking it, since the doc site does not publish
+ * `/docs/claude*` at all in that configuration and a link there would 404.
+ *
+ * The bundle id is not a filesystem path this layer invents — it is the same
+ * `ownerSkill` string the linked form already prints beside its link — so
+ * turning the link off never removes information, only the navigation.
+ */
+export function agentResourceDisabledNotice(ownerSkill: SafeText | null): PhrasingContent[] {
+  return ownerSkill === null
+    ? [text(literal("No owning bundle is identified in the published model."))]
+    : [
+        text(literal("Stored in the")),
+        space(),
+        code(ownerSkill),
+        space(),
+        text(literal("evidence bundle. Agent-resource links are disabled for this project.")),
+      ];
 }

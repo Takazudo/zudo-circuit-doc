@@ -41,14 +41,19 @@ import { anchor } from "../ids.ts";
 import { buildPage, type GeneratedPage } from "../page.ts";
 import { joinSafe, literal, type SafeText } from "../text.ts";
 import {
+  DEFAULT_RENDER_OPTIONS,
   agentResourceDestination,
+  agentResourceDisabledNotice,
   aliasTerms,
   fitLabel,
+  generatedNotice,
   openDomainRatio,
   openDomainSummary,
   ownerSkillOf,
   placementSummary,
   recordRoute,
+  zeroPublishedRecordsNotice,
+  type RenderOptions,
 } from "./shared.ts";
 import type { PublicRecord, PublicViewModel } from "../view-model.ts";
 import type { PhrasingContent, RootContent } from "mdast";
@@ -56,10 +61,14 @@ import type { PhrasingContent, RootContent } from "mdast";
 /** Anchor the landing and record pages link the index by. Public contract. */
 export const CATALOG_INDEX_ANCHOR = "catalog-index";
 
-export function renderCatalog(model: PublicViewModel): GeneratedPage {
+export function renderCatalog(
+  model: PublicViewModel,
+  options: RenderOptions = DEFAULT_RENDER_OPTIONS,
+): GeneratedPage {
   const records = model.records;
 
   const body: RootContent[] = [
+    ...generatedNotice(options),
     paragraph([
       text(
         literal(
@@ -71,68 +80,73 @@ export function renderCatalog(model: PublicViewModel): GeneratedPage {
       ),
     ]),
 
-    heading(2, literal("How to read this catalog")),
-    paragraph([
-      text(
-        literal(
-          "Four columns describe state. None of them is a grade, and there is deliberately no " +
-            "column combining them — a part is not summarised into a verdict here or anywhere " +
-            "else in this section.",
-        ),
-      ),
-    ]),
-    bulletList([
-      labelled(
-        "Fit",
-        "Whether the part is fitted in the as-built design, or is marked do-not-populate or " +
-          "hand-fit.",
-      ),
-      labelled(
-        "Identity",
-        "Whether the exact orderable part has been confirmed. Unresolved does not mean the " +
-          "wrong part is fitted; it means the confirmation is not on record, so a same-name " +
-          "part from another vendor may not be substituted on the strength of it.",
-      ),
-      labelled(
-        "Sources",
-        "Whether any document backing this line could be retrieved. A line whose sources are " +
-          "unavailable still publishes, so the gap stays visible rather than absent.",
-      ),
-      labelled(
-        "Open domains",
-        "How many of the record's published coverage domains are unresolved, out of how many " +
-          "were published at all. The denominator is the point: no open domains out of none " +
-          "published means nothing was checked, not that everything passed.",
-      ),
-    ]),
+    ...(records.length === 0
+      ? zeroPublishedRecordsNotice()
+      : [
+          heading(2, literal("How to read this catalog")),
+          paragraph([
+            text(
+              literal(
+                "Four columns describe state. None of them is a grade, and there is " +
+                  "deliberately no column combining them — a part is not summarised into a " +
+                  "verdict here or anywhere else in this section.",
+              ),
+            ),
+          ]),
+          bulletList([
+            labelled(
+              "Fit",
+              "Whether the part is fitted in the as-built design, or is marked do-not-populate " +
+                "or hand-fit.",
+            ),
+            labelled(
+              "Identity",
+              "Whether the exact orderable part has been confirmed. Unresolved does not mean " +
+                "the wrong part is fitted; it means the confirmation is not on record, so a " +
+                "same-name part from another vendor may not be substituted on the strength of " +
+                "it.",
+            ),
+            labelled(
+              "Sources",
+              "Whether any document backing this line could be retrieved. A line whose sources " +
+                "are unavailable still publishes, so the gap stays visible rather than absent.",
+            ),
+            labelled(
+              "Open domains",
+              "How many of the record's published coverage domains are unresolved, out of how " +
+                "many were published at all. The denominator is the point: no open domains out " +
+                "of none published means nothing was checked, not that everything passed.",
+            ),
+          ]),
 
-    heading(2, literal("Parts at a glance")),
-    evidenceAnchor(anchor(CATALOG_INDEX_ANCHOR)),
-    scrollableTable(
-      "parts-index",
-      [
-        literal("Part"),
-        literal("Record"),
-        literal("Function"),
-        literal("Fit"),
-        literal("Identity"),
-        literal("Sources"),
-        literal("Open domains"),
-      ],
-      records.map((record) => indexRow(record)),
-    ),
+          heading(2, literal("Parts at a glance")),
+          evidenceAnchor(anchor(CATALOG_INDEX_ANCHOR)),
+          scrollableTable(
+            "parts-index",
+            [
+              literal("Part"),
+              literal("Record"),
+              literal("Function"),
+              literal("Fit"),
+              literal("Identity"),
+              literal("Sources"),
+              literal("Open domains"),
+            ],
+            records.map((record) => indexRow(record)),
+          ),
 
-    heading(2, literal("Part entries")),
-    paragraph([
-      text(
-        literal(
-          "One entry per record, carrying the orderable identity and every board placement. " +
-            "Each entry links to its record page, where the evidence itself is published, and " +
-            "to the raw agent resource that evidence is stored in.",
-        ),
-      ),
-    ]),
-    ...records.flatMap((record) => entry(record)),
+          heading(2, literal("Part entries")),
+          paragraph([
+            text(
+              literal(
+                "One entry per record, carrying the orderable identity and every board " +
+                  "placement. Each entry links to its record page, where the evidence itself " +
+                  "is published, and to the raw agent resource that evidence is stored in.",
+              ),
+            ),
+          ]),
+          ...records.flatMap((record) => entry(record, options)),
+        ]),
   ];
 
   return buildPage(
@@ -178,7 +192,7 @@ function indexRow(record: PublicRecord): TableRow {
 }
 
 /** One full entry: exact identity, every placement, and where to go next. */
-function entry(record: PublicRecord): RootContent[] {
+function entry(record: PublicRecord, options: RenderOptions): RootContent[] {
   const { identity } = record;
   const ownerSkill = ownerSkillOf(record);
   const aliases = aliasTerms(record);
@@ -197,7 +211,6 @@ function entry(record: PublicRecord): RootContent[] {
     ...(ownerSkill === null ? [] : [metadataRow("Owner skill", [code(ownerSkill)])]),
   ];
 
-  const agentResource = agentResourceDestination(record);
   // The part is named INSIDE each link rather than only in the heading above
   // it. This page carries 64 links whose text would otherwise be one of two
   // phrases repeated 32 times each, and a screen reader's link list — or any
@@ -209,6 +222,7 @@ function entry(record: PublicRecord): RootContent[] {
   // Only linked when the owning bundle is actually known — see
   // `agentResourceDestination`. A stand-in link to the resource index would read
   // as this record's bundle and go somewhere else.
+  const agentResource = options.agentResources ? agentResourceDestination(record) : null;
   if (agentResource !== null) {
     links.push(
       space(),
@@ -216,6 +230,8 @@ function entry(record: PublicRecord): RootContent[] {
       space(),
       routeLink(agentResource, linkLabel(identity.mpn, "raw agent resource")),
     );
+  } else if (!options.agentResources) {
+    links.push(space(), text(literal("—")), space(), ...agentResourceDisabledNotice(ownerSkill));
   }
 
   return [

@@ -68,10 +68,11 @@ import {
   SOURCE_STATE_GLOSS,
   UNIT_NONE_GLOSS,
   VERDICT_GLOSS,
-  INTEGRATION_DOMAIN_GLOSS,
   CATALOG_ROUTE,
+  DEFAULT_RENDER_OPTIONS,
   INTEGRATION_ROUTE,
   agentResourceDestination,
+  agentResourceDisabledNotice,
   aliasTerms,
   catalogEntryRoute,
   entryValue,
@@ -79,6 +80,7 @@ import {
   factValue,
   factValueEntries,
   fitLabel,
+  generatedNotice,
   glossFor,
   integrationRoute,
   openDomainSummary,
@@ -89,6 +91,7 @@ import {
   recordRoute,
   samePage,
   type RecordIndex,
+  type RenderOptions,
 } from "./shared.ts";
 import type {
   PublicCoverage,
@@ -104,11 +107,16 @@ import type { PhrasingContent, RootContent } from "mdast";
 /** The unit string the provider records when a value is not a quantity. */
 const UNIT_NONE = "NONE";
 
-export function renderRecord(record: PublicRecord, index: RecordIndex): GeneratedPage {
+export function renderRecord(
+  record: PublicRecord,
+  index: RecordIndex,
+  options: RenderOptions = DEFAULT_RENDER_OPTIONS,
+): GeneratedPage {
   const { identity } = record;
 
   const body: RootContent[] = [
     evidenceAnchor(identity.anchor),
+    ...generatedNotice(options),
     ...orientation(record),
     ...subordinateSection(record),
     ...identitySection(record),
@@ -119,10 +127,10 @@ export function renderRecord(record: PublicRecord, index: RecordIndex): Generate
     ...calculationSection(record, index),
     ...pinMapSection(record),
     ...interactionSection(record, index),
-    ...ruleSection(record, index),
+    ...ruleSection(record, index, options),
     ...sourceSection(record),
     ...legendSection(record),
-    ...agentResourceSection(record),
+    ...agentResourceSection(record, options),
   ];
 
   return buildPage(
@@ -777,7 +785,11 @@ function recordReferences(
  * strings. Neither is a verdict about this part: a record can be named in a
  * rule purely as the component whose limit another part must stay under.
  */
-function ruleSection(record: PublicRecord, index: RecordIndex): RootContent[] {
+function ruleSection(
+  record: PublicRecord,
+  index: RecordIndex,
+  options: RenderOptions,
+): RootContent[] {
   const head = [
     heading(2, literal("Cross-component rules")),
     paragraph([
@@ -802,14 +814,14 @@ function ruleSection(record: PublicRecord, index: RecordIndex): RootContent[] {
 
   return [
     ...head,
-    bulletList(rules.map((rule) => ruleReference(rule))),
+    bulletList(rules.map((rule) => ruleReference(rule, options))),
     paragraph([
       routeLink(INTEGRATION_ROUTE, literal("All cross-component rules")),
     ]),
   ];
 }
 
-function ruleReference(rule: PublicIntegrationRule): PhrasingContent[] {
+function ruleReference(rule: PublicIntegrationRule, options: RenderOptions): PhrasingContent[] {
   const reference: PhrasingContent[] = [
     routeCodeLink(integrationRoute(rule.anchor), rule.ruleId),
     space(),
@@ -826,7 +838,7 @@ function ruleReference(rule: PublicIntegrationRule): PhrasingContent[] {
   // The gloss goes last because it is the longest part: the identifier, the
   // domain and the verdict are what a reader scans for, and burying them behind
   // a sentence would make a list of three rules unscannable.
-  const gloss = INTEGRATION_DOMAIN_GLOSS[rule.domain];
+  const gloss = options.integrationDomainGloss[rule.domain];
   if (gloss !== undefined) {
     reference.push(space(), text(literal("—")), space(), text(literal(gloss)));
   }
@@ -992,9 +1004,9 @@ function legendSection(record: PublicRecord): RootContent[] {
  * authoritative form can reach it, and the wording says which of the two wins,
  * so the projection is never mistaken for the record.
  */
-function agentResourceSection(record: PublicRecord): RootContent[] {
+function agentResourceSection(record: PublicRecord, options: RenderOptions): RootContent[] {
   const ownerSkill = ownerSkillOf(record);
-  const destination = agentResourceDestination(record);
+  const destination = options.agentResources ? agentResourceDestination(record) : null;
 
   return [
     heading(2, literal("Raw agent resource")),
@@ -1008,23 +1020,28 @@ function agentResourceSection(record: PublicRecord): RootContent[] {
       ),
     ]),
     paragraph(
-      // No fallback link when the owner is unknown. A link to the resource index
-      // would look like the owning bundle and lead somewhere else, and a
-      // convincingly wrong link is worse than a stated absence.
-      destination === null || ownerSkill === null
-        ? [
-            text(
-              literal(
-                "The owning bundle is not identified in the published model, so no reciprocal " +
-                  "link can be given for this record.",
+      !options.agentResources
+        ? // The site does not publish `/docs/claude*` in this configuration, so
+          // the bundle is named without being linked — see
+          // `agentResourceDisabledNotice`.
+          agentResourceDisabledNotice(ownerSkill)
+        : // No fallback link when the owner is unknown. A link to the resource
+          // index would look like the owning bundle and lead somewhere else, and
+          // a convincingly wrong link is worse than a stated absence.
+          destination === null || ownerSkill === null
+          ? [
+              text(
+                literal(
+                  "The owning bundle is not identified in the published model, so no " +
+                    "reciprocal link can be given for this record.",
+                ),
               ),
-            ),
-          ]
-        : [
-            routeLink(destination, literal("Open the owning bundle")),
-            space(),
-            code(ownerSkill),
-          ],
+            ]
+          : [
+              routeLink(destination, literal("Open the owning bundle")),
+              space(),
+              code(ownerSkill),
+            ],
     ),
   ];
 }
@@ -1059,8 +1076,12 @@ function termList(terms: readonly SafeText[]): PhrasingContent[] {
  * exists to be the category's front door and to get a reader to the right one,
  * so it carries names and IDs and sends everything else to the catalog.
  */
-export function renderRecordsIndex(records: readonly PublicRecord[]): GeneratedPage {
+export function renderRecordsIndex(
+  records: readonly PublicRecord[],
+  options: RenderOptions = DEFAULT_RENDER_OPTIONS,
+): GeneratedPage {
   const body: RootContent[] = [
+    ...generatedNotice(options),
     paragraph([
       text(
         literal(

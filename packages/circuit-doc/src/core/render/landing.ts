@@ -24,7 +24,13 @@ import {
   type TableRow,
 } from "../mdx.ts";
 import { anchor } from "../ids.ts";
-import { AGENT_RESOURCES_HUB_ROUTE } from "./shared.ts";
+import {
+  AGENT_RESOURCES_HUB_ROUTE,
+  DEFAULT_RENDER_OPTIONS,
+  generatedNotice,
+  zeroPublishedRecordsNotice,
+  type RenderOptions,
+} from "./shared.ts";
 import { buildPage, type GeneratedPage } from "../page.ts";
 import { literal, safeText } from "../text.ts";
 import type { PublicationPolicy } from "../publication.ts";
@@ -37,11 +43,13 @@ export const CORPUS_ANCHOR = "components-corpus";
 export function renderLanding(
   model: PublicViewModel,
   policy: PublicationPolicy,
+  options: RenderOptions = DEFAULT_RENDER_OPTIONS,
 ): GeneratedPage {
   const { corpus } = model;
   const counts = policy.publishRequired("corpus.counts", corpus);
 
   const body: RootContent[] = [
+    ...generatedNotice(options),
     paragraph([
       text(
         literal(
@@ -51,6 +59,7 @@ export function renderLanding(
         ),
       ),
     ]),
+    ...(model.records.length === 0 ? zeroPublishedRecordsNotice() : []),
 
     heading(2, literal("How to read these pages")),
     bulletList([
@@ -127,9 +136,18 @@ export function renderLanding(
         ),
       ),
     ]),
-    paragraph([
-      routeLink(AGENT_RESOURCES_HUB_ROUTE, literal("Browse the raw agent resources")),
-    ]),
+    paragraph(
+      options.agentResources
+        ? [routeLink(AGENT_RESOURCES_HUB_ROUTE, literal("Browse the raw agent resources"))]
+        : [
+            text(
+              literal(
+                "This project has not published the raw agent-resource routes, so they are " +
+                  "not linked from this site — consult the evidence bundles directly.",
+              ),
+            ),
+          ],
+    ),
 
     heading(2, literal("Sections")),
     component("CategoryNav", { category: "components" }),
