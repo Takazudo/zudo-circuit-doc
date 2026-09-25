@@ -14,6 +14,8 @@
  */
 
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { describe, it } from "node:test";
 
 import { ALLOWED_COMPONENT_ATTRIBUTES, ATTRIBUTE_VALUE_PATTERN } from "../../src/core/mdx.ts";
@@ -22,9 +24,12 @@ import { renderIntegration } from "../../src/core/render/integration.ts";
 import { renderRecord } from "../../src/core/render/record.ts";
 import { buildRecordIndex } from "../../src/core/render/shared.ts";
 import { FIXTURE_IDS, fixtureModel } from "../fixtures/view-model-fixtures.ts";
+import { bundleForSsr } from "../ui/bundle.ts";
 
 /** Names bound by the host rather than by this project. */
 const PACKAGE_GLOBAL_COMPONENTS: readonly string[] = ["CategoryNav"];
+
+const STYLESHEET_PATH = fileURLToPath(new URL("../../styles.css", import.meta.url));
 
 const model = fixtureModel();
 const index = buildRecordIndex(model);
@@ -67,10 +72,33 @@ function disclosedBlocks(page: string): string[] {
   );
 }
 
+describe("host bindings stay in step with the component allow-list", async () => {
+  // The host's chrome-bindings shim spreads `circuitDocMdxExtras` into
+  // `mdxExtras`, so the package export is the registry under test.
+  const { circuitDocMdxExtras } = await bundleForSsr<typeof import("../../src/mdx-extras.ts")>("src/mdx-extras.ts");
+  const registry: Readonly<Record<string, unknown>> = circuitDocMdxExtras;
 
-// moved to T11 (#13): "host bindings stay in step with the component allow-list"
-// and "the stylesheet declares what the components emit" -- re-added there against
-// the package's own chrome-bindings shim and stylesheet.
+  it("finds the mdxExtras registry at all", () => {
+    assert.notEqual(Object.keys(registry).length, 0, "circuitDocMdxExtras is empty");
+  });
+
+  for (const name of Object.keys(ALLOWED_COMPONENT_ATTRIBUTES)) {
+    if (PACKAGE_GLOBAL_COMPONENTS.includes(name)) continue;
+
+    it(`registers ${name} in mdxExtras`, () => {
+      // An unregistered name is not an error at build time: MDX renders it as
+      // literal text and silently drops whatever it wrapped. This is the only
+      // place that failure becomes visible before a reader finds it.
+      assert.equal(typeof registry[name], "function", `${name} is on the allow-list but not registered in mdxExtras`);
+    });
+  }
+
+  it("registers nothing the generator cannot emit", () => {
+    for (const name of Object.keys(registry)) {
+      assert.ok(name in ALLOWED_COMPONENT_ATTRIBUTES, `${name} is registered but not on the allow-list`);
+    }
+  });
+});
 
 describe("dense tables carry a scroll container", () => {
   it("wraps every table wider than two columns, on every page", () => {
@@ -158,3 +186,70 @@ describe("link text names its subject", () => {
   });
 });
 
+describe("the stylesheet declares what the components emit", () => {
+  const stylesheet = readFileSync(STYLESHEET_PATH, "utf8");
+
+  it("styles every class the evidence components render", () => {
+    for (const className of [
+      "zcd-evidence-anchor",
+      "zcd-evidence-details",
+      "zcd-evidence-table",
+      "zcd-evidence-table--parts-index",
+    ]) {
+      assert.ok(stylesheet.includes(`.${className}`), `styles.css has no rule for .${className}`);
+    }
+  });
+
+  it("makes the scroll container a scroll container with a focus ring", () => {
+    // Both halves matter: `overflow-x` without a focus style leaves a region
+    // that only a pointer can scroll.
+    assert.match(stylesheet, /\.zcd-evidence-table\s*\{[^}]*overflow-x:\s*auto/u);
+    assert.match(stylesheet, /\.zcd-evidence-table:focus-visible\s*\{[^}]*outline:/u);
+  });
+
+  it("gives the tables a min-width so the container can overflow at all", () => {
+    assert.match(stylesheet, /\.zcd-evidence-table table\s*\{[^}]*min-width:/u);
+  });
+
+  it("aligns document metadata and pairs contained preview media by content width", () => {
+    assert.match(
+      stylesheet,
+      /\.zcd-component-references__document\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) minmax\(12rem, 0\.8fr\)/u,
+    );
+    assert.match(stylesheet, /\.zcd-component-references__previews\s*\{[^}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/u);
+    assert.match(stylesheet, /\.zcd-component-references\s*\{[^}]*container-type:\s*inline-size/u);
+    assert.match(stylesheet, /@container \(max-width: 38rem\)/u);
+    assert.match(
+      stylesheet,
+      /\.zcd-component-references__footprint-frame > a\s*\{[^}]*aspect-ratio:\s*16 \/ 9/u,
+    );
+    assert.match(
+      stylesheet,
+      /\.zcd-component-references__footprint img\s*\{[^}]*object-fit:\s*contain/u,
+    );
+  });
+
+  it("keeps enlarge dialogs viewport-bound, scroll-contained, and keyboard visible", () => {
+    assert.match(stylesheet, /\.zcd-preview-dialog\s*\{[^}]*height:[^;}]*100dvh/u);
+    assert.match(stylesheet, /\.zcd-preview-dialog\s*\{[^}]*max-width:[^;}]*100vw/u);
+    assert.match(stylesheet, /\.zcd-preview-dialog__content\s*\{[^}]*overscroll-behavior:\s*contain/u);
+    assert.match(
+      stylesheet,
+      /\.zcd-preview-dialog--footprint \.zcd-preview-dialog__content > img\s*\{[^}]*object-fit:\s*contain/u,
+    );
+    assert.match(stylesheet, /\.zcd-preview-enlarge-button:focus-visible,[^{]*\{[^}]*outline:/u);
+  });
+
+  it("gives every preview dialog control a 44px target and semantic colors", () => {
+    for (const selector of ["zcd-preview-enlarge-button", "zcd-preview-dialog__close"]) {
+      const rule = new RegExp(`\\.${selector}\\s*\\{([^}]*)\\}`, "u").exec(stylesheet)?.[1] ?? "";
+      assert.match(rule, /min-width:\s*44px/u, `.${selector} has no 44px minimum width`);
+      assert.match(rule, /min-height:\s*44px/u, `.${selector} has no 44px minimum height`);
+      assert.match(rule, /var\(--color-/u, `.${selector} does not use theme color tokens`);
+    }
+  });
+
+  it("merges the component-references container block into one rule", () => {
+    assert.equal(stylesheet.match(/^\.zcd-component-references\s*\{/gmu)?.length, 1);
+  });
+});

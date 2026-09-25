@@ -4,6 +4,8 @@
   "compilerOptions": {
     "noEmit": false,
     "rewriteRelativeImportExtensions": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
     "declaration": true,
     "outDir": "dist",
     "rootDir": "src"
