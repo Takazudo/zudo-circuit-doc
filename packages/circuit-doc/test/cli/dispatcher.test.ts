@@ -79,8 +79,6 @@ describe("zudo-circuit-doc dispatcher", () => {
   });
 
   for (const [argv, issue] of [
-    [["scan"], 19],
-    [["check-built"], 19],
     [["check-browser"], 27],
   ] as const) {
     it(`stub \`${argv.join(" ")}\` prints its tracking issue and exits 2`, async () => {
