@@ -1,0 +1,62 @@
+---
+title: "Project brief"
+description: "Purpose, intended behavior, constraints, and the current state of this example circuit project: a TMP1075 I²C temperature-sensor breakout."
+sidebar_position: 1
+---
+
+:::note[Example project]
+This is an **example project** shipped with zudo-circuit-doc. It shows one exact component taken through the documented agent workflow, from the brief to a generated record page. The design intent below is a `PROJECT-CHOICE` made for the example, not a manufacturer fact and not a request from a real owner.
+:::
+
+## Purpose
+
+| Field | Project statement |
+|---|---|
+| Project name | TMP1075 I²C temperature breakout |
+| Intended user and setting | A developer evaluating a digital temperature sensor on a bench, connected to a microcontroller or single-board-computer host |
+| What the object does | Reports the board temperature over I²C to the host |
+| Why this project exists | To exercise the zudo-circuit-doc workflow on a small circuit with one exact component and a real manufacturer datasheet |
+| What a successful first prototype demonstrates | The host reads plausible temperature values at the expected I²C address, and the reading can be compared against a reference thermometer |
+| Current owner or maintainer | zudo-circuit-doc maintainers (example project) |
+
+Scenario: the developer plugs the breakout's header into the host's I²C pins and the host's logic supply, scans the bus, finds the sensor at its strapped address and polls the temperature register. Reading the temperature is essential; the ALERT output, one-shot mode and conversion-rate tuning are later experiments.
+
+## Scope and constraints
+
+| Topic | Requirement or preference | Basis | Still unknown |
+|---|---|---|---|
+| Power source and operating environment | Powered from the host's `3V3` logic rail through the header; indoor bench use | `PROJECT-CHOICE` | Host rail noise and current budget |
+| Inputs, outputs and controls | I²C (SDA, SCL) to the host; no user controls; ALERT not brought out | `PROJECT-CHOICE` | Whether a later revision needs ALERT on the header |
+| Physical size, mounting and appearance | A small breakout with a single four-pin header (`3V3`, GND, SDA, SCL) | `PROJECT-CHOICE` | Board outline, header pitch and mounting holes |
+| Assembly, sourcing and repair | Hand-solderable leaded package preferred; ordered by exact MPN from a general distributor | `PROJECT-CHOICE` | Passive part numbers for the bypass capacitor and pullups |
+| Budget and prototype quantity | Not entered | Not entered | Not entered |
+| Firmware and development tools | Host-side test script only; no firmware on the breakout | `PROJECT-CHOICE` | Host platform |
+
+The desired behavior above is a requirement of the example. Component capabilities are claims with evidence: they live in the [TMP1075DR record](/docs/components/records/tmp1075dr/), not on this page.
+
+## Current design state
+
+| Item | Current reference |
+|---|---|
+| Documentation revision reviewed | This repository revision |
+| Schematic or circuit specification revision | None; the connections are described in the [architecture overview](../architecture/overview.mdx) only |
+| PCB revision | None |
+| Firmware revision, if applicable | Not applicable; the breakout has no firmware |
+| Physical prototype or assembly ID | None built |
+| Latest relevant verification report | None; nothing has been measured |
+
+The only exact component is Texas Instruments TMP1075DR, selected in the [sensor selection decision](../decisions/sensor-selection.mdx). No schematic, PCB, CAD asset or physical prototype exists yet.
+
+## How to read this project
+
+- [Next actions](./next-actions.mdx) is the entry point for continuing work.
+- [How we work](./how-we-work.mdx) explains the agent workflow, the templates and where evidence lives.
+- [Architecture](../architecture/overview.mdx) explains the functional blocks and operating states.
+- [Research](../research/index.mdx), [Decisions](../decisions/index.mdx) and [Verification](../verification/index.mdx) hold component research, consequential choices and verification reports.
+- The [component catalog](/docs/components/) is generated from the component evidence records.
+
+Exact component identity, sourced facts, asset provenance, and generated catalog entries belong to the component evidence bundle. This page describes project intent and current state.
+
+## Immediate next result
+
+Acquire the symbol, footprint and 3D model for TMP1075DR (Workflow D) and record their fidelity, so the pin map can be checked against real CAD files. See [next actions](./next-actions.mdx).

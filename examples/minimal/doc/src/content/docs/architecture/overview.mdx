@@ -1,0 +1,53 @@
+---
+title: "Architecture overview"
+description: "Functional blocks, operating states, design boundaries, and unresolved architecture questions of the TMP1075 breakout example."
+sidebar_position: 10
+---
+
+This page describes the architecture as it is proposed. The block structure and connections are `PROJECT-CHOICE` for the example; exact component limits are cited by fact ID from the [TMP1075DR record](/docs/components/records/tmp1075dr/). No schematic or PCB exists yet.
+
+## Intended behavior
+
+From the [project brief](../project/index.mdx): a host powers the breakout from its `3V3` logic rail and reads the temperature over I²C. The breakout needs a supply connection, a bus connection, a temperature sensor and the passive parts the sensor's datasheet asks for.
+
+## Functional blocks
+
+| Block ID | Responsibility | Receives | Produces | Current design basis |
+|---|---|---|---|---|
+| B1 Host header | Carries power and the I²C bus between host and breakout | Host `3V3`, GND, SDA, SCL | The same signals on the board | `PROJECT-CHOICE` (four-pin header) |
+| B2 Temperature sensor | Measures temperature and answers I²C reads | `3V3`, GND, SDA, SCL; address straps | Temperature register data | [Sensor selection](../decisions/sensor-selection.mdx): TMP1075DR (`U1`) |
+| B3 Supply decoupling | Keeps the sensor supply quiet at its pins | `3V3`, GND | A local bypass at `U1` | `fact-tmp1075-bypass-required`, `fact-tmp1075-bypass-recommended`; exact capacitor not selected |
+| B4 Bus pullups | Pull SDA and SCL high for the open-drain bus | `3V3`, SDA, SCL | Valid I²C logic levels | `fact-tmp1075-sda-open-drain`, `fact-tmp1075-pullup-recommended`, `fact-tmp1075-pullup-current-max`; exact resistors not selected |
+| B5 Address strapping | Sets the 7-bit I²C address | GND | A fixed address | A0, A1 and A2 tied to GND (`PROJECT-CHOICE`), giving `fact-tmp1075-address-all-gnd`; A2 may only go to GND or V+ (`fact-tmp1075-address-pin-strapping`) |
+
+The host may already have pullups on its bus. Whether B4 is fitted, and with which value, depends on the host and stays an open design choice.
+
+## Physical partitioning
+
+| Boundary | Reason for separating it | Consequence for assembly or testing | Decision reference |
+|---|---|---|---|
+| Host to breakout header | The sensor is evaluated on its own board, away from the host's heat | The header pinout must be documented for each host; cable length affects bus edges | `PROJECT-CHOICE`; no decision record yet |
+
+Board outline, header pitch and mounting are not entered. Placement of `U1` relative to the header and any heat source affects the reading (`fact-tmp1075-installed-accuracy`).
+
+## Operating states and transitions
+
+| State | How it is entered | Required outputs or behavior | Defaults and stored configuration | Evidence or test still needed |
+|---|---|---|---|---|
+| Unpowered | Header disconnected or host off | None | None | None |
+| Continuous conversion | Host rail applied | Sensor converts continuously and answers reads | Manufacturer-documented reset configuration: `fact-tmp1075-default-mode` | Readback of the configuration register on a built board |
+| Shutdown or one-shot | Host writes the configuration register | Lower average current | Written by the host test script | Not planned for the first prototype |
+
+## Project envelopes and calculations
+
+| Analysis question | Related blocks | Required inputs | Evidence or calculation reference | Current limitation |
+|---|---|---|---|---|
+| Is the host rail inside the sensor's recommended supply range? | B1, B2 | Host rail value and tolerance; `fact-tmp1075-vplus-min`, `fact-tmp1075-vplus-max` | No calculation yet | The host and its rail tolerance are not fixed |
+| Do the pullups keep bus current inside the recommendation? | B4 | Pullup value, rail value; `fact-tmp1075-pullup-current-max` | No calculation yet | Resistors not selected; host pullups unknown |
+| How far off is the installed reading? | B2 | Board layout, mounting, airflow | `fact-tmp1075-installed-accuracy` (`NEEDS BENCH`) | Needs a built board and a reference thermometer |
+
+## Architecture choices still open
+
+- Footprint choice for `U1`: generic JEDEC SOIC-8 land pattern or TI's example land pattern (Q-01 in [next actions](../project/next-actions.mdx)).
+- Whether pullups are fitted on the breakout or left to the host.
+- Whether ALERT is brought to the header in a later revision.
