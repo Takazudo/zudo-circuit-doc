@@ -29,7 +29,6 @@ describe("zudo-circuit-doc dispatcher", () => {
     for (const name of ["generate", "check", "validate", "models", "doctor", "new-component", "scan", "check-built", "footprints", "check-browser"]) {
       assert.ok(COMMANDS.some((entry) => entry.meta.name === name), `${name} is registered`);
     }
-    assert.match(run.stdout, /footprints .*not implemented yet — #20/u);
   });
 
   it("<command> --help renders that module's flags and exit codes", async () => {
@@ -82,7 +81,6 @@ describe("zudo-circuit-doc dispatcher", () => {
   for (const [argv, issue] of [
     [["scan"], 19],
     [["check-built"], 19],
-    [["footprints", "check"], 20],
     [["check-browser"], 27],
   ] as const) {
     it(`stub \`${argv.join(" ")}\` prints its tracking issue and exits 2`, async () => {
