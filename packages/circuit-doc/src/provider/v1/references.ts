@@ -13,11 +13,17 @@ import type { InstanceSelection } from "../../core/publication.ts";
 import type { EvidenceIndex, IndexedRecord, ProviderSource } from "./evidence.ts";
 import type { CircuitProjectPaths } from "./paths.ts";
 
-export const REFERENCE_LIMITS = {
+export type ReferenceLimits = {
+  readonly footprintBytes: number;
+  readonly modelBytes: number;
+  readonly aggregateModelBytes: number;
+};
+
+export const REFERENCE_LIMITS: ReferenceLimits = {
   footprintBytes: 512 * 1024,
   modelBytes: 2 * 1024 * 1024,
   aggregateModelBytes: 8 * 1024 * 1024,
-} as const;
+};
 
 export type Transform3d = { readonly x: number; readonly y: number; readonly z: number };
 
@@ -51,17 +57,33 @@ export type CircuitReferenceRoots = Pick<
 >;
 
 /**
- * Upstream (zudo-led-lamp) values, kept as option defaults so the extraction
- * stays behavior-identical; the CAD reference contract issue replaces them.
+ * Upstream (zudo-led-lamp) value, kept as the option default so a project that
+ * does not override it gets the same fail-closed behavior the extraction
+ * started from. The package-count lock has no such default any more (ADR-012):
+ * it is a project-reviewed value that lives on `InstanceSelection.expect`.
  */
 export const UPSTREAM_MODEL_PREFIX = "${KIPRJMOD}/../../footprints/kicad/zudo-led-lamp.3dshapes/";
+/** Documents the upstream literal this issue replaced; no longer used as a default. */
 export const UPSTREAM_EXPECTED_PACKAGES = 25;
 
 export type CircuitReferenceOptions = {
+  /**
+   * CAD capability flag (config `cad.enabled`). Defaults to `true`, matching
+   * upstream (CAD was always available). `false` is a capability that must be
+   * respected: a selected PCB-mounted record still requiring a footprint is a
+   * fatal `ADAPTER_CONTRACT`, never a silent skip. An `external` (non-PCB)
+   * record is unaffected either way.
+   */
+  readonly enabled?: boolean;
   /** The only footprint model locator prefix accepted as a local WRL. */
-  readonly modelPrefix?: string;
-  /** The exact number of distinct packages the selection must resolve to. */
-  readonly expectedPackages?: number;
+  readonly modelLocatorPrefix?: string;
+  /**
+   * Base directory the recorded `footprintPath`/`modelPath` are computed
+   * relative to (config `cad.footprintPathBase`). Defaults to `projectRoot`.
+   */
+  readonly footprintPathBase?: string;
+  /** Overridable size limits; any field left unset falls back to `REFERENCE_LIMITS`. */
+  readonly limits?: Partial<ReferenceLimits>;
 };
 
 const SAFE_BASENAME = /^[A-Za-z0-9][A-Za-z0-9._+-]*$/u;
@@ -79,11 +101,12 @@ export async function readCircuitReferenceContract(
   roots: CircuitReferenceRoots,
   options: CircuitReferenceOptions = {},
 ): Promise<CircuitReferenceContract> {
-  const modelPrefix = options.modelPrefix ?? UPSTREAM_MODEL_PREFIX;
-  const expectedPackages = options.expectedPackages ?? UPSTREAM_EXPECTED_PACKAGES;
-  // Asset paths are reported relative to the canonical root, because the files
-  // themselves are canonicalised before the relative path is taken.
-  const canonicalProjectRoot = await realpath(roots.projectRoot);
+  const enabled = options.enabled ?? true;
+  const modelLocatorPrefix = options.modelLocatorPrefix ?? UPSTREAM_MODEL_PREFIX;
+  const limits = resolveLimits(options.limits);
+  // Asset paths are reported relative to the canonical path base, because the
+  // files themselves are canonicalised before the relative path is taken.
+  const canonicalPathBase = await realpath(options.footprintPathBase ?? roots.projectRoot);
   const documentsByRecordId = selectDocuments(index, selection);
   const packageByRecordId = new Map<string, CircuitPackageReference>();
   const packagesByName = new Map<string, CircuitPackageReference>();
@@ -98,12 +121,30 @@ export async function readCircuitReferenceContract(
       }
       continue;
     }
+    if (!enabled) {
+      fail(
+        "ADAPTER_CONTRACT",
+        `CAD capability disabled but record ${recordId} requires a footprint/model reference`,
+        { recordId },
+      );
+    }
     const footprintName = canonicalFootprint(entry);
     let packageReference = packagesByName.get(footprintName);
     if (packageReference === undefined) {
-      packageReference = await readPackage(footprintName, recordId, roots, canonicalProjectRoot, modelPrefix);
-      aggregateModelBytes += await fileSize(join(canonicalProjectRoot, packageReference.modelPath), "model", recordId);
-      assertReferenceSize("aggregate", aggregateModelBytes, recordId);
+      packageReference = await readPackage(
+        footprintName,
+        recordId,
+        roots,
+        canonicalPathBase,
+        modelLocatorPrefix,
+        limits,
+      );
+      aggregateModelBytes += await fileSize(
+        join(canonicalPathBase, packageReference.modelPath),
+        "model",
+        recordId,
+      );
+      assertReferenceSize("aggregate", aggregateModelBytes, recordId, limits);
       packagesByName.set(footprintName, packageReference);
     }
     const recordIds = [...packageReference.recordIds, recordId];
@@ -116,7 +157,8 @@ export async function readCircuitReferenceContract(
   }
 
   const packages = [...packagesByName.values()];
-  if (packages.length !== expectedPackages) {
+  const expectedPackages = selection.expect.packages;
+  if (expectedPackages !== undefined && packages.length !== expectedPackages) {
     fail("ADAPTER_CONTRACT", `preview manifest must contain exactly ${expectedPackages} packages`, {
       expected: expectedPackages,
       actual: packages.length,
@@ -176,14 +218,13 @@ async function readPackage(
   footprintName: string,
   recordId: string,
   roots: CircuitReferenceRoots,
-  canonicalProjectRoot: string,
-  modelPrefix: string,
+  canonicalPathBase: string,
+  modelLocatorPrefix: string,
+  limits: ReferenceLimits,
 ): Promise<CircuitPackageReference> {
   const footprintFile = await containedFile(roots.footprintLibraryRoot, `${footprintName}.kicad_mod`, recordId, roots.projectRoot);
   const footprintStat = await lstat(footprintFile);
-  if (footprintStat.size > REFERENCE_LIMITS.footprintBytes) {
-    assertReferenceSize("footprint", footprintStat.size, recordId);
-  }
+  assertReferenceSize("footprint", footprintStat.size, recordId, limits);
   const footprint = await readFile(footprintFile, "utf8");
   const models = [...footprint.matchAll(/\(model\s+"([^"]+)"/gu)];
   if (models.length !== 1) {
@@ -194,14 +235,14 @@ async function readPackage(
     });
   }
   const modelLocator = models[0]?.[1] ?? "";
-  if (!modelLocator.startsWith(modelPrefix)) {
+  if (!modelLocator.startsWith(modelLocatorPrefix)) {
     fail("PATH_CONTAINMENT", "footprint model is not a safe local WRL", {
       recordId,
       footprint: footprintName,
       model: modelLocator,
     });
   }
-  const modelName = modelLocator.slice(modelPrefix.length);
+  const modelName = modelLocator.slice(modelLocatorPrefix.length);
   if (!SAFE_BASENAME.test(modelName) || extname(modelName).toLowerCase() !== ".wrl") {
     fail("PATH_CONTAINMENT", "footprint model has an unsafe WRL name", {
       recordId,
@@ -211,9 +252,7 @@ async function readPackage(
   }
   const modelFile = await containedFile(roots.modelRoot, modelName, recordId, roots.projectRoot);
   const modelStat = await lstat(modelFile);
-  if (modelStat.size > REFERENCE_LIMITS.modelBytes) {
-    assertReferenceSize("model", modelStat.size, recordId);
-  }
+  assertReferenceSize("model", modelStat.size, recordId, limits);
   const stepName = `${modelName.slice(0, -4)}.step`;
   assertSameBasenamePair(modelName, stepName, recordId);
   await containedFile(roots.modelRoot, stepName, recordId, roots.projectRoot);
@@ -222,8 +261,8 @@ async function readPackage(
   return {
     packageId: footprintName,
     footprintName,
-    footprintPath: relative(canonicalProjectRoot, footprintFile),
-    modelPath: relative(canonicalProjectRoot, modelFile),
+    footprintPath: relative(canonicalPathBase, footprintFile),
+    modelPath: relative(canonicalPathBase, modelFile),
     offset: transform(footprint, "offset", recordId, footprintName),
     rotation: transform(footprint, "rotate", recordId, footprintName),
     scale: transform(footprint, "scale", recordId, footprintName),
@@ -276,13 +315,26 @@ export function assertSameBasenamePair(wrlName: string, stepName: string, record
   }
 }
 
-export function assertReferenceSize(kind: "footprint" | "model" | "aggregate", actual: number, recordId: string): void {
+export function assertReferenceSize(
+  kind: "footprint" | "model" | "aggregate",
+  actual: number,
+  recordId: string,
+  limits: ReferenceLimits = REFERENCE_LIMITS,
+): void {
   const limit = kind === "footprint"
-    ? REFERENCE_LIMITS.footprintBytes
+    ? limits.footprintBytes
     : kind === "model"
-      ? REFERENCE_LIMITS.modelBytes
-      : REFERENCE_LIMITS.aggregateModelBytes;
+      ? limits.modelBytes
+      : limits.aggregateModelBytes;
   if (!Number.isSafeInteger(actual) || actual < 0 || actual > limit) sizeFailure(kind, recordId, actual, limit);
+}
+
+function resolveLimits(overrides: Partial<ReferenceLimits> | undefined): ReferenceLimits {
+  return {
+    footprintBytes: overrides?.footprintBytes ?? REFERENCE_LIMITS.footprintBytes,
+    modelBytes: overrides?.modelBytes ?? REFERENCE_LIMITS.modelBytes,
+    aggregateModelBytes: overrides?.aggregateModelBytes ?? REFERENCE_LIMITS.aggregateModelBytes,
+  };
 }
 
 function transform(body: string, key: string, recordId: string, footprint: string): Transform3d {

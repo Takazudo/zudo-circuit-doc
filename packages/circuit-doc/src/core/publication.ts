@@ -184,6 +184,15 @@ export type InstanceSelection = {
      * a reviewed change rather than a diff nobody looked at.
      */
     readonly integrationRules: number;
+    /**
+     * The reviewed CAD package lock (ADR-012): the exact number of distinct
+     * footprint/model packages the selection must resolve to. Optional
+     * because a project with CAD disabled never resolves any package and need
+     * not declare it. When present, 0 is a valid, fully-reviewed value — the
+     * gate lives entirely in the provider (`references.ts`/`model-assets.ts`)
+     * and is never echoed into the preflight report.
+     */
+    readonly packages?: number;
   };
 };
 

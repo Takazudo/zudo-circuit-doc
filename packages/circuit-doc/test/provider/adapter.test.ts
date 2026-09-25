@@ -40,7 +40,7 @@ import {
   writeFixtureProject,
 } from "../fixtures/provider-fixtures.ts";
 
-const REFERENCE = { modelPrefix: FIXTURE_MODEL_PREFIX, expectedPackages: FIXTURE_PACKAGE_COUNT };
+const REFERENCE = { modelLocatorPrefix: FIXTURE_MODEL_PREFIX };
 
 let scratch = "";
 let paths: CircuitProjectPaths;
@@ -108,17 +108,21 @@ describe("readEvidenceIndex", () => {
     assert.equal(JSON.stringify(fromDisk), JSON.stringify(pure));
   });
 
-  it("keeps the upstream exact-25 package gate as the default", async () => {
+  it("enforces the project-reviewed package lock (ADR-012), not an upstream literal", async () => {
+    const staleLock: typeof FIXTURE_SELECTION = {
+      ...FIXTURE_SELECTION,
+      expect: { ...FIXTURE_SELECTION.expect, packages: FIXTURE_PACKAGE_COUNT + 1 },
+    };
     await rejectsWith(
-      readEvidenceIndex({ paths, selection: FIXTURE_SELECTION, reference: { modelPrefix: FIXTURE_MODEL_PREFIX } }),
+      readEvidenceIndex({ paths, selection: staleLock, reference: REFERENCE }),
       "ADAPTER_CONTRACT",
-      /exactly 25 packages/u,
+      /exactly 4 packages/u,
     );
   });
 
   it("keeps the upstream model locator prefix as the default", async () => {
     await rejectsWith(
-      readEvidenceIndex({ paths, selection: FIXTURE_SELECTION, reference: { expectedPackages: FIXTURE_PACKAGE_COUNT } }),
+      readEvidenceIndex({ paths, selection: FIXTURE_SELECTION, reference: {} }),
       "PATH_CONTAINMENT",
       /not a safe local WRL/u,
     );
@@ -310,7 +314,13 @@ describe("readCanaries", () => {
 
 describe("model publication", () => {
   it("plans and publishes the selected WRLs into modelPublicRoot", async () => {
-    const options = { paths, selection: FIXTURE_SELECTION, reference: REFERENCE };
+    const options = {
+      paths,
+      selection: FIXTURE_SELECTION,
+      reference: REFERENCE,
+      policy: policy(),
+      validation: PASSING_VALIDATION,
+    };
     const plan = await buildModelAssetPlan(options);
     assert.deepEqual(plan.map((entry) => entry.name), ["HDR-1x5.wrl", "MSOP-8.wrl", "R-2512.wrl"]);
 
@@ -326,15 +336,35 @@ describe("model publication", () => {
     assert.deepEqual((await publishModelAssets(options, true)).drift, []);
   });
 
-  it("keeps the upstream exact-25 gate as the default", async () => {
+  it("keeps the project-reviewed package lock, not an upstream literal", async () => {
+    const staleLock: typeof FIXTURE_SELECTION = {
+      ...FIXTURE_SELECTION,
+      expect: { ...FIXTURE_SELECTION.expect, packages: FIXTURE_PACKAGE_COUNT + 1 },
+    };
+    await rejectsWith(
+      buildModelAssetPlan({
+        paths,
+        selection: staleLock,
+        reference: REFERENCE,
+        policy: policy(staleLock),
+        validation: PASSING_VALIDATION,
+      }),
+      "ADAPTER_CONTRACT",
+      /exactly 4/u,
+    );
+  });
+
+  it("refuses to publish when the canonical validator did not pass", async () => {
     await rejectsWith(
       buildModelAssetPlan({
         paths,
         selection: FIXTURE_SELECTION,
-        reference: { modelPrefix: FIXTURE_MODEL_PREFIX },
+        reference: REFERENCE,
+        policy: policy(),
+        validation: { ok: false, command: ["stub"], exitCode: 1, stdout: "", stderr: "FAIL" },
       }),
-      "ADAPTER_CONTRACT",
-      /exactly 25/u,
+      "VALIDATION_FAILED",
+      /passing canonical validator/u,
     );
   });
 });
@@ -343,8 +373,10 @@ describe("model publication", () => {
 
 const ANY_PYTHON = { major: 3, minor: 0 } as const;
 
-function policy(): PublicationPolicy {
-  return new PublicationPolicy(CIRCUIT_PUBLICATION_MATRIX, FIXTURE_SELECTION);
+const PASSING_VALIDATION = { ok: true, command: ["stub"], exitCode: 0, stdout: "", stderr: "" } as const;
+
+function policy(selection: typeof FIXTURE_SELECTION = FIXTURE_SELECTION): PublicationPolicy {
+  return new PublicationPolicy(CIRCUIT_PUBLICATION_MATRIX, selection);
 }
 
 function passingValidator() {

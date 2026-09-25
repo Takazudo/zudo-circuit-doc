@@ -1,13 +1,15 @@
 /** Deterministic publication of the manifest-selected, validated WRL models. */
 
-import { copyFile, lstat, mkdir, readdir, readFile, realpath } from "node:fs/promises";
+import { copyFile, lstat, mkdir, readdir, readFile } from "node:fs/promises";
 import { basename, extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
+import type { ValidationOutcome } from "../../core/adapter.ts";
+import { assertNotSymlink, assertPathNotSymlinked } from "../../core/emit.ts";
 import { fail } from "../../core/errors.ts";
-import { assertNotSymlink } from "../../core/emit.ts";
 import { byCodeUnit } from "../../core/ids.ts";
+import type { PublicationPolicy } from "../../core/publication.ts";
 import { readEvidenceIndex, type EvidenceIndexOptions } from "./index.ts";
-import { assertSafePreviewAssetName, UPSTREAM_EXPECTED_PACKAGES } from "./references.ts";
+import { assertSafePreviewAssetName } from "./references.ts";
 
 export type ModelAssetPlanEntry = {
   readonly name: string;
@@ -22,18 +24,53 @@ export type ModelAssetResult = {
   readonly drift: readonly string[];
 };
 
+/**
+ * The extra proof model publication needs beyond plain evidence reading: the
+ * canonical validator's own outcome (so the CLI's already-run check gates
+ * this too, instead of publishing against unvalidated data), and the policy
+ * used to assert the selection is fresh before a single file is planned.
+ */
+export type ModelAssetPlanOptions = EvidenceIndexOptions & {
+  readonly policy: PublicationPolicy;
+  readonly validation: ValidationOutcome;
+};
+
 export async function buildModelAssetPlan(
-  options: EvidenceIndexOptions,
+  options: ModelAssetPlanOptions,
 ): Promise<readonly ModelAssetPlanEntry[]> {
-  const expectedPackages = options.reference?.expectedPackages ?? UPSTREAM_EXPECTED_PACKAGES;
+  const { policy, validation } = options;
+  if (!validation.ok) {
+    fail("VALIDATION_FAILED", "model publication requires a passing canonical validator run", {
+      command: validation.command,
+      exitCode: validation.exitCode,
+    });
+  }
   const index = await readEvidenceIndex(options);
+  // Fatal when the committed selection names something the provider lost, or
+  // the corpus size moved — the same freshness gate `projectIndex` runs, but
+  // model publication is a separate CLI path that never calls it otherwise.
+  policy.assertSelectionFresh(
+    index.records.map((entry) => entry.record.record_id),
+    index.sourceIds,
+    index.integrationRules.length,
+  );
+
   const packages = index.references?.packages;
-  if (packages === undefined || packages.length !== expectedPackages) {
+  if (packages === undefined) {
+    fail("ADAPTER_CONTRACT", "model publication requires a validated reference contract");
+  }
+  // Defense in depth: `readCircuitReferenceContract` already enforced this
+  // same lock while building `index.references`, so a mismatch here would
+  // mean that contract was bypassed.
+  const expectedPackages = options.selection.expect.packages;
+  if (expectedPackages !== undefined && packages.length !== expectedPackages) {
     fail("ADAPTER_CONTRACT", `model publication requires exactly ${expectedPackages} selected packages`, {
-      actual: packages?.length ?? 0,
+      expected: expectedPackages,
+      actual: packages.length,
     });
   }
 
+  const pathBase = options.reference?.footprintPathBase ?? options.paths.projectRoot;
   const names = new Set<string>();
   const entries: ModelAssetPlanEntry[] = [];
   for (const descriptor of packages) {
@@ -45,26 +82,31 @@ export async function buildModelAssetPlan(
     names.add(name);
     entries.push({
       name,
-      source: containedRepositoryFile(options.paths.projectRoot, descriptor.modelPath),
+      source: containedRepositoryFile(pathBase, descriptor.modelPath),
     });
   }
   return entries.sort((a, b) => byCodeUnit(a.name, b.name));
 }
 
 export async function publishModelAssets(
-  options: EvidenceIndexOptions,
+  options: ModelAssetPlanOptions,
   dryRun: boolean,
 ): Promise<ModelAssetResult> {
   const plan = await buildModelAssetPlan(options);
-  return syncModelAssets(plan, options.paths.modelPublicRoot, dryRun);
+  return syncModelAssets(plan, options.paths.projectRoot, options.paths.modelPublicRoot, dryRun);
 }
 
 export async function syncModelAssets(
   plan: readonly ModelAssetPlanEntry[],
+  projectRoot: string,
   outputRoot: string,
   dryRun: boolean,
 ): Promise<ModelAssetResult> {
-  await assertSafeOutputRoot(outputRoot);
+  // Walk only from the project root down to the output root — never from the
+  // filesystem root — so an ancestor symlink above the project (macOS
+  // `/tmp` -> `/private/tmp`, or a symlinked checkout) does not fail a
+  // publish that never reads or writes through it.
+  await assertPathNotSymlinked(projectRoot, outputRoot);
   if (!dryRun) await mkdir(outputRoot, { recursive: true });
 
   const expected = new Set(plan.map((entry) => entry.name));
@@ -129,12 +171,12 @@ export async function syncModelAssets(
   };
 }
 
-function containedRepositoryFile(projectRoot: string, path: string): string {
-  const root = resolve(projectRoot);
-  const target = resolve(root, path);
-  const rel = relative(root, target);
+function containedRepositoryFile(root: string, path: string): string {
+  const base = resolve(root);
+  const target = resolve(base, path);
+  const rel = relative(base, target);
   if (rel === "" || rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel)) {
-    fail("PATH_CONTAINMENT", "selected model escapes the repository", { path });
+    fail("PATH_CONTAINMENT", "selected model escapes its path base", { path });
   }
   return target;
 }
@@ -146,21 +188,6 @@ function containedPublicTarget(outputRoot: string, name: string): string {
     fail("PATH_CONTAINMENT", "published model escapes its output root", { name });
   }
   return target;
-}
-
-async function assertSafeOutputRoot(outputRoot: string): Promise<void> {
-  const resolvedRoot = resolve(outputRoot);
-  const segments = resolvedRoot.split(sep).filter(Boolean);
-  let current = isAbsolute(resolvedRoot) ? sep : "";
-  for (const segment of segments) {
-    current = join(current, segment);
-    await assertNotSymlink(current);
-  }
-  try {
-    await realpath(outputRoot);
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-  }
 }
 
 async function listPublishedFiles(outputRoot: string) {

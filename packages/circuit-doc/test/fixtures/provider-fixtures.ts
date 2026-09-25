@@ -399,7 +399,9 @@ export const FIXTURE_SELECTION: InstanceSelection = {
     { recordId: "rec-sense", sourceId: "src-sense-primary", documentKind: "specification" },
     { recordId: "rec-handfit", sourceId: "src-handfit-distributor", documentKind: "drawing" },
   ],
-  expect: { records: 3, sources: 4, integrationRules: 3 },
+  // `packages` must match `FIXTURE_PACKAGE_COUNT` below (declared later, so not
+  // referenced directly here to avoid a temporal-dead-zone access).
+  expect: { records: 3, sources: 4, integrationRules: 3, packages: 3 },
 };
 
 /** The real committed decisions — the fixtures must clear the same matrix. */
