@@ -1,6 +1,11 @@
 # Build output
 node_modules
 dist
+# @takazudo/zudo-circuit-doc builds to lib/, not dist/ — workaround for
+# https://github.com/Takazudo/zudo-front-builder/issues/3154 (zfb prunes
+# workspace-package dirs named "dist"). Anchored: examples/empty/doc/pages/lib
+# is authored source and must stay tracked.
+packages/circuit-doc/lib/
 .zfb
 .zfb-build/
 .zudo-doc/
