@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "coverage": [
+    {
+      "coverage_id": "cov-tmp1075-identity-and-ordering",
+      "record_id": "rec-tmp1075dr",
+      "domain": "identity-and-ordering",
+      "status": "COVERED",
+      "reason": "Manufacturer, orderable row and MSL from SBOS854F title block and Package Option Addendum.",
+      "fact_ids": [
+        "fact-tmp1075-manufacturer",
+        "fact-tmp1075-orderable",
+        "fact-tmp1075-msl"
+      ],
+      "blocking_fact_ids": []
+    },
+    {
+      "coverage_id": "cov-tmp1075-pinout",
+      "record_id": "rec-tmp1075dr",
+      "domain": "pinout",
+      "status": "COVERED",
+      "reason": "Table 5-1 pin numbering, open-drain outputs and address-pin strapping for the D package.",
+      "fact_ids": [
+        "fact-tmp1075-pinout-d",
+        "fact-tmp1075-sda-open-drain",
+        "fact-tmp1075-alert-open-drain",
+        "fact-tmp1075-address-pin-strapping"
+      ],
+      "blocking_fact_ids": []
+    },
+    {
+      "coverage_id": "cov-tmp1075-supply-and-absolute-limits",
+      "record_id": "rec-tmp1075dr",
+      "domain": "supply-and-absolute-limits",
+      "status": "COVERED",
+      "reason": "Sections 6.1-6.3: absolute maximum, ESD and recommended operating conditions for the TMP1075 (non-N) variant; the TMP1075N row is recorded as NOT APPLICABLE.",
+      "fact_ids": [
+        "fact-tmp1075-vplus-abs-max",
+        "fact-tmp1075-bus-pin-abs-max",
+        "fact-tmp1075-a2-abs-max",
+        "fact-tmp1075-tj-abs-max",
+        "fact-tmp1075-esd-hbm",
+        "fact-tmp1075-esd-cdm",
+        "fact-tmp1075-vplus-min",
+        "fact-tmp1075-vplus-max",
+        "fact-tmp1075n-vplus-range",
+        "fact-tmp1075-ta-min",
+        "fact-tmp1075-ta-max"
+      ],
+      "blocking_fact_ids": []
+    },
+    {
+      "coverage_id": "cov-tmp1075-sensor-accuracy-and-resolution",
+      "record_id": "rec-tmp1075dr",
+      "domain": "sensor-accuracy-and-resolution",
+      "status": "COVERED",
+      "reason": "Section 6.5 guaranteed D-package accuracy per temperature band, with typical accuracy and resolution kept as typical values.",
+      "fact_ids": [
+        "fact-tmp1075-accuracy-d-40-110",
+        "fact-tmp1075-accuracy-d-55-125",
+        "fact-tmp1075-accuracy-typ",
+        "fact-tmp1075-resolution"
+      ],
+      "blocking_fact_ids": []
+    },
+    {
+      "coverage_id": "cov-tmp1075-i2c-interface",
+      "record_id": "rec-tmp1075dr",
+      "domain": "i2c-interface",
+      "status": "COVERED",
+      "reason": "Address table, power-up configuration, logic thresholds, output-low voltage and the recommended pullups.",
+      "fact_ids": [
+        "fact-tmp1075-address-all-gnd",
+        "fact-tmp1075-default-mode",
+        "fact-tmp1075-vih",
+        "fact-tmp1075-vil",
+        "fact-tmp1075-vol-max",
+        "fact-tmp1075-pullup-recommended",
+        "fact-tmp1075-pullup-current-max",
+        "fact-tmp1075-alert-unused"
+      ],
+      "blocking_fact_ids": []
+    },
+    {
+      "coverage_id": "cov-tmp1075-supply-current",
+      "record_id": "rec-tmp1075dr",
+      "domain": "supply-current",
+      "status": "COVERED",
+      "reason": "Section 6.5 IQ per conversion-rate setting (guaranteed maximum and typical kept apart), conversion and shutdown current.",
+      "fact_ids": [
+        "fact-tmp1075-iq-cr00-max",
+        "fact-tmp1075-iq-cr00-typ",
+        "fact-tmp1075-iq-cr01-max",
+        "fact-tmp1075-iq-cr01-typ",
+        "fact-tmp1075-iq-cr10-max",
+        "fact-tmp1075-iq-cr10-typ",
+        "fact-tmp1075-iq-cr11-max",
+        "fact-tmp1075-iq-cr11-typ",
+        "fact-tmp1075-iq-conversion-max",
+        "fact-tmp1075-isd-max-25c"
+      ],
+      "blocking_fact_ids": []
+    },
+    {
+      "coverage_id": "cov-tmp1075-decoupling-and-layout",
+      "record_id": "rec-tmp1075dr",
+      "domain": "decoupling-and-layout",
+      "status": "COVERED",
+      "reason": "Sections 8.3 and 8.4.1: bypass capacitor required, 0.01 uF recommended, placed at the supply pins.",
+      "fact_ids": [
+        "fact-tmp1075-bypass-required",
+        "fact-tmp1075-bypass-recommended"
+      ],
+      "blocking_fact_ids": []
+    },
+    {
+      "coverage_id": "cov-tmp1075-package-and-thermal",
+      "record_id": "rec-tmp1075dr",
+      "domain": "package-and-thermal",
+      "status": "COVERED",
+      "reason": "D0008A outline and TI example land pattern, and the D-package RthetaJA metric.",
+      "fact_ids": [
+        "fact-tmp1075-package-outline",
+        "fact-tmp1075-pitch",
+        "fact-tmp1075-max-height",
+        "fact-tmp1075-ti-land-pattern",
+        "fact-tmp1075-rthja-d"
+      ],
+      "blocking_fact_ids": []
+    },
+    {
+      "coverage_id": "cov-tmp1075-installed-accuracy-and-self-heating",
+      "record_id": "rec-tmp1075dr",
+      "domain": "installed-accuracy-and-self-heating",
+      "status": "OPEN",
+      "reason": "The datasheet bounds the sensor error only; the fitted breakout's measurement error and self-heating need bench measurement (fact-tmp1075-installed-accuracy, fact-tmp1075-self-heating are NEEDS BENCH).",
+      "fact_ids": [
+        "fact-tmp1075-installed-accuracy",
+        "fact-tmp1075-self-heating"
+      ],
+      "blocking_fact_ids": [
+        "fact-tmp1075-installed-accuracy",
+        "fact-tmp1075-self-heating"
+      ]
+    },
+    {
+      "coverage_id": "cov-tmp1075-cad-assets",
+      "record_id": "rec-tmp1075dr",
+      "domain": "cad-assets",
+      "status": "OPEN",
+      "reason": "No symbol, footprint or 3D model has been acquired and CAD is disabled in circuit.config.ts, so the pin-asset check does not run yet. Workflow D is the next step.",
+      "fact_ids": [],
+      "blocking_fact_ids": []
+    }
+  ]
+}

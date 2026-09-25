@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "pin_maps": [
+    {
+      "pin_map_id": "pinmap-tmp1075dr",
+      "record_id": "rec-tmp1075dr",
+      "symbol": "TMP1075D",
+      "footprint": "SOIC-8_3.9x4.9mm_P1.27mm",
+      "pins": [
+        {
+          "symbol_pin": "1",
+          "name": "SDA",
+          "footprint_pad": "1",
+          "function": "serial data I/O, open-drain; planned: header SDA with 5 kOhm pullup"
+        },
+        {
+          "symbol_pin": "2",
+          "name": "SCL",
+          "footprint_pad": "2",
+          "function": "serial clock input; planned: header SCL with 5 kOhm pullup"
+        },
+        {
+          "symbol_pin": "3",
+          "name": "ALERT",
+          "footprint_pad": "3",
+          "function": "overtemperature alert, open-drain output; planned: not connected to the header (unused)"
+        },
+        {
+          "symbol_pin": "4",
+          "name": "GND",
+          "footprint_pad": "4",
+          "function": "ground; planned: header GND"
+        },
+        {
+          "symbol_pin": "5",
+          "name": "A2",
+          "footprint_pad": "5",
+          "function": "address select, GND or V+ only; planned: GND"
+        },
+        {
+          "symbol_pin": "6",
+          "name": "A1",
+          "footprint_pad": "6",
+          "function": "address select; planned: GND"
+        },
+        {
+          "symbol_pin": "7",
+          "name": "A0",
+          "footprint_pad": "7",
+          "function": "address select; planned: GND"
+        },
+        {
+          "symbol_pin": "8",
+          "name": "V+",
+          "footprint_pad": "8",
+          "function": "supply, 1.7 V to 5.5 V; planned: header 3.3 V"
+        }
+      ],
+      "reviewed_by": "author check against SBOS854F Table 5-1 on 2026-09-26; no independent review yet; symbol and footprint files not yet acquired (pin-asset check skipped while CAD is disabled)"
+    }
+  ]
+}

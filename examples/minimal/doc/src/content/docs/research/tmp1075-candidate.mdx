@@ -1,0 +1,61 @@
+---
+title: "Temperature sensor candidates"
+description: "Why TMP1075DR was chosen over TMP75 and over TMP117 and TMP102 for the example breakout, with what was and was not re-verified."
+sidebar_position: 10
+---
+
+This page records the rationale for the sensor choice. The [TMP1075DR owner bundle](/docs/components/records/tmp1075dr/) owns the exact identity, sources, facts and coverage.
+
+## Research question
+
+| Field | Entry |
+|---|---|
+| Research ID | R-01 |
+| Function or problem being solved | A digital temperature sensor readable over I²C from a bench host |
+| Relevant project requirements | I²C interface; runs from the host's `3V3` rail; hand-solderable leaded package; a clear manufacturer datasheet for one exact orderable part |
+| Intended use and operating conditions | Indoor bench evaluation, powered and read by the host |
+| Research date and scope | 2026-09-26; TI's LM75-compatible and precision I²C sensors; manufacturer datasheets only |
+| Decision this research will inform | [Sensor selection](../decisions/sensor-selection.mdx) |
+
+## Comparison criteria
+
+| Criterion | Required, preferred, or exploratory | How it will be evaluated | Reference |
+|---|---|---|---|
+| I²C interface and a documented address table | Required | Datasheet interface section | [Project brief](../project/index.mdx) |
+| Supply range includes the host logic rail | Required | Recommended operating conditions table | [Project brief](../project/index.mdx) |
+| Leaded, hand-solderable package | Preferred | Package and orderable information | [Project brief](../project/index.mdx) |
+| One datasheet per device, without internal contradictions in the pin table | Preferred | Reading the pin table and document scope | Evidence quality for the example |
+
+## Candidate register
+
+| Candidate record | Exact identity confirmed? | Why it is being considered | Material evidence gap | Current disposition |
+|---|---|---|---|---|
+| Texas Instruments TMP1075DR | Yes: SBOS854F addendum row TMP1075DR, SOIC (D), 8 pins | LM75-compatible pinout and software, SOIC package, own datasheet | Installed accuracy and self-heating need bench data | Selected |
+| Texas Instruments TMP75AIDR | Yes: SBOS288M addendum (physical page index 24, printed "Addendum-Page 1") lists TMP75AIDR as Active, SOIC (D), 8 pins | Classic LM75-class part in SOIC | Shared-device datasheet; pin-table text defect (below) | Not selected |
+| Texas Instruments TMP117 | Not checked | Higher-accuracy digital sensor | Package: a leadless small-outline package, against the hand-soldering preference (not re-verified in this task) | Not selected |
+| Texas Instruments TMP102 | Not checked | Small, low-power digital sensor | Package: a very small SOT package, against the hand-soldering preference (not re-verified in this task) | Not selected |
+
+TMP117 and TMP102 were rejected by package preference only. No source was retrieved for them in this task, so nothing on this page says they are unsuitable or unavailable.
+
+## What the evidence establishes
+
+| Research issue | Evidence reference | Interpretation for this use | Limitation |
+|---|---|---|---|
+| TMP1075DR exact identity and package | `fact-tmp1075-orderable`, `fact-tmp1075-package-outline` | Active production SOIC (D) orderable | Orderable status is a dated observation (addendum dated 17-Sep-2026) |
+| TMP1075DR supply range covers the host rail | `fact-tmp1075-vplus-min`, `fact-tmp1075-vplus-max` | The recommended range brackets a nominal `3V3` rail | The host rail's tolerance is not known yet |
+| TMP1075DR pinout and bus | `fact-tmp1075-pinout-d`, `fact-tmp1075-sda-open-drain`, `fact-tmp1075-address-all-gnd` | LM75-style pinout; open-drain SDA and ALERT; address set by straps | None for the example |
+| TMP75 datasheet scope | TI SBOS288M, revised December 2020 (retrieved 2026-09-26 for this research; not retained as project evidence) | The document covers two devices (TMP175 and TMP75), so every claim needs a device qualifier | Research reading only; no owner bundle exists for TMP75 |
+| TMP75 pin table | Same document, physical page index 2, printed page 3, Pin Functions table, row SCL | The SCL row is typed as an input but its description reads "Open-drain output; requires a pullup resistor" — a text defect for a clock input | Research reading only |
+
+## Datasheet and CAD needs
+
+- Retained: TI SBOS854F revision F for TMP1075DR, hash-recorded in the owner bundle's sources.
+- Still needed: symbol, footprint and 3D model for the SOIC (D) package, compared with `fact-tmp1075-ti-land-pattern` (Workflow D).
+
+## Recommendation and alternatives
+
+TMP1075DR is recommended: it is TI's LM75-compatible sensor with its own datasheet, the supply range covers the host rail, and the SOIC package suits hand assembly. The strongest reason to choose differently would be a need for better accuracy than the TMP1075's guaranteed limits (`fact-tmp1075-accuracy-d-40-110`), which would favour a precision sensor such as TMP117 at the cost of a leadless package. Adopted in the [sensor selection decision](../decisions/sensor-selection.mdx).
+
+## Next action
+
+Acquire and audit the TMP1075DR CAD assets; see [next actions](../project/next-actions.mdx).
