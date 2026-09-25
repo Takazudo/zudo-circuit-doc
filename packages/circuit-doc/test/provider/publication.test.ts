@@ -8,6 +8,7 @@ import {
   type InstanceSelection,
   type PublicationMatrix,
 } from "../../src/core/publication.ts";
+import { VIEW_MODEL_VERSION } from "../../src/core/view-model.ts";
 import { CIRCUIT_PUBLICATION_MATRIX } from "../../src/provider/v1/matrix.ts";
 import { FIXTURE_SELECTION } from "../fixtures/provider-fixtures.ts";
 
@@ -131,7 +132,7 @@ describe("committed circuit policy", () => {
     const build = (): string =>
       JSON.stringify(
         policy.buildReport({
-          viewModelVersion: 1,
+          viewModelVersion: VIEW_MODEL_VERSION,
           providerId: "circuit-component-spec",
           providerContractVersion: 1,
           availableRecords: 32,

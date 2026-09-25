@@ -33,9 +33,16 @@ import type { SafeUrl } from "./url.ts";
  * boundary at extraction, and the rule then applies literally. Full reasoning
  * and the epic's two incompatible changes: ARCHITECTURE.md §5.
  */
-export const VIEW_MODEL_VERSION = 1;
+export const VIEW_MODEL_VERSION = 2;
 
-export type ViewModelVersion = typeof VIEW_MODEL_VERSION;
+/**
+ * Every view-model version a core/adapter pair may negotiate on. A union rather
+ * than `typeof VIEW_MODEL_VERSION`, so an adapter can declare the set it
+ * supports and a later bump extends it instead of replacing it. v2 (ADR-011)
+ * marks the extraction into `@takazudo/zudo-circuit-doc`; the shape itself did
+ * not change from v1.
+ */
+export type ViewModelVersion = 1 | 2;
 
 /** Which provider produced this model, and against which of its contracts. */
 export type ProviderIdentity = {
