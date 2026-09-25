@@ -67,7 +67,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node --experimental-strip-types --test \"test/**/*.test.ts\"",
     "test:led-corpus": "node --experimental-strip-types --test \"test-led/**/*.test.ts\"",
-    "check:shape": "node scripts/check-package-shape.mjs"
+    "check:shape": "node scripts/check-package-shape.mjs",
+    "check:core-provenance": "node scripts/check-core-provenance.mjs"
   },
   "dependencies": {
     "mdast-util-to-markdown": "2.1.2",
