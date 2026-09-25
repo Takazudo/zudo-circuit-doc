@@ -96,6 +96,14 @@ test("checkDestinationCollision is a no-op when the destination is missing or an
   assert.doesNotThrow(() => checkDestinationCollision(emptyDir));
 });
 
+test("composeProject succeeds when the destination already exists as an empty directory", () => {
+  const parent = mkdtemp();
+  const destinationPath = path.join(parent, "proj");
+  fs.mkdirSync(destinationPath);
+  composeProject({ plan: makePlan({ destinationPath }), templateDir: TEMPLATE_DIR, randomSuffix: () => "empty-dest" });
+  assert.ok(fs.existsSync(path.join(destinationPath, "package.json")));
+});
+
 test("collision: a non-empty destination is rejected with exit-1-worthy CliError and the tree is left byte-for-byte unchanged", () => {
   const parent = mkdtemp();
   const destinationPath = path.join(parent, "taken");
