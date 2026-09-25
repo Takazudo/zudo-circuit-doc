@@ -24,3 +24,15 @@ export * from "./core/render/catalog.ts";
 export * from "./core/render/integration.ts";
 export * from "./core/render/landing.ts";
 export * from "./core/render/record.ts";
+
+// v1 evidence provider (#11).
+export * from "./provider/v1/paths.ts";
+export * from "./provider/v1/read.ts";
+export * from "./provider/v1/evidence.ts";
+export * from "./provider/v1/integration.ts";
+export * from "./provider/v1/matrix.ts";
+export * from "./provider/v1/references.ts";
+export * from "./provider/v1/validate.ts";
+export * from "./provider/v1/canaries.ts";
+export * from "./provider/v1/model-assets.ts";
+export * from "./provider/v1/index.ts";
