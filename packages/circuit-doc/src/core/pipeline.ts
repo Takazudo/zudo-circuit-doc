@@ -23,7 +23,12 @@ import { renderCatalog } from "./render/catalog.ts";
 import { renderIntegration } from "./render/integration.ts";
 import { renderLanding } from "./render/landing.ts";
 import { renderRecord, renderRecordsIndex } from "./render/record.ts";
-import { buildRecordIndex, type RecordIndex } from "./render/shared.ts";
+import {
+  DEFAULT_RENDER_OPTIONS,
+  buildRecordIndex,
+  type RecordIndex,
+  type RenderOptions,
+} from "./render/shared.ts";
 import {
   VIEW_MODEL_VERSION,
   type PublicInteraction,
@@ -33,13 +38,25 @@ import {
 import type { ComponentDataAdapter } from "./adapter.ts";
 import { applyGeneratedMarker, GENERATED_MARKER, type GeneratedPage } from "./page.ts";
 
+/**
+ * `RenderOptions` plus the one pipeline-level knob that travels with them:
+ * which marker `emit`/`page` should write. It is not a render decision itself
+ * — no renderer reads it — but it is set from the same `docs.*` config keys
+ * (ADR-011), so it rides along in the same options bag rather than getting a
+ * third place to be threaded through `runPipeline`.
+ */
+export type PipelineRenderOptions = RenderOptions & {
+  /** Marker line for generated pages; defaults to `GENERATED_MARKER` (ADR-011). */
+  readonly generatedMarker?: string;
+};
+
 export type PipelineOptions = {
   /** Absolute path of the exclusively-owned generated root. */
   readonly generatedRoot: string;
   /** `true` reports drift and writes nothing. */
   readonly dryRun: boolean;
-  /** Marker line for generated pages; defaults to `GENERATED_MARKER` (ADR-011). */
-  readonly generatedMarker?: string;
+  /** Render-time toggles (ADR-011, ADR-020); defaults reproduce today's output. */
+  readonly render?: PipelineRenderOptions;
 };
 
 export type PipelineResult = {
@@ -177,16 +194,17 @@ export async function runPipeline(
   const recordIndex = buildRecordIndex(model);
   assertAnchorIntegrity(model, recordIndex);
 
-  const generatedMarker = options.generatedMarker ?? GENERATED_MARKER;
+  const render: PipelineRenderOptions = options.render ?? DEFAULT_RENDER_OPTIONS;
+  const generatedMarker = render.generatedMarker ?? GENERATED_MARKER;
   const pages: GeneratedPage[] = [
-    renderLanding(model, policy),
-    renderCatalog(model),
-    renderRecordsIndex(model.records),
-    ...model.records.map((record) => renderRecord(record, recordIndex)),
+    renderLanding(model, policy, render),
+    renderCatalog(model, render),
+    renderRecordsIndex(model.records, render),
+    ...model.records.map((record) => renderRecord(record, recordIndex, render)),
     // Rendered after the record pages it links into, so a missing record page
     // is reported by `assertLinkIntegrity` against a complete page set rather
     // than by ordering luck.
-    renderIntegration(model, recordIndex),
+    renderIntegration(model, recordIndex, render),
   ].map((page) => applyGeneratedMarker(page, generatedMarker));
   assertUnique("generated path", pages.map((page) => page.relativePath));
   assertLinkIntegrity(pages);

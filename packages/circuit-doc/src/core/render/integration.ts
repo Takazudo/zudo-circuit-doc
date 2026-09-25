@@ -47,17 +47,20 @@ import { anchor } from "../ids.ts";
 import { buildPage, type GeneratedPage } from "../page.ts";
 import { joinSafe, literal, safeText, type SafeText } from "../text.ts";
 import {
+  DEFAULT_RENDER_OPTIONS,
   EVIDENCE_STAGE_GLOSS,
   EVIDENCE_STAGE_STATUS_GLOSS,
-  INTEGRATION_DOMAIN_GLOSS,
   VERDICT_GLOSS,
+  agentResourceDisabledNotice,
   agentResourceRoute,
   factReference,
+  generatedNotice,
   glossFor,
   presentTerms,
   recordRoute,
   samePage,
   type RecordIndex,
+  type RenderOptions,
 } from "./shared.ts";
 import type {
   PublicIntegrationRule,
@@ -101,17 +104,19 @@ const NO_CURRENT_RECORD = null;
 export function renderIntegration(
   model: PublicViewModel,
   index: RecordIndex,
+  options: RenderOptions = DEFAULT_RENDER_OPTIONS,
 ): GeneratedPage {
   const rules = model.integration;
 
   const body: RootContent[] = [
+    ...generatedNotice(options),
     ...orientation(),
     ...ruleIndex(rules),
     ...(rules.length === 0
-      ? [paragraph([text(literal("No cross-component rule is published."))])]
-      : rules.flatMap((rule) => ruleSection(rule, index))),
-    ...legendSection(rules),
-    ...agentResourceSection(rules),
+      ? [paragraph([text(literal("No cross-component integration rule is declared."))])]
+      : rules.flatMap((rule) => ruleSection(rule, index, options))),
+    ...legendSection(rules, options),
+    ...agentResourceSection(rules, options),
   ];
 
   return buildPage(
@@ -251,8 +256,12 @@ function indexRow(rule: PublicIntegrationRule): TableRow {
   ];
 }
 
-function ruleSection(rule: PublicIntegrationRule, index: RecordIndex): RootContent[] {
-  const gloss = INTEGRATION_DOMAIN_GLOSS[rule.domain];
+function ruleSection(
+  rule: PublicIntegrationRule,
+  index: RecordIndex,
+  options: RenderOptions,
+): RootContent[] {
+  const gloss = options.integrationDomainGloss[rule.domain];
 
   const blocks: RootContent[] = [
     heading(2, rule.ruleId),
@@ -518,7 +527,10 @@ function evidenceChainRow(stage: PublicRuleEvidenceStage, index: RecordIndex): T
  * them mean, and a term with no wording recorded yet still gets a row rather
  * than disappearing.
  */
-function legendSection(rules: readonly PublicIntegrationRule[]): RootContent[] {
+function legendSection(
+  rules: readonly PublicIntegrationRule[],
+  options: RenderOptions,
+): RootContent[] {
   const blocks: RootContent[] = [
     heading(2, literal("Legend")),
     paragraph([
@@ -544,7 +556,7 @@ function legendSection(rules: readonly PublicIntegrationRule[]): RootContent[] {
     {
       title: "Domain",
       terms: presentTerms(rules.map((rule) => rule.domain)),
-      gloss: INTEGRATION_DOMAIN_GLOSS,
+      gloss: options.integrationDomainGloss,
     },
     {
       title: "Evidence stage",
@@ -586,7 +598,10 @@ function legendSection(rules: readonly PublicIntegrationRule[]): RootContent[] {
  * bundle comes from the model rather than from a constant here, because `core/`
  * knows no provider's directory names.
  */
-function agentResourceSection(rules: readonly PublicIntegrationRule[]): RootContent[] {
+function agentResourceSection(
+  rules: readonly PublicIntegrationRule[],
+  options: RenderOptions,
+): RootContent[] {
   const owners = presentTerms(rules.map((rule) => rule.ownerSkill));
 
   return [
@@ -609,13 +624,15 @@ function agentResourceSection(rules: readonly PublicIntegrationRule[]): RootCont
             ),
           ),
         ])
-      : bulletList(
-          owners.map((ownerSkill) => [
-            routeLink(agentResourceRoute(ownerSkill), literal("Open the owning bundle")),
-            space(),
-            code(ownerSkill),
-          ]),
-        ),
+      : options.agentResources
+        ? bulletList(
+            owners.map((ownerSkill) => [
+              routeLink(agentResourceRoute(ownerSkill), literal("Open the owning bundle")),
+              space(),
+              code(ownerSkill),
+            ]),
+          )
+        : bulletList(owners.map((ownerSkill) => agentResourceDisabledNotice(ownerSkill))),
   ];
 }
 

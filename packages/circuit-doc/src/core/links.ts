@@ -28,9 +28,7 @@
 
 import { fail } from "./errors.ts";
 import type { GeneratedPage } from "./page.ts";
-
-/** The route prefix the generated tree owns. Mirrors `render/shared.ts`. */
-const GENERATED_ROUTE_PREFIX = "/docs/components/";
+import { GENERATED_ROUTE_PREFIX } from "./site.ts";
 
 /** How many broken links to name before the message gets useless. */
 const REPORTED_LIMIT = 20;

@@ -1,6 +1,7 @@
 import { decodeModelDescriptor, encodeModelDescriptor, type ModelViewerDescriptor } from "./model-descriptor.ts";
+import { FOOTPRINT_ASSET_BASE } from "./site.ts";
 
-export const FOOTPRINT_ASSET_BASE = "/assets/component-previews/footprints/";
+export { FOOTPRINT_ASSET_BASE };
 
 export type ComponentReferencesDescriptor = {
   readonly version: 1;
@@ -22,7 +23,13 @@ export type ComponentReferencesDescriptor = {
 const HEX = /^(?:[0-9a-f]{2})+$/u;
 const DOCUMENT_LABELS = new Set(["Datasheet PDF", "Specification PDF", "Mechanical drawing PDF"]);
 const SAFE_FOOTPRINT_NAME = /^[A-Za-z0-9][A-Za-z0-9 ._+(),/-]*$/u;
-const SAFE_FOOTPRINT_ASSET = /^\/assets\/component-previews\/footprints\/[A-Za-z0-9][A-Za-z0-9._+-]*\.svg$/u;
+// `FOOTPRINT_ASSET_BASE` (from `./site.ts`) has no regex metacharacters, so it
+// is safe to splice straight into the pattern — the accepted URL set is
+// unchanged from before this moved (v1 descriptor contract).
+const SAFE_FOOTPRINT_ASSET = new RegExp(
+  `^${FOOTPRINT_ASSET_BASE}[A-Za-z0-9][A-Za-z0-9._+-]*\\.svg$`,
+  "u",
+);
 
 export function footprintAssetUrl(footprintName: string): string {
   const assetUrl = `${FOOTPRINT_ASSET_BASE}${footprintName}.svg`;
