@@ -1,7 +1,7 @@
 // Bootstrap placeholder (#2), extended with the core's public API (#5). The
 // root barrel is edited only along the dependency chain #5 (core) -> #11
-// (provider) -> #16 (validator runner); every other sub-issue exposes its API
-// through its own exports subpath.
+// (provider) -> #16 (validator runner, the last editor); every other
+// sub-issue exposes its API through its own exports subpath.
 export const CIRCUIT_DOC_PACKAGE_NAME = "@takazudo/zudo-circuit-doc";
 
 export * from "./core/errors.ts";
@@ -36,3 +36,8 @@ export * from "./provider/v1/validate.ts";
 export * from "./provider/v1/canaries.ts";
 export * from "./provider/v1/model-assets.ts";
 export * from "./provider/v1/index.ts";
+
+// The canonical validator runner: config transport + packaged Python discovery (#16).
+export * from "./validate/resolved-config.ts";
+export * from "./validate/python.ts";
+export * from "./validate/runner.ts";
