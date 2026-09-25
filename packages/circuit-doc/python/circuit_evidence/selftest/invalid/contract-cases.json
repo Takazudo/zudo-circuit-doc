@@ -1,0 +1,11 @@
+{
+  "schema_version":1,
+  "cases":[
+    {"name":"missing-locator","base":"golden","target":"facts.fact-golden-limit.locator","value":"","expected_error":"locator"},
+    {"name":"unsourced-manufacturer","base":"template","target":"facts.fact-example-manufacturer.provenance","value":"PROJECT-CHOICE","expected_error":"manufacturer"},
+    {"name":"unavailable-without-state","base":"template","target":"sources.src-example.availability","value":"","expected_error":"availability"},
+    {"name":"stale-online-hash","base":"template","target":"sources.src-example.sha256","value":"xyz","expected_error":"SHA-256"},
+    {"name":"raw-fact-dependency","base":"golden","target":"facts.fact-golden-limit.depends_on","value":["fact-golden-margin"],"expected_error":"raw fact"},
+    {"name":"unacknowledged-gap","base":"template","target":"coverage.cov-example-pinout.status","value":"UNKNOWN","expected_error":"coverage"}
+  ]
+}
