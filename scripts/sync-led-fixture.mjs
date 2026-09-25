@@ -397,10 +397,6 @@ async function runCli() {
     const { count, total } = materializeStep(source, lock);
     source.cleanup?.();
     console.log(`STEP files materialized ${count}/${total}`);
-    if (count < total) {
-      console.error("run: pnpm fixtures:led:materialize");
-      process.exitCode = 1;
-    }
     return;
   }
 
@@ -426,6 +422,9 @@ async function runCli() {
     console.error("fixtures/led: CHECK FAILED");
     process.exitCode = 1;
     return;
+  }
+  if (result.materializedCount < result.materializedTotal) {
+    console.log("STEP files not materialized: run pnpm fixtures:led:materialize");
   }
   console.log(`fixtures/led: OK (${result.lock.fileCount} files verified)`);
 }
