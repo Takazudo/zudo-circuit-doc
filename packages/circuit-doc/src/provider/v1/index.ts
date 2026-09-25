@@ -48,8 +48,6 @@ import type {
   PublicViewModel,
 } from "../../core/view-model.ts";
 import { CIRCUIT_PUBLICATION_MATRIX } from "./matrix.ts";
-
-export { CIRCUIT_PUBLICATION_MATRIX, CIRCUIT_PUBLICATION_MATRIX_PRESET } from "./matrix.ts";
 import {
   readCircuitReferenceContract,
   type CircuitPackageReference,
@@ -73,6 +71,8 @@ import {
   type ProviderPinMap,
   type ProviderSource,
 } from "./evidence.ts";
+
+export { CIRCUIT_PUBLICATION_MATRIX, CIRCUIT_PUBLICATION_MATRIX_PRESET } from "./matrix.ts";
 
 /** The frozen component-spec contract this adapter is written against. */
 export const CIRCUIT_CONTRACT_VERSION = 1;
