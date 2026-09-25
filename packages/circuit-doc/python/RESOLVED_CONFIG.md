@@ -43,6 +43,7 @@
 
 - **`bundles.requireSkillMd`:** when `true`, `SKILL.md` must exist under `auditSkillDir` and `integrationSkillDir` (when they are set), and its frontmatter `name` must equal the directory name. When `false`, the frontmatter is checked only if the file exists. Owner bundles always require `SKILL.md`, because `schema.json` `required_skill_files` lists it.
 - **`inventory.provider`:** `kind` selects the implementation in `circuit_evidence/inventory/registry.py`. `manual` (generic-v1, ADR-010) takes no other options, and it requires `generator_specs: []`.
+  `led-generator-v1` takes `specs: [{path, board?}]` (absolute paths; `[]` means no generator). Board names come from each spec's `PROJECT_NAME` unless `board` overrides it, and the inventory's `generator_specs` must equal the spec paths relative to `projectRoot`.
 - **`routing.directRouting`:**
   - When configured, the file must hold exactly one `{line_id, negative}` case per inventory line.
   - When `null`, the positive direct-routing queries still run for every line.
@@ -61,8 +62,9 @@
   - The integration skill name, used for the expected trigger skill and the `/skill` invocation, is the basename of `integrationSkillDir`. It defaults to `circuit-spec-integration`.
 - **`policy.path`:**
   - The file is `{schema_version, <checkKey>: <value>, ...}`.
-  - Each key dispatches to the check registered under that key in `orchestrator.POLICY_CHECKS`, and an unknown key fails.
-  - While no checks are registered, any configured policy file fails.
+  - Each key dispatches to the check registered under that key in `policy.POLICY_CHECKS`, and an unknown key fails.
+  - The one registered key is `checks`: a list of typed checks (`pin-locks`, `critical-fact-review`, `refresh-evidence`, `integration`, `seeded-fixtures`). `circuit_evidence/policy/checks.py` documents the schema; an unknown check type fails.
+  - Paths inside the policy file are relative to `projectRoot` and must stay inside it.
 - **`online`:** used only with `--online` or `--refresh-source`.
   - Downloads go to a fresh subdirectory of `tempRoot`, which is created if needed and emptied afterwards.
   - `userAgent` goes into the request `User-Agent`.

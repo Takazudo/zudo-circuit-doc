@@ -1,0 +1,66 @@
+{
+  "comment": "Relative input for the LED regression, mirroring circuit.config.ts: paths are relative to fixtures/led (the config directory) and projectRoot is 'upstream'; a 'package:' prefix is relative to packages/circuit-doc. test_led_regression.py turns this into an absolute resolved config (RESOLVED_CONFIG.md) for a temp copy of fixtures/led.",
+  "configVersion": 1,
+  "contractVersion": 1,
+  "projectRoot": "upstream",
+  "bundles": {
+    "root": "upstream/.claude/skills",
+    "ownerPrefix": "component-",
+    "reservedDirs": [
+      "component-spec-audit"
+    ],
+    "auditSkillDir": "upstream/.claude/skills/component-spec-audit",
+    "requireSkillMd": true
+  },
+  "inventory": {
+    "path": "upstream/.claude/skills/component-spec-audit/references/inventory.json",
+    "provider": {
+      "kind": "led-generator-v1",
+      "specs": [
+        {
+          "path": "upstream/scripts/schgen/board_p_spec.py"
+        },
+        {
+          "path": "upstream/scripts/schgen/board_l_spec.py"
+        },
+        {
+          "path": "upstream/scripts/schgen/swd_adapter_spec.py"
+        }
+      ]
+    }
+  },
+  "routing": {
+    "directRouting": "upstream/.claude/skills/component-spec-audit/fixtures/direct-routing.json",
+    "vendorQualifiers": "upstream/.claude/skills/component-spec-audit/references/external-vendor-qualifiers.json"
+  },
+  "template": {
+    "dir": "package:templates/component-skill-template",
+    "name": "component-example"
+  },
+  "cad": {
+    "enabled": true,
+    "symbolLibraries": [
+      "upstream/symbols/zudo-led-lamp.kicad_sym"
+    ],
+    "footprintDirs": [
+      "upstream/footprints/kicad"
+    ],
+    "requirePinEqualsPad": true
+  },
+  "integration": {
+    "rulesPath": "upstream/.claude/skills/circuit-spec-integration/references/rules.json",
+    "forwardTests": "upstream/.claude/skills/circuit-spec-integration/references/forward-tests.json",
+    "integrationSkillDir": "upstream/.claude/skills/circuit-spec-integration"
+  },
+  "policy": {
+    "path": "circuit/policy.json"
+  },
+  "online": {
+    "tempRoot": "upstream/.circuit-cache/sources",
+    "userAgent": "zudo-circuit-doc-component-spec/1.0",
+    "skipVolatileInAll": true
+  },
+  "output": {
+    "json": false
+  }
+}
