@@ -219,11 +219,8 @@ class SelfTestAndPolicyTests(unittest.TestCase):
         with self.assertRaisesRegex(ContractError, "value.json: seeded mutation passed"):
             validate(config, selftest_dir=self.corrupted_selftest("value.json", to=20))
 
-    def test_policy_file_fails_without_registered_checks(self):
-        config = make_project(self.root, policy={"schema_version": 1})
-        self.assertEqual(POLICY_CHECKS, {})
-        with self.assertRaisesRegex(ContractError, "no policy checks are registered"):
-            validate(config)
+    def test_policy_registry_holds_only_the_typed_checks_key(self):
+        self.assertEqual(sorted(POLICY_CHECKS), ["checks"])
 
     def test_policy_dispatches_to_registered_checks(self):
         seen = []
@@ -235,7 +232,7 @@ class SelfTestAndPolicyTests(unittest.TestCase):
             with self.assertRaisesRegex(ContractError, "unknown check 'unknown'"):
                 validate(config)
         finally:
-            POLICY_CHECKS.clear()
+            del POLICY_CHECKS["requireChain"]
         self.assertEqual(seen, [({"domain": "source-to-bench-chain"}, [])])
 
 

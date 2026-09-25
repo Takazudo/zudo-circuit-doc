@@ -15,6 +15,7 @@ from .errors import load, require, required_keys
 from .golden import SELFTEST_DIR, run_seeded_fixtures
 from .integration import DEFAULT_INTEGRATION_SKILL, check_forward_tests, load_rules, validate_rules
 from .inventory import load_inventory, provider_for
+from .policy import POLICY_CHECKS
 from .routing import RoutingPolicy, validate_routing
 from .skillmd import frontmatter
 from .sources import online_sources
@@ -36,9 +37,6 @@ CONFIG_SECTIONS = {
 }
 REQUIRED_PATHS = ("projectRoot", "bundles.root", "inventory.path", "template.dir", "online.tempRoot")
 OPTIONAL_PATHS = ("bundles.auditSkillDir", "routing.directRouting", "routing.vendorQualifiers", "integration.rulesPath", "integration.forwardTests", "integration.integrationSkillDir", "policy.path")
-
-# Policy-file key -> check(value, context). Projects without registered checks cannot use a policy file.
-POLICY_CHECKS = {}
 
 
 @dataclass
