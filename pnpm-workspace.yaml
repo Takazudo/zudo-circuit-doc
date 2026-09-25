@@ -1,0 +1,22 @@
+packages:
+  - "packages/*"
+  - "examples/*"
+  - "examples/*/doc"
+  - "doc"
+allowBuilds:
+  esbuild: true
+minimumReleaseAgeExclude:
+  # First-party @takazudo packages — allowlisted by name so a freshly published
+  # release installs without waiting out the minimumReleaseAge supply-chain window.
+  - "@takazudo/zfb"
+  - "@takazudo/zfb-runtime"
+  - "@takazudo/zfb-md-wasm"
+  # zfb platform-specific native binaries (optionalDependencies of zfb)
+  - "@takazudo/zfb-darwin-arm64"
+  - "@takazudo/zfb-darwin-x64"
+  - "@takazudo/zfb-linux-arm64-gnu"
+  - "@takazudo/zfb-linux-x64-gnu"
+  - "@takazudo/zfb-win32-x64-msvc"
+  - "@takazudo/zudo-doc"
+  - "@takazudo/zudo-doc-history-server"
+  - "create-zudo-doc"

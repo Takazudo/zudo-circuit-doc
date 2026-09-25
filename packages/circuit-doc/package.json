@@ -1,0 +1,94 @@
+{
+  "name": "@takazudo/zudo-circuit-doc",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Circuit-development component-evidence engine, built on zudo-doc.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Takazudo/zudo-circuit-doc.git",
+    "directory": "packages/circuit-doc"
+  },
+  "bugs": {
+    "url": "https://github.com/Takazudo/zudo-circuit-doc/issues"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./config": {
+      "types": "./dist/config/define.d.ts",
+      "default": "./dist/config/define.js"
+    },
+    "./ui": {
+      "types": "./dist/ui/index.d.ts",
+      "default": "./dist/ui/index.js"
+    },
+    "./mdx-extras": {
+      "types": "./dist/mdx-extras.d.ts",
+      "default": "./dist/mdx-extras.js"
+    },
+    "./islands": {
+      "types": "./dist/islands.d.ts",
+      "default": "./dist/islands.js"
+    },
+    "./descriptors": {
+      "types": "./dist/core/descriptors.d.ts",
+      "default": "./dist/core/descriptors.js"
+    },
+    "./styles.css": "./styles.css",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "zudo-circuit-doc": "./bin/zudo-circuit-doc.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "python",
+    "templates",
+    "contract",
+    "styles.css",
+    "README.md",
+    "LICENSE",
+    "!dist/**/*.test.*",
+    "!python/tests",
+    "!python/**/__pycache__"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --experimental-strip-types --test \"test/**/*.test.ts\"",
+    "test:led-corpus": "node --experimental-strip-types --test \"test-led/**/*.test.ts\"",
+    "check:shape": "node scripts/check-package-shape.mjs"
+  },
+  "dependencies": {
+    "mdast-util-to-markdown": "2.1.2",
+    "mdast-util-mdx": "3.0.0",
+    "mdast-util-gfm-table": "2.0.0",
+    "three": "0.185.1"
+  },
+  "peerDependencies": {
+    "@takazudo/zfb": "^2.20.2",
+    "@takazudo/zudo-doc": "^5.27.0",
+    "preact": "^10.29.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0",
+    "@types/node": "^22.0.0",
+    "@types/mdast": "^4.0.0",
+    "@types/three": "0.185.3",
+    "esbuild": "^0.28.0",
+    "preact": "^10.29.1",
+    "preact-render-to-string": "^6.6.6",
+    "@takazudo/zfb": "2.21.0",
+    "@takazudo/zudo-doc": "5.27.0"
+  }
+}
