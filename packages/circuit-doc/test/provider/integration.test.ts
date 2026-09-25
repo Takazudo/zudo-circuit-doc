@@ -427,7 +427,7 @@ describe("integration page", () => {
       { ...model, integration: [] },
       buildRecordIndex({ ...model, integration: [] }),
     ).contents;
-    assert.ok(empty.includes("No cross-component rule is published."));
+    assert.ok(empty.includes("No cross-component integration rule is declared."));
     assert.ok(empty.includes('<EvidenceAnchor id="integration-index" />'));
   });
 
