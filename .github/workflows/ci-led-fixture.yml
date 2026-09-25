@@ -1,0 +1,63 @@
+# fixtures/led regression gate.
+#
+# Triggered on PRs targeting `main` or any `base/**` branch (epic-PR stacks),
+# and on push to `main`.
+#
+# Jobs:
+#   lock-check — pnpm fixtures:led:check (offline, no network, no Python)
+#   oracle     — pnpm fixtures:led:oracle: the pinned upstream validator, its
+#                unit tests and the forward-test checker, unmodified. Never
+#                reads STEP, so no materialization step is needed here.
+#                (#21 adds STEP-cached jobs that exercise the runtime engine.)
+
+name: CI LED Fixture
+
+on:
+  pull_request:
+    branches:
+      - main
+      - "base/**"
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ci-led-fixture-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lock-check:
+    name: Lock Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: fixtures:led:check
+        run: pnpm fixtures:led:check
+
+  oracle:
+    name: Oracle
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: fixtures:led:oracle
+        run: pnpm fixtures:led:oracle
