@@ -1,0 +1,39 @@
+# This repo's own documentation site build gate.
+#
+# Full history is fetched (fetch-depth: 0) so zudo-doc's docHistory feature
+# does not log git errors from a shallow clone.
+
+name: CI Docs
+
+on:
+  pull_request:
+    branches:
+      - main
+      - "base/**"
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ci-docs-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  doc-build:
+    name: Build Doc Site
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build doc site
+        run: pnpm doc:build

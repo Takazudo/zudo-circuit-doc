@@ -1,0 +1,60 @@
+# Core build/typecheck/unit-test gate.
+#
+# Triggered on PRs targeting `main` or any `base/**` branch (epic-PR stacks),
+# and on push to `main`.
+#
+# Jobs:
+#   build-typecheck — pnpm build && pnpm typecheck
+#   ts-unit         — pnpm test:ts, on a node matrix [22, 24]
+
+name: CI Core
+
+on:
+  pull_request:
+    branches:
+      - main
+      - "base/**"
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ci-core-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-typecheck:
+    name: Build & Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build & typecheck
+        run: pnpm build && pnpm typecheck
+
+  ts-unit:
+    name: TS Unit Tests (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        node-version: ["22", "24"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Run unit tests
+        run: pnpm test:ts

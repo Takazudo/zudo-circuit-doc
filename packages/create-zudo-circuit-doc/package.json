@@ -1,0 +1,42 @@
+{
+  "name": "create-zudo-circuit-doc",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Create a new zudo-circuit-doc project.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Takazudo/zudo-circuit-doc.git",
+    "directory": "packages/create-zudo-circuit-doc"
+  },
+  "bugs": {
+    "url": "https://github.com/Takazudo/zudo-circuit-doc/issues"
+  },
+  "keywords": ["create", "scaffold", "circuit", "zudo-circuit-doc", "cli"],
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    "create-zudo-circuit-doc": "./bin/create-zudo-circuit-doc.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "templates",
+    "README.md",
+    "LICENSE",
+    "!dist/**/*.test.*"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --experimental-strip-types --test \"test/**/*.test.ts\""
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0",
+    "@types/node": "^22.0.0"
+  }
+}
