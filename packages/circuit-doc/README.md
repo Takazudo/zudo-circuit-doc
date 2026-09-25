@@ -18,6 +18,12 @@ The runtime package for `create-zudo-circuit-doc` projects: a circuit-developmen
 
 The CLI is exposed as the `zudo-circuit-doc` binary.
 
+## Build output
+
+`pnpm build` emits to `lib/`, not the conventional `dist/` — zfb 2.21.0's workspace-package
+staging hard-prunes any directory named `dist` from workspace packages
+([zudo-front-builder#3154](https://github.com/Takazudo/zudo-front-builder/issues/3154)).
+
 ## License
 
 MIT. See [LICENSE](./LICENSE).

@@ -20,28 +20,28 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
     },
     "./config": {
-      "types": "./dist/config/define.d.ts",
-      "default": "./dist/config/define.js"
+      "types": "./lib/config/define.d.ts",
+      "default": "./lib/config/define.js"
     },
     "./ui": {
-      "types": "./dist/ui/index.d.ts",
-      "default": "./dist/ui/index.js"
+      "types": "./lib/ui/index.d.ts",
+      "default": "./lib/ui/index.js"
     },
     "./mdx-extras": {
-      "types": "./dist/mdx-extras.d.ts",
-      "default": "./dist/mdx-extras.js"
+      "types": "./lib/mdx-extras.d.ts",
+      "default": "./lib/mdx-extras.js"
     },
     "./islands": {
-      "types": "./dist/islands.d.ts",
-      "default": "./dist/islands.js"
+      "types": "./lib/islands.d.ts",
+      "default": "./lib/islands.js"
     },
     "./descriptors": {
-      "types": "./dist/core/descriptors.d.ts",
-      "default": "./dist/core/descriptors.js"
+      "types": "./lib/core/descriptors.d.ts",
+      "default": "./lib/core/descriptors.js"
     },
     "./styles.css": "./styles.css",
     "./package.json": "./package.json"
@@ -51,14 +51,14 @@
   },
   "files": [
     "bin",
-    "dist",
+    "lib",
     "python",
     "templates",
     "contract",
     "styles.css",
     "README.md",
     "LICENSE",
-    "!dist/**/*.test.*",
+    "!lib/**/*.test.*",
     "!python/tests",
     "!python/**/__pycache__"
   ],

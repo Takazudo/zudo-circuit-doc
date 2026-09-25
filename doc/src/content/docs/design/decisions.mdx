@@ -90,11 +90,13 @@ package cannot ship `.ts` sources for anything Node executes. LED's engine carri
 **Decision:** The runtime package is built with `tsc` emit using
 `rewriteRelativeImportExtensions`. Sources keep LED's `.ts` specifiers, so the code stays
 near-verbatim and tests run via `node --experimental-strip-types --test`. Emit is per-file, so
-`"use client"` survives on island files.
+`"use client"` survives on island files. The output directory is `lib/`, not `dist/` — zfb
+2.21.0's workspace-package staging hard-prunes any directory named `dist` from workspace
+packages ([zudo-front-builder#3154](https://github.com/Takazudo/zudo-front-builder/issues/3154)).
 
 **Rejected alternative:** `tsup bundle:false` — it does not rewrite the 313 `.ts` specifiers.
 
-**Consequences / PR-time review target:** The shape-check output: no `.ts` imports in `dist/`,
+**Consequences / PR-time review target:** The shape-check output: no `.ts` imports in `lib/`,
 and island files start with `"use client"`.
 
 **Owning issues:** [#5](https://github.com/Takazudo/zudo-circuit-doc/issues/5),

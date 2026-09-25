@@ -4,11 +4,11 @@
 //   1. Every literal `exports` target exists on disk.
 //   2. Every `exports` condition object lists `types` before `default`.
 //   3. `files` covers the package boundary entries.
-//   4. Every `dist/islands/*.js` island root still starts with "use client"
+//   4. Every `lib/islands/*.js` island root still starts with "use client"
 //      (zfb registers islands per file; a lost directive means no hydration).
-//   5. No `dist/**/*.js` import specifier ends in `.ts`/`.tsx` (Node refuses
+//   5. No `lib/**/*.js` import specifier ends in `.ts`/`.tsx` (Node refuses
 //      type stripping under node_modules). Declaration files are exempt.
-//   6. `styles.css` and `dist/islands.d.ts` exist.
+//   6. `styles.css` and `lib/islands.d.ts` exist.
 //
 // Usage: node scripts/check-package-shape.mjs   (exit 1 on any violation)
 
@@ -17,11 +17,13 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const PKG_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const DIST = join(PKG_ROOT, "dist");
+// Output dir is "lib", not "dist" — zfb 2.21.0 prunes workspace-package
+// dirs named "dist" (https://github.com/Takazudo/zudo-front-builder/issues/3154).
+const LIB = join(PKG_ROOT, "lib");
 const manifest = JSON.parse(readFileSync(join(PKG_ROOT, "package.json"), "utf8"));
 
-const REQUIRED_FILES = ["bin", "dist", "python", "templates", "contract", "styles.css", "README.md", "LICENSE"];
-const REQUIRED_PATHS = ["styles.css", "dist/islands.d.ts"];
+const REQUIRED_FILES = ["bin", "lib", "python", "templates", "contract", "styles.css", "README.md", "LICENSE"];
+const REQUIRED_PATHS = ["styles.css", "lib/islands.d.ts"];
 // Island roots are the modules wrapped in `<Island>`; helpers the roots import
 // (viewer-runtime, viewer-state) are plain modules and carry no directive.
 const ISLAND_ROOTS = ["footprint-preview-island.js", "package-model-viewer-island.js", "preview-enlarge-dialog.js"];
@@ -69,22 +71,22 @@ function jsFiles(dir) {
     .map((entry) => join(entry.parentPath, entry.name));
 }
 
-const islandsDir = join(DIST, "islands");
+const islandsDir = join(LIB, "islands");
 const islandFiles = new Set(jsFiles(islandsDir).map((path) => relative(islandsDir, path)));
 for (const root of ISLAND_ROOTS) {
   if (!islandFiles.has(root)) {
-    errors.push(`dist/islands/${root} does not exist (run the package build first)`);
+    errors.push(`lib/islands/${root} does not exist (run the package build first)`);
     continue;
   }
   const source = readFileSync(join(islandsDir, root), "utf8");
   if (!/^["']use client["'];?\s*\n/u.test(source)) {
-    errors.push(`dist/islands/${root} does not start with "use client"`);
+    errors.push(`lib/islands/${root} does not start with "use client"`);
   }
 }
 
 // Static `from "…"`, bare side-effect `import "…"`, and dynamic `import("…")`.
 const SPECIFIER = /(?:\bfrom\s*|\bimport\s*\(?\s*)(["'])([^"'\n]+)\1/gu;
-for (const file of jsFiles(DIST)) {
+for (const file of jsFiles(LIB)) {
   const source = readFileSync(file, "utf8");
   for (const match of source.matchAll(SPECIFIER)) {
     const specifier = match[2];
@@ -101,5 +103,5 @@ if (errors.length > 0) {
 }
 const count = Object.keys(manifest.exports).length;
 console.log(
-  `OK — @takazudo/zudo-circuit-doc package shape (${count} exports resolved, ${ISLAND_ROOTS.length} "use client" island roots, no .ts specifiers in dist JS).`,
+  `OK — @takazudo/zudo-circuit-doc package shape (${count} exports resolved, ${ISLAND_ROOTS.length} "use client" island roots, no .ts specifiers in lib JS).`,
 );
