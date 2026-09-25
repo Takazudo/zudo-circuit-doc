@@ -1,0 +1,2129 @@
+{
+  "lockVersion": 1,
+  "source": {
+    "repository": "Takazudo/zudo-led-lamp",
+    "commit": "194d8a297e3545588197342130c3111a66c10973"
+  },
+  "fileCount": 353,
+  "totalBytes": 56261304,
+  "files": [
+    {
+      "path": ".claude/skills/circuit-spec-integration/SKILL.md",
+      "size": 1913,
+      "sha256": "75aa47d83a441f9ad5e72641ca1c55f7bf0f242a19ac1ff19175c74938f9000a",
+      "gitBlob": "70785255cc950122b65f7694bff307c94b1c2a85"
+    },
+    {
+      "path": ".claude/skills/circuit-spec-integration/agents/openai.yaml",
+      "size": 236,
+      "sha256": "4717fddb356cef1f7a9ac46101499c8ff6214f3f9984123bf2d6433e29a68c30",
+      "gitBlob": "a438f3fe80de532ecfe1d0e0d4abc239389d5e98"
+    },
+    {
+      "path": ".claude/skills/circuit-spec-integration/references/forward-tests.json",
+      "size": 13475,
+      "sha256": "95bc1dcfcdeaab0b7eeed5fe6ec3b059802b7817c5ec92288fe9bf1b2cff99ff",
+      "gitBlob": "4fa10f89bf6cc119eae6269d0e9fb72eedaf4c0e"
+    },
+    {
+      "path": ".claude/skills/circuit-spec-integration/references/observed-runs.json",
+      "size": 14399,
+      "sha256": "045721e6f184b6119270571b43a8555ad0a8235a2e885567c8395536f2aa44d5",
+      "gitBlob": "34665d2ae5e94f88fa872500319709f8a3e39606"
+    },
+    {
+      "path": ".claude/skills/circuit-spec-integration/references/rules.json",
+      "size": 21070,
+      "sha256": "fb655ceba05b843ee5aafd00593cad2409e9490f415757012e17ce33d40050fd",
+      "gitBlob": "42053fe1ff2df8ffdec21f94671aeec9dd17ee33"
+    },
+    {
+      "path": ".claude/skills/circuit-spec-integration/scripts/check_forward_tests.py",
+      "size": 6412,
+      "sha256": "721ddb7f41db0ccc333ee685132341a1bcb2d08e717cba0c16f318a6d410c768",
+      "gitBlob": "b77ac5ac44791549e29fca1af751917cd447217a"
+    },
+    {
+      "path": ".claude/skills/component-al8860mp-13/SKILL.md",
+      "size": 2792,
+      "sha256": "329b4db85641fc9a1c8e8bdbc8d7e14e9de8656fcadd2f01328978e30240f4b4",
+      "gitBlob": "93634b9d118d6853463750ec7eaa44fffc2a81fa"
+    },
+    {
+      "path": ".claude/skills/component-al8860mp-13/agents/openai.yaml",
+      "size": 245,
+      "sha256": "7f6d398d2014d2d6f4228fc29a0982e8ad09b12fd0bcacf7de658666f4d11547",
+      "gitBlob": "a00b2c91ddebd7db0fc3e040268f45d69f3acea2"
+    },
+    {
+      "path": ".claude/skills/component-al8860mp-13/coverage.json",
+      "size": 7011,
+      "sha256": "255909397e6f84c93d528379d4b0f4bc3fa9127b4899e0692c37c11d687a7f0a",
+      "gitBlob": "8c10addb3892464e8582e770d4bd8c4c10014f92"
+    },
+    {
+      "path": ".claude/skills/component-al8860mp-13/facts.json",
+      "size": 26812,
+      "sha256": "f17a4a554269fd402f913b9e9fa0cdaeae78e491fb0c1b5bdbb0eedd6c7f8e50",
+      "gitBlob": "c5a5fce549cd07ea37b65301376a0bb2ca3a25ab"
+    },
+    {
+      "path": ".claude/skills/component-al8860mp-13/interactions.json",
+      "size": 1696,
+      "sha256": "c7960a88d076a8612b1ce6840486ff7fda74d002d3010910603a85dd37d0c6ff",
+      "gitBlob": "25ad3ddff805bc6818484c506d505f3889653dfb"
+    },
+    {
+      "path": ".claude/skills/component-al8860mp-13/manifest.json",
+      "size": 4576,
+      "sha256": "54344e1e524fe6c5093c740d51347f573e261eb8140587727f4728065e595702",
+      "gitBlob": "2012c613c5be3ac3d109ac7082b93c9b640dfd0b"
+    },
+    {
+      "path": ".claude/skills/component-al8860mp-13/pin-map.json",
+      "size": 2188,
+      "sha256": "bb27b2ba16e073161b275e7b33314ca20fc6e757f87fa2105319734c339bb666",
+      "gitBlob": "a8f853c87a36c58754bf0aea25bbe9271c16f766"
+    },
+    {
+      "path": ".claude/skills/component-al8860mp-13/routing.json",
+      "size": 1365,
+      "sha256": "84aaad410f967ebe97793886ceb2cde576d1423bff8c33baddf01e66ca3d59a8",
+      "gitBlob": "ddc61c5276d5697d51ca0f49fd389016360a9958"
+    },
+    {
+      "path": ".claude/skills/component-al8860mp-13/sources.json",
+      "size": 10477,
+      "sha256": "118af2738101a883e625708a5084850ff267dd4e3ba2ad2df4cca45869c8443b",
+      "gitBlob": "a5e0b7560f488b6cd70fcc795aebfc5ae99b2d3d"
+    },
+    {
+      "path": ".claude/skills/component-alps-rk10j11e0034/SKILL.md",
+      "size": 1507,
+      "sha256": "a1f4dbb3fb12096893412aaaa9f8e57084734c2b18eac2459bbbbb8b53531075",
+      "gitBlob": "868bc875ef3eec303c8787653765ae6742da5443"
+    },
+    {
+      "path": ".claude/skills/component-alps-rk10j11e0034/coverage.json",
+      "size": 1954,
+      "sha256": "dd8b6ef225a479d884a9f0b8b2a15cdb33acb7c1e8e80d87a04216def21b2121",
+      "gitBlob": "162d493304a8dc2d7d516cc4aa6d55952d23a44d"
+    },
+    {
+      "path": ".claude/skills/component-alps-rk10j11e0034/facts.json",
+      "size": 9619,
+      "sha256": "f93999f3b5b576bd6a935d42e421f975c9225e1cc103e37f3cd90a013d5ae3a8",
+      "gitBlob": "a93bfede6d9ce8366e12fca1b0e6e415d4e5688a"
+    },
+    {
+      "path": ".claude/skills/component-alps-rk10j11e0034/interactions.json",
+      "size": 414,
+      "sha256": "8e1a97ef8d53007830d3666943c23043ccf3e32e0a7aa779eb42ed438cce3935",
+      "gitBlob": "c4fc55962ba302f7487a018d79fe12acc91cef48"
+    },
+    {
+      "path": ".claude/skills/component-alps-rk10j11e0034/manifest.json",
+      "size": 1160,
+      "sha256": "0711ce3316051129272a01409365755f53a552e67abeb6f9462097cc4a9ade1c",
+      "gitBlob": "ab1bba0e7a6dc6feeb506ce621bf7b96d48891fd"
+    },
+    {
+      "path": ".claude/skills/component-alps-rk10j11e0034/pin-map.json",
+      "size": 1602,
+      "sha256": "498fc0893b68a30ace948a231f80aa4b592a8d9eb7d599c6b4d9af6235f77949",
+      "gitBlob": "e8d3698035119db4ed74aeb408513fffd89a03c7"
+    },
+    {
+      "path": ".claude/skills/component-alps-rk10j11e0034/routing.json",
+      "size": 576,
+      "sha256": "5d858f5a8f12a7439b4496fdf326de7ca63c84831dd13ad9838c0db83f3d37d5",
+      "gitBlob": "c7d18f056dce0195607cc2cc18286feefa234125"
+    },
+    {
+      "path": ".claude/skills/component-alps-rk10j11e0034/sources.json",
+      "size": 5167,
+      "sha256": "ab6c08b705942aaa1434a4b1dcb4a6a2a957da9269857e625e501e9e16b3c40d",
+      "gitBlob": "dd3c9bad8a3bf26d5e752ae1fb3ce1f598f9ca65"
+    },
+    {
+      "path": ".claude/skills/component-ap63203wu-7/SKILL.md",
+      "size": 2738,
+      "sha256": "ff713d4e0bfa6072437c0a41b9a1bc87aa007a4481ec94dd09bb510115f4b4ad",
+      "gitBlob": "4ac9fe38db77e2483b802343f79dcf57bb1ebb9a"
+    },
+    {
+      "path": ".claude/skills/component-ap63203wu-7/agents/openai.yaml",
+      "size": 239,
+      "sha256": "b0c38f7a0af22f9b0aae9684b65c3e2aa1b1b7502030e2231bd78c7410a86361",
+      "gitBlob": "52aac0ba239aa757e99574653473fed657f27b6b"
+    },
+    {
+      "path": ".claude/skills/component-ap63203wu-7/coverage.json",
+      "size": 4689,
+      "sha256": "827c0d7f64f79bcc4ebc34915dd503a72cbb2ea51fb48fec0963a4e69d842ab8",
+      "gitBlob": "ad298f8950f474c01a287705ce7950e6f542a463"
+    },
+    {
+      "path": ".claude/skills/component-ap63203wu-7/facts.json",
+      "size": 23097,
+      "sha256": "68405f04b8cf569f45c25f1819bc8f75ef7813ea8a583d97de2abfc5f1d1e1ad",
+      "gitBlob": "5d21b9efe4fefb806fd6fea477faec0986fb0e7b"
+    },
+    {
+      "path": ".claude/skills/component-ap63203wu-7/interactions.json",
+      "size": 1436,
+      "sha256": "e486104c8d9690e4730a0ebcb4b6ee4bd637ff6c125685f84a33f6e9cf058462",
+      "gitBlob": "85a2cbe53a906e4a18c94872a0b03a8b9841891a"
+    },
+    {
+      "path": ".claude/skills/component-ap63203wu-7/manifest.json",
+      "size": 3735,
+      "sha256": "131375526438541fc1cbcc0b739ea25c0731e88e2ce45ad0c700cfaecdf94d2e",
+      "gitBlob": "4caa26df160c3e6a644ffdcd1149139f4a870203"
+    },
+    {
+      "path": ".claude/skills/component-ap63203wu-7/pin-map.json",
+      "size": 1527,
+      "sha256": "4f52ae71c81a14c71ff9fcb46642279e5ade0db43d15a1ed5443364ada389078",
+      "gitBlob": "f07f5aa699a4a9faaa01a846e17e1fa5306fbf61"
+    },
+    {
+      "path": ".claude/skills/component-ap63203wu-7/routing.json",
+      "size": 1067,
+      "sha256": "6ec3312ff52ec1413f14e5987b4f65ec52e6e36f49bcc25a7bf79a500d34f377",
+      "gitBlob": "2257b03350ac3d203851fab50e9e9169d3ce995a"
+    },
+    {
+      "path": ".claude/skills/component-ap63203wu-7/sources.json",
+      "size": 7300,
+      "sha256": "87c13671020fe2e58cd4b7677181cd5d989f050e36a7ebc6d1485867b1a26d26",
+      "gitBlob": "ec5879cf4bdb62ee3a71b2254e92344487ad7533"
+    },
+    {
+      "path": ".claude/skills/component-bhfuse-bsmd1206-075-30v/SKILL.md",
+      "size": 1637,
+      "sha256": "5df9f1cde61eaba7303ffa8fc73bc6b1636937d21ae4ab771a1d9ab587e60caf",
+      "gitBlob": "fb3bf6a7967a457f1442d99190d15ff9f87594c4"
+    },
+    {
+      "path": ".claude/skills/component-bhfuse-bsmd1206-075-30v/agents/openai.yaml",
+      "size": 251,
+      "sha256": "74db66163e47abd946b239aa2efec02633db43cae2f0b178c133c1d19251ddc3",
+      "gitBlob": "7e86aefad126df844cc0fcea4113e545a1016323"
+    },
+    {
+      "path": ".claude/skills/component-bhfuse-bsmd1206-075-30v/coverage.json",
+      "size": 1634,
+      "sha256": "8bbdc0b653583cdeed8e63492774171bf6760c252fade8623ad295bbf2bfe7e0",
+      "gitBlob": "7db72304429b3bfcc890ad52ce1fd99450ccf306"
+    },
+    {
+      "path": ".claude/skills/component-bhfuse-bsmd1206-075-30v/facts.json",
+      "size": 8458,
+      "sha256": "caffcff086d6d53c31d2c8d8afa8d32746115f05ba8b93d46ec6973f2f0afe78",
+      "gitBlob": "6f404d46ddbc76163b7912c695518ffbff562f04"
+    },
+    {
+      "path": ".claude/skills/component-bhfuse-bsmd1206-075-30v/interactions.json",
+      "size": 453,
+      "sha256": "e30bc2773194cbb4a298cedf2014ba88e199060a17d970add0fc4c6c797518da",
+      "gitBlob": "1ba79082cb38403fdd9f476514ca4771be01da28"
+    },
+    {
+      "path": ".claude/skills/component-bhfuse-bsmd1206-075-30v/manifest.json",
+      "size": 1318,
+      "sha256": "c27cc09146a9258005a0a5902599b8a9fb59d77bc8d822491e2839dfe6bd9c49",
+      "gitBlob": "b103942b13b584e5149c87fe049d258434dd8881"
+    },
+    {
+      "path": ".claude/skills/component-bhfuse-bsmd1206-075-30v/pin-map.json",
+      "size": 408,
+      "sha256": "24e8cf238dfe6cca95b49e1fadb1f8d6ac63125682f9c4951a994738a3052aac",
+      "gitBlob": "3b8c9b46f3277d40ba574cfb6cbac140f07236a2"
+    },
+    {
+      "path": ".claude/skills/component-bhfuse-bsmd1206-075-30v/routing.json",
+      "size": 380,
+      "sha256": "e08ba497d3d099424e19bf9438366d1b7713205d47a35e78d2a48a96f1e1a98b",
+      "gitBlob": "b833b3e792a3b7ad39988aaa743d6e3d855cd998"
+    },
+    {
+      "path": ".claude/skills/component-bhfuse-bsmd1206-075-30v/sources.json",
+      "size": 2151,
+      "sha256": "4635bc7d2b8693f9f2ad7f4a37134006fcfdb52766b173c518ac878c74a6a5ef",
+      "gitBlob": "900c91a732ea7cdd8fd46a9c96341783773ec788"
+    },
+    {
+      "path": ".claude/skills/component-gswitch-ss-12d01-g020/SKILL.md",
+      "size": 1200,
+      "sha256": "7f7e3e0a4780bd6b7a49fc131f24ee61b9141881494e9041e8c209ec21f95e8f",
+      "gitBlob": "cf3beef9ff672a4c4843433513849941a40b78b9"
+    },
+    {
+      "path": ".claude/skills/component-gswitch-ss-12d01-g020/coverage.json",
+      "size": 2152,
+      "sha256": "7c7423af1cd282ae5bf4e0bbf932004f41fc55e8de479ae6a51bbc22ba7dda5b",
+      "gitBlob": "e5d88be3601af4b8d680b7cb762633da928da95b"
+    },
+    {
+      "path": ".claude/skills/component-gswitch-ss-12d01-g020/facts.json",
+      "size": 7211,
+      "sha256": "624e62062628ee3d1e8ebb81b6fd0a6db5b69836a84c19fb008ac6a1d2869dcb",
+      "gitBlob": "5e8c36a04885b2f97e0e48da2ae3fd487c3ba499"
+    },
+    {
+      "path": ".claude/skills/component-gswitch-ss-12d01-g020/interactions.json",
+      "size": 417,
+      "sha256": "8e5eaef27d67764ed0af5207d82685a20ff496aab324a39886273e1e1ba62f44",
+      "gitBlob": "780bf208638e9ff390f2e04ebf974ef2ce8bb10f"
+    },
+    {
+      "path": ".claude/skills/component-gswitch-ss-12d01-g020/manifest.json",
+      "size": 1069,
+      "sha256": "42990878b938dd09654ef52afe5bc6f94debb3bf029d31771ad965716bf86106",
+      "gitBlob": "ac2d2875a7590c17fe11b5fc790ce9299dd14615"
+    },
+    {
+      "path": ".claude/skills/component-gswitch-ss-12d01-g020/pin-map.json",
+      "size": 880,
+      "sha256": "701474aeba96fb4fda7bc8f67cea63d2394f697079aa68cbf6237cc1b3885f08",
+      "gitBlob": "d7614df826b4bf59cc41d770bb662daf8321ee39"
+    },
+    {
+      "path": ".claude/skills/component-gswitch-ss-12d01-g020/routing.json",
+      "size": 583,
+      "sha256": "835a90b24298f031f6d484dbc3a8f2af43f212988399d9cd62d6f7bfd7b9176a",
+      "gitBlob": "0abe63ac81d0a184adffeb6f75254c1076a2d98b"
+    },
+    {
+      "path": ".claude/skills/component-gswitch-ss-12d01-g020/sources.json",
+      "size": 4075,
+      "sha256": "9f5e836934fe06007412b173a78eae63e1048b550f0caac60da3531a9b5ccdad",
+      "gitBlob": "7c72e67cb0c543afa8b71ea60cc6fd98af536003"
+    },
+    {
+      "path": ".claude/skills/component-high-diode-smaj20a-c571370/SKILL.md",
+      "size": 1524,
+      "sha256": "9a40933675954b149ca8029257884137b449e24acaa5225a082ddd3669fb552a",
+      "gitBlob": "b5f718752229c1c72f5ef4535641b3c47892a812"
+    },
+    {
+      "path": ".claude/skills/component-high-diode-smaj20a-c571370/coverage.json",
+      "size": 1976,
+      "sha256": "81d5e8371833c8a492c7619c40728f6f7e1ff854e47499630e13c8f672d04b70",
+      "gitBlob": "9011c943707a478723203cc3d48d29a924090975"
+    },
+    {
+      "path": ".claude/skills/component-high-diode-smaj20a-c571370/facts.json",
+      "size": 5305,
+      "sha256": "55e1f943d91b22a5ae50d00b13ea4477b48f97b26fd3ef6f0393f5d4246e92fb",
+      "gitBlob": "1fbc659345b4cd4e33c328eb01aa27b7794f0cf9"
+    },
+    {
+      "path": ".claude/skills/component-high-diode-smaj20a-c571370/interactions.json",
+      "size": 1131,
+      "sha256": "0130abfe94297d859a3474489a2ac59d164ba6e64805d7582617ad1216c33de8",
+      "gitBlob": "81fde3138e849e8e5e2b297facf3f50bf023ed7a"
+    },
+    {
+      "path": ".claude/skills/component-high-diode-smaj20a-c571370/manifest.json",
+      "size": 1087,
+      "sha256": "94103b02bff98a60d49edba74a2429caacc7d30772c6b74178720731b8c77178",
+      "gitBlob": "28d52cf90b0698e26eed0fb3a624a964ec176d1b"
+    },
+    {
+      "path": ".claude/skills/component-high-diode-smaj20a-c571370/pin-map.json",
+      "size": 745,
+      "sha256": "ae168f2ea1e4aeac4dbe3afcad9adee2bbb94e16468010426be4a093f97d167f",
+      "gitBlob": "cb3f8e264639dcb9a1348463f11aceb8614bf58d"
+    },
+    {
+      "path": ".claude/skills/component-high-diode-smaj20a-c571370/routing.json",
+      "size": 614,
+      "sha256": "d0d61131e9da92f0bee513e4fcc58b26b75e0b446d5e255845d2714a36c3b5da",
+      "gitBlob": "5867e1c1a8057232341ee1b0de265f058cb3fc3c"
+    },
+    {
+      "path": ".claude/skills/component-high-diode-smaj20a-c571370/sources.json",
+      "size": 1943,
+      "sha256": "1c6c6e1990794d5aeb642044d1eee7e116edf72825e914f218bfe20d6221a1a6",
+      "gitBlob": "08b3bdc8fa5d994407e6d88122b9cdc510fc3ffe"
+    },
+    {
+      "path": ".claude/skills/component-honglitronic-hl-am-2835h421w-s1-08-hr3/SKILL.md",
+      "size": 2070,
+      "sha256": "e0491f3629be30a79429ffed69fff7070766934566da5a421c29dcc012175080",
+      "gitBlob": "90f0eca000ec2842f669f9ef7034c2ca1af5a3bf"
+    },
+    {
+      "path": ".claude/skills/component-honglitronic-hl-am-2835h421w-s1-08-hr3/coverage.json",
+      "size": 3710,
+      "sha256": "df4e0b04400fd832a140d58de1a0b9fef603cd0fe143202ee764e024285482d7",
+      "gitBlob": "1125a3532133b3910718178532975943145a89cc"
+    },
+    {
+      "path": ".claude/skills/component-honglitronic-hl-am-2835h421w-s1-08-hr3/facts.json",
+      "size": 11687,
+      "sha256": "21c0114398eeb8e895bb8c1cd24cdf42018ae4fd3a153451fa79b649522ef19a",
+      "gitBlob": "c90591139538ed01df9301622dd4646d0df48a08"
+    },
+    {
+      "path": ".claude/skills/component-honglitronic-hl-am-2835h421w-s1-08-hr3/interactions.json",
+      "size": 1496,
+      "sha256": "50d0462b0d4576d45469bfb6e9791c9c28cbfba7832def597e65bf69e636375f",
+      "gitBlob": "dc1635d199b480361f0fc8a6b4ff7092d516a7e3"
+    },
+    {
+      "path": ".claude/skills/component-honglitronic-hl-am-2835h421w-s1-08-hr3/manifest.json",
+      "size": 2399,
+      "sha256": "14616c545e47d9629867a27f7270216b154a9f8cc65b3e3d1cbd93a696bb582a",
+      "gitBlob": "5f9b1e6cf5c7e28fac84498ce99ad941b0d90f78"
+    },
+    {
+      "path": ".claude/skills/component-honglitronic-hl-am-2835h421w-s1-08-hr3/pin-map.json",
+      "size": 709,
+      "sha256": "42a0b5fda9d95ac7b6a2e88250e250d908cbc6ca2d45b68fbfb9af5cf729a78c",
+      "gitBlob": "fd6ab2383c3255ec460c25ced12492a6f5141173"
+    },
+    {
+      "path": ".claude/skills/component-honglitronic-hl-am-2835h421w-s1-08-hr3/routing.json",
+      "size": 596,
+      "sha256": "07600c9428f4adec88c4973a57de6c046abe2c117b5aefb71e4f3a3ab97c184a",
+      "gitBlob": "491d10020b552cc0b2fb18b23117a45502385bfa"
+    },
+    {
+      "path": ".claude/skills/component-honglitronic-hl-am-2835h421w-s1-08-hr3/sources.json",
+      "size": 4776,
+      "sha256": "22603f800f95b114be2727d7fa7adbbf28e80beed612f4b9b00ea335e210a7e6",
+      "gitBlob": "c6cfa8b96ba2c955c2a0d28597805a23335b24cf"
+    },
+    {
+      "path": ".claude/skills/component-murata-ncp18xh103f03rb/SKILL.md",
+      "size": 1687,
+      "sha256": "69a2bd47d3b37182f2571f8f346f075b07a484630cdad8d83cb7a81baa9fcc69",
+      "gitBlob": "3380287e993201ad937576818fceec2f28098abe"
+    },
+    {
+      "path": ".claude/skills/component-murata-ncp18xh103f03rb/coverage.json",
+      "size": 2986,
+      "sha256": "8c87d116bae925ed7d8bcfd20f526a388182f28b6a43b76593bcc4ca06aaa7b4",
+      "gitBlob": "bcab73c14200c767db90bff6111c96b95edcd861"
+    },
+    {
+      "path": ".claude/skills/component-murata-ncp18xh103f03rb/facts.json",
+      "size": 6398,
+      "sha256": "ba74c7204ca9d1dcf13441c0aff91321be24520bcf4b21e0d9ae8ef590e12c94",
+      "gitBlob": "1f342ea067e1d150677503ec2103ce81c8366ce3"
+    },
+    {
+      "path": ".claude/skills/component-murata-ncp18xh103f03rb/interactions.json",
+      "size": 689,
+      "sha256": "78740153d715d1273d985f8ca98c09e891abd352907ef369014399afbd570ea3",
+      "gitBlob": "2e579352cda6eeb6f6c217696a2fdc730314dae6"
+    },
+    {
+      "path": ".claude/skills/component-murata-ncp18xh103f03rb/manifest.json",
+      "size": 1269,
+      "sha256": "ff0e411b84022f9007deec1becd278a5d8d6e56475e28dc5782f2bf267d11498",
+      "gitBlob": "8e0cb2beca3bf4d546b7f1cba31bc5ccfe7575f2"
+    },
+    {
+      "path": ".claude/skills/component-murata-ncp18xh103f03rb/pin-map.json",
+      "size": 354,
+      "sha256": "40a6e71eb8977686b7f561e45776052eb10cd850daf3aaf95f550bf31b1574bb",
+      "gitBlob": "689f24065ec1340dfe112eba31e0dd820aed9315"
+    },
+    {
+      "path": ".claude/skills/component-murata-ncp18xh103f03rb/routing.json",
+      "size": 283,
+      "sha256": "85eff31dfcce3405605bedf493de73a0a62c3d2ff56abca660834e0062e2ca2e",
+      "gitBlob": "0c8576ace372f51b89537fc1c1233131c8729b35"
+    },
+    {
+      "path": ".claude/skills/component-murata-ncp18xh103f03rb/sources.json",
+      "size": 2727,
+      "sha256": "eba02d1b89eea4bff7fea4a6acba116222e637d82589b585a964938f48b19974",
+      "gitBlob": "e8352c63259d8bd6e997771ebd0132f3b6f1fb41"
+    },
+    {
+      "path": ".claude/skills/component-project-passives/SKILL.md",
+      "size": 3566,
+      "sha256": "dfba463af34f7e7a337b7b7ba76855f35d2d9088ec04e3899c989238703bdcfd",
+      "gitBlob": "eb31fb26660412890b68e13de6450b2409763022"
+    },
+    {
+      "path": ".claude/skills/component-project-passives/coverage.json",
+      "size": 13228,
+      "sha256": "bf365390da139ce5028f77c49bdfa3bdce4b7ffb11f6d5a3ea299d2445e07880",
+      "gitBlob": "9b65e9e4c64357037c44ecb2f00ad5bd44103c2f"
+    },
+    {
+      "path": ".claude/skills/component-project-passives/facts.json",
+      "size": 47130,
+      "sha256": "b9f709d027921c64a3c48c8db6fb34095bcc2f60425a0398def3428adf056127",
+      "gitBlob": "bf40b9dcc2b8644677a9edd7d0a6317f399e0c37"
+    },
+    {
+      "path": ".claude/skills/component-project-passives/interactions.json",
+      "size": 3611,
+      "sha256": "ec3be0e05865b1ae01a81e9c61bee7c9920e9ffb50e7ec557a2588772c6a753c",
+      "gitBlob": "76a2fa7ec94a977dfa9257c308be370c03a73f5b"
+    },
+    {
+      "path": ".claude/skills/component-project-passives/manifest.json",
+      "size": 9043,
+      "sha256": "9ba57106faf01a6bf9534c198757c8c470fde7cb68c2d42e24077dfc0feb13ff",
+      "gitBlob": "5c13bf3444b1a0f6adaf6f47bff3559d9cc8c492"
+    },
+    {
+      "path": ".claude/skills/component-project-passives/pin-map.json",
+      "size": 3789,
+      "sha256": "e3280d40d94f21696f4187647a1176a987cb1cf1a820438a2318f585550e2edb",
+      "gitBlob": "9ea9e82481667a15122944326416231345525aca"
+    },
+    {
+      "path": ".claude/skills/component-project-passives/routing.json",
+      "size": 5213,
+      "sha256": "6a816886537b225851434bfcb60a6a087216560bca50dbacac22645c578a95fc",
+      "gitBlob": "2dca38e52499439aa56772ff03850d47998d48b0"
+    },
+    {
+      "path": ".claude/skills/component-project-passives/sources.json",
+      "size": 16398,
+      "sha256": "a4d8815b2393aa17f9af3d8d2e65c593b9e96e60180ed13847f0f80d006c6b64",
+      "gitBlob": "40c09fc8337d26fb4f1cc23ec6d1346258fa43bd"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/SKILL.md",
+      "size": 2999,
+      "sha256": "f7d03bce413d235125543cb55301690ab317e97ca92b6bd9351908386e44252e",
+      "gitBlob": "fc9767414597c343503d51ea8c6aafaefef88189"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/SKILL.md",
+      "size": 1145,
+      "sha256": "126ac5ba3b95785812174c6eff27c8a7c6220b245b7a340ab1d9a7b8441906f5",
+      "gitBlob": "0b2b1230be93254ace1cc6e93e9977139f73568b"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/coverage.json",
+      "size": 292,
+      "sha256": "702425e6c2c078072a1778f5b6607a0622d4388ca7f24c4943fad7d4d7caf06c",
+      "gitBlob": "63c8ff9f602742c9ecba2fc23f434efb0830c47a"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/facts.json",
+      "size": 656,
+      "sha256": "d038949604b09a5fd67df326517f66fed8bda7f15a6043fd3b19cd38b6084233",
+      "gitBlob": "ebaed5dbd659d6b494a67d05962011cf0b4f75e1"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/interactions.json",
+      "size": 181,
+      "sha256": "f53740e3e58d3b0fcb30266ad33c16aa3506df739cc2260318c05b7e6bcb8989",
+      "gitBlob": "24fadc662a8dbd3fca81b624ee24d48186518f14"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/manifest.json",
+      "size": 402,
+      "sha256": "a9d2aae94e3542502b7c9cb9799a198317e8bb59f30dd9c9c14503c6de17008c",
+      "gitBlob": "58ceadb1c418fb33826208609d7d4caad1772fda"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/pin-map.json",
+      "size": 265,
+      "sha256": "25d27fe0ebf8af3ea57ac7cdf9bf929d8b61a80418de459707cc07010a1a777c",
+      "gitBlob": "22920eda668a74762491d23dacce2397f2262b75"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/routing.json",
+      "size": 310,
+      "sha256": "988978e3c61ddec81c443395b83884ed20a72b15c880fc79dadfdf1545423f7c",
+      "gitBlob": "a1871c97e4e54a05382581007e13340ad60a37bf"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/sources.json",
+      "size": 598,
+      "sha256": "a4b62462f13422d1b9d4f35844df3242c9a3dd7cd2dad4795291da4d638d2a1e",
+      "gitBlob": "1e104bf85565b46f7b9c2faa657cc216a130325c"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/fixtures/direct-routing.json",
+      "size": 3412,
+      "sha256": "c6048140e07dcf74eec7208f022e985d27782ba1b54f1740a47bf3e209902197",
+      "gitBlob": "6622fc23280f1429bc352f779ed91fc04fd7a856"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/fixtures/golden/critical-fact-review.json",
+      "size": 20009,
+      "sha256": "3bcb26bd6591a933aa9914266db22656b1fdc206b6c7fbfe9e1755f059f5f640",
+      "gitBlob": "efdbfa0e848cfd8f64b96b8774bd5dca1d048534"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/fixtures/golden/critical-facts.json",
+      "size": 2870,
+      "sha256": "ec2d03867f060ec9dd40f70a4ff30790431e1950d220039c25009bd14a20d09d",
+      "gitBlob": "2ad35666f14a1d21ec3d7ddb8640db928a9eecf2"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/fixtures/golden/real-pin-maps.json",
+      "size": 37716,
+      "sha256": "632918ca160098f89a83abb2c9f50f09a23fc8100d42952ebfb96a32f0925912",
+      "gitBlob": "1be1790e87190d03a869bb0408ee1caf62f4458c"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/fixtures/invalid/contract-cases.json",
+      "size": 1455,
+      "sha256": "88a37d4e93ec6bcb477743a12bb2c9e20f4806627bc12732b1a81368d5ce5850",
+      "gitBlob": "0f58e4e57ff758e61366c1bb75c01eb98d9dace4"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/fixtures/mutations/condition.json",
+      "size": 160,
+      "sha256": "f796b382da97e951c3f9c744c8f986ae17f9b46885d6af7377713aeaadbebc35",
+      "gitBlob": "4d10957cbb72574bb2522a9993b9394bc36deabd"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/fixtures/mutations/default-state.json",
+      "size": 136,
+      "sha256": "7d0862c98ae8cb479e0301b2901a64ddde076d1e04424cdabd2f70e283e5bc85",
+      "gitBlob": "5b88c625c61c0082b32f26a22cdaade1046e0846"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/fixtures/mutations/locator.json",
+      "size": 187,
+      "sha256": "2ce6611648faf0bd4e879b41d82d15d279a8da06eda77a77a7adcb5aa93966ed",
+      "gitBlob": "4a682a2fabb816810c1d7df470f7120c2268da89"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/fixtures/mutations/pin.json",
+      "size": 121,
+      "sha256": "9edfaa1b8c40af521c6e0fefa9276cd986729f307088ed1f288e95ad05d9180e",
+      "gitBlob": "082492f9509f2f6b85bac74f3a14a590a5fe12a7"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/fixtures/mutations/unit.json",
+      "size": 120,
+      "sha256": "24f2ab919ce1f1195d6f9f70026b7a7571d318d75f468efaabcd32a8d6d23eba",
+      "gitBlob": "e710b34bef1c80aadf6677f41a357b341a6aaece"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/fixtures/mutations/value.json",
+      "size": 122,
+      "sha256": "4fdcaa716aa35ab22ae5d90b8dcdf5e8f4d3172396d6722c281813b7ffa26322",
+      "gitBlob": "7a35276507a10138b51ec6797cb8b583becaa3a7"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/fixtures/refresh-evidence.json",
+      "size": 774,
+      "sha256": "0d2cf16b33201effe660ced953ad74c3e18afc8c82cf1e102b4f4ffdabe2a55c",
+      "gitBlob": "6a25e84bca2e82b6b0e91c25568878a20fc558a0"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/fixtures/valid/subordinate-record.json",
+      "size": 4756,
+      "sha256": "8f72bf6d2a21b9504ee5706e3f752f2bd309cfe8aeb534a9f6ed65c58508c41d",
+      "gitBlob": "b979bb7b416fb0dd485b13445a6f47f4621a8ad2"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/references/contract.md",
+      "size": 3902,
+      "sha256": "37a1a06db11a605d20588cc564da2151c3f0f9974f3f31e85b810d89bda0021a",
+      "gitBlob": "22e178c5ef473855b27a063277a6e79e7b87bb16"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/references/external-vendor-qualifiers.json",
+      "size": 139,
+      "sha256": "80e2e367b9843dd5404d3a150bac38ad908b04f214f4b03ce57631c972ef6b8a",
+      "gitBlob": "3c9ea6936f35e7753fc30819f42a597e85651014"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/references/inventory.json",
+      "size": 21922,
+      "sha256": "c40791b037f3de0f6f7f4c995ffa42333e2cec253a847da6be56d0e48878ff05",
+      "gitBlob": "6610cf0e23786d2a5597bb6d63c57e0326d68da9"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/references/new-component-workflow.md",
+      "size": 9521,
+      "sha256": "766f7112a9310c8a8c37020f9ac1909f1fc7278bf56e871a01b25be44f7fc8d6",
+      "gitBlob": "3d7144691a5b072c926df8730740f99364bfbe2c"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/references/schema.json",
+      "size": 3041,
+      "sha256": "51209d061e8dc94092773580f9c40d0b98369d54a2845cafc3590f2bbf94a08a",
+      "gitBlob": "b176fddbe7ee273a5c020810b0055eb04fc009ca"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/review-artifacts/circuit-recheck-decisions.md",
+      "size": 33670,
+      "sha256": "38450fbd18991fbd73bb8c681e274a051d12a0aadb41af329259a59a84081855",
+      "gitBlob": "a66e6b8700a06ed4afc1c1b94e93be7b36640054"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/review-artifacts/issue-21.md",
+      "size": 3985,
+      "sha256": "d0a88bdd21e2c03d42e06b2b394b99cff4f9809ff23493ff98169e9d99804ddf",
+      "gitBlob": "cc18cef2f5a57a6166803ead98d6ca91083bc0fe"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/review-artifacts/issue-23.md",
+      "size": 4129,
+      "sha256": "7f4cb16c29df09c90fc8103789b3f974f4152933436e037e92500d5a91bf262f",
+      "gitBlob": "df2396b33e69b3692dddbf23723b6f3a7d8e0387"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/review-artifacts/issue-24-independent-audit.md",
+      "size": 12764,
+      "sha256": "8349a2b19360b540220a6961abdf1131f5fc0f03042ae954c1da5969ea9ae6cc",
+      "gitBlob": "4365e77b2f0e7003bd17027432f2dcd0741ea4aa"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/review-artifacts/issue-25.md",
+      "size": 7919,
+      "sha256": "6cfc7d38d3355e9f81b743e2610e32809e5c20af84184d0a5c327ee71b91ac10",
+      "gitBlob": "1d6b5a3ef18bed8a749fd1832a4903432ba3215f"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/scripts/test_validate.py",
+      "size": 34972,
+      "sha256": "20332e4a2b6f920ed46e01f0f517e855036b4a439b77d806834d035430aaeb70",
+      "gitBlob": "c6bbd4f7b529b58304e701295f1acbbc3bce32ee"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/scripts/validate.py",
+      "size": 76470,
+      "sha256": "b3a98336976b7f836eedf0c3d556d1d696f291d62d339856d2e8a640fa30d389",
+      "gitBlob": "4d0cf82bfa9bd3b0c05ac1fac6ebb1a4c12e92e0"
+    },
+    {
+      "path": ".claude/skills/component-stm32g031f8p6/SKILL.md",
+      "size": 2861,
+      "sha256": "724f16bd5bd5a1d1c0b1233e24dfe9b0eea820a71d65c8265214fb07e792d06a",
+      "gitBlob": "27dfe8707b0532135ccf00ce4429b940e5a00c74"
+    },
+    {
+      "path": ".claude/skills/component-stm32g031f8p6/coverage.json",
+      "size": 5101,
+      "sha256": "5660d27418c4a13ebc5232c65e0762124912d9c14d46b4cf8f07a7a14b18b0f8",
+      "gitBlob": "adfd6d608c451cf3ae50635ebcf5c62df8da1eba"
+    },
+    {
+      "path": ".claude/skills/component-stm32g031f8p6/facts.json",
+      "size": 11531,
+      "sha256": "1ef8f4c6854358515c09c086e2c3bbd0e80a0557027f35962b26a49963353e35",
+      "gitBlob": "b6af4bff996600f1839b93faf040ab83f154e6dd"
+    },
+    {
+      "path": ".claude/skills/component-stm32g031f8p6/interactions.json",
+      "size": 2075,
+      "sha256": "42dfd8369dba40a5ce537f0d113960a0d51c507ad76277343bee2f57a75d7d5a",
+      "gitBlob": "26de851d4b302eec02a442c8e8d309e2f637edb1"
+    },
+    {
+      "path": ".claude/skills/component-stm32g031f8p6/manifest.json",
+      "size": 2982,
+      "sha256": "231287bae4dd2bc91528d6977973dfb6a4f85c0508d6566a13598cf663645aa1",
+      "gitBlob": "f794d2c8b3a799894d5913580c9b9c90c59ac1d3"
+    },
+    {
+      "path": ".claude/skills/component-stm32g031f8p6/pin-map.json",
+      "size": 4550,
+      "sha256": "4a1420268abff7d86a79dabd818934cb019b3358c26700387d2ebebb7cc07f79",
+      "gitBlob": "50d6dd6377913f4d3b5e93ee1d486a0a40a4ebb3"
+    },
+    {
+      "path": ".claude/skills/component-stm32g031f8p6/routing.json",
+      "size": 887,
+      "sha256": "ff1bf50c6e1b677a288fcceae99006080ec481a66fb2fd30fdef54c3cfad8c73",
+      "gitBlob": "2a2e246bd6eaac7d03bf47b43be73954adfa6832"
+    },
+    {
+      "path": ".claude/skills/component-stm32g031f8p6/sources.json",
+      "size": 9911,
+      "sha256": "14b63e753ef511ccd6f2ae297debd41944a701bb1f2b0f5f771968512a166f05",
+      "gitBlob": "d61257f277a59509643cf61e7e878462b043b6a4"
+    },
+    {
+      "path": ".claude/skills/component-stusb4500qtr/SKILL.md",
+      "size": 3975,
+      "sha256": "4604c36377d46ef1cd39908c8e1b6e4c6ffbe0bfade70784a11ddb4264ea221a",
+      "gitBlob": "38edcd2569b205e1fe4ac7538e013ae93fcae239"
+    },
+    {
+      "path": ".claude/skills/component-stusb4500qtr/coverage.json",
+      "size": 7700,
+      "sha256": "fa2a7da97c52ee90d0a2d1e16e3b4f39692cbc71322d34660a73f95867d79c87",
+      "gitBlob": "152bd29d2ed4d7ec3bc7f47faed88e85358a9c70"
+    },
+    {
+      "path": ".claude/skills/component-stusb4500qtr/facts.json",
+      "size": 22528,
+      "sha256": "a1507772607fead607d903dbfa1693ac636fde9fb6e0a81dd6a8e3f847004e4c",
+      "gitBlob": "66044c44c278020e9609ab005c57d6f5aad6729e"
+    },
+    {
+      "path": ".claude/skills/component-stusb4500qtr/interactions.json",
+      "size": 3449,
+      "sha256": "f885f644f72093030fbdd1bdb5414b81cd7523d54fe39ad51079073d15137784",
+      "gitBlob": "35cf51a8291b394ca7ba33be0c244ce642ab0d4f"
+    },
+    {
+      "path": ".claude/skills/component-stusb4500qtr/manifest.json",
+      "size": 3764,
+      "sha256": "e8d8c85cf0642f5c0ec9a2385c366a94d90a9fcd872e5baeb37bdd536aeb38d7",
+      "gitBlob": "cc9bccd5cab25fc6de3d4b88849ba5e0ce904762"
+    },
+    {
+      "path": ".claude/skills/component-stusb4500qtr/pin-map.json",
+      "size": 5613,
+      "sha256": "0555659f1a34e8a6b9e2dd3c97d8f1c6798d347e02c555f24a4d6be5c8f3633b",
+      "gitBlob": "e3944b31fcd15851a4b340f239ad6c3cbb1d58d4"
+    },
+    {
+      "path": ".claude/skills/component-stusb4500qtr/routing.json",
+      "size": 1680,
+      "sha256": "70ee838bacc3adee8eec210d80e02ea3d7b8a052008e66f15a4800b289e0c383",
+      "gitBlob": "20fbe3bf3084f97e0ef8e650a26141dc73c8ced7"
+    },
+    {
+      "path": ".claude/skills/component-stusb4500qtr/sources.json",
+      "size": 14316,
+      "sha256": "fc024413928cef73036728b57f93a674d941193e49cd30d627ea5ac7c55b33c9",
+      "gitBlob": "165b5bf23225e21a5da13593a087608aaa21e287"
+    },
+    {
+      "path": ".claude/skills/component-type-c-31-m-17/SKILL.md",
+      "size": 1411,
+      "sha256": "1be2e722425f77a66374deb8a1a11405e9b73a285926d604a31016ce636321ec",
+      "gitBlob": "acc213a698a0f7275df28fa024463102d442d1f0"
+    },
+    {
+      "path": ".claude/skills/component-type-c-31-m-17/coverage.json",
+      "size": 2300,
+      "sha256": "9d2835a41f99bca37aed10a316978371cdbef91c6349b2bb10b03d878c714c03",
+      "gitBlob": "b7ce3d96a5757dba56bd980cc562dab218a1e258"
+    },
+    {
+      "path": ".claude/skills/component-type-c-31-m-17/facts.json",
+      "size": 6918,
+      "sha256": "23bad34a807f25069aed250e2aa728218790b6d4dcfd993ed5d88305c996ccfa",
+      "gitBlob": "e1225a72f8648e1d2966ab5ca5cc4865005498c7"
+    },
+    {
+      "path": ".claude/skills/component-type-c-31-m-17/interactions.json",
+      "size": 1185,
+      "sha256": "494f085cd2987431dfae8dcec55161bc73a57313b08b8b67d4fcc08b49447fe3",
+      "gitBlob": "157be87c34a513d0c9461b7df22409e3f7f6736a"
+    },
+    {
+      "path": ".claude/skills/component-type-c-31-m-17/manifest.json",
+      "size": 1355,
+      "sha256": "1b2ec29089b3a72c2cfbbd00ddba40b4b1393b2867a2c56e578d662b5dbba09c",
+      "gitBlob": "d5527a4885ad92e082539ac6a9c070d394c2a58b"
+    },
+    {
+      "path": ".claude/skills/component-type-c-31-m-17/pin-map.json",
+      "size": 1414,
+      "sha256": "a4357c1be778b3f2db527d30a18afc6a6515f07629f3f7fdeec028beb0e72c91",
+      "gitBlob": "c0b97c0b1c18748ca0d5dd02b688b3f1f21ae919"
+    },
+    {
+      "path": ".claude/skills/component-type-c-31-m-17/routing.json",
+      "size": 617,
+      "sha256": "ae72fea48f6591f51512de356345daf90cbb7be92d422045b7a5e42160eb52c9",
+      "gitBlob": "cd7cfb6779ffec21a70dd8e795d29b0508b62ac8"
+    },
+    {
+      "path": ".claude/skills/component-type-c-31-m-17/sources.json",
+      "size": 3715,
+      "sha256": "f7877aa9031d26b5c4c89f1d361dfd8d1749f1910de1a521598fcbc70eca760c",
+      "gitBlob": "90212da1c0c54a805854f9813e4c51eab63a1b25"
+    },
+    {
+      "path": ".claude/skills/component-umw-ao3401a-c347476/SKILL.md",
+      "size": 1336,
+      "sha256": "b39f786cf12293dbebbcf68c8d6ba0a1ad6dabde9da5a94d007f5167135c08cb",
+      "gitBlob": "79a158bbaed9f622c91a0853bc53fdf813154f56"
+    },
+    {
+      "path": ".claude/skills/component-umw-ao3401a-c347476/coverage.json",
+      "size": 2239,
+      "sha256": "2e65cd193b3717d6a1ab40afc21434b8c77957e156662b4af02b1e223121cc1e",
+      "gitBlob": "2f444c7f5a76e5283e5af8abdc0e3412ad41ff90"
+    },
+    {
+      "path": ".claude/skills/component-umw-ao3401a-c347476/facts.json",
+      "size": 6011,
+      "sha256": "c9ad17fb3d3c2b8e95fd74eadd21df7410ad2de6c3c744f2576ad53e168e1d2f",
+      "gitBlob": "814d240cefb2fbbc3298c83479851ada21045177"
+    },
+    {
+      "path": ".claude/skills/component-umw-ao3401a-c347476/interactions.json",
+      "size": 1156,
+      "sha256": "dad9afd2ae3a60e2e69133e5aabe14eff3a476a11c85470856ec95167217642f",
+      "gitBlob": "4baf4ca58d6a974b463df8e5567968e951b5ae85"
+    },
+    {
+      "path": ".claude/skills/component-umw-ao3401a-c347476/manifest.json",
+      "size": 1177,
+      "sha256": "fb4f9374842e5a3eaccedd6cca2651a9bc2540ccb3dff73ae96d068cc100253e",
+      "gitBlob": "21f927c48b66ef117d47dc916429a4a806feb46d"
+    },
+    {
+      "path": ".claude/skills/component-umw-ao3401a-c347476/pin-map.json",
+      "size": 752,
+      "sha256": "b10a6652d5f11ec6b5df693dd3abcb720ea36d927b35e79ce299d3faa43cde7b",
+      "gitBlob": "3e9426a82f5c3a2b1e0e2bcceabc16f6126d6fb8"
+    },
+    {
+      "path": ".claude/skills/component-umw-ao3401a-c347476/routing.json",
+      "size": 726,
+      "sha256": "45d9d90b65b668719e4ac0b6ebd66aa56c904667e0333c4da5cac14f04a4c3d7",
+      "gitBlob": "30cb6e849ea0cbba865c2925b0c93a771e0bb38f"
+    },
+    {
+      "path": ".claude/skills/component-umw-ao3401a-c347476/sources.json",
+      "size": 2041,
+      "sha256": "45a1d910ac03489add0bfabe048c22451eed9c4d48a2e30bb3b2722d82da7296",
+      "gitBlob": "781ad61bc3d2a67cb803391ced643a0e8e202928"
+    },
+    {
+      "path": ".claude/skills/component-xfcn-board-headers/SKILL.md",
+      "size": 1307,
+      "sha256": "27a12d6aff544cb5a9bd9cf8bc42d3bf8ca51affd2d30670ab8d1ff949dc5235",
+      "gitBlob": "dc0f5b2edeb9a26c06f12e489224175b2e6c7a70"
+    },
+    {
+      "path": ".claude/skills/component-xfcn-board-headers/coverage.json",
+      "size": 2302,
+      "sha256": "489fc5ad2ac1e081600c5413e38cbeaca62cd827a35451a7185251dc912bc814",
+      "gitBlob": "87da8227f37197f38e74982a5c230b69e5310526"
+    },
+    {
+      "path": ".claude/skills/component-xfcn-board-headers/facts.json",
+      "size": 6610,
+      "sha256": "c008b4bb447fe4dfb30501887c7e38742027340d29e6f58ecc2b18cf93e72931",
+      "gitBlob": "1f6fe85e2a961f1728ededd8e4a1ee95b1c5ffbc"
+    },
+    {
+      "path": ".claude/skills/component-xfcn-board-headers/interactions.json",
+      "size": 1384,
+      "sha256": "02189c23ad0bb7fd2c77acb3e9de4efae9cbef7aaf937344ca836352e7710b72",
+      "gitBlob": "7faf8990d607f61a24dfe6da82bded939d102aef"
+    },
+    {
+      "path": ".claude/skills/component-xfcn-board-headers/manifest.json",
+      "size": 1601,
+      "sha256": "caf657c3b732511badea60f58d0a9c5551d725996c4d9dcfed7b1ccf62acbae6",
+      "gitBlob": "8c2bddd8f99724026ab579ac963628d05a79ec47"
+    },
+    {
+      "path": ".claude/skills/component-xfcn-board-headers/pin-map.json",
+      "size": 1762,
+      "sha256": "3810edbd47f1e77d0db2146ab5d56de7ae57c483f28cf100a52e7bb296ac412d",
+      "gitBlob": "de46c3867e732afe74108e4c1079ea22c04d3bb5"
+    },
+    {
+      "path": ".claude/skills/component-xfcn-board-headers/routing.json",
+      "size": 1004,
+      "sha256": "88ae2a84d16ceed3d6b24aa4de724701f2df1053ccbbf1e3bf71eea4ea12484a",
+      "gitBlob": "d9fc6403f0aa78bcc5727bcbf0acc56197387d07"
+    },
+    {
+      "path": ".claude/skills/component-xfcn-board-headers/sources.json",
+      "size": 6197,
+      "sha256": "a21f124c5b800235668937fe7b0ad335eb88cbe75f13393fbdc08657f91f2720",
+      "gitBlob": "f40d9018648582aadb3c937696bf99713b61425d"
+    },
+    {
+      "path": "doc/component-docs/preflight.json",
+      "size": 36504,
+      "sha256": "f39973315885b644d5883358d1318c77c6dd3f342a771c38f99a347b661e9343",
+      "gitBlob": "3db8c2be22c47937c84adad091111bca10a4fcb1"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/C0603.svg",
+      "size": 1875,
+      "sha256": "620aaccbc35f0703f6551e3759fbe3d9fcf72f1cb761f0e46227c90507269eea",
+      "gitBlob": "73120c48ec9b27df48705e4b6e5f40fd555f1129"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/C0805.svg",
+      "size": 1875,
+      "sha256": "68f4424d1ce6a0423f3990246f26770c13dddbdb7d3f29aced088b0566d15b0e",
+      "gitBlob": "87adc8d2edee7d7ab2ab20e42f61c53839544aa5"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/C1206.svg",
+      "size": 1875,
+      "sha256": "c897d9cca5a68c954efe1eeb21a3e2a36210749210b2f6befe840d9c6b54b45b",
+      "gitBlob": "9b6b808caa8a2bb77ed508e73fe95015ee498a3d"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/F1206.svg",
+      "size": 1701,
+      "sha256": "0186e8068ec3b0713571b39f34f987e92ae031331120d01c6a53342411d00ffd",
+      "gitBlob": "717e5509aa93b7d786782f373841fc168059306c"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/HDR-TH_5P-P2.54-V-M.svg",
+      "size": 1750,
+      "sha256": "f6a7e49233cf15efc7a1608b2c2862d2c8c9992d846ea10fbe2e9b13b311380b",
+      "gitBlob": "e9fb799f1a9ab360ff597fdd5af423d41c41a127"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/HDR-TH_6P-P2.54-V-F.svg",
+      "size": 1862,
+      "sha256": "fff7d2fa2e80c939ef334ccc8ee4b1088914697c1d6f2ef7b8ed200a515a96fa",
+      "gitBlob": "492f8affd7a8e8de63296a088e260dcaa9dfa249"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/HDR-TH_6P-P2.54-V-M.svg",
+      "size": 1862,
+      "sha256": "623767a758483442d5755c98445bde7d95cd81a31a0af3a8eec5b9e54655676b",
+      "gitBlob": "e36c9d7c5747fba13ba2be6a9428c427469b5b41"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/IDC-TH_20P-P2.54-V-R2-C10-S2.54.svg",
+      "size": 3455,
+      "sha256": "e16182ea4db6495fa2278ce48da6ba0f143ca9dd2b1df695825fe6841b843bb8",
+      "gitBlob": "30ef20029a045c2e6ef1ab93ec5c9a7963f338e4"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/IND-SMD_L4.0-W4.0_FNR40XXS.svg",
+      "size": 1311,
+      "sha256": "f73ac28f6d6c1dc161631f5fd8ed15a738486afcef997a28dec4f38fab654dbc",
+      "gitBlob": "5f6253d75e7a42e9d2211926d0100a19f4643d45"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/IND-SMD_L7.0-W6.6_FXL0630.svg",
+      "size": 1487,
+      "sha256": "e22cb6e4b1584e920015d890b45e9f77e0e20a5756e6d41eb81a61fc8b849e22",
+      "gitBlob": "9ae458997d6b684cfecdf3eff0bf3d34c76d37a2"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/LED-SMD_L3.3-W2.8-RD.svg",
+      "size": 1532,
+      "sha256": "e71ccc58de3e4c2e44b4f33c163a546e5123c4daf1d57ba60944628882f0837a",
+      "gitBlob": "ae03d8586ad71de4f74277964034f664265add89"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/MSOP-8_L3.0-W3.0-P0.65-LS4.9-BL-EP1.8.svg",
+      "size": 1906,
+      "sha256": "2fb04963cc5c605dfd8eab7977c6516f2e73c6738b7b4343482c6540e6304a98",
+      "gitBlob": "a724414550e3e72c6dfeebd1b1bfa3b6a54c96f2"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/POT-TH_RK10J11E0034.svg",
+      "size": 2383,
+      "sha256": "1f763c6bf8a58ec0b9cd12745aa9fb08a3e1365b397aeca7130404cabbe2de93",
+      "gitBlob": "3c90a9948c759645bf1b0a60d21d17610c7863b4"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/QFN-24_L4.0-W4.0-P0.50-BL-EP2.8.svg",
+      "size": 2612,
+      "sha256": "68df0e83c157df51c2cd5f2fcaac7e84de8a197a7c4885efdab9511f3c2f38bd",
+      "gitBlob": "37ad6eeb4fdad849e6b4f933971131d7d04ab175"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/R0603.svg",
+      "size": 1487,
+      "sha256": "95f6363455609f3d3a057ddcc71ca4b05ac02c7330301de9ae7a4d0b0a99760a",
+      "gitBlob": "5b097cefd7fbb359a99d34e2e1a6dc8db7f84e80"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/R0805.svg",
+      "size": 1487,
+      "sha256": "1ec092f45fe6d8281d62d2ff42adffb9c1a49a3eb07283c31ab3852a42bdb07a",
+      "gitBlob": "8694a5f14d0b09335fa6daec3bbd8a5425aab77d"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/R2512.svg",
+      "size": 1487,
+      "sha256": "b7370007580c5bd124307971490350896d869b3d6922e87336078b4334ea74b8",
+      "gitBlob": "4683772ab6856f983e31e45aa183ed57284e2ce4"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/SMA_L4.2-W2.6-LS5.3-RD.svg",
+      "size": 1737,
+      "sha256": "f21c59c60c406390a965e2926087890e87174767a17c720e01ba61a99d1fdf4b",
+      "gitBlob": "4418c981c94b3f6beb9f5609a81131a99d594dc3"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/SMA_L4.3-W2.6-LS5.0-FD.svg",
+      "size": 2095,
+      "sha256": "4a3d46243ba6fb305921d37270950ca44f36335cdff8dce9401fbae94fa6a594",
+      "gitBlob": "091e705023cf980585c4edf6701141cb0e8b8067"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/SOD-523_L1.2-W0.8-LS1.6-RD.svg",
+      "size": 1781,
+      "sha256": "0e86b6559ca0629d03fbb9128aec4ec1caffd19d672d85ef47cd6baa2b61dd6e",
+      "gitBlob": "82c9b1c45f98e0380c71a8049ea21adf75ae6019"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/SOT-23_L2.9-W1.3-P1.90-LS2.4-BR.svg",
+      "size": 1590,
+      "sha256": "84d08cc4f53beaa0d6812bd036d57c540c425f0d026099bf6564b31ec21714c6",
+      "gitBlob": "2e6a4edf04fa2068cd519737d464855b7aa807a9"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/SW-TH_SS-12D01-G020.svg",
+      "size": 1618,
+      "sha256": "412c13cc55f692f1440cb729c716b652e2be4bc7abec26360aa7f01c29828ad2",
+      "gitBlob": "af1ee0fe5a5c61e4336bba55adec189363cb9681"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/TSOT-26_L2.9-W1.6-P0.95-LS2.8-BL.svg",
+      "size": 2251,
+      "sha256": "cccac93db21851071741524ce898e9c36e327f0776a991ee128971fd2a7c230f",
+      "gitBlob": "da43544bf53a19aa3976476e7ca853b826f111a1"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/TSSOP-20_L6.5-W4.4-P0.65-LS6.4-BL.svg",
+      "size": 2333,
+      "sha256": "16af9d5f63d018e269d27bde2c84bf2573afb9b31cd4caa6d38a8e5172ac0484",
+      "gitBlob": "223036ab7ba19ae48b47d804911e779d6a1a4440"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/USB-C-SMD_10P-P1.00-L6.8-W8.9.svg",
+      "size": 2335,
+      "sha256": "c83166db794f12ebc585d9cb4787f79eea5c67f3cb50d013e2bb2aa1f01e23d4",
+      "gitBlob": "8a96d309c8a804d95db4bb4f6212bd3ede25aac6"
+    },
+    {
+      "path": "doc/public/assets/component-previews/footprints/manifest.json",
+      "size": 14253,
+      "sha256": "e9de68653140afb27c96367033c4eb9661200aaee0d3ea1a9bc26c8b25978c7f",
+      "gitBlob": "77b07b852beb030681fbad24cb034445c3585d9a"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/C0603_L1.6-W0.8-H0.8.wrl",
+      "size": 59276,
+      "sha256": "125791465c37d0e6cda3b2f45f84e01af226d81a462bfbecb7a4513327e9f22a",
+      "gitBlob": "b48d1e30e68f3221f976e993500086521b815efc"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/C0805_L2.0-W1.3-H1.3.wrl",
+      "size": 59211,
+      "sha256": "31b2ac9a40994188ebd20202214e75f004b604b0068b3dea50d8cf7940cadb1a",
+      "gitBlob": "4d09ec147b8ebf41504ba7056d8eeecc03c51e6b"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/C1206_L3.2-W1.6-H1.3.wrl",
+      "size": 113901,
+      "sha256": "1641b0be48933142193f9b658497e2ca292dbe52afd2b1083770c3012d1d4d02",
+      "gitBlob": "e71ebcc7a6caafe28d4ed5481371c1064c5da086"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/F1206_L3.2-W1.7-H0.6.wrl",
+      "size": 23025,
+      "sha256": "5a8588b69860ec89f945d3e7fba389736280dec034ef3efc6cb1076186ff0e3b",
+      "gitBlob": "9a31625236d11b6e0dc0759581bd752441b99bb8"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/HDR-TH_5P-P2.54-M-LI-1X5P.wrl",
+      "size": 54810,
+      "sha256": "644527e834b50a33eca7ac3f8bd8215c48a6b8d65d8b081e70922132fa932d84",
+      "gitBlob": "839f9967ef7288f15cd29a1795f654a88ef91b9d"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/HDR-TH_6P-P2.54-M-LI-1X6P.wrl",
+      "size": 57957,
+      "sha256": "7598d387ea6611b225e6873936fa7289067a2965d4a9a8fa4be5f0790713a522",
+      "gitBlob": "adbe67bb6960041553995481aa50d345fdc2b3af"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/HDR-TH_6P-P2.54-V-F.wrl",
+      "size": 42922,
+      "sha256": "c376ab438bd847cbe63e90aa4024a2b05db6fb9ea7aa3929c57cb7c29662c583",
+      "gitBlob": "c0b5f7e5a6ec21d77191e82c108b7d3ecc6650fb"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/IDC-TH_20P-P2.54-V-R2-C10-S2.54.wrl",
+      "size": 85839,
+      "sha256": "0e083fc2441f117264eb6371a51ed8c432abae7cd2678eae985f087a5a8b8075",
+      "gitBlob": "3298d86905725c4eb42bce54ea713fefc980554f"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/IND-SMD_L4.0-W4.0-H2.6_FNR40XXS.wrl",
+      "size": 203932,
+      "sha256": "b451ab0d3959f6bcda2a822d41c590b95dbee666492fd13acb4c203d032ca1d5",
+      "gitBlob": "84678d098dfd68c30acec4878fff54e00abf69ab"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/IND-SMD_L7.0-W6.6-H2.8_FXL0630.wrl",
+      "size": 50024,
+      "sha256": "b522d289804beb4485aed18d6d254b9e9e23f17aad8e4cb86ca22d4898a3b51f",
+      "gitBlob": "07f3e00e55e51c9ba57ff33812ff3249d14bcf59"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/LED-SMD_L3.5-W2.8-H0.7.wrl",
+      "size": 20011,
+      "sha256": "333ca18cd2c0695bdcd653b55dd7821194cab49c8ad1bf736441bb3b0b6ea50d",
+      "gitBlob": "33273c70cf97038cf45847ef04c025765255482f"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/MSOP-8_L3.0-W3.0-P0.65-LS4.9-BL-EP1.8.wrl",
+      "size": 100697,
+      "sha256": "be881df515e15dd630751851a12dfb54bdb2723f920a3b7497866a6e3e1e1787",
+      "gitBlob": "93d19d4c240992ee47e91dc183fe6aec4aa12405"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/POT-TH_RK10J11E0034_family.wrl",
+      "size": 243074,
+      "sha256": "372effcbbcfb2e64cf17c74f5189531c6dad7f3dc08b706ded614efa26064bfe",
+      "gitBlob": "a4c42f775067da34a9a2575d880be042fe2d2906"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/QFN-24_L4.0-W4.0-P0.50-BL-EP2.8.wrl",
+      "size": 97990,
+      "sha256": "9ea79cd5048d38ecbeec20257a34113f0f2e441bfb6feded7ff53a6dafdda7b1",
+      "gitBlob": "776f2c94cb268ec67fde8d904bfd44e729f2b8e9"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/R0603.wrl",
+      "size": 81041,
+      "sha256": "2a125409502d8eb68f2e196ab1c28b180e0918830445364f93a45d9461b4daad",
+      "gitBlob": "7de3c5ac2782ed37d377e68b5c9009b263834e05"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/R0805_L2.0-W1.3-H0.6.wrl",
+      "size": 22021,
+      "sha256": "76145163b8ad77c0f68aa2c4b6ced6a1f5008bab9c42bb2043539f815256d6ab",
+      "gitBlob": "31a3ba2bfc7c0a7cf9dedede76b022ff4410a8c1"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/R2512_L6.3-W3.2-H0.6.wrl",
+      "size": 22084,
+      "sha256": "55293e2e32da23224ef00e936ba154b5ef9accbd8e87f45636e31649d7b4b168",
+      "gitBlob": "4f3fecdcae4b201c40f3848c0a4de4e887d87ccf"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/SMA_L4.2-W2.6-LS5.3-RD.wrl",
+      "size": 28361,
+      "sha256": "2760e81a823d6a0f5d79b313f579d89a717e2f17f774a72634776ed22093df0f",
+      "gitBlob": "15f59c99d17916410c95360e76dc8a1fe5002161"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/SMA_L4.3-W2.6-LS5.0-FD.wrl",
+      "size": 67182,
+      "sha256": "50489e9fcc76425405f2d2ba4e2dac232b20f264e300e3bb9cac383b4c951425",
+      "gitBlob": "9f7ac0e0edf40c0e8ff0417bd7943d214f7af70b"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/SOD-523_L1.2-W0.8-H0.7-LS1.6.wrl",
+      "size": 124325,
+      "sha256": "9894a1247b562d70c40061d6f7a70e512c0e44cf44768b814b60b01c926d6c69",
+      "gitBlob": "931105c3a1d0e41098a344f19eea551eb315df76"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/SOT-23-3P_L2.9-W1.3-H1.0-LS2.4-P0.95.wrl",
+      "size": 289040,
+      "sha256": "e07719fa926e604c1a91b88904426570afb92f7e51bbca24d40d0e7c4e4c62f8",
+      "gitBlob": "385c3397d441bcaa381f7fc055869fbfff26cf2b"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/SW-TH_SS-12D01-G020.wrl",
+      "size": 617349,
+      "sha256": "fe38c0a93172ea73ea736917b20612818d97438ed1d9c4d20911c7c4f35240e7",
+      "gitBlob": "dd99bfb1ec646c10b1214c0c1f447a313ad84fe2"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/TSOT-26_L2.9-W1.6-P0.95-LS2.8-BL.wrl",
+      "size": 68520,
+      "sha256": "cea0f96767724d06e8c232affea97d8817d6fcf062d32513f25749da2068d3c9",
+      "gitBlob": "77467ca16603730dc5d52c44e256358bf31d49a9"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/TSSOP-20_L6.5-W4.4-H1.0-LS6.4-P0.65.wrl",
+      "size": 1154580,
+      "sha256": "78533b244071e94c304ab8cd40a109e9f8224b7e201dc7976fbe3a6e235f7def",
+      "gitBlob": "f8559d27c262bf4b452d29b27bc24d824ed80c35"
+    },
+    {
+      "path": "doc/public/assets/component-previews/models/TYPE-C-SMD_6P-L8.9-W6.8-H3.2-P1.00.wrl",
+      "size": 398366,
+      "sha256": "78b3a6c8533b3767f843c7c0e712b4d28b9d2675f44cc0a875592acb540b4c44",
+      "gitBlob": "0c89c4117d76219c773256a22c36794d12681e99"
+    },
+    {
+      "path": "doc/src/content/docs/components/catalog/index.mdx",
+      "size": 53358,
+      "sha256": "370a032b176bee46c25af314e672e9f8781b6d59219cbf190d06d2d79a148540",
+      "gitBlob": "2aadf8cc5312d33b424b0bb246e9febb5614f38b"
+    },
+    {
+      "path": "doc/src/content/docs/components/index.mdx",
+      "size": 2057,
+      "sha256": "18fde002d0c6dbc0eb7f297c90ba100adc431fa58518df9eadf9865a986d7494",
+      "gitBlob": "b828c30fbc2811fdc48a251f82dff2d2e6418948"
+    },
+    {
+      "path": "doc/src/content/docs/components/integration/index.mdx",
+      "size": 47398,
+      "sha256": "9d90679d171b6b173b2c922447c78d8df7914fca525a307159598f2787108965",
+      "gitBlob": "74f9529c6159b2b743070408f193e7161868e48a"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/al8860mp-13/index.mdx",
+      "size": 31335,
+      "sha256": "3f2cd64b52a58d3b0a8f41f4883db388b3f3a3f932a64ae6cbbddf1d39414d83",
+      "gitBlob": "031be60bec3fb664fcfc2ea92dd50ad7cd005537"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/ap63203wu-7/index.mdx",
+      "size": 33969,
+      "sha256": "85ae41ea246669e09e397210918e73dcfb382f404dac288fd22076cc078be1fa",
+      "gitBlob": "347c26812f18eff150bc74df3ee82a4b81b9ab16"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/bsmd1206-075-30v/index.mdx",
+      "size": 27234,
+      "sha256": "cc9d9df098084d3895110b72b49873a349391a5b609a4018675f791c20cb9c48",
+      "gitBlob": "44c5a6b23b199cb101e6ec351f32ab811070604d"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c13564/index.mdx",
+      "size": 26170,
+      "sha256": "113816856806fe6faa4062ff21931195b16f219b80abd5ae26af9e7a7a42af65",
+      "gitBlob": "594bce66cef9abe0577f54fd71f31cb86f4d0eab"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c13585/index.mdx",
+      "size": 19392,
+      "sha256": "297b71b78cc1a6d534affc2125213b1960b92711a40e1bc12a80d722a1d2129e",
+      "gitBlob": "30c8d52ebfcefe257637fe3692e9221fa1e507e7"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c14663/index.mdx",
+      "size": 20511,
+      "sha256": "483ebc5b9df8d6734ec5f37a8024351e99669dd596b6e963b8ced05bf98cca64",
+      "gitBlob": "44570267753c3b4e83cc0cb2136fc5f57b98ca44"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c15849/index.mdx",
+      "size": 19313,
+      "sha256": "f268aff069a8856587b7978b9262b25280e9cb8c655dfb432e8dcfa608bdd32b",
+      "gitBlob": "290e6cbeacc1f26bc39d63e1e417674f1df6e241"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c17414/index.mdx",
+      "size": 20251,
+      "sha256": "a7efc1578780ec5edfcc6b649acc6c3da5a570307f1aa467863ec1de385dddf0",
+      "gitBlob": "51c6b1eefb028bbb9e1e8bfd88767b8a1ecc3ca5"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c210315/index.mdx",
+      "size": 29082,
+      "sha256": "952c80ed3c8cb1bdf4c8fd0d36539c056696c8ee6ad1c284884bf0b1c501af0a",
+      "gitBlob": "366c304c40acb47abff860fdc9b683e9db5b6742"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c21189/index.mdx",
+      "size": 18207,
+      "sha256": "1e38140ce5fc3cbb236c8f79ac3b1d149cb38e85d10667483143260a589638a0",
+      "gitBlob": "faedcc7b4f73d30f5a9835f193a48bcfd30b2a43"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c22775/index.mdx",
+      "size": 20592,
+      "sha256": "97c238c1445fd66f07321861aa6364d8a330b8e31d9f193027c32740894dd5fa",
+      "gitBlob": "faa112823a5ce40cca45b9b240376f92f0e77ab7"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c22807/index.mdx",
+      "size": 20291,
+      "sha256": "50b82c70cececdb8274e2ee700e762613898298029b83356ac0a6095c655db8c",
+      "gitBlob": "566d4339a8593f94e1161f5ab885c53c81beb42f"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c23162/index.mdx",
+      "size": 18060,
+      "sha256": "484a34de2b0aabc7590a1a5e929dfdbe322f7cc1fc1747cca922dfe7b8d5ae90",
+      "gitBlob": "7b458ea7fcb4296f4bc353ed4b2f7afa2ebbf0ef"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c23179/index.mdx",
+      "size": 20082,
+      "sha256": "e84beba6673d99b4fac18f3e25214b1e923f200f319c5a78d5172367a7e53c3c",
+      "gitBlob": "ba496ca7655342d48da8e51c9d5de263b747d358"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c25803/index.mdx",
+      "size": 18955,
+      "sha256": "7c7a7417a1425494fe4a107270c74b1694c998da6e94828a2936b00fd91bb589",
+      "gitBlob": "6a45627499c3353a6463476b48ba246b184f8623"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c2832269/index.mdx",
+      "size": 21330,
+      "sha256": "3769b68020688529f73f635a6e26ca7b1f0fdf5b5505cb7c859bd49f9ba703f2",
+      "gitBlob": "8433500d198f972ce6989f1cb403138f2c4eeb65"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c2934070/index.mdx",
+      "size": 23693,
+      "sha256": "6b73bc901ae7e5cde49ae4e1d0f85d105e68ae71098cc02f45862f7cbc02ad7f",
+      "gitBlob": "84d977b6e312f5ba38cbeb8b12d8ffd34f1a1c79"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c4216/index.mdx",
+      "size": 20260,
+      "sha256": "dc3c3330a454df6cdc7fad15638f431689073e25a2b7a16cdcc70f2aea76fcdd",
+      "gitBlob": "04f109ab6f679d499e9aa2ee3e40dbf2f02c2ac6"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c470643/index.mdx",
+      "size": 27591,
+      "sha256": "a2c7adde63a52030916028d546e2983f1888664eb9ef512b76ff1b789795c2da",
+      "gitBlob": "aa731729d5e79fae1b67fee9fa26212936fadeea"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c4749199/index.mdx",
+      "size": 25541,
+      "sha256": "11ba734298d4fdd9f60f11099444008610503520135c56f5e2287d618664411e",
+      "gitBlob": "67ee1656c4f4f17a912001803a124add90e1c997"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c492404/index.mdx",
+      "size": 18777,
+      "sha256": "df37b11266a55b19975c982a32e920b24fb43972a7777986f9777a0025fb24ed",
+      "gitBlob": "8f53210bec2dcffc625deb329ebb14cda95cda15"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c492405/index.mdx",
+      "size": 21174,
+      "sha256": "d23ea308d01704e93891d1596f7c13962da58128b5c71babb535e5fba0225b41",
+      "gitBlob": "0a2ac35a1fe4b02ad37e6ebaac2c0b2043020457"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c529334/index.mdx",
+      "size": 29784,
+      "sha256": "d06de3f4c53e5622879be577389da9f692ee0bf629661ec5a365ce129f0a1d14",
+      "gitBlob": "2da35dd8f8b8ef465838a385725f3e751a53af88"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/c5446803/index.mdx",
+      "size": 24581,
+      "sha256": "7a7fce5e353321497c4c5ca19b4dc4485f43357140af1685ef57599fbc48b25f",
+      "gitBlob": "5d4592f12f418f1a6873a53e9dd3db0c6300757d"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/cl21a226maqnnne/index.mdx",
+      "size": 22327,
+      "sha256": "7d67ca2f2e799d57c72da4e963504246be700358eda88cfe0d78c6aad942b6b2",
+      "gitBlob": "fb0851a1cf1bd7a658a577c43fe2c52037c46f36"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/fnr4030s4r7mt/index.mdx",
+      "size": 27659,
+      "sha256": "df3398999d8331c2baa0383eb8c7b586f93b8b8197db457b26935a965245ba5e",
+      "gitBlob": "1c1155923ec6d65a6679bb08743b3a5388c219ed"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/fxl0630-330-m/index.mdx",
+      "size": 27584,
+      "sha256": "196f7e81bfd3bd38838244647d67ddd83eacd952d050082713ca5c9675ce6ddb",
+      "gitBlob": "b6ccf3b9f3fa823559fc8f01017603d0203a01ac"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/high-diode-smaj20a/index.mdx",
+      "size": 22884,
+      "sha256": "b91c63dfa60cc79127ccf423871468a3f3c7362aee330e7e144dbdce5331d7e8",
+      "gitBlob": "f42c6a8bbf84c6a8e4a24330f37c536de15628f0"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/index.mdx",
+      "size": 4039,
+      "sha256": "1701a93ef47d809877017af58430f2e987852816f0c164d3ff28a44c8d6b8760",
+      "gitBlob": "5a2bf74cfdcf50399a82b499d1ad80021e6e4e39"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/pesd24vs1ub/index.mdx",
+      "size": 18017,
+      "sha256": "e7300e0ee341c865f0cd28c4aacb9fc8e78db2da46a25dd29cf00c62fe0864d3",
+      "gitBlob": "c037304eb2e3c7bc27c2b4720225465c5b6c2cf6"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/rd-0603waf5101t5e/index.mdx",
+      "size": 23073,
+      "sha256": "3cf60f8885eb58200334316aa53f86dddbf648e37c6064a60e600b4ab0a5af34",
+      "gitBlob": "65c8754d851f74b2e54951b3658d713e14e12307"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/rlp25feer200/index.mdx",
+      "size": 24121,
+      "sha256": "25ad8583d2a761f8eaaff6fcdb7c3b8743350b3aa75daf2a047d8e789eed1f10",
+      "gitBlob": "47d8f31201698a404e866997bae8d2775b8971f6"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/ro-ss26/index.mdx",
+      "size": 27597,
+      "sha256": "bd87373cbbfde27e99a4c355ce9a3fce7cda72696af3946ff9e54db51c71a799",
+      "gitBlob": "0197c3dfe8da00aaaebdfdaa409578fcdb89db84"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/stusb4500qtr/index.mdx",
+      "size": 46866,
+      "sha256": "6f8bd9469079014d3f24e60ba15d080c46270983c6b60ab12b2b6756df74d190",
+      "gitBlob": "7b936128aacc371866226f784bc12a0d99aca903"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/type-c-31-m-17/index.mdx",
+      "size": 27484,
+      "sha256": "6f570bf1da7c7a6381f5ab8a22c2047c17c6581ac8c232d508b87bae5324308d",
+      "gitBlob": "be07cd176ed3ebfc06c371dcba6b0fb6bf577822"
+    },
+    {
+      "path": "doc/src/content/docs/components/records/umw-ao3401a/index.mdx",
+      "size": 24336,
+      "sha256": "76b584921791b6cef9214577f5a1dffabf7575f1d9877fe8f5d93ac3f88575c2",
+      "gitBlob": "4398535189ee4b893c0c0f08482b812f48ae0165"
+    },
+    {
+      "path": "footprints/kicad/C0603.kicad_mod",
+      "size": 1987,
+      "sha256": "7906b32d683ca5f0fe3ec26dbae726a88e1ba98c1ceac52ba0f2c7f69534dbb4",
+      "gitBlob": "e7947c7581e43b89d7404d478954c82922c6466b"
+    },
+    {
+      "path": "footprints/kicad/C0805.kicad_mod",
+      "size": 1986,
+      "sha256": "899b4b130452a41ac8cdc60c93960ddec18dda2b4af0d2f9c83898f7caf84d7f",
+      "gitBlob": "c1c162716033387e1edce750368da4efcfb46feb"
+    },
+    {
+      "path": "footprints/kicad/C1206.kicad_mod",
+      "size": 1986,
+      "sha256": "78801404ade843b3a03170aea42ae1c770e7f32bc96c3f6c7789dc9bf1588c25",
+      "gitBlob": "1be49e63b6d1293e912fe9b7ed450579fb20777e"
+    },
+    {
+      "path": "footprints/kicad/F1206.kicad_mod",
+      "size": 1698,
+      "sha256": "7fc2283d33452630153bc2ec62ed660180a4a4e9b37bad650f5c830447fd8cbf",
+      "gitBlob": "c8e0236b111e3ebba933f3fa40a00eaa0df2ecb7"
+    },
+    {
+      "path": "footprints/kicad/HDR-TH_5P-P2.54-V-M.kicad_mod",
+      "size": 1902,
+      "sha256": "4c3f655448f3aec1fe186eabad34fe0c04b89dcef75ccdb29c187a75caa43bf2",
+      "gitBlob": "60cfe8dc263915c0c3f5ab500eead4a625e93e64"
+    },
+    {
+      "path": "footprints/kicad/HDR-TH_6P-P2.54-V-F.kicad_mod",
+      "size": 2000,
+      "sha256": "be7f204f9be10593f64d1c6bac072cc3c1896db940b5c1942223ed868d0ccd65",
+      "gitBlob": "8914600bccee6a06188a4dee15481efa638aa562"
+    },
+    {
+      "path": "footprints/kicad/HDR-TH_6P-P2.54-V-M.kicad_mod",
+      "size": 2005,
+      "sha256": "dd769a497fa033a6e22bb281aeee6475cd71b0aad12203ff448172cce7d7511e",
+      "gitBlob": "943e86f010349e28b4e5bc2b3b196260bd004faf"
+    },
+    {
+      "path": "footprints/kicad/IDC-TH_20P-P2.54-V-R2-C10-S2.54.kicad_mod",
+      "size": 4022,
+      "sha256": "f0dc3d39da95222814f531f3a77d88ca44f5f9b561e81541b2e663fde6c73ea4",
+      "gitBlob": "7cd6236c8a4f73e1f6f65b22b6d873f00a511192"
+    },
+    {
+      "path": "footprints/kicad/IND-SMD_L4.0-W4.0_FNR40XXS.kicad_mod",
+      "size": 1347,
+      "sha256": "86d39cedabd5391b31004d369150525dab7ee569ac84db661d2400542867031a",
+      "gitBlob": "e4d796ac49fc3a2bfe3ba9cdda4aaab22c4ba73c"
+    },
+    {
+      "path": "footprints/kicad/IND-SMD_L7.0-W6.6_FXL0630.kicad_mod",
+      "size": 1647,
+      "sha256": "7f9c9e1eddb4c9c209f188242dd1fb3bee92d5cb2ad128efeaeb943bdc0e6104",
+      "gitBlob": "95b0b10b94aa7dc2d11d42aaef3279c3719e419a"
+    },
+    {
+      "path": "footprints/kicad/LED-SMD_L3.3-W2.8-RD.kicad_mod",
+      "size": 1665,
+      "sha256": "2bf7fc5e296c440d107a1a07762fe7f8cb93ccb6dba96535cfc85263e6b9eb7d",
+      "gitBlob": "3d297cdd8e3b7dea7eeb7d1165ccf7c8a8a44888"
+    },
+    {
+      "path": "footprints/kicad/MSOP-8_L3.0-W3.0-P0.65-LS4.9-BL-EP1.8.kicad_mod",
+      "size": 2297,
+      "sha256": "45f581573fa81a098a606a3039add1308fde77b1b24d388ddb1d01a737278e3e",
+      "gitBlob": "8fa59f38954a1727b0ea80663858884744412a75"
+    },
+    {
+      "path": "footprints/kicad/POT-TH_RK10J11E0034.kicad_mod",
+      "size": 2567,
+      "sha256": "f0c424d68428c6a24ed85825da34a02e8ab864b8c0f3727f348cdd5eaa26558b",
+      "gitBlob": "eb3427b144e12df5791529860437287667f0fa49"
+    },
+    {
+      "path": "footprints/kicad/QFN-24_L4.0-W4.0-P0.50-BL-EP2.8.kicad_mod",
+      "size": 4100,
+      "sha256": "5bee37ae1b62c371401f47078a5f4e10955bb3c1428c94f287ef972870808c54",
+      "gitBlob": "59fb94b86fdc7a6f175e5c304e5a8f3225f56817"
+    },
+    {
+      "path": "footprints/kicad/R0603.kicad_mod",
+      "size": 1613,
+      "sha256": "3eae896b8822c03975f32ad2ef62f7d2ec9842ed97a85d8476e03dcc16f638f1",
+      "gitBlob": "f583e3e6dc9ae18b9506e28ffe0f9a865c3d6b93"
+    },
+    {
+      "path": "footprints/kicad/R0805.kicad_mod",
+      "size": 1625,
+      "sha256": "a4f7383f4423665170eff7bb6c7d345d714e23e934b7254520e9aefaf93b0666",
+      "gitBlob": "e7f2e72c3281c4fbf17680bac1f69cab3f2e0d7a"
+    },
+    {
+      "path": "footprints/kicad/R2512.kicad_mod",
+      "size": 1597,
+      "sha256": "3b41f0750fa99a09339fba7a6f3f52c0c695003fe1b17695adf397dd491f6a7a",
+      "gitBlob": "1beae40a6920072f10809f5f8e8c708fdfd78283"
+    },
+    {
+      "path": "footprints/kicad/SMA_L4.2-W2.6-LS5.3-RD.kicad_mod",
+      "size": 1961,
+      "sha256": "1cdb4a8a90c33fd3506c829d46dafe539e2b5753e10528c672776d8baa9efba4",
+      "gitBlob": "4f34b0d6caa7f92b2ca06c111813b6e215a7fd23"
+    },
+    {
+      "path": "footprints/kicad/SMA_L4.3-W2.6-LS5.0-FD.kicad_mod",
+      "size": 2242,
+      "sha256": "a080db360afab7eccad00999fb4bc32075ce0d35d1f5c38e42d3e5d13aef848e",
+      "gitBlob": "7dd334676b3f344fc6799012a8bc7a7dbf75c223"
+    },
+    {
+      "path": "footprints/kicad/SOD-523_L1.2-W0.8-LS1.6-RD.kicad_mod",
+      "size": 2057,
+      "sha256": "56df196ee99028e5c7b497cdfdbf50264c04275a70173d836b331eb33652b86f",
+      "gitBlob": "89cd76cb4c3ab929ad591fd7fb8044ce6ed638fb"
+    },
+    {
+      "path": "footprints/kicad/SOT-23_L2.9-W1.3-P1.90-LS2.4-BR.kicad_mod",
+      "size": 1762,
+      "sha256": "7403575ed5f854c0d4aa03e6f82725381106dd60612d44ee194c61b5544713ed",
+      "gitBlob": "d8494f614351539f2a70eda6bf313f368e11b362"
+    },
+    {
+      "path": "footprints/kicad/SW-TH_SS-12D01-G020.kicad_mod",
+      "size": 2431,
+      "sha256": "7fd669c1bfa38a29000bfecfc29bd47d3b70dc118d82c4bf826f090bf15f3aea",
+      "gitBlob": "eb03f8aee542bfa9f9de423321de5538dfee7085"
+    },
+    {
+      "path": "footprints/kicad/TSOT-26_L2.9-W1.6-P0.95-LS2.8-BL.kicad_mod",
+      "size": 2560,
+      "sha256": "a17dcd17c92d70566edd8a10d2a1fc5bf267346ee2b8b10577f74250069a06c2",
+      "gitBlob": "104e1325396ba1db060bbde6cecb94bd111f270e"
+    },
+    {
+      "path": "footprints/kicad/TSSOP-20_L6.5-W4.4-P0.65-LS6.4-BL.kicad_mod",
+      "size": 3335,
+      "sha256": "8010172eb00274f837963a5e922bdd1327ce7ab5f7d9ae70b0d36227a1dd5792",
+      "gitBlob": "ee0cc12424b15f591b805078b3351f9fef58e539"
+    },
+    {
+      "path": "footprints/kicad/USB-C-SMD_10P-P1.00-L6.8-W8.9.kicad_mod",
+      "size": 2396,
+      "sha256": "80b78fc9ecf2042ecc1d9193ed8b92de0f5565af213af7943c18c00c6939425d",
+      "gitBlob": "7cd1261d9c4b7da7aa67abe9145a03b2fd5e7b8a"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/C0603_L1.6-W0.8-H0.8.step",
+      "size": 1468144,
+      "sha256": "f9918dd3888f5ca8b9c906b8cb10b9d8e335f6855513b3e235a18123ae353a78",
+      "gitBlob": "6e12a4cc0d02ed8ef575815d86eeec7fe45fea11"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/C0603_L1.6-W0.8-H0.8.wrl",
+      "size": 59276,
+      "sha256": "125791465c37d0e6cda3b2f45f84e01af226d81a462bfbecb7a4513327e9f22a",
+      "gitBlob": "b48d1e30e68f3221f976e993500086521b815efc"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/C0805_L2.0-W1.3-H1.3.step",
+      "size": 1480675,
+      "sha256": "99acc6b12df8e17000d6e7529bddac9ea44e1240f5635482742aae256f49b5df",
+      "gitBlob": "ee524b70a292bb28b1defb93c7073687789f0021"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/C0805_L2.0-W1.3-H1.3.wrl",
+      "size": 59211,
+      "sha256": "31b2ac9a40994188ebd20202214e75f004b604b0068b3dea50d8cf7940cadb1a",
+      "gitBlob": "4d09ec147b8ebf41504ba7056d8eeecc03c51e6b"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/C1206_L3.2-W1.6-H1.3.step",
+      "size": 1169787,
+      "sha256": "8c99630f2bb86b653b57c467d723383db2a61971d491692b1eb2a5768df02cef",
+      "gitBlob": "6809c0b81d3f272580b25bb6a343b644d89d6fd0"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/C1206_L3.2-W1.6-H1.3.wrl",
+      "size": 113901,
+      "sha256": "1641b0be48933142193f9b658497e2ca292dbe52afd2b1083770c3012d1d4d02",
+      "gitBlob": "e71ebcc7a6caafe28d4ed5481371c1064c5da086"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/F1206_L3.2-W1.7-H0.6.step",
+      "size": 1276800,
+      "sha256": "b4aa1c51737817cb825db00ace803703d2022f88e8062722a44807b791b94f1f",
+      "gitBlob": "75abc6628bc3a6306a9e9c1df83f1020512c64da"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/F1206_L3.2-W1.7-H0.6.wrl",
+      "size": 23025,
+      "sha256": "5a8588b69860ec89f945d3e7fba389736280dec034ef3efc6cb1076186ff0e3b",
+      "gitBlob": "9a31625236d11b6e0dc0759581bd752441b99bb8"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/HDR-TH_5P-P2.54-M-LI-1X5P.step",
+      "size": 1567693,
+      "sha256": "73e08cb77c73909d7a22a844b0e2b72731a4831b9b2626cfc691730514f9f63f",
+      "gitBlob": "505045cf88fdead9608bf7a395681a54656a0659"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/HDR-TH_5P-P2.54-M-LI-1X5P.wrl",
+      "size": 54810,
+      "sha256": "644527e834b50a33eca7ac3f8bd8215c48a6b8d65d8b081e70922132fa932d84",
+      "gitBlob": "839f9967ef7288f15cd29a1795f654a88ef91b9d"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/HDR-TH_6P-P2.54-M-LI-1X6P.step",
+      "size": 1645506,
+      "sha256": "dc269a9893939c6010e8f9d4632f8b55b6c641528794a5971dded9a0bc519136",
+      "gitBlob": "ecb86e366ac0740aebe43b994b07ec273c05d4b3"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/HDR-TH_6P-P2.54-M-LI-1X6P.wrl",
+      "size": 57957,
+      "sha256": "7598d387ea6611b225e6873936fa7289067a2965d4a9a8fa4be5f0790713a522",
+      "gitBlob": "adbe67bb6960041553995481aa50d345fdc2b3af"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/HDR-TH_6P-P2.54-V-F.step",
+      "size": 1624330,
+      "sha256": "6101de529b83a8e40d64b9e05257aaeaa86d39c19e3ce22019d66e50f42541db",
+      "gitBlob": "feb1851cec5dca65f1f942df00b1f2bd18d0a9a8"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/HDR-TH_6P-P2.54-V-F.wrl",
+      "size": 42922,
+      "sha256": "c376ab438bd847cbe63e90aa4024a2b05db6fb9ea7aa3929c57cb7c29662c583",
+      "gitBlob": "c0b5f7e5a6ec21d77191e82c108b7d3ecc6650fb"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/IDC-TH_20P-P2.54-V-R2-C10-S2.54.step",
+      "size": 2886139,
+      "sha256": "c15bc53051f210b11ef35a966c124ebf4ac194d0995963d99c0e044bd1e304de",
+      "gitBlob": "3a8445f5e252e1158f9f89b11bbd8bfdba51450d"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/IDC-TH_20P-P2.54-V-R2-C10-S2.54.wrl",
+      "size": 85839,
+      "sha256": "0e083fc2441f117264eb6371a51ed8c432abae7cd2678eae985f087a5a8b8075",
+      "gitBlob": "3298d86905725c4eb42bce54ea713fefc980554f"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/IND-SMD_L4.0-W4.0-H2.6_FNR40XXS.step",
+      "size": 1760358,
+      "sha256": "74f9ee02cb5adcb8e149e9452ece79ead7312c30211f2e812f08011b83bec38a",
+      "gitBlob": "e0d47a45a00e822d71fcc6cfd25166fd3509ee5b"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/IND-SMD_L4.0-W4.0-H2.6_FNR40XXS.wrl",
+      "size": 203932,
+      "sha256": "b451ab0d3959f6bcda2a822d41c590b95dbee666492fd13acb4c203d032ca1d5",
+      "gitBlob": "84678d098dfd68c30acec4878fff54e00abf69ab"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/IND-SMD_L7.0-W6.6-H2.8_FXL0630.step",
+      "size": 1810325,
+      "sha256": "02299170d9b3a4cd3bce3deea6dbc758ab7d5e8cb8b888464d0a940f4cfaa68b",
+      "gitBlob": "5256512e8cc004414245edcd4480e30183e6ca02"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/IND-SMD_L7.0-W6.6-H2.8_FXL0630.wrl",
+      "size": 50024,
+      "sha256": "b522d289804beb4485aed18d6d254b9e9e23f17aad8e4cb86ca22d4898a3b51f",
+      "gitBlob": "07f3e00e55e51c9ba57ff33812ff3249d14bcf59"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/LED-SMD_L3.5-W2.8-H0.7.step",
+      "size": 1331151,
+      "sha256": "3950f739b2e9163404e0e98e33c876ebafdf6088500b2c3855ac725715120e6e",
+      "gitBlob": "738f11e2ed222c833c189241e49101d2bf9cf98b"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/LED-SMD_L3.5-W2.8-H0.7.wrl",
+      "size": 20011,
+      "sha256": "333ca18cd2c0695bdcd653b55dd7821194cab49c8ad1bf736441bb3b0b6ea50d",
+      "gitBlob": "33273c70cf97038cf45847ef04c025765255482f"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/MSOP-8_L3.0-W3.0-P0.65-LS4.9-BL-EP1.8.step",
+      "size": 2291153,
+      "sha256": "48850e0ba8c705a3ed743f6390adaab2a1d0596e479fb656a4d3820779e8c833",
+      "gitBlob": "93a412efb5d1863cd6b44254e1ca46094c4e850b"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/MSOP-8_L3.0-W3.0-P0.65-LS4.9-BL-EP1.8.wrl",
+      "size": 100697,
+      "sha256": "be881df515e15dd630751851a12dfb54bdb2723f920a3b7497866a6e3e1e1787",
+      "gitBlob": "93d19d4c240992ee47e91dc183fe6aec4aa12405"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/POT-TH_RK10J11E0034_family.step",
+      "size": 2578360,
+      "sha256": "a269286859ddcf169a50c53c80608770861e5dd891d52231b39f04d058c07fa1",
+      "gitBlob": "3031b9039a663ef181e31138cec26d992cc8d3a4"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/POT-TH_RK10J11E0034_family.wrl",
+      "size": 243074,
+      "sha256": "372effcbbcfb2e64cf17c74f5189531c6dad7f3dc08b706ded614efa26064bfe",
+      "gitBlob": "a4c42f775067da34a9a2575d880be042fe2d2906"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/QFN-24_L4.0-W4.0-P0.50-BL-EP2.8.step",
+      "size": 1472922,
+      "sha256": "9057661be7130af37402e30647602e467285870efe0b403443404628462cf576",
+      "gitBlob": "7bcf95dd3bcbbcc493d8bc6e4ef258720bffb04a"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/QFN-24_L4.0-W4.0-P0.50-BL-EP2.8.wrl",
+      "size": 97990,
+      "sha256": "9ea79cd5048d38ecbeec20257a34113f0f2e441bfb6feded7ff53a6dafdda7b1",
+      "gitBlob": "776f2c94cb268ec67fde8d904bfd44e729f2b8e9"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/R0603.step",
+      "size": 1046656,
+      "sha256": "e52f17888a8c6c2cb8d56dccf25e2ed131a12a241311657622543c405e42826c",
+      "gitBlob": "07e4a27ac8457657fa4e7d2758db843755c6b890"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/R0603.wrl",
+      "size": 81041,
+      "sha256": "2a125409502d8eb68f2e196ab1c28b180e0918830445364f93a45d9461b4daad",
+      "gitBlob": "7de3c5ac2782ed37d377e68b5c9009b263834e05"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/R0805_L2.0-W1.3-H0.6.step",
+      "size": 1067890,
+      "sha256": "001b6970d63e46474aa901afc1d8fe93ed3098f81f79d75f9019f417207be59b",
+      "gitBlob": "44740069c7c79e7c84b94c717fde8f1beab3e933"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/R0805_L2.0-W1.3-H0.6.wrl",
+      "size": 22021,
+      "sha256": "76145163b8ad77c0f68aa2c4b6ced6a1f5008bab9c42bb2043539f815256d6ab",
+      "gitBlob": "31a3ba2bfc7c0a7cf9dedede76b022ff4410a8c1"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/R2512_L6.3-W3.2-H0.6.step",
+      "size": 1063279,
+      "sha256": "d34780eb5085295fb4a1eb5b1f5acc10fb14adc5438cd630e13497305530862e",
+      "gitBlob": "b9cbc3e9144b5b8dd72b89f621a126b53e9bd099"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/R2512_L6.3-W3.2-H0.6.wrl",
+      "size": 22084,
+      "sha256": "55293e2e32da23224ef00e936ba154b5ef9accbd8e87f45636e31649d7b4b168",
+      "gitBlob": "4f3fecdcae4b201c40f3848c0a4de4e887d87ccf"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/SMA_L4.2-W2.6-LS5.3-RD.step",
+      "size": 1352049,
+      "sha256": "cae76c7a440b48c6e959dcfd5b9b8e8ed6dd731b7cf5fcb58a2b767283b138df",
+      "gitBlob": "e121e2a24c61002d4a7a1bb6dd07aa24acd77ac0"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/SMA_L4.2-W2.6-LS5.3-RD.wrl",
+      "size": 28361,
+      "sha256": "2760e81a823d6a0f5d79b313f579d89a717e2f17f774a72634776ed22093df0f",
+      "gitBlob": "15f59c99d17916410c95360e76dc8a1fe5002161"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/SMA_L4.3-W2.6-LS5.0-FD.step",
+      "size": 2065359,
+      "sha256": "c2559d2addaf77f7ab6a456c25071c142825a8b9ac35f226bd29f32157bb486b",
+      "gitBlob": "a8b66d30c1e21dd9d352a8fe39054666036e29d7"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/SMA_L4.3-W2.6-LS5.0-FD.wrl",
+      "size": 67182,
+      "sha256": "50489e9fcc76425405f2d2ba4e2dac232b20f264e300e3bb9cac383b4c951425",
+      "gitBlob": "9f7ac0e0edf40c0e8ff0417bd7943d214f7af70b"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/SOD-523_L1.2-W0.8-H0.7-LS1.6.step",
+      "size": 1204456,
+      "sha256": "db577ce0ad0cfe606d0ba741eaca8f8f2e7b49fb55b6e87bd33aacd80d3fb808",
+      "gitBlob": "2fed7e8c73b92534b44666200f0805ffbd14b002"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/SOD-523_L1.2-W0.8-H0.7-LS1.6.wrl",
+      "size": 124325,
+      "sha256": "9894a1247b562d70c40061d6f7a70e512c0e44cf44768b814b60b01c926d6c69",
+      "gitBlob": "931105c3a1d0e41098a344f19eea551eb315df76"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/SOT-23-3P_L2.9-W1.3-H1.0-LS2.4-P0.95.step",
+      "size": 2773949,
+      "sha256": "77ba908a82212855f2a6d38b120604e403137808eaba47113ce858f1831017e5",
+      "gitBlob": "3aa7a5ba96afa83af491fb8bf14f6da03c4b9cfc"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/SOT-23-3P_L2.9-W1.3-H1.0-LS2.4-P0.95.wrl",
+      "size": 289040,
+      "sha256": "e07719fa926e604c1a91b88904426570afb92f7e51bbca24d40d0e7c4e4c62f8",
+      "gitBlob": "385c3397d441bcaa381f7fc055869fbfff26cf2b"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/SW-TH_SS-12D01-G020.step",
+      "size": 1509075,
+      "sha256": "fc474ae1f7fde48b66f40c479a7e512004d33b76240da28d623a281ec1a7d261",
+      "gitBlob": "8d0efc7f537aa841785cba686499fa47eb83ae85"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/SW-TH_SS-12D01-G020.wrl",
+      "size": 617349,
+      "sha256": "fe38c0a93172ea73ea736917b20612818d97438ed1d9c4d20911c7c4f35240e7",
+      "gitBlob": "dd99bfb1ec646c10b1214c0c1f447a313ad84fe2"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/TSOT-26_L2.9-W1.6-P0.95-LS2.8-BL.step",
+      "size": 1646811,
+      "sha256": "a8ffb0afc940ec9e0ce869d16f41faa486004f5cc5013e7ecec23d16ffa680ed",
+      "gitBlob": "21b061bc5d67324b5609867eac3c4b0b4f7671e4"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/TSOT-26_L2.9-W1.6-P0.95-LS2.8-BL.wrl",
+      "size": 68520,
+      "sha256": "cea0f96767724d06e8c232affea97d8817d6fcf062d32513f25749da2068d3c9",
+      "gitBlob": "77467ca16603730dc5d52c44e256358bf31d49a9"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/TSSOP-20_L6.5-W4.4-H1.0-LS6.4-P0.65.step",
+      "size": 5542938,
+      "sha256": "a5e7eefa7f0245d8cfd2f80a92974768a8369a4ad184fe612e8379d22c4c5dca",
+      "gitBlob": "a5ce75fde19111a055f31602e96b3bf630389d6f"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/TSSOP-20_L6.5-W4.4-H1.0-LS6.4-P0.65.wrl",
+      "size": 1154580,
+      "sha256": "78533b244071e94c304ab8cd40a109e9f8224b7e201dc7976fbe3a6e235f7def",
+      "gitBlob": "f8559d27c262bf4b452d29b27bc24d824ed80c35"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/TYPE-C-SMD_6P-L8.9-W6.8-H3.2-P1.00.step",
+      "size": 2298921,
+      "sha256": "78e05b327ed9cafeb90af4e2270b96f9884e86e391353cba6c005b2082d07545",
+      "gitBlob": "99169043f9615e7793926ff38c301097e15dff6b"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.3dshapes/TYPE-C-SMD_6P-L8.9-W6.8-H3.2-P1.00.wrl",
+      "size": 398366,
+      "sha256": "78b3a6c8533b3767f843c7c0e712b4d28b9d2675f44cc0a875592acb540b4c44",
+      "gitBlob": "0c89c4117d76219c773256a22c36794d12681e99"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/C0603.kicad_mod",
+      "size": 1987,
+      "sha256": "7906b32d683ca5f0fe3ec26dbae726a88e1ba98c1ceac52ba0f2c7f69534dbb4",
+      "gitBlob": "e7947c7581e43b89d7404d478954c82922c6466b"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/C0805.kicad_mod",
+      "size": 1986,
+      "sha256": "899b4b130452a41ac8cdc60c93960ddec18dda2b4af0d2f9c83898f7caf84d7f",
+      "gitBlob": "c1c162716033387e1edce750368da4efcfb46feb"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/C1206.kicad_mod",
+      "size": 1986,
+      "sha256": "78801404ade843b3a03170aea42ae1c770e7f32bc96c3f6c7789dc9bf1588c25",
+      "gitBlob": "1be49e63b6d1293e912fe9b7ed450579fb20777e"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/F1206.kicad_mod",
+      "size": 1698,
+      "sha256": "7fc2283d33452630153bc2ec62ed660180a4a4e9b37bad650f5c830447fd8cbf",
+      "gitBlob": "c8e0236b111e3ebba933f3fa40a00eaa0df2ecb7"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/HDR-TH_5P-P2.54-V-M.kicad_mod",
+      "size": 1902,
+      "sha256": "4c3f655448f3aec1fe186eabad34fe0c04b89dcef75ccdb29c187a75caa43bf2",
+      "gitBlob": "60cfe8dc263915c0c3f5ab500eead4a625e93e64"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/HDR-TH_6P-P2.54-V-F.kicad_mod",
+      "size": 2000,
+      "sha256": "be7f204f9be10593f64d1c6bac072cc3c1896db940b5c1942223ed868d0ccd65",
+      "gitBlob": "8914600bccee6a06188a4dee15481efa638aa562"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/HDR-TH_6P-P2.54-V-M.kicad_mod",
+      "size": 2005,
+      "sha256": "dd769a497fa033a6e22bb281aeee6475cd71b0aad12203ff448172cce7d7511e",
+      "gitBlob": "943e86f010349e28b4e5bc2b3b196260bd004faf"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/IDC-TH_20P-P2.54-V-R2-C10-S2.54.kicad_mod",
+      "size": 4022,
+      "sha256": "f0dc3d39da95222814f531f3a77d88ca44f5f9b561e81541b2e663fde6c73ea4",
+      "gitBlob": "7cd6236c8a4f73e1f6f65b22b6d873f00a511192"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/IND-SMD_L4.0-W4.0_FNR40XXS.kicad_mod",
+      "size": 1347,
+      "sha256": "86d39cedabd5391b31004d369150525dab7ee569ac84db661d2400542867031a",
+      "gitBlob": "e4d796ac49fc3a2bfe3ba9cdda4aaab22c4ba73c"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/IND-SMD_L7.0-W6.6_FXL0630.kicad_mod",
+      "size": 1647,
+      "sha256": "7f9c9e1eddb4c9c209f188242dd1fb3bee92d5cb2ad128efeaeb943bdc0e6104",
+      "gitBlob": "95b0b10b94aa7dc2d11d42aaef3279c3719e419a"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/LED-SMD_L3.3-W2.8-RD.kicad_mod",
+      "size": 1665,
+      "sha256": "2bf7fc5e296c440d107a1a07762fe7f8cb93ccb6dba96535cfc85263e6b9eb7d",
+      "gitBlob": "3d297cdd8e3b7dea7eeb7d1165ccf7c8a8a44888"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/MSOP-8_L3.0-W3.0-P0.65-LS4.9-BL-EP1.8.kicad_mod",
+      "size": 2297,
+      "sha256": "45f581573fa81a098a606a3039add1308fde77b1b24d388ddb1d01a737278e3e",
+      "gitBlob": "8fa59f38954a1727b0ea80663858884744412a75"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/POT-TH_RK10J11E0034.kicad_mod",
+      "size": 2567,
+      "sha256": "f0c424d68428c6a24ed85825da34a02e8ab864b8c0f3727f348cdd5eaa26558b",
+      "gitBlob": "eb3427b144e12df5791529860437287667f0fa49"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/QFN-24_L4.0-W4.0-P0.50-BL-EP2.8.kicad_mod",
+      "size": 4100,
+      "sha256": "5bee37ae1b62c371401f47078a5f4e10955bb3c1428c94f287ef972870808c54",
+      "gitBlob": "59fb94b86fdc7a6f175e5c304e5a8f3225f56817"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/R0603.kicad_mod",
+      "size": 1613,
+      "sha256": "3eae896b8822c03975f32ad2ef62f7d2ec9842ed97a85d8476e03dcc16f638f1",
+      "gitBlob": "f583e3e6dc9ae18b9506e28ffe0f9a865c3d6b93"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/R0805.kicad_mod",
+      "size": 1625,
+      "sha256": "a4f7383f4423665170eff7bb6c7d345d714e23e934b7254520e9aefaf93b0666",
+      "gitBlob": "e7f2e72c3281c4fbf17680bac1f69cab3f2e0d7a"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/R2512.kicad_mod",
+      "size": 1597,
+      "sha256": "3b41f0750fa99a09339fba7a6f3f52c0c695003fe1b17695adf397dd491f6a7a",
+      "gitBlob": "1beae40a6920072f10809f5f8e8c708fdfd78283"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/SMA_L4.2-W2.6-LS5.3-RD.kicad_mod",
+      "size": 1961,
+      "sha256": "1cdb4a8a90c33fd3506c829d46dafe539e2b5753e10528c672776d8baa9efba4",
+      "gitBlob": "4f34b0d6caa7f92b2ca06c111813b6e215a7fd23"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/SMA_L4.3-W2.6-LS5.0-FD.kicad_mod",
+      "size": 2242,
+      "sha256": "a080db360afab7eccad00999fb4bc32075ce0d35d1f5c38e42d3e5d13aef848e",
+      "gitBlob": "7dd334676b3f344fc6799012a8bc7a7dbf75c223"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/SOD-523_L1.2-W0.8-LS1.6-RD.kicad_mod",
+      "size": 2057,
+      "sha256": "56df196ee99028e5c7b497cdfdbf50264c04275a70173d836b331eb33652b86f",
+      "gitBlob": "89cd76cb4c3ab929ad591fd7fb8044ce6ed638fb"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/SOT-23_L2.9-W1.3-P1.90-LS2.4-BR.kicad_mod",
+      "size": 1762,
+      "sha256": "7403575ed5f854c0d4aa03e6f82725381106dd60612d44ee194c61b5544713ed",
+      "gitBlob": "d8494f614351539f2a70eda6bf313f368e11b362"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/SW-TH_SS-12D01-G020.kicad_mod",
+      "size": 2431,
+      "sha256": "7fd669c1bfa38a29000bfecfc29bd47d3b70dc118d82c4bf826f090bf15f3aea",
+      "gitBlob": "eb03f8aee542bfa9f9de423321de5538dfee7085"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/TSOT-26_L2.9-W1.6-P0.95-LS2.8-BL.kicad_mod",
+      "size": 2560,
+      "sha256": "a17dcd17c92d70566edd8a10d2a1fc5bf267346ee2b8b10577f74250069a06c2",
+      "gitBlob": "104e1325396ba1db060bbde6cecb94bd111f270e"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/TSSOP-20_L6.5-W4.4-P0.65-LS6.4-BL.kicad_mod",
+      "size": 3335,
+      "sha256": "8010172eb00274f837963a5e922bdd1327ce7ab5f7d9ae70b0d36227a1dd5792",
+      "gitBlob": "ee0cc12424b15f591b805078b3351f9fef58e539"
+    },
+    {
+      "path": "footprints/kicad/zudo-led-lamp.pretty/USB-C-SMD_10P-P1.00-L6.8-W8.9.kicad_mod",
+      "size": 2396,
+      "sha256": "80b78fc9ecf2042ecc1d9193ed8b92de0f5565af213af7943c18c00c6939425d",
+      "gitBlob": "7cd1261d9c4b7da7aa67abe9145a03b2fd5e7b8a"
+    },
+    {
+      "path": "scripts/schgen/board_l_spec.py",
+      "size": 7238,
+      "sha256": "51291b8064396026aa308a4290b5e356deead54428e7f0f07904d99b96e24f3c",
+      "gitBlob": "dc42c8380ab962b988f8acad424bdbbc6b169229"
+    },
+    {
+      "path": "scripts/schgen/board_p_spec.py",
+      "size": 4434,
+      "sha256": "4357f5adacedb473a874f649f9847357d04e98927abb1216d82e0c25eca7f656",
+      "gitBlob": "6a147502fcd6572ee4ea59517661ce51f0b70828"
+    },
+    {
+      "path": "scripts/schgen/schgen_core.py",
+      "size": 10186,
+      "sha256": "11fb55a5d97bd08a914091cf1ba6b95b731e7f017a97d66501e15a22b58ca356",
+      "gitBlob": "f7e64771642645788e858555e0cb174d46c18cbc"
+    },
+    {
+      "path": "scripts/schgen/sexp.py",
+      "size": 1359,
+      "sha256": "e15f9b4fa99dae0738b269134d21d401163af2f0f1b611330ac0ed8c18da68e1",
+      "gitBlob": "5106244dd87ab411411288b10c15451e2ca8ec4a"
+    },
+    {
+      "path": "scripts/schgen/swd_adapter_spec.py",
+      "size": 1115,
+      "sha256": "64331cf1816f23040f212a442596773c76f62d1900784511c14e9800ed4ea5dc",
+      "gitBlob": "080e93d16f296ca9567eabc353054dbff358d9ac"
+    },
+    {
+      "path": "scripts/schgen/verify_power_switch.py",
+      "size": 4182,
+      "sha256": "bbe07d3496244e46697afbabf90388b1926575e3a0be6f109e4e1b5ebc4398f2",
+      "gitBlob": "01a2846fff72f63eb6042e3347a491b7cae36210"
+    },
+    {
+      "path": "symbols/zudo-led-lamp.kicad_sym",
+      "size": 136520,
+      "sha256": "fb336ab0122441fedec20475bf8897b685dcab0a349df5a405333d276a655f7b",
+      "gitBlob": "4a2f0f11f758e613815ffc8eac7784271cb3b658"
+    }
+  ]
+}

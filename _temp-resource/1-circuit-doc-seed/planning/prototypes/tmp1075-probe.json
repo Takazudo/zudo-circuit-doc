@@ -1,0 +1,41 @@
+{
+  "retrieved": "2026-09-26",
+  "part": {"manufacturer": "Texas Instruments", "mpn": "TMP1075DR", "package": "SOIC-8 (TI D, drawing D0008A 4214825/C, JEDEC MS-012 var AA)", "packing": "2500 LARGE T&R", "marking": "1075", "msl": "Level-1-260C-UNLIM", "status": "Active (addendum dated 17-Sep-2026)"},
+  "datasheet": {
+    "document_title": "TMP1075 Temperature Sensor With I2C and SMBus Interface in Industry Standard LM75 Form Factor and Pinout",
+    "document_number": "SBOS854F", "revision": "F", "document_date": "2024-06", "first_issued": "2018-03",
+    "authoritative_url": "https://www.ti.com/lit/ds/symlink/tmp1075.pdf",
+    "alternate_authoritative_url": "https://www.ti.com/lit/ds/sbos854f/sbos854f.pdf",
+    "sha256": "266c9a50a80b100884e9cf378b320ea51412023057fed8ba4fbdf85502340cf2", "bytes": 2813742, "pages": 49,
+    "http_last_modified": "Fri, 18 Sep 2026 05:40:44 GMT", "etag": "\"2aef2e-65bbb5773d0ab\"",
+    "locators_zero_based": [
+      {"idx": 3, "label": "4", "what": "Section 5 Pin Configuration and Functions, Figure 5-1 D Package, Table 5-1 Pin Functions"},
+      {"idx": 4, "label": "5", "what": "6.1 Absolute Maximum Ratings; 6.2 ESD; 6.3 Recommended Operating Conditions"},
+      {"idx": 5, "label": "6", "what": "6.4 Thermal Information; 6.5 Electrical Characteristics: TMP1075 (accuracy, VIH/VIL, VOL)"},
+      {"idx": 6, "label": "7", "what": "6.5 cont. IQ, ISD, POR thresholds; 6.6 Electrical Characteristics: TMP1075N"},
+      {"idx": 13, "label": "14", "what": "Table 7-2 TMP1075 Address Pins State"},
+      {"idx": 24, "label": "25", "what": "8.2 Typical Application, Figure 8-1 (0.01uF bypass, 5k pullups), 8.2.1 Design Requirements"},
+      {"idx": 25, "label": "26", "what": "8.3 Power Supply Recommendations; 8.4.1 Layout Guidelines; Figure 8-2 Layout Example (D Package)"},
+      {"idx": 31, "label": "Addendum-Page 1", "what": "Package Option Addendum orderable table (TMP1075DR row)"},
+      {"idx": 38, "label": "unprinted physical page 39", "what": "D0008A PACKAGE OUTLINE 4214825/C"},
+      {"idx": 39, "label": "unprinted physical page 40", "what": "D0008A EXAMPLE BOARD LAYOUT (8X 1.55x0.6 pads, 5.4 row span, 1.27 pitch)"}
+    ]
+  },
+  "pinmap_D_package": {"1": "SDA", "2": "SCL", "3": "ALERT", "4": "GND", "5": "A2", "6": "A1", "7": "A0", "8": "V+"},
+  "distributors": {
+    "digikey": {"ct": "296-51833-1-ND", "tr": "296-51833-2-ND", "digireel": "296-51833-6-ND", "product_url": "https://www.digikey.com/en/products/detail/texas-instruments/TMP1075DR/9685283", "verified_via": "WebFetch of product page (curl gets 403)"},
+    "mouser": {"code": "595-TMP1075DR", "product_url": "https://www.mouser.com/ProductDetail/Texas-Instruments/TMP1075DR?qs=byeeYqUIh0MQFff6VZgmIA%3D%3D", "verified_via": "UNVERIFIED: web-search snippet only; page returns Access Denied/captcha to curl and times out via WebFetch"},
+    "lcsc": {"code": "C2878381", "verified_via": "curl of lcsc.com product-detail page (HTTP 200, productCode C2878381, brand TI, SOIC-8); JLCPCB lists it as Extended Part"}
+  },
+  "kicad": {
+    "tag": "9.0.9",
+    "footprint": {"lib": "Package_SO", "name": "SOIC-8_3.9x4.9mm_P1.27mm", "url": "https://gitlab.com/kicad/libraries/kicad-footprints/-/raw/9.0.9/Package_SO.pretty/SOIC-8_3.9x4.9mm_P1.27mm.kicad_mod", "sha256": "623e154d907cd3e49387a81775898feee35c4ed5fd3317865ad11c322f72adfb", "format_version": "20241229", "pads": "8x roundrect 1.95x0.6 at x=+-2.475, pitch 1.27"},
+    "step_9.0.9": {"url": "https://gitlab.com/kicad/libraries/kicad-packages3D/-/raw/9.0.9/Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step", "sha256": "07f46cff378d30e6c27dfd5a03092c795323f86d91c71fc7e743f4f418dc553a", "bytes": 125320},
+    "wrl_9.0.9": "404 (KiCad 9.x packages3D repo ships STEP only)",
+    "step_8.0.9": {"url": "https://gitlab.com/kicad/libraries/kicad-packages3D/-/raw/8.0.9/Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step", "sha256": "d9b46f6dd6cf8c5e2028838eed38e2a6a7f26235856078511e5a71a594ca809e", "bytes": 253807},
+    "wrl_8.0.9": {"url": "https://gitlab.com/kicad/libraries/kicad-packages3D/-/raw/8.0.9/Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.wrl", "sha256": "2b84645ac35f878381da69ebf467feab9e5f054922c809c1b28a1586dd4e462d", "bytes": 77404, "bbox_mm": "x +-3.0, y +-2.451, z 0..1.75"},
+    "symbol": {"lib": "Sensor_Temperature", "name": "TMP1075D", "default_footprint": "Package_SO:SO-8_3.9x4.9mm_P1.27mm", "pins_match_table_5_1": true},
+    "license": "CC-BY-SA 4.0 with KiCad library exception"
+  },
+  "docker": {"pinned": "kicad/kicad@sha256:e638b79b0321f29395a5b783e94bb9f3c73303e8da15da27b8f5cb4b67a37729", "tag": "kicad/kicad:9.0.9", "platforms": ["linux/amd64"], "compressed_size_bytes": 476051907, "local": false}
+}

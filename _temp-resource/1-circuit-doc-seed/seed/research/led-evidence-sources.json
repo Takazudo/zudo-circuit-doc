@@ -1,0 +1,320 @@
+{
+  "repository": "Takazudo/zudo-led-lamp",
+  "commit": "194d8a297e3545588197342130c3111a66c10973",
+  "scope": "Component evidence contract, representative bundles, integration workflow, template and validator. Repository evidence review; no new live vendor source audit.",
+  "retrieved_on": "2026-09-25",
+  "sources": [
+    {
+      "path": ".claude/skills/component-spec-audit/SKILL.md",
+      "sha": "fc9767414597c343503d51ea8c6aafaefef88189",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/SKILL.md",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-spec-audit/SKILL.md.source"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/references/contract.md",
+      "sha": "22e178c5ef473855b27a063277a6e79e7b87bb16",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/references/contract.md",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-spec-audit/references/contract.md.source"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/references/schema.json",
+      "sha": "b176fddbe7ee273a5c020810b0055eb04fc009ca",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/references/schema.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-spec-audit/references/schema.json.source"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/references/new-component-workflow.md",
+      "sha": "3d7144691a5b072c926df8730740f99364bfbe2c",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/references/new-component-workflow.md",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-spec-audit/references/new-component-workflow.md.source"
+    },
+    {
+      "path": ".claude/skills/circuit-spec-integration/SKILL.md",
+      "sha": "70785255cc950122b65f7694bff307c94b1c2a85",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/circuit-spec-integration/SKILL.md",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/circuit-spec-integration/SKILL.md.source"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/references/inventory.json",
+      "sha": "6610cf0e23786d2a5597bb6d63c57e0326d68da9",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/references/inventory.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-spec-audit/references/inventory.json.source"
+    },
+    {
+      "path": ".claude/skills/component-al8860mp-13/manifest.json",
+      "sha": "2012c613c5be3ac3d109ac7082b93c9b640dfd0b",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-al8860mp-13/manifest.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-al8860mp-13/manifest.json.source"
+    },
+    {
+      "path": ".claude/skills/component-al8860mp-13/sources.json",
+      "sha": "a5e0b7560f488b6cd70fcc795aebfc5ae99b2d3d",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-al8860mp-13/sources.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-al8860mp-13/sources.json.source"
+    },
+    {
+      "path": ".claude/skills/component-al8860mp-13/facts.json",
+      "sha": "c5a5fce549cd07ea37b65301376a0bb2ca3a25ab",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-al8860mp-13/facts.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-al8860mp-13/facts.json.source"
+    },
+    {
+      "path": ".claude/skills/component-al8860mp-13/coverage.json",
+      "sha": "8c10addb3892464e8582e770d4bd8c4c10014f92",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-al8860mp-13/coverage.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-al8860mp-13/coverage.json.source"
+    },
+    {
+      "path": ".claude/skills/component-al8860mp-13/routing.json",
+      "sha": "ddc61c5276d5697d51ca0f49fd389016360a9958",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-al8860mp-13/routing.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-al8860mp-13/routing.json.source"
+    },
+    {
+      "path": ".claude/skills/component-al8860mp-13/pin-map.json",
+      "sha": "a8f853c87a36c58754bf0aea25bbe9271c16f766",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-al8860mp-13/pin-map.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-al8860mp-13/pin-map.json.source"
+    },
+    {
+      "path": ".claude/skills/component-al8860mp-13/interactions.json",
+      "sha": "25ad3ddff805bc6818484c506d505f3889653dfb",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-al8860mp-13/interactions.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-al8860mp-13/interactions.json.source"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/scripts/validate.py",
+      "sha": "4d0cf82bfa9bd3b0c05ac1fac6ebb1a4c12e92e0",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/scripts/validate.py",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-spec-audit/scripts/validate.py.source"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/scripts/test_validate.py",
+      "sha": "c6bbd4f7b529b58304e701295f1acbbc3bce32ee",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/scripts/test_validate.py",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-spec-audit/scripts/test_validate.py.source"
+    },
+    {
+      "path": ".claude/skills/circuit-spec-integration/references/rules.json",
+      "sha": "42053fe1ff2df8ffdec21f94671aeec9dd17ee33",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/circuit-spec-integration/references/rules.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/circuit-spec-integration/references/rules.json.source"
+    },
+    {
+      "path": ".claude/skills/circuit-spec-integration/references/forward-tests.json",
+      "sha": "4fa10f89bf6cc119eae6269d0e9fb72eedaf4c0e",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/circuit-spec-integration/references/forward-tests.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/circuit-spec-integration/references/forward-tests.json.source"
+    },
+    {
+      "path": ".claude/skills/circuit-spec-integration/references/observed-runs.json",
+      "sha": "34665d2ae5e94f88fa872500319709f8a3e39606",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/circuit-spec-integration/references/observed-runs.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/circuit-spec-integration/references/observed-runs.json.source"
+    },
+    {
+      "path": ".claude/skills/component-stusb4500qtr/manifest.json",
+      "sha": "cc9bccd5cab25fc6de3d4b88849ba5e0ce904762",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stusb4500qtr/manifest.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-stusb4500qtr/manifest.json.source"
+    },
+    {
+      "path": ".claude/skills/component-stusb4500qtr/sources.json",
+      "sha": "165b5bf23225e21a5da13593a087608aaa21e287",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stusb4500qtr/sources.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-stusb4500qtr/sources.json.source"
+    },
+    {
+      "path": ".claude/skills/component-stusb4500qtr/facts.json",
+      "sha": "66044c44c278020e9609ab005c57d6f5aad6729e",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stusb4500qtr/facts.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-stusb4500qtr/facts.json.source"
+    },
+    {
+      "path": ".claude/skills/component-stusb4500qtr/coverage.json",
+      "sha": "152bd29d2ed4d7ec3bc7f47faed88e85358a9c70",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stusb4500qtr/coverage.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-stusb4500qtr/coverage.json.source"
+    },
+    {
+      "path": ".claude/skills/component-stusb4500qtr/routing.json",
+      "sha": "20fbe3bf3084f97e0ef8e650a26141dc73c8ced7",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stusb4500qtr/routing.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-stusb4500qtr/routing.json.source"
+    },
+    {
+      "path": ".claude/skills/component-stusb4500qtr/pin-map.json",
+      "sha": "e3944b31fcd15851a4b340f239ad6c3cbb1d58d4",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stusb4500qtr/pin-map.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-stusb4500qtr/pin-map.json.source"
+    },
+    {
+      "path": ".claude/skills/component-stm32g031f8p6/manifest.json",
+      "sha": "f794d2c8b3a799894d5913580c9b9c90c59ac1d3",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stm32g031f8p6/manifest.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-stm32g031f8p6/manifest.json.source"
+    },
+    {
+      "path": ".claude/skills/component-stm32g031f8p6/sources.json",
+      "sha": "d61257f277a59509643cf61e7e878462b043b6a4",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stm32g031f8p6/sources.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-stm32g031f8p6/sources.json.source"
+    },
+    {
+      "path": ".claude/skills/component-stm32g031f8p6/facts.json",
+      "sha": "b6af4bff996600f1839b93faf040ab83f154e6dd",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stm32g031f8p6/facts.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-stm32g031f8p6/facts.json.source"
+    },
+    {
+      "path": ".claude/skills/component-stm32g031f8p6/coverage.json",
+      "sha": "adfd6d608c451cf3ae50635ebcf5c62df8da1eba",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stm32g031f8p6/coverage.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-stm32g031f8p6/coverage.json.source"
+    },
+    {
+      "path": ".claude/skills/component-stm32g031f8p6/routing.json",
+      "sha": "2a2e246bd6eaac7d03bf47b43be73954adfa6832",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stm32g031f8p6/routing.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-stm32g031f8p6/routing.json.source"
+    },
+    {
+      "path": ".claude/skills/component-stm32g031f8p6/pin-map.json",
+      "sha": "50d6dd6377913f4d3b5e93ee1d486a0a40a4ebb3",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stm32g031f8p6/pin-map.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-stm32g031f8p6/pin-map.json.source"
+    },
+    {
+      "path": ".claude/skills/component-project-passives/manifest.json",
+      "sha": "5c13bf3444b1a0f6adaf6f47bff3559d9cc8c492",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-project-passives/manifest.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-project-passives/manifest.json.source"
+    },
+    {
+      "path": ".claude/skills/component-project-passives/sources.json",
+      "sha": "40c09fc8337d26fb4f1cc23ec6d1346258fa43bd",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-project-passives/sources.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-project-passives/sources.json.source"
+    },
+    {
+      "path": ".claude/skills/component-project-passives/facts.json",
+      "sha": "bf40b9dcc2b8644677a9edd7d0a6317f399e0c37",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-project-passives/facts.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-project-passives/facts.json.source"
+    },
+    {
+      "path": ".claude/skills/component-project-passives/coverage.json",
+      "sha": "9b65e9e4c64357037c44ecb2f00ad5bd44103c2f",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-project-passives/coverage.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-project-passives/coverage.json.source"
+    },
+    {
+      "path": ".claude/skills/component-project-passives/routing.json",
+      "sha": "2dca38e52499439aa56772ff03850d47998d48b0",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-project-passives/routing.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-project-passives/routing.json.source"
+    },
+    {
+      "path": ".claude/skills/component-project-passives/pin-map.json",
+      "sha": "9ea9e82481667a15122944326416231345525aca",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-project-passives/pin-map.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-project-passives/pin-map.json.source"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/SKILL.md",
+      "sha": "0b2b1230be93254ace1cc6e93e9977139f73568b",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/assets/component-skill-template/SKILL.md",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-spec-audit/assets/component-skill-template/SKILL.md.source"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/manifest.json",
+      "sha": "58ceadb1c418fb33826208609d7d4caad1772fda",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/assets/component-skill-template/manifest.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-spec-audit/assets/component-skill-template/manifest.json.source"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/sources.json",
+      "sha": "1e104bf85565b46f7b9c2faa657cc216a130325c",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/assets/component-skill-template/sources.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-spec-audit/assets/component-skill-template/sources.json.source"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/facts.json",
+      "sha": "ebaed5dbd659d6b494a67d05962011cf0b4f75e1",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/assets/component-skill-template/facts.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-spec-audit/assets/component-skill-template/facts.json.source"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/coverage.json",
+      "sha": "63c8ff9f602742c9ecba2fc23f434efb0830c47a",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/assets/component-skill-template/coverage.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-spec-audit/assets/component-skill-template/coverage.json.source"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/routing.json",
+      "sha": "a1871c97e4e54a05382581007e13340ad60a37bf",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/assets/component-skill-template/routing.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-spec-audit/assets/component-skill-template/routing.json.source"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/interactions.json",
+      "sha": "24fadc662a8dbd3fca81b624ee24d48186518f14",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/assets/component-skill-template/interactions.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-spec-audit/assets/component-skill-template/interactions.json.source"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/pin-map.json",
+      "sha": "22920eda668a74762491d23dacce2397f2262b75",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/assets/component-skill-template/pin-map.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-spec-audit/assets/component-skill-template/pin-map.json.source"
+    },
+    {
+      "path": ".claude/skills/component-spec-audit/references/external-vendor-qualifiers.json",
+      "sha": "3c9ea6936f35e7753fc30819f42a597e85651014",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/references/external-vendor-qualifiers.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-spec-audit/references/external-vendor-qualifiers.json.source"
+    },
+    {
+      "path": ".claude/skills/component-al8860mp-13/SKILL.md",
+      "sha": "93634b9d118d6853463750ec7eaa44fffc2a81fa",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-al8860mp-13/SKILL.md",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-al8860mp-13/SKILL.md.source"
+    },
+    {
+      "path": ".claude/skills/component-stusb4500qtr/SKILL.md",
+      "sha": "38edcd2569b205e1fe4ac7538e013ae93fcae239",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stusb4500qtr/SKILL.md",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-stusb4500qtr/SKILL.md.source"
+    },
+    {
+      "path": ".claude/skills/component-stm32g031f8p6/SKILL.md",
+      "sha": "27dfe8707b0532135ccf00ce4429b940e5a00c74",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stm32g031f8p6/SKILL.md",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-stm32g031f8p6/SKILL.md.source"
+    },
+    {
+      "path": ".claude/skills/component-project-passives/SKILL.md",
+      "sha": "eb31fb26660412890b68e13de6450b2409763022",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-project-passives/SKILL.md",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-project-passives/SKILL.md.source"
+    },
+    {
+      "path": ".claude/skills/component-stusb4500qtr/interactions.json",
+      "sha": "35cf51a8291b394ca7ba33be0c244ce642ab0d4f",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stusb4500qtr/interactions.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-stusb4500qtr/interactions.json.source"
+    },
+    {
+      "path": ".claude/skills/component-stm32g031f8p6/interactions.json",
+      "sha": "26de851d4b302eec02a442c8e8d309e2f637edb1",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stm32g031f8p6/interactions.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-stm32g031f8p6/interactions.json.source"
+    },
+    {
+      "path": ".claude/skills/component-project-passives/interactions.json",
+      "sha": "76a2fa7ec94a977dfa9257c308be370c03a73f5b",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-project-passives/interactions.json",
+      "snapshotPathFromBundleRoot": "references/upstream/led/.claude/skills/component-project-passives/interactions.json.source"
+    }
+  ]
+}

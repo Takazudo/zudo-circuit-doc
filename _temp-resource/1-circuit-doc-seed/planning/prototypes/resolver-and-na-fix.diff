@@ -1,0 +1,13 @@
+317c317
+<     if unknown_lcsc or len(mentioned_lcsc) > 1 or len(mpn_matches) > 1:
+---
+>     if unknown_lcsc or len(mentioned_lcsc) > 1:
+318a319,323
+>     if len(mpn_matches) > 1:
+>         qualified = {entry[id_key] for entry in entries if entry[id_key] in mpn_matches and contains_alias(query, entry["manufacturer"])}
+>         if len(qualified) != 1:
+>             return []
+>         mpn_matches = qualified
+565a571,572
+>     if fact["verdict"] == "NOT APPLICABLE":
+>         return False

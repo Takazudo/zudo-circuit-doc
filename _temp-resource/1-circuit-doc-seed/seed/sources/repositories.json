@@ -1,0 +1,37 @@
+{
+  "researchDate": "2026-09-26",
+  "timezone": "Asia/Tokyo",
+  "target": {
+    "repository": "Takazudo/zudo-circuit-doc",
+    "url": "https://github.com/Takazudo/zudo-circuit-doc",
+    "observedState": "empty repository",
+    "defaultBranchMetadata": "main",
+    "commit": null
+  },
+  "repositories": [
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "url": "https://github.com/Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "url": "https://github.com/Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "url": "https://github.com/zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8"
+    }
+  ],
+  "observedPackageVersions": {
+    "create-zudo-sg": "0.1.8",
+    "@takazudo/zudo-sg": "0.3.6",
+    "create-zudo-doc": "5.27.0",
+    "led-doc-node-engine": ">=22",
+    "led-doc-pnpm": "10.34.1",
+    "led-doc-zudo-doc-dependency": "^5.27.0"
+  },
+  "versionCaveat": "Versions observed in pinned source manifests, not independent npm registry release checks; not a promised future dependency compatibility matrix."
+}

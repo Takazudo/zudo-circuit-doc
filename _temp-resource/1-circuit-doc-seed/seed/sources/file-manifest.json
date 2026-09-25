@@ -1,0 +1,2456 @@
+{
+  "researchDate": "2026-09-26",
+  "timezone": "Asia/Tokyo",
+  "scope": "Pinned source files inspected for this seed; snapshots are selected inert references, not complete runnable checkouts.",
+  "files": [
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/circuit-spec-integration/SKILL.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/circuit-spec-integration/SKILL.md",
+      "gitBlobSha1": "70785255cc950122b65f7694bff307c94b1c2a85",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/circuit-spec-integration/SKILL.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 1913,
+      "sha256": "75aa47d83a441f9ad5e72641ca1c55f7bf0f242a19ac1ff19175c74938f9000a"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/circuit-spec-integration/references/forward-tests.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/circuit-spec-integration/references/forward-tests.json",
+      "gitBlobSha1": "4fa10f89bf6cc119eae6269d0e9fb72eedaf4c0e",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/circuit-spec-integration/references/forward-tests.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 13475,
+      "sha256": "95bc1dcfcdeaab0b7eeed5fe6ec3b059802b7817c5ec92288fe9bf1b2cff99ff"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/circuit-spec-integration/references/observed-runs.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/circuit-spec-integration/references/observed-runs.json",
+      "gitBlobSha1": "34665d2ae5e94f88fa872500319709f8a3e39606",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/circuit-spec-integration/references/observed-runs.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 14399,
+      "sha256": "045721e6f184b6119270571b43a8555ad0a8235a2e885567c8395536f2aa44d5"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/circuit-spec-integration/references/rules.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/circuit-spec-integration/references/rules.json",
+      "gitBlobSha1": "42053fe1ff2df8ffdec21f94671aeec9dd17ee33",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/circuit-spec-integration/references/rules.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 21070,
+      "sha256": "fb655ceba05b843ee5aafd00593cad2409e9490f415757012e17ce33d40050fd"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-al8860mp-13/SKILL.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-al8860mp-13/SKILL.md",
+      "gitBlobSha1": "93634b9d118d6853463750ec7eaa44fffc2a81fa",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-al8860mp-13/SKILL.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2792,
+      "sha256": "329b4db85641fc9a1c8e8bdbc8d7e14e9de8656fcadd2f01328978e30240f4b4"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-al8860mp-13/coverage.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-al8860mp-13/coverage.json",
+      "gitBlobSha1": "8c10addb3892464e8582e770d4bd8c4c10014f92",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-al8860mp-13/coverage.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 7011,
+      "sha256": "255909397e6f84c93d528379d4b0f4bc3fa9127b4899e0692c37c11d687a7f0a"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-al8860mp-13/facts.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-al8860mp-13/facts.json",
+      "gitBlobSha1": "c5a5fce549cd07ea37b65301376a0bb2ca3a25ab",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-al8860mp-13/facts.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 26812,
+      "sha256": "f17a4a554269fd402f913b9e9fa0cdaeae78e491fb0c1b5bdbb0eedd6c7f8e50"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-al8860mp-13/interactions.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-al8860mp-13/interactions.json",
+      "gitBlobSha1": "25ad3ddff805bc6818484c506d505f3889653dfb",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-al8860mp-13/interactions.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 1696,
+      "sha256": "c7960a88d076a8612b1ce6840486ff7fda74d002d3010910603a85dd37d0c6ff"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-al8860mp-13/manifest.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-al8860mp-13/manifest.json",
+      "gitBlobSha1": "2012c613c5be3ac3d109ac7082b93c9b640dfd0b",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-al8860mp-13/manifest.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 4576,
+      "sha256": "54344e1e524fe6c5093c740d51347f573e261eb8140587727f4728065e595702"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-al8860mp-13/pin-map.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-al8860mp-13/pin-map.json",
+      "gitBlobSha1": "a8f853c87a36c58754bf0aea25bbe9271c16f766",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-al8860mp-13/pin-map.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2188,
+      "sha256": "bb27b2ba16e073161b275e7b33314ca20fc6e757f87fa2105319734c339bb666"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-al8860mp-13/routing.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-al8860mp-13/routing.json",
+      "gitBlobSha1": "ddc61c5276d5697d51ca0f49fd389016360a9958",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-al8860mp-13/routing.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 1365,
+      "sha256": "84aaad410f967ebe97793886ceb2cde576d1423bff8c33baddf01e66ca3d59a8"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-al8860mp-13/sources.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-al8860mp-13/sources.json",
+      "gitBlobSha1": "a5e0b7560f488b6cd70fcc795aebfc5ae99b2d3d",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-al8860mp-13/sources.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 10477,
+      "sha256": "118af2738101a883e625708a5084850ff267dd4e3ba2ad2df4cca45869c8443b"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-project-passives/SKILL.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-project-passives/SKILL.md",
+      "gitBlobSha1": "eb31fb26660412890b68e13de6450b2409763022",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-project-passives/SKILL.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3566,
+      "sha256": "dfba463af34f7e7a337b7b7ba76855f35d2d9088ec04e3899c989238703bdcfd"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-project-passives/coverage.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-project-passives/coverage.json",
+      "gitBlobSha1": "9b65e9e4c64357037c44ecb2f00ad5bd44103c2f",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-project-passives/coverage.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 13228,
+      "sha256": "bf365390da139ce5028f77c49bdfa3bdce4b7ffb11f6d5a3ea299d2445e07880"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-project-passives/facts.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-project-passives/facts.json",
+      "gitBlobSha1": "bf40b9dcc2b8644677a9edd7d0a6317f399e0c37",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-project-passives/facts.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 47130,
+      "sha256": "b9f709d027921c64a3c48c8db6fb34095bcc2f60425a0398def3428adf056127"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-project-passives/interactions.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-project-passives/interactions.json",
+      "gitBlobSha1": "76a2fa7ec94a977dfa9257c308be370c03a73f5b",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-project-passives/interactions.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3611,
+      "sha256": "ec3be0e05865b1ae01a81e9c61bee7c9920e9ffb50e7ec557a2588772c6a753c"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-project-passives/manifest.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-project-passives/manifest.json",
+      "gitBlobSha1": "5c13bf3444b1a0f6adaf6f47bff3559d9cc8c492",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-project-passives/manifest.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 9043,
+      "sha256": "9ba57106faf01a6bf9534c198757c8c470fde7cb68c2d42e24077dfc0feb13ff"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-project-passives/pin-map.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-project-passives/pin-map.json",
+      "gitBlobSha1": "9ea9e82481667a15122944326416231345525aca",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-project-passives/pin-map.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3789,
+      "sha256": "e3280d40d94f21696f4187647a1176a987cb1cf1a820438a2318f585550e2edb"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-project-passives/routing.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-project-passives/routing.json",
+      "gitBlobSha1": "2dca38e52499439aa56772ff03850d47998d48b0",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-project-passives/routing.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 5213,
+      "sha256": "6a816886537b225851434bfcb60a6a087216560bca50dbacac22645c578a95fc"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-project-passives/sources.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-project-passives/sources.json",
+      "gitBlobSha1": "40c09fc8337d26fb4f1cc23ec6d1346258fa43bd",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-project-passives/sources.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 16398,
+      "sha256": "a4d8815b2393aa17f9af3d8d2e65c593b9e96e60180ed13847f0f80d006c6b64"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-spec-audit/SKILL.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/SKILL.md",
+      "gitBlobSha1": "fc9767414597c343503d51ea8c6aafaefef88189",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-spec-audit/SKILL.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2999,
+      "sha256": "f7d03bce413d235125543cb55301690ab317e97ca92b6bd9351908386e44252e"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/SKILL.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/assets/component-skill-template/SKILL.md",
+      "gitBlobSha1": "0b2b1230be93254ace1cc6e93e9977139f73568b",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-spec-audit/assets/component-skill-template/SKILL.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 1145,
+      "sha256": "126ac5ba3b95785812174c6eff27c8a7c6220b245b7a340ab1d9a7b8441906f5"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/coverage.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/assets/component-skill-template/coverage.json",
+      "gitBlobSha1": "63c8ff9f602742c9ecba2fc23f434efb0830c47a",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-spec-audit/assets/component-skill-template/coverage.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 292,
+      "sha256": "702425e6c2c078072a1778f5b6607a0622d4388ca7f24c4943fad7d4d7caf06c"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/facts.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/assets/component-skill-template/facts.json",
+      "gitBlobSha1": "ebaed5dbd659d6b494a67d05962011cf0b4f75e1",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-spec-audit/assets/component-skill-template/facts.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 656,
+      "sha256": "d038949604b09a5fd67df326517f66fed8bda7f15a6043fd3b19cd38b6084233"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/interactions.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/assets/component-skill-template/interactions.json",
+      "gitBlobSha1": "24fadc662a8dbd3fca81b624ee24d48186518f14",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-spec-audit/assets/component-skill-template/interactions.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 181,
+      "sha256": "f53740e3e58d3b0fcb30266ad33c16aa3506df739cc2260318c05b7e6bcb8989"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/manifest.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/assets/component-skill-template/manifest.json",
+      "gitBlobSha1": "58ceadb1c418fb33826208609d7d4caad1772fda",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-spec-audit/assets/component-skill-template/manifest.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 402,
+      "sha256": "a9d2aae94e3542502b7c9cb9799a198317e8bb59f30dd9c9c14503c6de17008c"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/pin-map.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/assets/component-skill-template/pin-map.json",
+      "gitBlobSha1": "22920eda668a74762491d23dacce2397f2262b75",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-spec-audit/assets/component-skill-template/pin-map.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 265,
+      "sha256": "25d27fe0ebf8af3ea57ac7cdf9bf929d8b61a80418de459707cc07010a1a777c"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/routing.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/assets/component-skill-template/routing.json",
+      "gitBlobSha1": "a1871c97e4e54a05382581007e13340ad60a37bf",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-spec-audit/assets/component-skill-template/routing.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 310,
+      "sha256": "988978e3c61ddec81c443395b83884ed20a72b15c880fc79dadfdf1545423f7c"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-spec-audit/assets/component-skill-template/sources.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/assets/component-skill-template/sources.json",
+      "gitBlobSha1": "1e104bf85565b46f7b9c2faa657cc216a130325c",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-spec-audit/assets/component-skill-template/sources.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 598,
+      "sha256": "a4b62462f13422d1b9d4f35844df3242c9a3dd7cd2dad4795291da4d638d2a1e"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-spec-audit/references/contract.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/references/contract.md",
+      "gitBlobSha1": "22e178c5ef473855b27a063277a6e79e7b87bb16",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-spec-audit/references/contract.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3902,
+      "sha256": "37a1a06db11a605d20588cc564da2151c3f0f9974f3f31e85b810d89bda0021a"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-spec-audit/references/external-vendor-qualifiers.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/references/external-vendor-qualifiers.json",
+      "gitBlobSha1": "3c9ea6936f35e7753fc30819f42a597e85651014",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-spec-audit/references/external-vendor-qualifiers.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 139,
+      "sha256": "80e2e367b9843dd5404d3a150bac38ad908b04f214f4b03ce57631c972ef6b8a"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-spec-audit/references/inventory.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/references/inventory.json",
+      "gitBlobSha1": "6610cf0e23786d2a5597bb6d63c57e0326d68da9",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-spec-audit/references/inventory.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 21922,
+      "sha256": "c40791b037f3de0f6f7f4c995ffa42333e2cec253a847da6be56d0e48878ff05"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-spec-audit/references/new-component-workflow.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/references/new-component-workflow.md",
+      "gitBlobSha1": "3d7144691a5b072c926df8730740f99364bfbe2c",
+      "auditManifests": [
+        "led-evidence-sources.json",
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-spec-audit/references/new-component-workflow.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 9521,
+      "sha256": "766f7112a9310c8a8c37020f9ac1909f1fc7278bf56e871a01b25be44f7fc8d6"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-spec-audit/references/schema.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/references/schema.json",
+      "gitBlobSha1": "b176fddbe7ee273a5c020810b0055eb04fc009ca",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-spec-audit/references/schema.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3041,
+      "sha256": "51209d061e8dc94092773580f9c40d0b98369d54a2845cafc3590f2bbf94a08a"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-spec-audit/scripts/test_validate.py",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/scripts/test_validate.py",
+      "gitBlobSha1": "c6bbd4f7b529b58304e701295f1acbbc3bce32ee",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-spec-audit/scripts/test_validate.py.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 34972,
+      "sha256": "20332e4a2b6f920ed46e01f0f517e855036b4a439b77d806834d035430aaeb70"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-spec-audit/scripts/validate.py",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-spec-audit/scripts/validate.py",
+      "gitBlobSha1": "4d0cf82bfa9bd3b0c05ac1fac6ebb1a4c12e92e0",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-spec-audit/scripts/validate.py.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 76470,
+      "sha256": "b3a98336976b7f836eedf0c3d556d1d696f291d62d339856d2e8a640fa30d389"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-stm32g031f8p6/SKILL.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stm32g031f8p6/SKILL.md",
+      "gitBlobSha1": "27dfe8707b0532135ccf00ce4429b940e5a00c74",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-stm32g031f8p6/SKILL.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2861,
+      "sha256": "724f16bd5bd5a1d1c0b1233e24dfe9b0eea820a71d65c8265214fb07e792d06a"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-stm32g031f8p6/coverage.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stm32g031f8p6/coverage.json",
+      "gitBlobSha1": "adfd6d608c451cf3ae50635ebcf5c62df8da1eba",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-stm32g031f8p6/coverage.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 5101,
+      "sha256": "5660d27418c4a13ebc5232c65e0762124912d9c14d46b4cf8f07a7a14b18b0f8"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-stm32g031f8p6/facts.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stm32g031f8p6/facts.json",
+      "gitBlobSha1": "b6af4bff996600f1839b93faf040ab83f154e6dd",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-stm32g031f8p6/facts.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 11531,
+      "sha256": "1ef8f4c6854358515c09c086e2c3bbd0e80a0557027f35962b26a49963353e35"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-stm32g031f8p6/interactions.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stm32g031f8p6/interactions.json",
+      "gitBlobSha1": "26de851d4b302eec02a442c8e8d309e2f637edb1",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-stm32g031f8p6/interactions.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2075,
+      "sha256": "42dfd8369dba40a5ce537f0d113960a0d51c507ad76277343bee2f57a75d7d5a"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-stm32g031f8p6/manifest.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stm32g031f8p6/manifest.json",
+      "gitBlobSha1": "f794d2c8b3a799894d5913580c9b9c90c59ac1d3",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-stm32g031f8p6/manifest.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2982,
+      "sha256": "231287bae4dd2bc91528d6977973dfb6a4f85c0508d6566a13598cf663645aa1"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-stm32g031f8p6/pin-map.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stm32g031f8p6/pin-map.json",
+      "gitBlobSha1": "50d6dd6377913f4d3b5e93ee1d486a0a40a4ebb3",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-stm32g031f8p6/pin-map.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 4550,
+      "sha256": "4a1420268abff7d86a79dabd818934cb019b3358c26700387d2ebebb7cc07f79"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-stm32g031f8p6/routing.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stm32g031f8p6/routing.json",
+      "gitBlobSha1": "2a2e246bd6eaac7d03bf47b43be73954adfa6832",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-stm32g031f8p6/routing.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 887,
+      "sha256": "ff1bf50c6e1b677a288fcceae99006080ec481a66fb2fd30fdef54c3cfad8c73"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-stm32g031f8p6/sources.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stm32g031f8p6/sources.json",
+      "gitBlobSha1": "d61257f277a59509643cf61e7e878462b043b6a4",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-stm32g031f8p6/sources.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 9911,
+      "sha256": "14b63e753ef511ccd6f2ae297debd41944a701bb1f2b0f5f771968512a166f05"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-stusb4500qtr/SKILL.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stusb4500qtr/SKILL.md",
+      "gitBlobSha1": "38edcd2569b205e1fe4ac7538e013ae93fcae239",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-stusb4500qtr/SKILL.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3975,
+      "sha256": "4604c36377d46ef1cd39908c8e1b6e4c6ffbe0bfade70784a11ddb4264ea221a"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-stusb4500qtr/coverage.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stusb4500qtr/coverage.json",
+      "gitBlobSha1": "152bd29d2ed4d7ec3bc7f47faed88e85358a9c70",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-stusb4500qtr/coverage.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 7700,
+      "sha256": "fa2a7da97c52ee90d0a2d1e16e3b4f39692cbc71322d34660a73f95867d79c87"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-stusb4500qtr/facts.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stusb4500qtr/facts.json",
+      "gitBlobSha1": "66044c44c278020e9609ab005c57d6f5aad6729e",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-stusb4500qtr/facts.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 22528,
+      "sha256": "a1507772607fead607d903dbfa1693ac636fde9fb6e0a81dd6a8e3f847004e4c"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-stusb4500qtr/interactions.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stusb4500qtr/interactions.json",
+      "gitBlobSha1": "35cf51a8291b394ca7ba33be0c244ce642ab0d4f",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-stusb4500qtr/interactions.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3449,
+      "sha256": "f885f644f72093030fbdd1bdb5414b81cd7523d54fe39ad51079073d15137784"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-stusb4500qtr/manifest.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stusb4500qtr/manifest.json",
+      "gitBlobSha1": "cc9bccd5cab25fc6de3d4b88849ba5e0ce904762",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-stusb4500qtr/manifest.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3764,
+      "sha256": "e8d8c85cf0642f5c0ec9a2385c366a94d90a9fcd872e5baeb37bdd536aeb38d7"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-stusb4500qtr/pin-map.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stusb4500qtr/pin-map.json",
+      "gitBlobSha1": "e3944b31fcd15851a4b340f239ad6c3cbb1d58d4",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-stusb4500qtr/pin-map.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 5613,
+      "sha256": "0555659f1a34e8a6b9e2dd3c97d8f1c6798d347e02c555f24a4d6be5c8f3633b"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-stusb4500qtr/routing.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stusb4500qtr/routing.json",
+      "gitBlobSha1": "20fbe3bf3084f97e0ef8e650a26141dc73c8ced7",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-stusb4500qtr/routing.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 1680,
+      "sha256": "70ee838bacc3adee8eec210d80e02ea3d7b8a052008e66f15a4800b289e0c383"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": ".claude/skills/component-stusb4500qtr/sources.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/.claude/skills/component-stusb4500qtr/sources.json",
+      "gitBlobSha1": "165b5bf23225e21a5da13593a087608aaa21e287",
+      "auditManifests": [
+        "led-evidence-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/.claude/skills/component-stusb4500qtr/sources.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 14316,
+      "sha256": "fc024413928cef73036728b57f93a674d941193e49cd30d627ea5ac7c55b33c9"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "CLAUDE.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/CLAUDE.md",
+      "gitBlobSha1": "be0965c5ea2fc8f315cf39fcc373c3bf944f6368",
+      "auditManifests": [
+        "root-audit"
+      ],
+      "snapshotPath": "references/upstream/led/CLAUDE.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2199,
+      "sha256": "5b121eb76b2e677d71b314dc1925c985658bf7a73cd0edb81df4ef7b2afedbcc"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "README.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/README.md",
+      "gitBlobSha1": "b2809630c56126f3ceb185c4ae4e00b2959ecfb6",
+      "auditManifests": [
+        "root-audit"
+      ],
+      "snapshotPath": "references/upstream/led/README.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 696,
+      "sha256": "a88abb979282702575b5411de1ae5a2b197f0b4b74968a8ecaea2335be05d8a7"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/SCAFFOLD.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/SCAFFOLD.md",
+      "gitBlobSha1": "854dcf0b5354dcf029523cf9dfe4ce7e41dfe16f",
+      "auditManifests": [
+        "root-audit"
+      ],
+      "snapshotPath": "references/upstream/led/doc/SCAFFOLD.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 5051,
+      "sha256": "807bbb51e8e71d222e4f695796c6b147c9cedc6fe8737b70501f0e26143c899e"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/ARCHITECTURE.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/ARCHITECTURE.md",
+      "gitBlobSha1": "4ea913e6ced1d3a2adc35f6aa55bda19b49b5b14",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/ARCHITECTURE.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 51575,
+      "sha256": "20efdfa5405e7a984e01928e4a139ce6f5b69633de6297d8374012b13eb6b2ec"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/PRESENTATION-CONTRACT.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/PRESENTATION-CONTRACT.md",
+      "gitBlobSha1": "5ef4e88a68d05cfa9b50d56dbb7d1fdf575ed9db",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/PRESENTATION-CONTRACT.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 25936,
+      "sha256": "91fbf6752724ff7633f325f5f1d15f41b6181d43e024549210620f9b8cc159bd"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/adapters/circuit/evidence.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/adapters/circuit/evidence.ts",
+      "gitBlobSha1": "2dc8d0ca7ee620da1159e6f0449d45554885d5fe",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/adapters/circuit/evidence.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 29574,
+      "sha256": "7941369a876ece90c574253aec63da16b9da5f109636253e3432284187c37689"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/adapters/circuit/index.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/adapters/circuit/index.ts",
+      "gitBlobSha1": "86d1d56efffe51ad18bde6bff5292484825e3624",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/adapters/circuit/index.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 32534,
+      "sha256": "0fdcda77c50e283024eb94f978905a63a6efbc3f50408a5513d1b017feb1cd20"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/adapters/circuit/integration.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/adapters/circuit/integration.ts",
+      "gitBlobSha1": "7fa4a1cdca1419c156ae793d77694a5bba24745c",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/adapters/circuit/integration.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 13479,
+      "sha256": "fb8eac52f8849593c353e67f317bc41689cd7ac440c6e1aa3a6df4fcf1db47e5"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/adapters/circuit/matrix.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/adapters/circuit/matrix.ts",
+      "gitBlobSha1": "8eaffcc9b79e12f7c78cf12f0ae4434b66c63409",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/adapters/circuit/matrix.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 7989,
+      "sha256": "c257867e7eedf9ad0d3db283701c4a0f08eac30b6e99083d1eec9eca3bcc3bd6"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/adapters/circuit/model-assets.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/adapters/circuit/model-assets.ts",
+      "gitBlobSha1": "c1c41aa81115b41c99bea18f05507352976cc64f",
+      "auditManifests": [
+        "led-assets-sources.json",
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/adapters/circuit/model-assets.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 6173,
+      "sha256": "ce6391caa7f5662678270015f938201fee2c9707fb7f3c67e460dadcac6d1da3"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/adapters/circuit/paths.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/adapters/circuit/paths.ts",
+      "gitBlobSha1": "a45a52557b3317111eedcc1293acdc2c404ed846",
+      "auditManifests": [
+        "led-assets-sources.json",
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/adapters/circuit/paths.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3271,
+      "sha256": "ce2bd406f430e86d81ee6bf9f7bfff2d6c31e858e61a3eb81439c57519494199"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/adapters/circuit/read.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/adapters/circuit/read.ts",
+      "gitBlobSha1": "b05a7af1ae50679491a86d660516d408d92a97c6",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/adapters/circuit/read.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3585,
+      "sha256": "2138be4fee949d954167989cec45d773995ae726fe240a933d97c4e43c69a974"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/adapters/circuit/references.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/adapters/circuit/references.ts",
+      "gitBlobSha1": "0095720c26f163adeff89c2fae2266d12e7b265c",
+      "auditManifests": [
+        "led-assets-sources.json",
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/adapters/circuit/references.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 12206,
+      "sha256": "01b25a4bd500a960950b1731b99a421fa3676e166b8aaf15442a5d5176b3f0ae"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/adapters/circuit/selection.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/adapters/circuit/selection.ts",
+      "gitBlobSha1": "c61244585e4ae2cbc2ce2a171c5609677dcf6ef4",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/adapters/circuit/selection.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 16900,
+      "sha256": "776aa3dc43baa5f603fb0b78fee2ae3289cf3cd5f044ef0e9fafad171d2acbbb"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/adapters/circuit/validate.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/adapters/circuit/validate.ts",
+      "gitBlobSha1": "3f6d92ad7cd2c147512c310cd84757b19940ec51",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/adapters/circuit/validate.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 4041,
+      "sha256": "2da9c2688dc1b50bbcb2369a3c35a1ce6f05f1685594bc34d07822f3fb2287d4"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/cli/check.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/cli/check.ts",
+      "gitBlobSha1": "65a25e6e802539018a03dacfe5f18509c7938f93",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/cli/check.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 1386,
+      "sha256": "a6c31a14e515838b0bf33016c77d3c1d26339665ba2eabc291c4f4513c956733"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/cli/generate.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/cli/generate.ts",
+      "gitBlobSha1": "a1aef2921291918172d3e5cad8f4fa731e64136f",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/cli/generate.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 1211,
+      "sha256": "de79f9bed5e4f1b0bef56859fd49f64e642ee7a03f692062133d08fdabaced45"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/cli/models.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/cli/models.ts",
+      "gitBlobSha1": "dcf35ed13b8334c8d82a88d7f258d59aa443ea53",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/cli/models.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 693,
+      "sha256": "2eca70b00028704c065fb921de8d55387b7db6154ba6d328debc67e7933d6658"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/cli/run.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/cli/run.ts",
+      "gitBlobSha1": "308244bd9912ccf6a4c262ed415cc90da00b6559",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/cli/run.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2825,
+      "sha256": "095b9eac6a31dca0c8d2dec3e4ecae1b354ca6dc6ef47a405f30fbf2b660c1a9"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/cli/scan-artifacts.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/cli/scan-artifacts.ts",
+      "gitBlobSha1": "25f359f46e7e77efb16370e9a3d3f30f80aca43b",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/cli/scan-artifacts.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 26928,
+      "sha256": "b0883a832f9184125614bf9f7b7f54f96a24d3ff20275435c2d299bb1bf943d3"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/cli/watch.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/cli/watch.ts",
+      "gitBlobSha1": "367df899e35856c10e94b0f31ec84561aa8c9b7f",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/cli/watch.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 4251,
+      "sha256": "47fe856d81d61503639d49c0dd4d6630d75021c59425a852c5ff2b81520a23a2"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/adapter.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/adapter.ts",
+      "gitBlobSha1": "ed655581ffba0c0d9acf0d6862acb0f71ffab2ee",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/adapter.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2327,
+      "sha256": "a7476afd88a9c8b98d3a47af7ca5e93410bb47586985aec654b6f1baf43c06a3"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/emit.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/emit.ts",
+      "gitBlobSha1": "89088da2d9ac19ef29d701ae7d8e0adc56f11e7d",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/emit.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 7771,
+      "sha256": "773270231cf396c12e44bf9a8a58c2287a8ce1e90362f86d6e044931f2427ae4"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/errors.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/errors.ts",
+      "gitBlobSha1": "c0357cb2ac80d9f65751159c5e10f1005489924d",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/errors.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 1921,
+      "sha256": "19e51bc6568fd3874dfec3d6a58edf44742652251dec95abc7315190769e2fda"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/ids.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/ids.ts",
+      "gitBlobSha1": "66f4560149f22a47013f28e2a27f8e99b7e06fe2",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/ids.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3873,
+      "sha256": "93902802a88ea2c9df291ebd3fb658531fc427ec955c3f982110f51ec0e8e6d1"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/links.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/links.ts",
+      "gitBlobSha1": "a9315227a6bcbbb2f00679de5b9921dcbb7b8089",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/links.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3714,
+      "sha256": "0a2d84604a4a4e0e273ff6ee6663a04f7ee0de987f2831617ebe6abf1e86822e"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/mdx.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/mdx.ts",
+      "gitBlobSha1": "b65fb913c2e443f71397a067bed5bca942871dc3",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/mdx.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 17955,
+      "sha256": "8466fd3fa0c6b4411c59d8253b24362c0a935896a3fbd3480ff3f62f076177fe"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/model-descriptor.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/model-descriptor.ts",
+      "gitBlobSha1": "6c54bf9102466bdab510c49f9dbac8b100682661",
+      "auditManifests": [
+        "led-assets-sources.json",
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/model-descriptor.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2937,
+      "sha256": "df7b95a62e6eeb73ff1b3ee8b4faa9e1d0f5c39ec36ceb40ec2eb7f2e02a9ea5"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/page.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/page.ts",
+      "gitBlobSha1": "557da5e7f8365fb01c991e8005dcef598f485289",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/page.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 4614,
+      "sha256": "3faa3a80f24c66956eb7f2d943c9c7da08d8b8816579a88352e2c5d216df253f"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/pipeline.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/pipeline.ts",
+      "gitBlobSha1": "6b8316ac2d7d35812771fc92578fa9be21a80bd2",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/pipeline.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 9937,
+      "sha256": "98920a0de412a3e5af7709717859ece3a0a57316ba5ebbe33ad2af6911291449"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/publication.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/publication.ts",
+      "gitBlobSha1": "53ecfa6bc41f7c7b86e7a07fefd3a930f514f592",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/publication.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 15811,
+      "sha256": "192ac4b53d2ea1176be61469ab51284a0a42ceeebc6b80ad80139af209d14812"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/reference-descriptor.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/reference-descriptor.ts",
+      "gitBlobSha1": "51629d39c7036063087e2bae2ca98c6e602a40e5",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/reference-descriptor.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 6052,
+      "sha256": "4a9d81c01264e8c887283b640a39c8259c01cea15b702733b047e7ae7b72c070"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/render/catalog.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/render/catalog.ts",
+      "gitBlobSha1": "e4bdf674fa073929493a2bdd8b598e1e8131d2d3",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/render/catalog.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 10709,
+      "sha256": "ae54b3f2b68e7a937c61fd3713cc22408d6ff5c1ade146adce27884e163b801e"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/render/integration.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/render/integration.ts",
+      "gitBlobSha1": "7ea352316ad01ba9cfc205b883fd0c09d64ea957",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/render/integration.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 23115,
+      "sha256": "3ee7fe25d60376ba86de765238061406ea5539b35fe8e8d837ef88146821a068"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/render/landing.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/render/landing.ts",
+      "gitBlobSha1": "135891d0aaf11d8a7e0ca824e02fd921212c9786",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/render/landing.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 4915,
+      "sha256": "7eae9a6d2684d59ebc8f569012ad1fc2530abaa6f0fe48ba55a234fdb598c4d3"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/render/record.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/render/record.ts",
+      "gitBlobSha1": "863abc4dd31ef82d0f98c62d7b2bf5e320223415",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/render/record.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 40393,
+      "sha256": "3eca8931041e2a6106037704928f3deb1617a58cc567f71c9089c1f4f8531472"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/render/shared.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/render/shared.ts",
+      "gitBlobSha1": "307633ef5ab964240886b888b3323d961e2432a0",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/render/shared.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 30257,
+      "sha256": "d04cd926fa6551b143a03c52da06beb6f82a01b99b81bcec6f6306c7d8cb9c9a"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/scan.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/scan.ts",
+      "gitBlobSha1": "753092298c25d881ef26f9a3621f097f35463b5a",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/scan.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 20458,
+      "sha256": "b7aa2f9fb29090aff5728e99cfb0a5d3e241d65c689a277a38ebe5ac8aae108a"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/text.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/text.ts",
+      "gitBlobSha1": "b738224a2a8119dbe6dc20dc0835d66b6dd8cd24",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/text.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 6172,
+      "sha256": "72e9f54e20228ef766e6f3afef5d82871ba409dc0f4f57df76eb90b2ed1682e1"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/url.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/url.ts",
+      "gitBlobSha1": "01a910de9d42cc5b8a45b3f2898b9ef877cecd45",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/url.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3298,
+      "sha256": "c0bd3cbde60a16f67123333498093c349fad4bc0586d362ea835cc73fa50f9e9"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/core/view-model.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/core/view-model.ts",
+      "gitBlobSha1": "8075980d48a484a16df1be1571d471e91ac73f79",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/core/view-model.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 13030,
+      "sha256": "239e2708008b4c238c2879e63cdef34da74c5cfddcd42f58ff620ac71a2532ec"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/footprint-previews/check.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/footprint-previews/check.ts",
+      "gitBlobSha1": "b52605aa3d024e30aa13e48a5b28802d67e63cc7",
+      "auditManifests": [
+        "led-assets-sources.json",
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/footprint-previews/check.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 5001,
+      "sha256": "5af60ba9b29f7a5c187e8463ca4233e671da95342050ec1a96ff5b3040079571"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/footprint-previews/config.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/footprint-previews/config.ts",
+      "gitBlobSha1": "9e5f3d05d2f5d92d21daa4d7ee10bb1858d59e83",
+      "auditManifests": [
+        "led-assets-sources.json",
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/footprint-previews/config.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 967,
+      "sha256": "4800ca2508fe0caa9e1a7a88d3b56283bdb8ffa66e1c4f805896416bb0b33ac0"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/footprint-previews/footprint.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/footprint-previews/footprint.ts",
+      "gitBlobSha1": "cdadb4d4839198bcf46ae57e95aa184862d9fde7",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/footprint-previews/footprint.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2005,
+      "sha256": "a90e935054ac1531d7c9511e3b1be709a9215ed57e58f058326cdfba067384ed"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/footprint-previews/generate.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/footprint-previews/generate.ts",
+      "gitBlobSha1": "ba5d61bde0d73430f2d0ce6bae188b4b2802691f",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/footprint-previews/generate.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 6965,
+      "sha256": "22b1b5aee68a3a3b3966c83f00b5ba3af027d171f1f0895005edb6f5629314c0"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/footprint-previews/manifest.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/footprint-previews/manifest.ts",
+      "gitBlobSha1": "483d97809034c87211778ce04c23d85db6f38022",
+      "auditManifests": [
+        "led-assets-sources.json",
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/footprint-previews/manifest.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 921,
+      "sha256": "e580c9348a20409f96f90bcf5bb7aef9ae4aa3d56615a9d4266ffb89bba17c04"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/footprint-previews/parity.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/footprint-previews/parity.ts",
+      "gitBlobSha1": "3f3d79e32c126d5846945c0d1186380fdeb1d90b",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/footprint-previews/parity.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 1995,
+      "sha256": "aa0f7f02cb499749d2c9ba1e3d5f4f8a5a3582ba641b535ca050250aa4c3eac5"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/footprint-previews/selection.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/footprint-previews/selection.ts",
+      "gitBlobSha1": "f7e284545ebdd11e7d292a298575d50d5107a2ba",
+      "auditManifests": [
+        "led-assets-sources.json",
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/footprint-previews/selection.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 688,
+      "sha256": "57ed4ae23e1a86950aeaf48dc9762969a1781e163976555bb6829a06614c1f03"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/footprint-previews/svg.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/footprint-previews/svg.ts",
+      "gitBlobSha1": "b0a711c245eddd6c6cf76e8b0b9bb04dfaf980a3",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/footprint-previews/svg.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 8350,
+      "sha256": "7e7a8a85ede5694b488f2516a86034ab7783863d9803b7ac935260e9aa349eb3"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/scripts/check-built-component-references.mjs",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/scripts/check-built-component-references.mjs",
+      "gitBlobSha1": "8ff0170fa8db6fc35e1b7db080f1c9ab5deca6b0",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/scripts/check-built-component-references.mjs.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 10299,
+      "sha256": "37d2a528762d6a9fed3416df44fcaa7a9034b004bf55ddabe58afdc78e1b3753"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/scripts/check-zfb-link-warnings.sh",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/scripts/check-zfb-link-warnings.sh",
+      "gitBlobSha1": "62614d65c3dcc649a03ca84e1437f8ec7a4dc163",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/scripts/check-zfb-link-warnings.sh.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 5662,
+      "sha256": "8020db4f652daab12fad5e759a4250ffceaed86fec4ec6f0dfb7c103c7293d7b"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/scripts/scan-doc-skill.sh",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/scripts/scan-doc-skill.sh",
+      "gitBlobSha1": "6a317cf7c4af0bccb8804347cc9c8b773916b8e4",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/scripts/scan-doc-skill.sh.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2969,
+      "sha256": "35e4f2f1ea4978fca5c3a855cec734abaa2517fec31af87fd445320b45464823"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/tests/emit.test.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/tests/emit.test.ts",
+      "gitBlobSha1": "2f4e6cbdbcbf347489789039f0d1ef9930eda021",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/tests/emit.test.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 8421,
+      "sha256": "c0df0c7372320dd0283382deff23b748ce4b882778d381ee8a180c17f7457434"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/tests/fixtures.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/tests/fixtures.ts",
+      "gitBlobSha1": "1b0c1a915d0d808ef4b24f9e953f2d8826500f70",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/tests/fixtures.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 32449,
+      "sha256": "3c4ab89c0f7643c5fbc2bf7efda55012aee0c5f2dff3535ea2566122f32b36db"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/tests/pipeline.test.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/tests/pipeline.test.ts",
+      "gitBlobSha1": "fb4af8471534ef5b2f9bd71bb09d17857bee5192",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/tests/pipeline.test.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 7951,
+      "sha256": "4a947acb85fc7a37212f87ac0f484c3ab9cbbc9d1a019f25b82581acb7c5a79d"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/tests/provider-fixtures.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/tests/provider-fixtures.ts",
+      "gitBlobSha1": "5f0f6d2bde45511b68c3d32ab05777d6085efe7d",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/tests/provider-fixtures.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 19582,
+      "sha256": "590fe81fcd26e6ffbe2449c807e182320ff10f59c057cdb27837451b5c669e8a"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/ui/component-references.tsx",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/ui/component-references.tsx",
+      "gitBlobSha1": "58f95bd4d828a29b95e8ed5995fbe54732fca8e1",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/ui/component-references.tsx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2065,
+      "sha256": "881ff5e1668b153aed74ea155e81c5a28b208c979bc7288146c8c43adb70ba8e"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/ui/evidence-anchor.tsx",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/ui/evidence-anchor.tsx",
+      "gitBlobSha1": "dd66b285a16e61af8aca738461e0360cbb3cd43b",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/ui/evidence-anchor.tsx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 960,
+      "sha256": "a5913a894d955da5aa1948d5e8b4addf20c77d464b084f52124c61d2ae1d285a"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/ui/evidence-details.tsx",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/ui/evidence-details.tsx",
+      "gitBlobSha1": "a16dc9f99715fc492fb7b2464e8bb791a2b618ae",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/ui/evidence-details.tsx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2089,
+      "sha256": "3fc5eeb819f6cf6d058cc8439afc30a13fe8ea4f2bc2ab08cfa0875898f4e09e"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/ui/evidence-fact.tsx",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/ui/evidence-fact.tsx",
+      "gitBlobSha1": "69638f36eb8dbdc0683e6c2022b7f60863353a56",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/ui/evidence-fact.tsx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 405,
+      "sha256": "7f9cb01a2e96733fac3074566809854d8762b7896dbbf75cdfebb6861b1335cd"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/ui/evidence-table.tsx",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/ui/evidence-table.tsx",
+      "gitBlobSha1": "3730311aa72dbf74bc6b5e7dfb667cb1cc25a2ad",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/ui/evidence-table.tsx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2428,
+      "sha256": "f3cd7f6744c4f6d8278d2cbbbd33058325ef3613eb51dcf19150fc1c08061735"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/ui/footprint-preview.tsx",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/ui/footprint-preview.tsx",
+      "gitBlobSha1": "f4212a9b86eb1143bca7878717d1f76050485234",
+      "auditManifests": [
+        "led-assets-sources.json",
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/ui/footprint-preview.tsx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 545,
+      "sha256": "2b14a2d41663160752d7d21256a0ffcd2e4b4ac5f737107778b1b9c50942f5c1"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/component-docs/ui/package-model-viewer.tsx",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/component-docs/ui/package-model-viewer.tsx",
+      "gitBlobSha1": "b9259025ad57e575956d97ce317d57dd3f962ba6",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/component-docs/ui/package-model-viewer.tsx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 540,
+      "sha256": "0bf7ae20561f79323ddc1a534ec5571c0c00192745970fbeaa3455141593fd5b"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/package.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/package.json",
+      "gitBlobSha1": "950c8991a828b9a515ac62c88715e50a1079595c",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/package.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3834,
+      "sha256": "209b1cf4b726f8f02d81c620d3de85d25795efb60ba317c13a0dfe0439e96677"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/pages/docs/[[...slug]].tsx",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/pages/docs/[[...slug]].tsx",
+      "gitBlobSha1": "e6775e0edbda64a2fffd3ae28963d2d0d516cdb5",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/pages/docs/[[...slug]].tsx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3467,
+      "sha256": "148ef045834d281123b52d12ec294362c0317a2801668c8a28a4186a1dc44f5e"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/src/chrome-bindings.tsx",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/src/chrome-bindings.tsx",
+      "gitBlobSha1": "6745c75d185d6c152012dee98805d691801348ee",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/src/chrome-bindings.tsx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 1816,
+      "sha256": "6ec1e45db74a17355276a32880deb1f6f92a927286b797a51b60e313c3433545"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/src/component-model-viewer/package-model-viewer-island.tsx",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/src/component-model-viewer/package-model-viewer-island.tsx",
+      "gitBlobSha1": "0895615f4a405ebe50e2f0a2e6c8ffc572c1eb09",
+      "auditManifests": [
+        "led-assets-sources.json",
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/src/component-model-viewer/package-model-viewer-island.tsx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 5656,
+      "sha256": "53b7d22dbaf9157da9b48de6dca2337a0dee2519e7c10d9442b4c895b5413a1d"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/src/component-model-viewer/viewer-runtime.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/src/component-model-viewer/viewer-runtime.ts",
+      "gitBlobSha1": "8776ca289e8de229d7a38b58b8ccb26ff621442f",
+      "auditManifests": [
+        "led-assets-sources.json",
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/src/component-model-viewer/viewer-runtime.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 8856,
+      "sha256": "88a1c4769031a2301c7e62c8417fd704917b0578f7d791d3f5fcb7d8fa15f556"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/src/component-model-viewer/viewer-state.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/src/component-model-viewer/viewer-state.ts",
+      "gitBlobSha1": "8ed5eb164d9a341a71bda889746059a318cc19c0",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/src/component-model-viewer/viewer-state.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 548,
+      "sha256": "e662721b6ffcff1c4c742331ae44c3608572108beda0d1d352b817efa6dbc09b"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/src/component-preview/footprint-preview-island.tsx",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/src/component-preview/footprint-preview-island.tsx",
+      "gitBlobSha1": "e5e9e0abadef1affe775daa09e6c59d07153e7bb",
+      "auditManifests": [
+        "led-assets-sources.json",
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/src/component-preview/footprint-preview-island.tsx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3301,
+      "sha256": "5d4567b56c35026176764b21e163552e4e9dfa07a7d0bf21d493bc3ceb5cef58"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/src/component-preview/preview-enlarge-dialog.tsx",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/src/component-preview/preview-enlarge-dialog.tsx",
+      "gitBlobSha1": "038d9a62637cbba5043e08bd5031b75062f8a4fc",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/src/component-preview/preview-enlarge-dialog.tsx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3163,
+      "sha256": "064274cdf360724825f3c5c4e76af7cd89b0d4091b0a4edaddff4427af3436ab"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/src/content/docs/architecture/bom.mdx",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/src/content/docs/architecture/bom.mdx",
+      "gitBlobSha1": "ed6eae82540832579f1c756dad1a2756364179a3",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/src/content/docs/architecture/bom.mdx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 16073,
+      "sha256": "5b985f0717b2ba6ae751cd39859a3c5287eb62ad2a1ff719a084420514dfaada"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/src/content/docs/architecture/decisions.mdx",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/src/content/docs/architecture/decisions.mdx",
+      "gitBlobSha1": "a0a49c6074f106c3bc67d61e057b4819ee23e7c3",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/src/content/docs/architecture/decisions.mdx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 24884,
+      "sha256": "2d4dfb817920f96c44980392d40d8acc4aa62e1eb12f5a11b38c87f4042fdd7e"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/src/content/docs/architecture/enclosure.mdx",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/src/content/docs/architecture/enclosure.mdx",
+      "gitBlobSha1": "52698f08d9f6c16ad142d7c8f7de0e5753e48330",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/src/content/docs/architecture/enclosure.mdx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 9400,
+      "sha256": "146751dbc3f3715e3a2db50850b90e46938ebd9315a4806949d0bfc075bb7eab"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/src/content/docs/architecture/next-steps.mdx",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/src/content/docs/architecture/next-steps.mdx",
+      "gitBlobSha1": "0155ab9b5c8e1c1539972301dbb8fb29fd6c1899",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/src/content/docs/architecture/next-steps.mdx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 22901,
+      "sha256": "3aa45aa16ae60998a9a787f3a8e98402a7d2a594eed6509eb3710d863b1cc0f2"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/src/content/docs/architecture/overview.mdx",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/src/content/docs/architecture/overview.mdx",
+      "gitBlobSha1": "f39cac878bbb17276bfa8c586ebe527b4bb3df10",
+      "auditManifests": [
+        "root-audit"
+      ],
+      "snapshotPath": "references/upstream/led/doc/src/content/docs/architecture/overview.mdx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 8029,
+      "sha256": "3ae7f9c6e46207d6f98da8b6131a412991c8485b25111596d6341dfccfa16fba"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/src/content/docs/how-to/component-docs-adoption.mdx",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/src/content/docs/how-to/component-docs-adoption.mdx",
+      "gitBlobSha1": "47749f60f04c7fa1237b6360d941c8522e535573",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/src/content/docs/how-to/component-docs-adoption.mdx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 23723,
+      "sha256": "ae65798c903245737ccfd4acc2829293341539cf554d088d7cba24c45aed3baa"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/src/styles/global.css",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/src/styles/global.css",
+      "gitBlobSha1": "0b766a7228494503e18bc902ec1046671acd0dea",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/src/styles/global.css.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 17088,
+      "sha256": "868fb5a16978a92742680b712103eae7153b5997003c64f5995fd096e00305ba"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "doc/zfb.config.ts",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/doc/zfb.config.ts",
+      "gitBlobSha1": "1374b3ae95de47870ab662008d73da2334d0bc1a",
+      "auditManifests": [
+        "led-doc-engine-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/doc/zfb.config.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 5458,
+      "sha256": "99e8b53b9f2742aab68c1b47317e18394f7618f27c73e8f33a6f012f106a113c"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "footprints/CLAUDE.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/footprints/CLAUDE.md",
+      "gitBlobSha1": "39b8530412b5a78d0b083ff2f6027e7059045e62",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/footprints/CLAUDE.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 6797,
+      "sha256": "b49eb396c40aab7b435349160077459912a63df322951cb077758b92cc98621c"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "footprints/vendor/C470643/README.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/footprints/vendor/C470643/README.md",
+      "gitBlobSha1": "53de866cf497c048c58f37d727b4c6ea5a88227f",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/footprints/vendor/C470643/README.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2210,
+      "sha256": "9f0fc466f0f6a3e5a8fd186d93a995603c96e381b83e65899764736a0b39a186"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "footprints/vendor/C5446803/README.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/footprints/vendor/C5446803/README.md",
+      "gitBlobSha1": "399c4af5c92c259545eb5e5fd8b2a8486efe4e3e",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/footprints/vendor/C5446803/README.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 7957,
+      "sha256": "bef2da25f02a1e774127ae609a687e76b1f106f7342e6d64f691c870d1688622"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "footprints/vendor/C5446803/derive-model.py",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/footprints/vendor/C5446803/derive-model.py",
+      "gitBlobSha1": "fe63055280bab0f0260181f6c96812ffac773b8b",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/footprints/vendor/C5446803/derive-model.py.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 7850,
+      "sha256": "68ccb7856d5581b9fad91f52e80afa13dc489854a56eaab284bf6ff015238837"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "footprints/vendor/C5446803/model-audit.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/footprints/vendor/C5446803/model-audit.json",
+      "gitBlobSha1": "4fca803a1281097047d5c97fc179ef0ce2c49930",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/footprints/vendor/C5446803/model-audit.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 1325,
+      "sha256": "3bb3ed6d49ede40e109113e4d5625a66824b5def41bc7e46c091d5f2c31ce0b2"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "manufacturing/ORDER-STATUS.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/manufacturing/ORDER-STATUS.md",
+      "gitBlobSha1": "7a46dfec1bd882e07e84eb5668684dd34ab795f5",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/manufacturing/ORDER-STATUS.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 792,
+      "sha256": "78728bcc9f9a146f68432ecb54fdaf8993c395a41519097c67788650a95512e4"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "manufacturing/README.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/manufacturing/README.md",
+      "gitBlobSha1": "87bbca63ffb2e8dc54d01430f89e45bc8f9675a4",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/manufacturing/README.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 6273,
+      "sha256": "693e6b8537303e8c5a6e7979eb663cea39db9515b7b272e3092f696591af6b0f"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "manufacturing/jlcpcb-rotation-corrections.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/manufacturing/jlcpcb-rotation-corrections.json",
+      "gitBlobSha1": "c320abbc8bed216678bdd7a5446b182e2c0bffe8",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/manufacturing/jlcpcb-rotation-corrections.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 347,
+      "sha256": "5f32ef063b37c8b1929711d4f302d5e7fcccb432aadc89cdd416adb97a099c3f"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "manufacturing/jlcpcb/2026-09-19/ORDER-NOTES.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/manufacturing/jlcpcb/2026-09-19/ORDER-NOTES.md",
+      "gitBlobSha1": "87bbca63ffb2e8dc54d01430f89e45bc8f9675a4",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/manufacturing/jlcpcb/2026-09-19/ORDER-NOTES.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 6273,
+      "sha256": "693e6b8537303e8c5a6e7979eb663cea39db9515b7b272e3092f696591af6b0f"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "manufacturing/jlcpcb/2026-09-19/README.md",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/manufacturing/jlcpcb/2026-09-19/README.md",
+      "gitBlobSha1": "939b68f6d8808851e693d4c53fd2156bc42ff3ea",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/manufacturing/jlcpcb/2026-09-19/README.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 1282,
+      "sha256": "9b76a5487fa98a0bc0314a1f2c30bdc34fd2052e84e38a6552d40915df87d919"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "manufacturing/jlcpcb/2026-09-19/manifest.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/manufacturing/jlcpcb/2026-09-19/manifest.json",
+      "gitBlobSha1": "cdf6a9e233fcd7c3e8065343e1d55b94f32c0cbe",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/manufacturing/jlcpcb/2026-09-19/manifest.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 9951,
+      "sha256": "2d720c46ec1565b3d46c19284083ec12645ee3e4d0d14a5e52f0b90095ffee65"
+    },
+    {
+      "repository": "Takazudo/zudo-led-lamp",
+      "commit": "194d8a297e3545588197342130c3111a66c10973",
+      "path": "manufacturing/jlcpcb/2026-09-19/rotation-corrections.json",
+      "url": "https://github.com/Takazudo/zudo-led-lamp/blob/194d8a297e3545588197342130c3111a66c10973/manufacturing/jlcpcb/2026-09-19/rotation-corrections.json",
+      "gitBlobSha1": "c320abbc8bed216678bdd7a5446b182e2c0bffe8",
+      "auditManifests": [
+        "led-assets-sources.json"
+      ],
+      "snapshotPath": "references/upstream/led/manufacturing/jlcpcb/2026-09-19/rotation-corrections.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 347,
+      "sha256": "5f32ef063b37c8b1929711d4f302d5e7fcccb432aadc89cdd416adb97a099c3f"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "README.md",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/README.md",
+      "gitBlobSha1": "b7c13cfab1f9ff8e8eecaa0bb3bfc3fa9fc98e91",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/README.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 1820,
+      "sha256": "8129ea812f56dc55d619b028c50a4f4f17f471896951c9af9d020519263b47a2"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "doc/src/content/docs/architecture/monorepo-layout.mdx",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/doc/src/content/docs/architecture/monorepo-layout.mdx",
+      "gitBlobSha1": "1fdb299e8e8d9c1a06a0227f77a2b14ba19d010c",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/doc/src/content/docs/architecture/monorepo-layout.mdx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 6072,
+      "sha256": "49f3a2afd5512fd24fcd7461415bb1a8e61840bc98f489c1ff1cee5e65781ae1"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "doc/zfb.config.ts",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/doc/zfb.config.ts",
+      "gitBlobSha1": "50cc66f54fd38db9d6dac5c3bb1836a4dab8b6ca",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/doc/zfb.config.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2340,
+      "sha256": "63a1f46448673e8ec0dd16176ba89fd80ddf95218be5fa55698acc939137039a"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "docs/adr/styleguide-engine.md",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/docs/adr/styleguide-engine.md",
+      "gitBlobSha1": "964d9ac849423556ce8d5c5899c9ae27938dc6b2",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/docs/adr/styleguide-engine.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 53302,
+      "sha256": "4f2d0e4ec59e9318ec8f445ecde4fc9cc476848bfe3a4e7e8fb63e5d325caecd"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "package.json",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/package.json",
+      "gitBlobSha1": "90d8bc52ddedb1f6066633361495b7c7b99de346",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/package.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3727,
+      "sha256": "5bc3bee6889966b16310efce9011c7d81412f66cbd77f4c96e66c73e03ecc08b"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/create-zudo-sg/CHANGELOG.md",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/create-zudo-sg/CHANGELOG.md",
+      "gitBlobSha1": "bfe25b1d6c48120307921bfbd761952b115357ee",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/packages/create-zudo-sg/CHANGELOG.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 5460,
+      "sha256": "ce894ad9be2b32956788168cc2b44934689e6876c9ba262bf40719c4ca75f7b3"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/create-zudo-sg/README.md",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/create-zudo-sg/README.md",
+      "gitBlobSha1": "1b2e77e967461ad305cecb538ba2a0d5b28fdf38",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/packages/create-zudo-sg/README.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 10414,
+      "sha256": "e955908e2a8418815eb58a58b2d529795bb161f9718152db29ab682bb644b36c"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/create-zudo-sg/package.json",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/create-zudo-sg/package.json",
+      "gitBlobSha1": "6a6d2d93a8364c41a410c474ba7a0bd62f8a02ff",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/packages/create-zudo-sg/package.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 1210,
+      "sha256": "c966cb65f782b21387cd5382a284e61d951cb52634b51c760b908e939939b777"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/create-zudo-sg/src/cli.ts",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/create-zudo-sg/src/cli.ts",
+      "gitBlobSha1": "bb88e75c9505931a0388f40fd870bf7f93273003",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/packages/create-zudo-sg/src/cli.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 7674,
+      "sha256": "50099f6b7b4331edbe5a6913c6b202d2253284a25cca6ef4222da7d70938a4fd"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/create-zudo-sg/src/scaffold.ts",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/create-zudo-sg/src/scaffold.ts",
+      "gitBlobSha1": "82ae5b655f30695fb8952738c6e3d483614dcf5a",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/packages/create-zudo-sg/src/scaffold.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 6798,
+      "sha256": "eba09d60449e890bcebf84498c22e12aac6af2cc2e7cfe790d8662cd63e4f7a6"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/create-zudo-sg/templates/default/package.json",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/create-zudo-sg/templates/default/package.json",
+      "gitBlobSha1": "8b0726710d3dc1a77de690fe2ed9fbe802a13f1d",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/packages/create-zudo-sg/templates/default/package.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 826,
+      "sha256": "1cee67761a5dcca10fe065c1e04ea6ad755b4a09b739138dc722d36d75839e95"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/create-zudo-sg/templates/default/zfb.config.ts",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/create-zudo-sg/templates/default/zfb.config.ts",
+      "gitBlobSha1": "59cf63009f8fde6183f657a18e02121faeb8aa01",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/packages/create-zudo-sg/templates/default/zfb.config.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 1722,
+      "sha256": "c7df26e80129268059eb776b5a9a2b6e7a99909231771f171fde284c22e9fc6f"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/create-zudo-sg/templates/default/zudo-sg.config.mjs",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/create-zudo-sg/templates/default/zudo-sg.config.mjs",
+      "gitBlobSha1": "585d7d0755a1d7db92e62e4234c3dfd16026dd3f",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/packages/create-zudo-sg/templates/default/zudo-sg.config.mjs.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 1469,
+      "sha256": "7810dfddccf81127d5d79e05bc6ef5bcb55794468780583fca7f3a660fad8886"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/styleguide/RELEASE.md",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/styleguide/RELEASE.md",
+      "gitBlobSha1": "1d7a43ac3d38dd1f0ea60ae2c6c1cdfe5d67b4ab",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/packages/styleguide/RELEASE.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 6393,
+      "sha256": "88690d2b1f6c728747a019c7c51005fc7fdd0996fbdbc322056e7f19d66bd73e"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/styleguide/package.json",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/styleguide/package.json",
+      "gitBlobSha1": "70119c2829efd2651bc980a851cbcc8a7309475b",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/packages/styleguide/package.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 5539,
+      "sha256": "d0b22937d512d182470bed1d2ee52fd7fba396c30b59d0b9b8419d9e3df9f40f"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/styleguide/scripts/check-package-shape.mjs",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/styleguide/scripts/check-package-shape.mjs",
+      "gitBlobSha1": "806a467aa02e02984439d0f7087c444c2a0312c5",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/packages/styleguide/scripts/check-package-shape.mjs.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2563,
+      "sha256": "6a932b1eca98e273ba0af8822c9c6ef7883f0b05e0a63b4c2858134cf7a81052"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/styleguide/src/cli/bin.ts",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/styleguide/src/cli/bin.ts",
+      "gitBlobSha1": "0b551f9b26f40a19573c83f684f41956c3db2722",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/packages/styleguide/src/cli/bin.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 2945,
+      "sha256": "174592beee6fa3152fc7caf3bf4d50057a7705e1dfcadf470c7bd49e73495a96"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/styleguide/src/cli/config.ts",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/styleguide/src/cli/config.ts",
+      "gitBlobSha1": "bfcea4bdc5f52209d3805e0125483258857ae553",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/packages/styleguide/src/cli/config.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3216,
+      "sha256": "e368e182b6fcb5077b38bb0fcb9d805aeb459d7521d828b4ad9424f551d4b86e"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/styleguide/src/config/index.ts",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/styleguide/src/config/index.ts",
+      "gitBlobSha1": "caad4db88f32bb57a3178d61e550a7b50c89b6ec",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/packages/styleguide/src/config/index.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 13933,
+      "sha256": "bf0c9d71669dca9d6bdc6f9c67fddc0bbb9eb30bddebcb441b6e0be730ed260c"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "pnpm-workspace.yaml",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/pnpm-workspace.yaml",
+      "gitBlobSha1": "85ed76831f1d79c65b36d0fb53bee4dc59815ae1",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/pnpm-workspace.yaml.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 1489,
+      "sha256": "a1f673d07dfb16c733ce753af1ef8deecb22307ce7dc9875dcea29558c4f878f"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "scripts/sync-create-zudo-sg-template.mjs",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/scripts/sync-create-zudo-sg-template.mjs",
+      "gitBlobSha1": "d2771d410f866988598d48d02c84bb4b28e57366",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/sg/scripts/sync-create-zudo-sg-template.mjs.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 14386,
+      "sha256": "988185b75088e2e6c6bbe25ca48c534d662843b1e5f2d3c066eb1dfc2b7bc811"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "packages/create-zudo-doc/README.md",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/packages/create-zudo-doc/README.md",
+      "gitBlobSha1": "5a48acfe84aebe153c1814134fe4fadc9b23faba",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/zudo-doc/packages/create-zudo-doc/README.md.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 9246,
+      "sha256": "852fd0370e068544ab5bf0955cd13c250e7a2793804c41d7a8f30e796e0c198a"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "packages/create-zudo-doc/package.json",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/packages/create-zudo-doc/package.json",
+      "gitBlobSha1": "9aadaf7e49adcbf758dac762aa726fa4e9cd98e2",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/zudo-doc/packages/create-zudo-doc/package.json.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 1620,
+      "sha256": "a850f419bbf8bbfe31a5ad9d9987f6e0d34f1c40f03b91d35e8e31755dd0fb95"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "packages/create-zudo-doc/src/api.ts",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/packages/create-zudo-doc/src/api.ts",
+      "gitBlobSha1": "3248ebb6a25fc542776b3b5fcc160119ebf1aaf1",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/zudo-doc/packages/create-zudo-doc/src/api.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 5641,
+      "sha256": "510dbbab7532832a0510932bbdf4eb6a06543ca86988cc00931b3f4e088a3a36"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "packages/create-zudo-doc/src/compose.ts",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/packages/create-zudo-doc/src/compose.ts",
+      "gitBlobSha1": "24513450d0fed0addfffbf1e1545c69cb4067382",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/zudo-doc/packages/create-zudo-doc/src/compose.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 10777,
+      "sha256": "5594a4b49658530c5f527e2312705ba31858a46c9eb64ff1dff87cac2bbf6cea"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "packages/zudo-doc/src/config.ts",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/packages/zudo-doc/src/config.ts",
+      "gitBlobSha1": "f04e173726f2ac6602aa393c7b2e54e4228ab196",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/zudo-doc/packages/zudo-doc/src/config.ts.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 35202,
+      "sha256": "fa89faa0c552ce3e0ab18bbcb52890fb1492dfdf2f4a8754c46276bd62258713"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "src/content/docs/guides/asset-viewer.mdx",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/src/content/docs/guides/asset-viewer.mdx",
+      "gitBlobSha1": "485ac6c4202cbebf842789287106c8570ba3a719",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/zudo-doc/src/content/docs/guides/asset-viewer.mdx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 15107,
+      "sha256": "88379c0a1332ad7b0a235bbce158435b013798b316671ca5f073286a321c8162"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "src/content/docs/guides/claude-resources.mdx",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/src/content/docs/guides/claude-resources.mdx",
+      "gitBlobSha1": "8dff0a067abe977eb03b9ead0112972d861d6de0",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/zudo-doc/src/content/docs/guides/claude-resources.mdx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 5245,
+      "sha256": "e187cd692a8af423459dacca383acb4392222b1fc82a40ba8ab828d4809f6940"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "src/content/docs/guides/codex-resources.mdx",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/src/content/docs/guides/codex-resources.mdx",
+      "gitBlobSha1": "5b29283a76d340ad8b29a5047ae976a71a0e2f38",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/zudo-doc/src/content/docs/guides/codex-resources.mdx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 5690,
+      "sha256": "281aca5bb7756fcbc3ac37e62578377bd95cf9c0d3ba99fff272a452be1ffa3d"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "src/content/docs/guides/custom-components.mdx",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/src/content/docs/guides/custom-components.mdx",
+      "gitBlobSha1": "e66c394995d04aed74ea210b6c778af015c0a827",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/zudo-doc/src/content/docs/guides/custom-components.mdx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 7980,
+      "sha256": "fbac3bcd4189afb598b9245532dee1c36b10f94140db700d6ecda4a13ef1f22f"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "src/content/docs/guides/llms-txt.mdx",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/src/content/docs/guides/llms-txt.mdx",
+      "gitBlobSha1": "fab63994049601d563b2db51d66db2d6b7635fa3",
+      "auditManifests": [
+        "sg-sources.json"
+      ],
+      "snapshotPath": "references/upstream/zudo-doc/src/content/docs/guides/llms-txt.mdx.source",
+      "snapshotStatus": "exact-git-blob-verified",
+      "bytes": 3612,
+      "sha256": "c01faa419b3d505f9f208d38b67dc2f3bc48680f3a96013d3f9986f7c5695800"
+    }
+  ]
+}

@@ -1,0 +1,354 @@
+{
+  "researchDate": "2026-09-26",
+  "timezone": "Asia/Tokyo",
+  "purpose": "Initializer and zudo-doc integration architecture for zudo-circuit-doc seed research",
+  "repositories": [
+    {
+      "repository": "Takazudo/zudo-sg",
+      "defaultBranch": "main",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "commitDate": "2026-09-24T19:10:46Z",
+      "commitMessage": "chore(release): create-zudo-sg v0.1.8",
+      "treeFetchedRecursively": true,
+      "treeTruncated": false
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "commitDate": "2026-09-24T08:23:52Z",
+      "commitMessage": "chore: pin formatter tooling and record dependency audit",
+      "treeFetchedRecursively": true,
+      "treeTruncated": false
+    }
+  ],
+  "sources": [
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "README.md",
+      "blobSha": "b7c13cfab1f9ff8e8eecaa0bb3bfc3fa9fc98e91",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/README.md",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/README.md.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "package.json",
+      "blobSha": "90d8bc52ddedb1f6066633361495b7c7b99de346",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/package.json",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/package.json.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "pnpm-workspace.yaml",
+      "blobSha": "85ed76831f1d79c65b36d0fb53bee4dc59815ae1",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/pnpm-workspace.yaml",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/pnpm-workspace.yaml.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/create-zudo-sg/package.json",
+      "blobSha": "6a6d2d93a8364c41a410c474ba7a0bd62f8a02ff",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/create-zudo-sg/package.json",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/packages/create-zudo-sg/package.json.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/create-zudo-sg/README.md",
+      "blobSha": "1b2e77e967461ad305cecb538ba2a0d5b28fdf38",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/create-zudo-sg/README.md",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/packages/create-zudo-sg/README.md.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/create-zudo-sg/src/cli.ts",
+      "blobSha": "bb88e75c9505931a0388f40fd870bf7f93273003",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/create-zudo-sg/src/cli.ts",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/packages/create-zudo-sg/src/cli.ts.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/create-zudo-sg/src/scaffold.ts",
+      "blobSha": "82ae5b655f30695fb8952738c6e3d483614dcf5a",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/create-zudo-sg/src/scaffold.ts",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/packages/create-zudo-sg/src/scaffold.ts.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/create-zudo-sg/templates/default/package.json",
+      "blobSha": "8b0726710d3dc1a77de690fe2ed9fbe802a13f1d",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/create-zudo-sg/templates/default/package.json",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/packages/create-zudo-sg/templates/default/package.json.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/create-zudo-sg/templates/default/zfb.config.ts",
+      "blobSha": "59cf63009f8fde6183f657a18e02121faeb8aa01",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/create-zudo-sg/templates/default/zfb.config.ts",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/packages/create-zudo-sg/templates/default/zfb.config.ts.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/create-zudo-sg/templates/default/zudo-sg.config.mjs",
+      "blobSha": "585d7d0755a1d7db92e62e4234c3dfd16026dd3f",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/create-zudo-sg/templates/default/zudo-sg.config.mjs",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/packages/create-zudo-sg/templates/default/zudo-sg.config.mjs.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "docs/adr/styleguide-engine.md",
+      "blobSha": "964d9ac849423556ce8d5c5899c9ae27938dc6b2",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/docs/adr/styleguide-engine.md",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/docs/adr/styleguide-engine.md.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "doc/src/content/docs/architecture/monorepo-layout.mdx",
+      "blobSha": "1fdb299e8e8d9c1a06a0227f77a2b14ba19d010c",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/doc/src/content/docs/architecture/monorepo-layout.mdx",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/doc/src/content/docs/architecture/monorepo-layout.mdx.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/styleguide/package.json",
+      "blobSha": "70119c2829efd2651bc980a851cbcc8a7309475b",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/styleguide/package.json",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/packages/styleguide/package.json.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/styleguide/src/config/index.ts",
+      "blobSha": "caad4db88f32bb57a3178d61e550a7b50c89b6ec",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/styleguide/src/config/index.ts",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/packages/styleguide/src/config/index.ts.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/styleguide/src/cli/bin.ts",
+      "blobSha": "0b551f9b26f40a19573c83f684f41956c3db2722",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/styleguide/src/cli/bin.ts",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/packages/styleguide/src/cli/bin.ts.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/styleguide/src/cli/config.ts",
+      "blobSha": "bfcea4bdc5f52209d3805e0125483258857ae553",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/styleguide/src/cli/config.ts",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/packages/styleguide/src/cli/config.ts.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "scripts/sync-create-zudo-sg-template.mjs",
+      "blobSha": "d2771d410f866988598d48d02c84bb4b28e57366",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/scripts/sync-create-zudo-sg-template.mjs",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/scripts/sync-create-zudo-sg-template.mjs.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "doc/zfb.config.ts",
+      "blobSha": "50cc66f54fd38db9d6dac5c3bb1836a4dab8b6ca",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/doc/zfb.config.ts",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/doc/zfb.config.ts.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/create-zudo-sg/CHANGELOG.md",
+      "blobSha": "bfe25b1d6c48120307921bfbd761952b115357ee",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/create-zudo-sg/CHANGELOG.md",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/packages/create-zudo-sg/CHANGELOG.md.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/styleguide/RELEASE.md",
+      "blobSha": "1d7a43ac3d38dd1f0ea60ae2c6c1cdfe5d67b4ab",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/styleguide/RELEASE.md",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/packages/styleguide/RELEASE.md.source"
+    },
+    {
+      "repository": "Takazudo/zudo-sg",
+      "commit": "b9b36ce35d98d6abc641d84e8535552eac0dbded",
+      "path": "packages/styleguide/scripts/check-package-shape.mjs",
+      "blobSha": "806a467aa02e02984439d0f7087c444c2a0312c5",
+      "url": "https://github.com/Takazudo/zudo-sg/blob/b9b36ce35d98d6abc641d84e8535552eac0dbded/packages/styleguide/scripts/check-package-shape.mjs",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/sg/packages/styleguide/scripts/check-package-shape.mjs.source"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "packages/create-zudo-doc/package.json",
+      "blobSha": "9aadaf7e49adcbf758dac762aa726fa4e9cd98e2",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/packages/create-zudo-doc/package.json",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/zudo-doc/packages/create-zudo-doc/package.json.source"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "packages/create-zudo-doc/src/api.ts",
+      "blobSha": "3248ebb6a25fc542776b3b5fcc160119ebf1aaf1",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/packages/create-zudo-doc/src/api.ts",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/zudo-doc/packages/create-zudo-doc/src/api.ts.source"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "packages/create-zudo-doc/src/compose.ts",
+      "blobSha": "24513450d0fed0addfffbf1e1545c69cb4067382",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/packages/create-zudo-doc/src/compose.ts",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/zudo-doc/packages/create-zudo-doc/src/compose.ts.source"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "packages/create-zudo-doc/README.md",
+      "blobSha": "5a48acfe84aebe153c1814134fe4fadc9b23faba",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/packages/create-zudo-doc/README.md",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/zudo-doc/packages/create-zudo-doc/README.md.source"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "src/content/docs/guides/asset-viewer.mdx",
+      "blobSha": "485ac6c4202cbebf842789287106c8570ba3a719",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/src/content/docs/guides/asset-viewer.mdx",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/zudo-doc/src/content/docs/guides/asset-viewer.mdx.source"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "src/content/docs/guides/claude-resources.mdx",
+      "blobSha": "8dff0a067abe977eb03b9ead0112972d861d6de0",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/src/content/docs/guides/claude-resources.mdx",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/zudo-doc/src/content/docs/guides/claude-resources.mdx.source"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "src/content/docs/guides/codex-resources.mdx",
+      "blobSha": "5b29283a76d340ad8b29a5047ae976a71a0e2f38",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/src/content/docs/guides/codex-resources.mdx",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/zudo-doc/src/content/docs/guides/codex-resources.mdx.source"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "src/content/docs/guides/llms-txt.mdx",
+      "blobSha": "fab63994049601d563b2db51d66db2d6b7635fa3",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/src/content/docs/guides/llms-txt.mdx",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/zudo-doc/src/content/docs/guides/llms-txt.mdx.source"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "src/content/docs/guides/custom-components.mdx",
+      "blobSha": "e66c394995d04aed74ea210b6c778af015c0a827",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/src/content/docs/guides/custom-components.mdx",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/zudo-doc/src/content/docs/guides/custom-components.mdx.source"
+    },
+    {
+      "repository": "zudolab/zudo-doc",
+      "commit": "6a10f764181cd9f73059d4bf523e3673983859d8",
+      "path": "packages/zudo-doc/src/config.ts",
+      "blobSha": "f04e173726f2ac6602aa393c7b2e54e4228ab196",
+      "url": "https://github.com/zudolab/zudo-doc/blob/6a10f764181cd9f73059d4bf523e3673983859d8/packages/zudo-doc/src/config.ts",
+      "readMethod": "GitHub plugin fetch_file",
+      "readExtent": "full",
+      "snapshotPathFromBundleRoot": "references/upstream/zudo-doc/packages/zudo-doc/src/config.ts.source"
+    }
+  ],
+  "websitePagesOpened": [
+    "https://zudo-doc.takazudomodular.com/",
+    "https://zudo-doc.takazudomodular.com/docs/getting-started/installation/",
+    "https://zudo-doc.takazudomodular.com/docs/reference/create-zudo-doc/",
+    "https://zudo-doc.takazudomodular.com/docs/guides/configuration/",
+    "https://zudo-doc.takazudomodular.com/docs/guides/custom-components/",
+    "https://zudo-doc.takazudomodular.com/docs/guides/asset-viewer/",
+    "https://zudo-doc.takazudomodular.com/docs/guides/claude-resources/",
+    "https://zudo-doc.takazudomodular.com/docs/guides/codex-resources/",
+    "https://zudo-doc.takazudomodular.com/docs/guides/llms-txt/"
+  ],
+  "limitations": [
+    "Read-only source research; no remote repository modifications.",
+    "No package install/build/execute of zudo-sg or zudo-doc performed in this subtask.",
+    "Versions are observed package metadata at commits, not a claim of latest npm registry publication.",
+    "Website docs have some defaults differing from code; exact pinned implementation should govern.",
+    "LED lamp circuit content extraction is handled separately."
+  ]
+}
