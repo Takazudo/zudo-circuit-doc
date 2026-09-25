@@ -7,7 +7,7 @@
 // goldens byte for byte — except the one deliberate difference recorded in
 // fixtures/led/expected/ (see EXPECTED-CHANGES.md).
 //
-// Requires `pnpm build` to have already run (reads packages/circuit-doc/dist)
+// Requires `pnpm build` to have already run (reads packages/circuit-doc/lib)
 // and STEP to be materialized (`pnpm fixtures:led:materialize`).
 //
 // Also available as `pnpm test:led` (chained with the LED-corpus TS suite, #26).

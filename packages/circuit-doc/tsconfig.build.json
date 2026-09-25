@@ -7,7 +7,7 @@
     "jsx": "react-jsx",
     "jsxImportSource": "preact",
     "declaration": true,
-    "outDir": "dist",
+    "outDir": "lib",
     "rootDir": "src"
   },
   "include": ["src"],
