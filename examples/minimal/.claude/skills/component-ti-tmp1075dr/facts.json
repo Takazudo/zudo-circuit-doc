@@ -120,7 +120,7 @@
       "class": "ABSOLUTE_MAXIMUM",
       "value": 6.5,
       "unit": "V",
-      "conditions": "input voltage on SCL, SDA, A1, A0, TMP1075 (non-N) orderables, including TMP1075DR; MIN -0.3 V; bus lines may be pulled up to a rail above V+ within this limit",
+      "conditions": "input voltage on SCL, SDA, A1, A0, TMP1075 (non-N) orderables, including TMP1075DR; MIN -0.3 V",
       "locator": "src-tmp1075-ds-ratings: Section 6.1 Absolute Maximum Ratings, row Input voltage SCL, SDA, A1, A0 / TMP1075, MAX column",
       "provenance": "PRIMARY-SPEC",
       "verdict": "PASS - primary-source confirmed",
