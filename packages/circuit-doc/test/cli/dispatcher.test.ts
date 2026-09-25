@@ -80,8 +80,6 @@ describe("zudo-circuit-doc dispatcher", () => {
   });
 
   for (const [argv, issue] of [
-    [["scan"], 19],
-    [["check-built"], 19],
     [["footprints", "check"], 20],
     [["check-browser"], 27],
   ] as const) {
