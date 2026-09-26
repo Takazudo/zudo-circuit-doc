@@ -19,7 +19,7 @@
     "fixtures:led:oracle": "node scripts/run-led-oracle.mjs",
     "test:led": "node scripts/check-led-fixture.mjs && pnpm --filter @takazudo/zudo-circuit-doc test:led-corpus",
     "build:led-site": "node scripts/build-fixture-site.mjs --fixture led",
-    "examples:build": "pnpm --filter \"./examples/*\" build",
+    "examples:build": "pnpm --filter \"./examples/*\" --workspace-concurrency=1 build",
     "sync:template": "node scripts/sync-create-template.mjs",
     "check:template": "node scripts/sync-create-template.mjs --check",
     "check:upstream-scaffold": "node scripts/check-upstream-scaffold.mjs",
