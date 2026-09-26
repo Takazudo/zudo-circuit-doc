@@ -1,0 +1,51 @@
+---
+title: Capability & tool matrix
+description: Which external tools, credentials, or network access every command needs, and what happens when one is missing.
+sidebar_position: 6
+---
+
+This is the authoritative answer to "which operations need external tools or credentials, and
+which capabilities are optional" — `pnpm circuit:doctor`'s own capability table is the same
+information, checked live against your machine (see
+[Getting Started → The first run](../getting-started/first-run.mdx)).
+
+## By operation
+
+| Operation | Needs | Optional / conditional | Network |
+| --- | --- | --- | --- |
+| Docs build/check (`pnpm build`, `pnpm check`, `pnpm dev`) | Node, pnpm, Python, git | — | No — the documentation build never goes online |
+| `zudo-circuit-doc generate` / `check` / `validate` | Node, Python ≥3.10 | — | No (unless `validate --online`/`--refresh-source`, below) |
+| `zudo-circuit-doc models` / `models --check` | Node | — | No |
+| `zudo-circuit-doc footprints generate` | Node | Docker + the pinned KiCad image (≈476 MB, `linux/amd64`) — exit `4` if missing, unless zero packages are selected, in which case Docker is never touched | No |
+| `zudo-circuit-doc footprints check` | Node | Never needs Docker | No |
+| `zudo-circuit-doc scan` / `check-built` | Node | — | No |
+| `zudo-circuit-doc check-browser` | Node | Chrome or `CHROME_BIN` — exit `4` if missing | No |
+| `zudo-circuit-doc doctor` | Node | Reports Docker/KiCad image/Chrome/`easyeda2kicad` as informational rows; never fails on them | No |
+| `zudo-circuit-doc new-component` | Node | — | No |
+| `validate --online` / `--refresh-source <id>` | Node, Python | — | **Yes** — re-downloads and hash-checks sources; VOLATILE-HTML sources are skipped under `--online` |
+| Datasheet / CAD acquisition (Workflows C, D) | — | Network to fetch bytes; optional `easyeda2kicad` for LCSC-listed parts; optional KiCad library tags for footprint/model provenance | **Yes**, for the fetch itself only |
+| Credentials | **None required** | — | — |
+| Deploy | **None configured** — the initializer writes no deploy target of any kind | — | — |
+
+## Notes
+
+- **Exit `4` is "not run," never "passed."** A CI job that treats exit `4` as green is
+  misconfigured — see [Reference → CLI](./cli.mdx) for the exit-code contract shared by every
+  command.
+- **Docker is never touched by a zero-package project.** `footprints generate` on a project with
+  `expect.packages: 0` is a pure no-op; the Docker/KiCad-image check only runs once a package is
+  actually selected.
+- **The KiCad image is pinned by digest** (`kicad/kicad@sha256:…`), recorded in
+  `cad.previewRenderer.image` — see [Reference → circuit.config.ts](./config.mdx#cad). `doctor`
+  reports it `n/a` while CAD is disabled, `missing` (with the `docker pull` command to run) once CAD
+  is enabled but the image isn't present locally, and `ok` once it is.
+- **The browser smoke is dependency-free.** It drives system Chrome over the Chrome DevTools
+  Protocol directly — there is no Playwright or other browser-automation package anywhere in
+  `@takazudo/zudo-circuit-doc`.
+- **`easyeda2kicad` is a convenience, not a dependency.** It imports EasyEDA/LCSC assets as a
+  starting point to inspect (Workflow D); nothing in the validated evidence or CAD contract requires
+  it, and its absence never fails a check.
+- **No credential ever needs to be configured** for any command in this table, including online
+  source refresh — datasheet and distributor pages fetched by `validate --online` are public URLs.
+- **No deploy step exists to configure.** Publishing the built site (or not) is entirely up to the
+  project; `@takazudo/zudo-circuit-doc` and its initializer stop at `doc/dist`.

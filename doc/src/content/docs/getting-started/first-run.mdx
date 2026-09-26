@@ -1,0 +1,58 @@
+---
+title: The first run
+description: pnpm circuit:doctor and pnpm dev — what to expect the first time you open a generated project.
+sidebar_position: 4
+---
+
+## `pnpm circuit:doctor`
+
+Run this before anything else. It reports every required and optional tool, whether
+`circuit.config.ts` loads and validates, and whether every file it declares is present — without
+touching the evidence or the site:
+
+```sh
+pnpm circuit:doctor
+```
+
+```
+ITEM            LEVEL     STATUS   DETAIL
+node            required  ok       v24.13.1 (engines >=22.18.0)
+config          required  ok       circuit.config.ts
+required files  required  ok       every declared file is present and well-formed
+python          required  ok       python3 3.12.3 (need >= 3.10)
+docker          optional  missing  install Docker (needed only for `footprints generate`)
+kicad image     optional  n/a      cad disabled: no footprint previews to render
+chrome          optional  missing  install Google Chrome or set CHROME_BIN (needed only for `check-browser`)
+git             info      ok       git version 2.43.0; inside a git repository
+easyeda2kicad   optional  missing  `pipx install easyeda2kicad` (optional helper for importing LCSC CAD)
+doctor: every required item is present
+```
+
+`doctor` exits `0` as long as every **required** row is `ok` — a fresh, CAD-disabled project (the
+default) is expected to show `docker` and `chrome` as `missing` and `kicad image` as `n/a`. Exit
+`1` means a required row failed (usually `python`, or `config` with a validation error); exit `2`
+is a usage error. See [Reference → Capability & tool matrix](../reference/capability-matrix.mdx)
+for what each row gates.
+
+## `pnpm dev`
+
+```sh
+pnpm dev
+```
+
+starts the zudo-doc dev server (`zfb dev`) for `doc/`. A generated project ships with zero
+components, so the site opens with an honest, empty catalog rather than placeholder data — the
+[Concepts](../concepts/) section explains why "empty" is a real, checked state rather than a
+missing feature.
+
+Component pages are generated from evidence, not hand-written; `pnpm dev` does not regenerate them
+for you on every change. Once you have evidence to project, run
+
+```sh
+pnpm circuit:generate --watch
+```
+
+alongside `pnpm dev` in a second terminal, or just re-run `pnpm circuit:generate` after editing
+evidence — see [Reference → CLI](../reference/cli.mdx#generate).
+
+Next: [The first task](./first-task.mdx).

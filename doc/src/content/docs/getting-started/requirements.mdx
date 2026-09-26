@@ -1,0 +1,42 @@
+---
+title: Requirements
+description: What has to be installed to work on a generated zudo-circuit-doc project, and what is optional.
+sidebar_position: 2
+---
+
+A generated project only *requires* a small toolchain. Everything else — Docker, Chrome, a
+package manager for CAD imports — is needed for one specific optional capability, and its absence
+never breaks the documentation build.
+
+## Required
+
+| Tool | Version | Used for |
+| --- | --- | --- |
+| [Node.js](https://nodejs.org/) | ≥22.18.0 | Everything: the CLI, the doc-site build, native TypeScript type stripping for `circuit.config.ts` |
+| [pnpm](https://pnpm.io/) | 11 (via [Corepack](https://nodejs.org/api/corepack.html)) | Install and every project script (`pnpm install`, `pnpm dev`, …) |
+| [Python](https://www.python.org/) | ≥3.10, standard library only | The canonical evidence validator (`pnpm circuit:check`) |
+| [git](https://git-scm.com/) | any recent version | Doc history, review diffs; `pnpm circuit:doctor` reports it as informational, not a hard requirement |
+
+Node's native TypeScript type stripping is why `circuit.config.ts` loads with no build step, and
+why the runtime package ships compiled JavaScript instead of `.ts` sources (type stripping only
+works outside `node_modules`) — see [Ownership and upgrades](../concepts/ownership-and-upgrades.mdx).
+
+## Optional
+
+Nothing below is needed to install, generate, or build a project's documentation. Each row names
+the one command that needs it; every other command works without it, and `pnpm circuit:doctor`
+reports each one as present or missing without failing the run.
+
+| Tool | Needed for | If missing |
+| --- | --- | --- |
+| Docker + the pinned KiCad container image | `zudo-circuit-doc footprints generate` (rendering footprint preview SVGs) | Exit `4` ("not run"); `footprints check` and everything else still works |
+| Chrome (or `CHROME_BIN`) | `zudo-circuit-doc check-browser` (browser smoke of the built site) | Exit `4` ("not run") |
+| Network access | Acquiring datasheets/CAD assets, and `validate --online` / `--refresh-source` | Those specific agent operations fail; the documentation build itself never goes online |
+| [`easyeda2kicad`](https://pypi.org/project/easyeda2kicad/) | Importing EasyEDA/LCSC CAD assets as a starting point (Workflow D) | Use another CAD source, or skip CAD for that component |
+
+See [Reference → Capability & tool matrix](../reference/capability-matrix.mdx) for the same
+information broken down by every CLI command, and [Getting Started → The first run](./first-run.mdx)
+for what `pnpm circuit:doctor` actually prints.
+
+No credentials are required for anything in this list, and no deploy target is configured by the
+initializer — see [Release](../release/) for what that means for a generated project.

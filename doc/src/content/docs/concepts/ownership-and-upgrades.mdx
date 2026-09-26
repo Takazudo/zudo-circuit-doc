@@ -1,0 +1,74 @@
+---
+title: Ownership and upgrades
+description: What belongs to the package, the project, or the generator; why there is no update command; and how to refresh the scaffold by hand.
+sidebar_position: 4
+---
+
+## Who owns what
+
+| Path | Owner | Edit by hand? |
+| --- | --- | --- |
+| `doc/src/content/docs/{project,architecture,research,decisions,verification}/` | Project | Yes |
+| `circuit/WORKFLOW.md`, `circuit/agent-task-examples.md`, `circuit/templates/` | Project | Yes |
+| `.claude/skills/component-*/` | Project | Yes, following the [evidence contract](./evidence-contract.mdx) |
+| `.claude/skills/component-spec-audit/references/*.json` | Project | Yes |
+| `.claude/skills/circuit-spec-integration/references/rules.json` | Project | Yes |
+| `circuit/publication/selection.json`, `circuit/publication/assets.json` | Project | Yes, as a reviewed diff — see [Publication](./publication.mdx) |
+| `circuit/cad-receipts/` | Project | Yes, created when the first asset is acquired |
+| `circuit.config.ts` | Project | Yes |
+| `doc/src/content/docs/components/**` | Generator | **Never** |
+| `circuit/generated/preflight.json` | Generator | **Never** |
+| `doc/public/assets/component-previews/**` | Generator | **Never** |
+| `node_modules/@takazudo/zudo-circuit-doc/` | Package | **Never** |
+
+Generated MDX is never hand-edited: change the evidence or the selection, then regenerate. A
+hand-edited generated file is reported as **drift** by `pnpm check`; one with its generated-page
+marker removed entirely is reported as an **ownership conflict** — the emitter refuses to overwrite
+a marker-less target, and never partially writes on any conflict.
+
+## Create-only: there is no `update` command
+
+`create-zudo-circuit-doc` scaffolds a project once. There is deliberately no `zudo-circuit-doc
+update` or `create-zudo-circuit-doc upgrade` command — a generated project's authored content
+(brief, architecture, decisions, evidence) is yours from the moment it's created, and an automatic
+in-place rewrite of project files is exactly the kind of silent mutation this project's evidence
+model is built to avoid elsewhere. Two things *do* get newer over time without an `update` command:
+
+- **The runtime package** (`@takazudo/zudo-circuit-doc`) — an ordinary `pnpm update` bumps it like
+  any other dependency, because the CLI, validator and MDX renderer are code your project depends
+  on, not files copied into your project.
+- **The scaffold** (the zudo-doc host glue under `doc/`, `package.json`, `pnpm-workspace.yaml`) —
+  these files *are* copied at creation time, and upgrading them is a manual, reviewable
+  scaffold-refresh, described next.
+
+## The scaffold-refresh procedure
+
+The initializer's `doc/` host glue is synced from a pinned `create-zudo-doc` release, with a few
+project-specific lines layered on top (the chrome-bindings import, the islands seed import, the
+package's `styles.css` import). `ZUDO_DEPS_PINS.md`, generated into every new project, records
+exactly which files came from where, at which pinned commit, and which lines were added on top of
+the vendored scaffold:
+
+```md
+## create-zudo-doc
+- pinned: <commit> (v5.27.0)
+- files: doc/pages/docs/[[...slug]].tsx, doc/pages/index.tsx, doc/tsconfig.json,
+  doc/src/styles/global.css, doc/scripts/check-links.js
+- notes: doc/pages/docs/[[...slug]].tsx carries one added import beyond the upstream stub;
+  doc/src/styles/global.css has one added @import line. Re-apply both after any re-copy.
+```
+
+To refresh a project's scaffold by hand after a new `create-zudo-doc` release:
+
+1. Run the pinned (or newer) `create-zudo-doc` into a scratch directory and diff its `app/` output
+   against the files `ZUDO_DEPS_PINS.md` lists.
+2. Apply the upstream diff to your project's copies.
+3. Re-apply the project-specific lines `ZUDO_DEPS_PINS.md`'s notes call out (they are not part of
+   the upstream scaffold, and a plain re-copy would silently drop them).
+4. Update `ZUDO_DEPS_PINS.md`'s `pinned:`/`updated:` fields.
+
+This repository's own dev-time **upstream-scaffold parity check**
+(`pnpm check:upstream-scaffold`, run against `examples/empty`) is the automated version of the same
+diff, kept green so `templates/default` never silently drifts from a real `create-zudo-doc` output.
+A generated project does not ship that script; the manual procedure above is the same idea, run by
+hand, on your own schedule.

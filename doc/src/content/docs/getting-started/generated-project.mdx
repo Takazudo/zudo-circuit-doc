@@ -1,0 +1,49 @@
+---
+title: What you get
+description: The generated-project layout, at a glance.
+sidebar_position: 6
+---
+
+A generated project keeps two kinds of knowledge side by side, plus the site that renders both:
+
+```
+my-circuit/
+├── circuit.config.ts          # what the CLI reads (see Reference → circuit.config.ts)
+├── circuit/
+│   ├── WORKFLOW.md             # the canonical agent workflow, A–G
+│   ├── agent-task-examples.md  # nine short example requests, English + Japanese
+│   ├── templates/              # unpublished authoring templates + the CAD asset receipt
+│   ├── checks/README.md        # what each check establishes, and what it doesn't
+│   ├── publication/            # selection.json + assets.json (both empty at first)
+│   └── generated/preflight.json
+├── .claude/skills/
+│   ├── component-spec-audit/   # inventory + routing + the "new component" workflow doc
+│   └── circuit-spec-integration/
+├── doc/                        # an ordinary zudo-doc site
+│   ├── src/content/docs/
+│   │   ├── project/            # brief, next-actions, how-we-work — authored
+│   │   ├── architecture/       # authored
+│   │   ├── research/           # authored
+│   │   ├── decisions/          # authored
+│   │   ├── verification/       # authored
+│   │   └── components/         # generated — never hand-edited
+│   └── zfb.config.ts
+├── CLAUDE.md / AGENTS.md       # thin pointers to circuit/WORKFLOW.md
+├── ZUDO_DEPS_PINS.md
+└── package.json
+```
+
+Nothing under `boards/`, `symbols/`, `footprints/` or `manufacturing/` is generated, and no deploy
+configuration is written — CAD only appears once you enable it (`cad.enabled: true`), and there is
+no LED-specific content anywhere. See [Reference → The generated project](../reference/generated-project.mdx)
+for the exhaustive file list and every root script, and [Concepts → Ownership and upgrades](../concepts/ownership-and-upgrades.mdx)
+for which of these files are yours to edit, which are generated, and which come from the installed
+package.
+
+## The six-item header nav
+
+The generated site's own documentation (not this one) ships six sections: **Project** (the brief,
+next actions, how-we-work), **Architecture**, **Research**, **Decisions**, **Verification**, and
+**Components** (the generated catalog and records, plus the raw agent resources under
+`/docs/claude/`). The first five are yours to write; the sixth is projected from evidence and
+regenerated on every `pnpm circuit:generate`.

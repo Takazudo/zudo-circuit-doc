@@ -1,0 +1,98 @@
+---
+title: The evidence contract
+description: Files, facts and classes, verdicts, provenance, availability vs. authority, locators, calculations, and why coverage is not sign-off.
+sidebar_position: 2
+---
+
+Component evidence is stored as one owner bundle per exact component, at
+`.claude/skills/component-<suffix>/`, following the frozen **component-spec contract, version 1**
+— extracted from zudo-led-lamp and shipped with the package as
+`node_modules/@takazudo/zudo-circuit-doc/contract/contract.md`. This page summarizes it; the
+shipped file is the source of truth.
+
+## Files of a v1 owner bundle
+
+| File | Role |
+| --- | --- |
+| `manifest.json` | Exact record identity, parentage, and the assigned source, fact and interaction IDs |
+| `sources.json` | Source authority, availability, document revision, URL, hash, locator and retained extract |
+| `facts.json` | Typed claims: value, unit, conditions, provenance, verdict and calculation dependencies |
+| `coverage.json` | Declared domain coverage with explicit reasons and `blocking_fact_ids` |
+| `routing.json` | Positive and negative routing cases to the exact owner |
+| `interactions.json` | Component-level interaction knowledge |
+| `pin-map.json` | Source-backed pin identity and project mapping (symbol pin, footprint pad, net) |
+| `SKILL.md` | Owner-bundle entry instructions |
+
+A standalone and a subordinate record follow the same rules: parentage changes organization, never
+rigor. A subordinate gets its own record, source, fact, interaction, routing, coverage and pin-map
+IDs — never a shortcut through its parent's.
+
+## Facts and their classes
+
+Every quantitative fact carries an explicit unit and its conditions; textual facts use unit
+`NONE`. A fact is classified as one of: `ABSOLUTE_MAXIMUM`, `RECOMMENDED_OPERATION`,
+`GUARANTEED_ELECTRICAL`, `TYPICAL_CURVE`, `TRANSIENT`, `PROTECTION_STANDOFF`,
+`PROTECTION_BREAKDOWN`, `PROTECTION_CLAMP`, `THERMAL_SOA`, or `PROJECT_STATE`. Keeping these
+distinct is the point: an absolute maximum is not a recommended operating point, a typical curve is
+not a guaranteed limit, and a clamp voltage is not a standoff voltage.
+
+## Verdicts
+
+Only six verdicts are valid, spelled exactly:
+
+| Verdict | Meaning |
+| --- | --- |
+| `PASS - primary-source confirmed` | A qualifying primary claim, or a calculation whose whole dependency closure is primary PASS |
+| `CONFIRMED - distributor identity only` | Narrow order-identity confirmation; never performance evidence |
+| `BLOCKER - deterministic spec violation` | A supported, deterministic violation |
+| `NEEDS BENCH` | Requires measurement or physical verification |
+| `UNSOURCED` | Required support is not retained |
+| `NOT APPLICABLE` | The claim or domain does not apply, with a reason; it never blocks a domain (see [ADR-008](../design/decisions.mdx#adr-008-—-not-applicable-never-blocks)) |
+
+These verdicts are never collapsed into a single pass/fail field, in the data or in a report.
+
+## Provenance, authority and availability
+
+Provenance is a separate field from verdict: `PRIMARY-SPEC`, `DISTRIBUTOR-IDENTITY`,
+`REFERENCE-DESIGN`, `CALCULATED`, `PROJECT-CHOICE`, `BENCH-OBSERVED`, or `UNVERIFIED`.
+`PRIMARY-SPEC` may be `PASS` only from an `AVAILABLE` `MANUFACTURER_PRIMARY` source.
+`CONFIRMED - distributor identity only` needs an `AVAILABLE` `DISTRIBUTOR_IDENTITY` source and a
+`PROJECT_STATE` identity fact — it can never support an electrical or thermal limit.
+
+**Availability is not authority.** A downloaded distributor page is available but not primary. A
+correct manufacturer URL is authoritative in origin but may currently be unavailable. An
+unavailable source records availability `SOURCE UNAVAILABLE` and the **zero-hash sentinel** — a
+SHA-256 of 64 zeros — which records the absence of verified bytes, never a guessed or copied hash.
+A hash belongs to the bytes actually inspected; an old hash is not proof that a URL still serves the
+same content today.
+
+## Page index vs. label
+
+A source lock records **both** `physical_pdf_page_index` and `printed_page_label`. The physical
+index is 0-based — the first page of the PDF file is `0`, whatever is printed on it. The printed
+label is the page number as printed on the page, which may be roman, prefixed, or absent entirely.
+The two commonly differ (a cover page, a table of contents, a title block), and the contract
+requires both because "page 12" is ambiguous without saying which kind of "12" it is.
+
+## Calculations and their limits
+
+A `CALCULATED` fact lists its raw fact IDs in `depends_on` and an evaluable arithmetic
+`expression` naming exactly those IDs. Missing, unused, self, or cyclic dependencies fail
+validation. A calculated `PASS` is trusted only when **every raw leaf of its dependency closure**
+is a primary-source `PASS` — a figure computed from a typical value stays dependent on typical
+evidence, however precise the arithmetic looks.
+
+The validator recomputes the arithmetic, but **arithmetic is not dimensional proof**: it does not
+check units algebraically, and it cannot tell you whether the source table was read correctly.
+Unit consistency and table interpretation stay an explicit review step for whoever records the
+fact.
+
+## Coverage ≠ sign-off
+
+`COVERED` means the declared domain has available, non-`UNSOURCED` evidence for its listed facts —
+that's all it means. A `NEEDS BENCH` fact can still count as "available evidence" for coverage
+purposes, so `COVERED` is not hardware sign-off, a clean validation run is not hardware sign-off,
+and a green build is not hardware sign-off. Every `OPEN` domain names its blocking facts in
+`blocking_fact_ids`, and a report states explicit verdicts — never a single summary "safe" badge.
+Physical fit, assembled state, programmed state and bench behavior are established only by recorded
+observations (the bench-result workflow), never inferred from a passing check.

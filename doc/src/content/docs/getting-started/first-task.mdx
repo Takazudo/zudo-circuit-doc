@@ -1,0 +1,52 @@
+---
+title: The first task
+description: The first thing to do in a generated project — write the brief, then add one exact component.
+sidebar_position: 5
+---
+
+A generated project ships one canonical agent workflow, in `circuit/WORKFLOW.md`. `CLAUDE.md` and
+`AGENTS.md` are thin pointers to it, so whichever agent you use follows the same steps — see
+[Workflows](../workflows/) for the full A–G list and
+[how Claude Code and Codex share one workflow](../workflows/agent-collaboration.mdx). This page
+only walks the first two.
+
+## Step 1 — Workflow A: start the circuit
+
+Describe the idea to your agent in a sentence or two and ask it to fill in the project brief. It
+will:
+
+1. Fill `doc/src/content/docs/project/index.mdx`: intended behavior, interfaces, power source,
+   dimensions, environment, quantity, constraints — leaving "Not entered" wherever you haven't said.
+2. Draft functional blocks and operating states in `doc/src/content/docs/architecture/overview.mdx`.
+3. Put the most consequential uncertainties and the next bounded task in
+   `doc/src/content/docs/project/next-actions.mdx`.
+4. Run `pnpm circuit:check` and `pnpm check`.
+
+**Done** looks like: another agent (or you, later) can explain the goal and the next decision from
+the brief, the overview and next actions alone — with unknown electrical values still left unknown,
+never invented to fill a table.
+
+## Step 2 — Workflow B: add the first exact component
+
+Once you know a real part, ask by manufacturer and full part number — for example, "add this part
+and download its datasheet". The agent will:
+
+1. Resolve the exact identity (manufacturer, complete MPN with suffix and package, supplier order
+   codes).
+2. Create the owner bundle: `pnpm exec zudo-circuit-doc new-component <suffix>` copies the
+   packaged template to `.claude/skills/component-<suffix>/`.
+3. Obtain and record evidence (Workflow C), then map pins in `pin-map.json` and update the
+   inventory.
+4. Read the `SCOPE:` line `pnpm circuit:check` prints — the honest limit of what the check proved
+   for a manual-profile inventory (see [Inventory profiles](../concepts/inventory-profiles.mdx)).
+5. Update `circuit/publication/selection.json` in the same task, then
+   `pnpm circuit:generate`, `pnpm check`, `pnpm build` and `pnpm check:site`.
+
+**Done** looks like: one exact identity is traceable from the inventory through its owner bundle to
+its published page; every outstanding gap shows as an `OPEN` domain or a non-`PASS` verdict — being
+in the catalog never means "verified" or "suitable for production" (see
+[Evidence contract → Coverage ≠ sign-off](../concepts/evidence-contract.mdx#coverage-≠-sign-off)).
+
+More short requests, in English and Japanese, are collected as task examples in the generated
+project's `circuit/agent-task-examples.md`. The full step-by-step versions of every workflow (A
+through G) live in `circuit/WORKFLOW.md` — this site never duplicates that text.

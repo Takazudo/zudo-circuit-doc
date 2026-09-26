@@ -1,6 +1,24 @@
 ---
 title: Concepts
+description: The core ideas behind zudo-circuit-doc — component evidence, publication, ownership, inventory profiles and CAD fidelity.
 sidebar_position: 1
 ---
 
-The core ideas behind zudo-circuit-doc: component evidence, the config contract, the generated-project layout, and how they fit together.
+The core ideas behind zudo-circuit-doc: component evidence, the config contract, the
+generated-project layout, and how they fit together. Everything here describes **implemented**
+behavior of `@takazudo/zudo-circuit-doc` — where the product differs from an earlier plan, this
+site follows the code.
+
+## In this section
+
+- [The evidence contract](./evidence-contract.mdx) — files, facts and classes, verdicts,
+  provenance, availability vs. authority, page index vs. label, calculations and their limits, and
+  why coverage is not sign-off.
+- [Publication](./publication.mdx) — the three gates, the selection lock, the assets allowlist,
+  and why `assetViewerExclude` is not privacy.
+- [Ownership and upgrades](./ownership-and-upgrades.mdx) — what belongs to the package, the
+  project, or the generator; why there is no `update` command; and the scaffold-refresh procedure.
+- [Inventory profiles](./inventory-profiles.mdx) — the manual (generic-v1) profile and the
+  led-generator-v1 profile.
+- [CAD fidelity](./cad-fidelity.mdx) — the four fidelity classes and what each one does, and does
+  not, prove.

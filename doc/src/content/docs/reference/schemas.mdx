@@ -1,0 +1,65 @@
+---
+title: Publication schemas
+description: selection.json, assets.json, and the resolved-validator-config pointer.
+sidebar_position: 5
+---
+
+## `selection.json`
+
+`circuit/publication/selection.json`, schema version 1:
+
+```json
+{
+  "schema_version": 1,
+  "recordIds": [],
+  "sourceIds": [],
+  "linkableSourceIds": [],
+  "documentSelections": [],
+  "expect": { "records": 0, "sources": 0, "integrationRules": 0, "packages": 0 }
+}
+```
+
+| Key | Type | Notes |
+| --- | --- | --- |
+| `schema_version` | `1` | |
+| `recordIds` | `string[]` | Record IDs cleared for publication (the INSTANCE gate) |
+| `sourceIds` | `string[]` | Source IDs cleared for publication |
+| `linkableSourceIds` | `string[]` | Subset of `sourceIds` whose outbound URL is also published |
+| `documentSelections` | `array` | One entry per published record choosing its primary document, `documentKind`: `datasheet` \| `specification` \| `drawing` |
+| `expect.records` / `expect.sources` / `expect.integrationRules` / `expect.packages` | `number` | Reviewed counts, `0` allowed for every one |
+| `comment` | `string` (optional) | The only extra key the schema allows beyond the above |
+
+Strictly validated: every key above is required except the optional `comment`; any other extra key
+is rejected. See [Concepts → Publication](../concepts/publication.mdx#the-selection-lock) for what
+each field gates.
+
+## `assets.json`
+
+`circuit/publication/assets.json`, schema version 1:
+
+```json
+{
+  "schema_version": 1,
+  "assets": [
+    { "path": "favicon.svg", "reason": "Site favicon shipped by the zudo-doc scaffold; not component evidence or CAD." }
+  ]
+}
+```
+
+Each entry: `path` (relative to `docs.publicRoot`), `reason` (a human-readable justification), and
+an optional `source_id`. See [Concepts → Publication](../concepts/publication.mdx#the-assets-allowlist).
+
+## The resolved-validator-config pointer
+
+The JS CLI never hands Python a config path to resolve itself. It loads and resolves
+`circuit.config.ts`, maps it into one resolved-config JSON object, and passes that object to
+`circuit_validate.py` as `--config <file>` (a unique `mkdtemp` temp file, removed afterwards) or on
+stdin (`--config -`) — never a fixed, potentially-racing project path. Every key in that JSON object
+is required, and every path in it is absolute; `null` means "not configured", and a configured path
+that doesn't exist is a `FAIL` naming it.
+
+The full shape — every key, what each one means, and the exact check order the validator runs in —
+is documented next to the validator itself:
+`packages/circuit-doc/python/RESOLVED_CONFIG.md` in this repository, shipped inside the npm tarball
+alongside `circuit_validate.py`. This site doesn't duplicate that file; treat it as this schema's
+source of truth for the validator's side of the config contract.
