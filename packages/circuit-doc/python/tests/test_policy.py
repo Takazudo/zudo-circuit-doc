@@ -115,6 +115,17 @@ class PolicyTests(unittest.TestCase):
         self.assert_policy_fails(policy({**seeded, "invalidCases": [{**blank, "base": "golden"}]}), "unsupported invalid-case base 'golden'", lines=[part], direct_routing=ROUTING)
         self.assert_policy_fails(policy({**seeded, "invalidCases": [blank]}), "routing.directRouting must be", lines=[part])
 
+    def test_seeded_fixtures_direct_routing_option_is_optional_and_defaults_to_the_resolved_config(self):
+        part = line("line-a", "TST-100", "Test Maker", owner="component-a")
+        case = {"name": "duplicate-mpn", "base": "inventory", "target": "lines.line-a.manufacturer", "value": "Test Maker", "expected_error": "x"}
+        bare = {"type": "seeded-fixtures", "invalidCases": [case]}
+        # A present routing.directRouting is used as-is, with no need to also name it in the check.
+        self.assert_policy_fails(policy(bare), "duplicate-mpn: invalid fixture passed", lines=[part], direct_routing=ROUTING)
+        blank = {**case, "name": "blank-mpn", "target": "lines.line-a.mpn", "value": " ", "expected_error": "blank identity field"}
+        self.assertEqual(self.run_policy(policy({**bare, "invalidCases": [blank]}), lines=[part], direct_routing=ROUTING).lines, 1)
+        # With no directRouting in the check and none configured, the default has nothing to fall back to.
+        self.assert_policy_fails(policy({**bare, "invalidCases": [blank]}), "routing.directRouting must be configured", lines=[part])
+
 
 if __name__ == "__main__":
     unittest.main()
