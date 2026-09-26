@@ -1,0 +1,19 @@
+{
+  "representatives": [
+    { "kind": "passive", "path": "/docs/components/records/c22807/", "slug": "c22807", "identity": "C22807" },
+    { "kind": "IC", "path": "/docs/components/records/al8860mp-13/", "slug": "al8860mp-13", "identity": "AL8860MP-13" },
+    {
+      "kind": "connector",
+      "path": "/docs/components/records/type-c-31-m-17/",
+      "slug": "type-c-31-m-17",
+      "identity": "TYPE-C-31-M-17"
+    },
+    {
+      "kind": "unavailable history",
+      "path": "/docs/components/records/c529334/",
+      "slug": "c529334",
+      "identity": "STM32G031F8P6",
+      "availability": "SOURCE UNAVAILABLE"
+    }
+  ]
+}

@@ -12,8 +12,37 @@
  * `models --check`/`footprints check` compare against the real pinned goldens
  * — there is no separate `expected/doc/...` tree to keep in sync, except the
  * one deliberate exception recorded in `expected/` (see EXPECTED-CHANGES.md).
+ *
+ * `scan`/`browserSmoke` below are never read by this file's own harness
+ * (`scripts/check-led-fixture.mjs` builds no site); they exist so
+ * `scripts/build-fixture-site.mjs` (#23) has a single source of truth to
+ * import when it derives the fixture SITE's own config (docs.* rewritten to a
+ * real zudo-doc host layout via `circuit/site-overlay.json`). Importing the
+ * JSON files directly — rather than copying their values in by hand — is what
+ * keeps `circuit/{scan-policy,browser-representatives}.json` the one place a
+ * re-baseline or a representative-list change needs to happen.
+ *
+ * `circuit/scan-policy.json` re-baselines the real zudo-led-lamp site's scan
+ * floors (100/60/100/150, expectedWithheld 6) for the fixture SITE, which has
+ * none of that site's hand-authored project/architecture/research/decisions/
+ * verification pages:
+ *   - `minimumOwnedCanaries`/`minimumOwnedFiles` (100/60) are kept AS-IS: the
+ *     OWNED tier scans only this feature's own output (generated MDX,
+ *     preflight, built component pages, search/llms slices), which the
+ *     surrounding host content never touches — measured 269 canaries x 81
+ *     files on the fixture site, comfortably above the unchanged floor.
+ *   - `minimumSiteCanaries`/`minimumSiteFiles` (266/185) and
+ *     `expectedWithheld` (3) are measured fresh on the fixture site (2026-09,
+ *     `pnpm build:led-site`): the SITE tier subtracts canaries any OTHER
+ *     authored page already publishes, and this host authors far fewer pages
+ *     than the real site (no project/architecture/research/decisions/
+ *     verification sections), so both the withheld count and the site-wide
+ *     file/canary totals are genuinely different numbers here, not the real
+ *     site's 150/6.
  */
 import type { CircuitConfig } from "@takazudo/zudo-circuit-doc/config";
+import browserSmoke from "./circuit/browser-representatives.json" with { type: "json" };
+import scan from "./circuit/scan-policy.json" with { type: "json" };
 
 export default {
   configVersion: 1,
@@ -83,4 +112,6 @@ export default {
   validation: {
     policy: "circuit/policy.json",
   },
+  scan,
+  browserSmoke,
 } satisfies CircuitConfig;

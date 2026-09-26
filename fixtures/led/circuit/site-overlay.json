@@ -1,0 +1,13 @@
+{
+  "_comment": "Read by scripts/build-fixture-site.mjs (#23), never by the runtime CLI. Rewrites fixtures/led/circuit.config.ts's docs.* paths from the raw pinned-corpus layout (upstream/doc/...) to a real zudo-doc host layout (doc/...), once the harness overlays host files from examples/empty/doc/ into <out>/doc/. The docs.* values are a mechanical rewrite: each one is the matching upstream/circuit.config.ts value with its leading 'upstream/' stripped. `publication.assets` points at a site-only allowlist (circuit/site-assets.json) so the host's favicon.svg (copied in from examples/empty/doc/public/, same as examples/empty's own project) does not trip the public-scope check — fixtures/led/circuit/assets.json itself stays untouched (#21 owns it, and its own harness never builds a site, so it never had a favicon to allowlist).",
+  "docs": {
+    "root": "doc",
+    "generatedContent": "doc/src/content/docs/components",
+    "preflight": "doc/component-docs/preflight.json",
+    "publicRoot": "doc/public",
+    "dist": "doc/dist"
+  },
+  "publication": {
+    "assets": "circuit/site-assets.json"
+  }
+}
