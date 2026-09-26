@@ -14,6 +14,7 @@ import { resolve } from "node:path";
 
 import { CATALOG_ROUTE } from "../../core/site.ts";
 import { findChromeBinary } from "../../browser-smoke/chrome.ts";
+import { deriveRepresentatives } from "../../browser-smoke/derive-representatives.ts";
 import { readRepresentativesFile } from "../../browser-smoke/representatives.ts";
 import { runBrowserSmoke } from "../../browser-smoke/run.ts";
 import type { Representative } from "../../browser-smoke/types.ts";
@@ -29,7 +30,8 @@ const meta: CommandMeta = {
       name: "--representatives",
       kind: "value",
       valueName: "<json>",
-      description: "representative pages (default: config browserSmoke.representatives)",
+      description:
+        "representative pages (default: config browserSmoke.representatives, else up to 3 derived from published records)",
     },
     { name: "--chrome", kind: "value", valueName: "<bin>", description: "Chrome binary (default: $CHROME_BIN)" },
     { name: "--shell-assertions", description: "also assert the zudo-doc shell DOM" },
@@ -39,7 +41,11 @@ const meta: CommandMeta = {
     { code: EXIT.PASS, meaning: "every browser check passed" },
     { code: EXIT.FAILED, meaning: "a browser check failed" },
     { code: EXIT.USAGE, meaning: "usage/config error" },
-    { code: EXIT.NOT_RUN, meaning: "not run: Chrome not found (set CHROME_BIN)" },
+    {
+      code: EXIT.NOT_RUN,
+      meaning:
+        "not run: Chrome not found (set CHROME_BIN), or records are published but none qualifies for a default smoke (set browserSmoke.representatives)",
+    },
   ],
 };
 
@@ -60,20 +66,43 @@ async function run(context: CommandContext): Promise<number> {
     return EXIT.NOT_RUN;
   }
 
+  const distFlag = flagValue(args, "--dist");
+  const distRoot = distFlag === undefined ? loaded.paths.distRoot : resolve(io.cwd, distFlag);
+
   let representatives: readonly Representative[];
   const representativesFlag = flagValue(args, "--representatives");
+  const configured = loaded.config.browserSmoke?.representatives;
   try {
-    representatives =
-      representativesFlag !== undefined
-        ? await readRepresentativesFile(representativesFlag, io.cwd)
-        : (loaded.config.browserSmoke?.representatives ?? []);
+    if (representativesFlag !== undefined) {
+      representatives = await readRepresentativesFile(representativesFlag, io.cwd);
+    } else if (configured !== undefined) {
+      representatives = configured;
+    } else {
+      const derived = await deriveRepresentatives({
+        preflightFile: loaded.paths.preflightFile,
+        generatedRoot: loaded.paths.generatedRoot,
+        distRoot,
+      });
+      if (derived.outcome === "none-qualify") {
+        io.stderr.write(
+          `not run: ${derived.publishedRecords} record(s) are published but none qualifies for a default browser smoke ` +
+            "(a component-references section with a reviewed PDF, footprint and WRL model); " +
+            "set browserSmoke.representatives in circuit.config.ts\n",
+        );
+        return EXIT.NOT_RUN;
+      }
+      if (derived.outcome === "derived") {
+        representatives = derived.representatives;
+        const names = representatives.map((representative) => `${representative.path} (${representative.identity})`);
+        io.stdout.write(`INFO: using derived representatives: ${names.join(", ")}\n`);
+      } else {
+        representatives = [];
+      }
+    }
   } catch (error) {
     io.stderr.write(`${(error as Error).message}\n`);
     return EXIT.USAGE;
   }
-
-  const distFlag = flagValue(args, "--dist");
-  const distRoot = distFlag === undefined ? loaded.paths.distRoot : resolve(io.cwd, distFlag);
 
   try {
     const report = await runBrowserSmoke({
