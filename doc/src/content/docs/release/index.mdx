@@ -12,8 +12,9 @@ evidence instead.
 
 ## Package names
 
-`create-zudo-circuit-doc` and `@takazudo/zudo-circuit-doc` are both **unclaimed on npm** (confirmed
-2026-09-26; `npm view` returns 404 for each). **Neither package is published.** Publishing is a
+`create-zudo-circuit-doc` and `@takazudo/zudo-circuit-doc` are both **unclaimed on npm**. This was
+re-checked with `npm view` on 2026-09-26 for the [validation report](./v0-1-validation.mdx), and it
+returned `E404` for each name. **Neither package is published.** Publishing is a
 separate, explicit action outside this epic's scope — see
 [Getting Started → Create a project](../getting-started/create-a-project.mdx) for how to try the
 tool from packed tarballs in the meantime.
@@ -24,6 +25,22 @@ tool from packed tarballs in the meantime.
 | --- | --- |
 | `@takazudo/zudo-circuit-doc` | `bin`, `lib`, `python`, `templates`, `contract`, `styles.css`, `README.md`, `LICENSE` (excluding `lib/**/*.test.*`, `python/tests`, `python/**/__pycache__`) |
 | `create-zudo-circuit-doc` | `bin`, `dist`, `templates`, `README.md`, `LICENSE` (excluding `dist/**/*.test.*`) |
+
+The tarball listings from the `verify:pack` run for the validation report:
+
+| Tarball | Entries | Breakdown |
+| --- | --- | --- |
+| `takazudo-zudo-circuit-doc-0.1.0.tgz` | 269 | `lib/` 218, `python/` 34, `templates/` 9, `contract/` 3, plus `bin/zudo-circuit-doc.js`, `styles.css`, `README.md`, `LICENSE`, `package.json` |
+| `create-zudo-circuit-doc-0.1.0.tgz` | 89 | `templates/` 59 (`templates/default`, including `_gitignore`), `dist/` 26, plus `bin/create-zudo-circuit-doc.js`, `README.md`, `LICENSE`, `package.json` |
+
+`verify:pack` also checks the shape of each tarball:
+
+- only the declared `files` appear at the top level;
+- no `test/`, `python/tests`, `__pycache__`, fixtures or examples;
+- no `.step`, `.stp` or `.pdf` file;
+- every `exports` target is present;
+- no compiled file keeps a `.ts` import specifier;
+- islands start with `"use client"`.
 
 The runtime package ships compiled JavaScript under `lib/` — not `dist/` — because zfb 2.21.0's
 workspace-package staging hard-prunes any directory literally named `dist` from a workspace package
@@ -47,6 +64,11 @@ Both packages, and this repository as a whole, are **MIT-licensed**. Two carve-o
   [CC-BY-SA 4.0 with the KiCad library exception](https://creativecommons.org/licenses/by-sa/4.0/legalcode) —
   see its own `NOTICE.md` for the exact file-by-file mapping to source library, tag and CAD receipt.
 
+**Recommendation (not done here):** add a LICENSE to
+[zudo-led-lamp](https://github.com/Takazudo/zudo-led-lamp) for its owner-authored content. At the
+pinned commit it has none, which is why `fixtures/led/NOTICE.md` can record provenance but not
+grant a license.
+
 ## Tested dependency family
 
 The version family is exact-pinned across the whole repository — see [Design → ADR-003](../design/decisions.mdx):
@@ -58,6 +80,12 @@ The version family is exact-pinned across the whole repository — see [Design �
 | pnpm (`packageManager`, via corepack) | 11.5.2 |
 | Node | ≥22.18.0 |
 | Python | ≥3.10 (standard library only) |
+
+The validation report ran the family on Node 24.13.1 and 22.18.0, and on Python 3.12.3 and 3.10.19.
+
+Before the first publish, revisit one generated-project setting: the root `pnpm-workspace.yaml`
+sets `minimumReleaseAge: 0`, following create-zudo-doc 5.27.0's own scaffold (ADR-003). This is a
+known trade-off, recorded for publish time.
 
 ## Known limits and deferred items
 
@@ -76,6 +104,8 @@ Out of scope for v0.1, deliberately:
   `mpn`, `lcsc`, `manufacturer`, `function`; a same-named part from a different manufacturer is
   handled by exact manufacturer-qualified identity, never by a shared-name shortcut (see
   [Design → ADR-009](../design/decisions.mdx)).
+- **No `.agents/skills` wiring for Codex.** Evidence stays in `.claude/skills/`, and Codex reaches it
+  through `AGENTS.md` → `circuit/WORKFLOW.md`. No mirror is created.
 
 Two follow-ups were opened against the runtime for a future release, tracked upstream rather than
 blocking v0.1:
@@ -84,10 +114,12 @@ config field, instead of inferring it from the legacy generated-page marker) and
 [#37](https://github.com/Takazudo/zudo-circuit-doc/issues/37) (allowing material-only `DEF`/`USE`
 in published WRLs, so official KiCad StepUp models publish without a derivation step).
 
-## Coming
+## Validation
 
-The [scenario traceability matrix](./scenario-matrix.mdx) covers all 31 IDs from the epic's
-acceptance plan. The full v0.1 validation report — including the Claude→Codex continuation run
-and the explicit "not run: requires physical hardware" bench scenario — is tracked as epic
-sub-issue [#34](https://github.com/Takazudo/zudo-circuit-doc/issues/34), and will land on this
-page once complete.
+The [v0.1 validation report](./v0-1-validation.mdx) covers all 31 acceptance scenarios, and the
+[scenario traceability matrix](./scenario-matrix.mdx) maps each one to its check. 29 pass through
+automated checks. AGENT-01, the Claude→Codex continuation, was **not run** because the Codex CLI
+hit its usage limit; see the [AGENT-01 summary](./agent-01-transcript-summary.mdx). BENCH-01 is
+**not run** because it requires physical hardware.
+
+Publishing is a separate, explicit action. Nothing in this epic publishes to npm or deploys a site.

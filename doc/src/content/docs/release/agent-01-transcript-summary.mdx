@@ -1,0 +1,120 @@
+---
+title: AGENT-01 run summary
+description: The v0.1 Claude-to-Codex continuation scenario — what was prepared, why the Codex side did not run, the grading key, and how to re-run it.
+sidebar_position: 4
+---
+
+**Status: not run — the Codex CLI reported its account usage limit.** Both Codex steps were
+attempted on 2026-09-26 and each stopped at its first model turn, before reading any file. No Codex
+output exists to grade, so AGENT-01 is **not passed**. The rest of this page records what was
+prepared and checked around that attempt, so that the scenario can be re-run unchanged.
+
+This page is a summary. It contains no transcript, no credentials and no account details.
+
+## Scenario
+
+AGENT-01 from the acceptance plan: *Claude completes a task, Codex continues.* Expected outcome:
+the same canonical evidence and workflow, and no duplicated or divergent database.
+
+- **Claude side (done).** The Claude side is the TMP1075DR onboarding of `examples/minimal`
+  ([#25](https://github.com/Takazudo/zudo-circuit-doc/issues/25), CAD in
+  [#29](https://github.com/Takazudo/zudo-circuit-doc/issues/29)). A Claude Code session acquired TI
+  datasheet SBOS854F rev F, wrote the owner bundle `.claude/skills/component-ti-tmp1075dr/`, added the
+  generic-profile inventory line and the publication selection, acquired KiCad CAD with receipts, and
+  left a handoff in `doc/src/content/docs/project/next-actions.mdx`. That state is committed and
+  validates: `pnpm check` and `check:site` passed on the monorepo copy and on the packed copy in the
+  confirm gates of the [v0.1 validation report](./v0-1-validation.mdx).
+- **Codex side (not run).** It needs two steps, *Continue* and *Query*, both run on a temporary copy
+  of `examples/minimal`. Neither ran.
+
+## What was run
+
+| Step | Environment | Result |
+| --- | --- | --- |
+| Temporary copy | A new directory under the OS temp dir, outside the monorepo. `examples/minimal` was copied there without `node_modules`, and the runtime was installed from a freshly packed `@takazudo/zudo-circuit-doc-0.1.0.tgz`, the same way `verify-pack.mjs --fixture minimal` does. A baseline git commit was made so that the diff could be scoped afterwards. | Ready |
+| Baseline `pnpm circuit:check` | Temporary copy, before Codex | PASS: `component-spec contract; 1 lines; offline=True; refreshed=none` (with a `SCOPE:` line saying the pin-asset check was performed) |
+| Baseline `pnpm check` | Temporary copy, before Codex | PASS: the generated output is up to date, and `zfb check` reported no errors |
+| Codex *Continue* | `codex exec --sandbox workspace-write -C <copy>` (codex-cli 0.156.1) | **Not run.** The first turn failed with the CLI's usage-limit error; retry was offered after 2026-10-02. |
+| Codex *Query* | `codex exec --sandbox read-only -C <copy>` | **Not run.** Same usage-limit error. |
+| Diff scope after Codex | `git status` on the copy | Empty. Codex changed nothing, because it never ran a turn. |
+| Cleanup | `codex-sweep.js --workspace <copy>`, then the copy was deleted | No broker left to reap; the directory was removed |
+
+No retry was made through another account, model, or provider. A substitute run would not be the
+scenario as specified.
+
+## Prompts used (reuse these verbatim)
+
+**Continue** (workspace-write sandbox):
+
+> Following circuit/WORKFLOW.md, add a coverage note and a next-action entry for verifying
+> TMP1075DR's I2C address strapping on the breakout (Workflow E), citing the existing fact and
+> locator; do not invent values. Keep the change to project-owned files, regenerate if the workflow
+> requires it, and run pnpm circuit:check and pnpm check before you finish. Do not commit.
+
+**Query** (read-only sandbox):
+
+> What is the evidence status of TMP1075DR's supply-voltage range and absolute maximum supply
+> voltage? Cite fact IDs, source IDs and locators, and say what remains NEEDS BENCH. Read-only: do
+> not modify any file.
+
+## Grading key
+
+This key comes from the committed bundle (`.claude/skills/component-ti-tmp1075dr/facts.json` and
+`coverage.json`), not from a Codex answer. A future run passes only if all of the following hold.
+
+**Continue passes when:**
+
+- `pnpm circuit:check` and `pnpm check` both pass on the copy afterwards.
+- The diff touches only project-owned files. The expected set is the owner bundle's
+  `coverage.json` (and `facts.json` only if a fact changes),
+  `doc/src/content/docs/project/next-actions.mdx`, and the generator's own
+  `doc/src/content/docs/components/**` and `circuit/generated/preflight.json`. Nothing under
+  `node_modules/`, and no second copy of the evidence anywhere.
+- The note cites the facts that already exist: `fact-tmp1075-address-pin-strapping` (locator
+  "Table 5-1 Pin Functions, rows A2, A1, A0") and `fact-tmp1075-address-all-gnd` (locator
+  "Table 7-2 TMP1075 Address Pins State, row A2=0 A1=0 A0=0"), from sources `src-tmp1075-ds-pins` and
+  `src-tmp1075-ds-address`. It introduces no new address value. Whether the breakout's actual strapping
+  was verified is a board question, so any verdict about it stays `NEEDS BENCH` or remains an
+  open next action.
+
+**Query passes when the answer:**
+
+- cites `fact-tmp1075-vplus-min` (1.7 V) and `fact-tmp1075-vplus-max` (5.5 V), both at
+  "Section 6.3 Recommended Operating Conditions, row Supply voltage / TMP1075";
+- cites `fact-tmp1075-vplus-abs-max` (6.5 V) at "Section 6.1 Absolute Maximum Ratings, row Power
+  supply V+ / TMP1075, MAX column";
+- names the source `src-tmp1075-ds-ratings` for all three facts, and the coverage domain
+  `cov-tmp1075-supply-and-absolute-limits` (COVERED);
+- keeps `fact-tmp1075n-vplus-range` as NOT APPLICABLE, because it is the TMP1075N variant;
+- lists what remains NEEDS BENCH: `fact-tmp1075-installed-accuracy`,
+  `fact-tmp1075-self-heating` and `fact-tmp1075-cad-physical-fit`;
+- shows that it read `AGENTS.md` and `circuit/WORKFLOW.md`, and invents no value that is not in the
+  bundle.
+
+## Structural criteria (checked, but not a pass by themselves)
+
+These properties were checked by inspecting the temporary copy before Codex ran:
+
+- **Single evidence root.** The only `facts.json`, `sources.json` and `coverage.json` files are under
+  `.claude/skills/component-ti-tmp1075dr/`, and the only `inventory.json` is under
+  `.claude/skills/component-spec-audit/references/`. There is no `.agents/` directory and no
+  duplicated evidence.
+- **Thin CLAUDE.md/AGENTS.md pair.** The two files are byte-identical, 7 lines each, and both only
+  point to `circuit/WORKFLOW.md`.
+
+These are the preconditions for the handoff. They are not evidence that a second agent actually
+continued the work.
+
+## Re-running it
+
+1. Pack the runtime and build the temporary copy the way `scripts/verify-pack.mjs` does in its
+   minimal flow (`copyWithoutNodeModules`, then `installLocalTarball` for `package.json` and
+   `doc/package.json`, plus a root `pnpm-workspace.yaml`). Run `pnpm install`, then `git init` and
+   make a baseline commit.
+2. Run the two prompts above with `codex exec`. Continue uses `--sandbox workspace-write -C <copy>`;
+   Query uses `--sandbox read-only -C <copy>`.
+3. Grade the results against the key above. Validate with `pnpm circuit:check` and `pnpm check`, and
+   read the diff with `git status` / `git diff` on the copy.
+4. Reap any Codex broker (`codex-sweep.js --workspace <copy>`) and delete the copy.
+5. Replace this page's status and "What was run" table with the actual outcome. Record a failure as
+   a failure.

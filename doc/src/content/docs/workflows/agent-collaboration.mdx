@@ -43,7 +43,9 @@ memory. Codex resuming the same project reads the identical `WORKFLOW.md`, the i
 `.claude/skills/` evidence, and the identical `pnpm circuit:check` output — including the same
 `SCOPE:` and `SKIP:` lines — that Claude Code would have seen.
 
-This project's own acceptance testing exercises exactly that handoff: one agent completes a bounded
-task, and a second, different agent continues from the committed evidence and the next-actions
-handoff alone, with no shared conversation history and no separate, divergent database to keep in
-sync.
+This project's acceptance scenario AGENT-01 is defined around exactly that handoff: one agent
+completes a bounded task, and a second, different agent continues from the committed evidence and
+the next-actions handoff alone, with no shared conversation history and no separate, divergent
+database to keep in sync. Whether the v0.1 run of it happened, and what it showed, is recorded in the
+[AGENT-01 summary](../release/agent-01-transcript-summary.mdx) — it is never inferred from the
+structure described above.
