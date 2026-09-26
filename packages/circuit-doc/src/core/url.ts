@@ -61,6 +61,12 @@ export function classifyUrl(raw: unknown): UrlDecision {
   if (!ALLOWED_URL_SCHEMES.includes(parsed.protocol)) {
     return { decision: "DENY", reason: "SCHEME_NOT_ALLOWED" };
   }
+  // `new URL` accepts `https:host/x` and `https:/host/x` (and `\` for `/`) as
+  // absolute, but a browser resolves those against the page's own origin.
+  if (!/^[a-z][a-z0-9+.-]*:\/\//iu.test(raw) || raw.includes("\\")) {
+    return { decision: "DENY", reason: "NOT_ABSOLUTE" };
+  }
+
   if (parsed.username !== "" || parsed.password !== "") {
     return { decision: "DENY", reason: "CREDENTIALS_IN_URL" };
   }

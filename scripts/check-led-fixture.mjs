@@ -36,6 +36,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..");
 const FIXTURE_DIR = path.join(REPO_ROOT, "fixtures/led");
 const BIN_ENTRY = path.join(REPO_ROOT, "packages/circuit-doc/bin/zudo-circuit-doc.js");
+// `bin/` is committed and only imports the gitignored build output, so probe that.
+const CLI_BUILT = path.join(REPO_ROOT, "packages/circuit-doc/lib/cli/main.js");
 const GENERATED_REL = "doc/src/content/docs/components";
 const PREFLIGHT_REL = "doc/component-docs/preflight.json";
 
@@ -234,8 +236,8 @@ async function runHarness() {
 }
 
 async function main() {
-  if (!existsSync(BIN_ENTRY)) {
-    throw new Error(`${path.relative(REPO_ROOT, BIN_ENTRY)} is missing; run \`pnpm build\` first`);
+  if (!existsSync(CLI_BUILT)) {
+    throw new Error(`${path.relative(REPO_ROOT, CLI_BUILT)} is missing; run \`pnpm build\` first`);
   }
   assertStepMaterialized();
   await assertSelectionPortsAreFaithful();

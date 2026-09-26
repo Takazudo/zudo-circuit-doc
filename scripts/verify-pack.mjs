@@ -75,7 +75,7 @@ const fixtureIndex = argv.indexOf("--fixture");
 const FIXTURE = fixtureIndex === -1 ? "empty" : argv[fixtureIndex + 1];
 const knownFlags = new Set(["--keep", "--fixture"]);
 for (const [index, argument] of argv.entries()) {
-  if (index === fixtureIndex + 1) continue; // the --fixture value
+  if (fixtureIndex !== -1 && index === fixtureIndex + 1) continue; // the --fixture value
   if (!knownFlags.has(argument)) fail(`Unknown argument: ${argument}`);
 }
 const KNOWN_FIXTURES = new Set(["empty", "minimal", "led"]);
@@ -518,7 +518,7 @@ async function emptyFixtureFlow({ scratch, initBin, runtimeTarball, packedTempla
     await writeFile(path.join(destDir, "keep.txt"), "pre-existing\n");
     const before = await hashTree(destDir);
     const result = await runCapture(process.execPath, [initBin, destDir, "--yes", "--no-install", "--no-git"], scratch);
-    assert(result.status !== 0, `expected a nonzero exit scaffolding into a non-empty destination, got ${result.status}`);
+    assert(result.status !== null && result.status !== 0, `expected a nonzero exit scaffolding into a non-empty destination, got ${result.status}`);
     const after = await hashTree(destDir);
     assert(before === after, "the existing destination's contents changed even though scaffolding failed");
     pass("NEG-INIT-03", `exit ${result.status}, destination byte-for-byte unchanged`);
@@ -539,7 +539,7 @@ async function emptyFixtureFlow({ scratch, initBin, runtimeTarball, packedTempla
     const inventoryRelative = ".claude/skills/component-spec-audit/references/inventory.json";
     await unlink(path.join(dir, inventoryRelative));
     const result = await runCapture(PNPM[0], [...PNPM.slice(1), "run", "circuit:check"], dir);
-    assert(result.status !== 0, `expected a nonzero exit, got ${result.status}`);
+    assert(result.status !== null && result.status !== 0, `expected a nonzero exit, got ${result.status}`);
     assert(
       (result.stdout + result.stderr).includes(inventoryRelative),
       `failure did not name the configured path ${inventoryRelative}:\n${result.stdout}\n${result.stderr}`,
@@ -566,7 +566,7 @@ async function emptyFixtureFlow({ scratch, initBin, runtimeTarball, packedTempla
       )}\n`,
     );
     const result = await runCapture(PNPM[0], [...PNPM.slice(1), "run", "circuit:generate"], dir);
-    assert(result.status !== 0, `expected a nonzero exit, got ${result.status}`);
+    assert(result.status !== null && result.status !== 0, `expected a nonzero exit, got ${result.status}`);
     assert((result.stdout + result.stderr).includes("STALE_SELECTION"), `expected STALE_SELECTION in output:\n${result.stdout}\n${result.stderr}`);
     pass("NEG-SELECTION", `exit ${result.status}, STALE_SELECTION reported`);
   });
@@ -794,7 +794,7 @@ async function minimalFixtureFlow(root, runtimeTarball, scratch) {
         ],
         hostDir,
       );
-      if (result.status === 4) {
+      if (result.status === 4 && !process.env.CI) {
         skip("M4", `check-browser: not run: Chrome not found (${(result.stdout + result.stderr).trim()})`);
         return;
       }
@@ -908,7 +908,7 @@ async function ledFixtureFlow(root, runtimeTarball, scratch, ledOutDir) {
         ],
         fixtureDir,
       );
-      if (result.status === 4) {
+      if (result.status === 4 && !process.env.CI) {
         skip("M4", `check-browser: not run: Chrome not found (${(result.stdout + result.stderr).trim()})`);
         return;
       }

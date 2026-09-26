@@ -177,7 +177,9 @@ export function applyGeneratedMarker(page: GeneratedPage, marker: string): Gener
  * marker, the package default, or any legacy marker.
  */
 export function isGeneratedContents(contents: string, marker: string = GENERATED_MARKER): boolean {
+  // A Windows checkout with core.autocrlf=true turns the owned files CRLF.
+  const normalized = contents.replace(/\r\n/gu, "\n");
   return [marker, GENERATED_MARKER, ...LEGACY_MARKERS].some((known) =>
-    contents.startsWith(`---\n${known}\n`),
+    normalized.startsWith(`---\n${known}\n`),
   );
 }

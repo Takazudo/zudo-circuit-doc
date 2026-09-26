@@ -35,9 +35,9 @@ def contains_alias(query, alias):
     return re.search(rf"(?<![A-Za-z0-9]){re.escape(alias)}(?![A-Za-z0-9])", query, re.I) is not None
 
 
-def looks_like_vendor_hint(token, known_vendor_tokens, board_names=frozenset()):
+def looks_like_vendor_hint(token, known_vendor_tokens, board_names=frozenset(), function_tokens=frozenset()):
     folded = token.casefold()
-    if folded in board_names:
+    if folded in board_names or folded in function_tokens:
         return False
     return (
         folded in known_vendor_tokens
@@ -102,7 +102,7 @@ def resolve_identities(query, entries, *, id_key, routing=NO_ROUTING_POLICY):
         if entry[id_key] not in candidates or not contains_alias(query, entry["mpn"]):
             continue
         qualifier = re.search(rf"\b([A-Za-z][A-Za-z0-9+&.-]*)\s+{re.escape(entry['mpn'])}(?![A-Za-z0-9])", query, re.I)
-        if qualifier and looks_like_vendor_hint(qualifier.group(1), known_vendor_tokens, routing.board_names):
+        if qualifier and looks_like_vendor_hint(qualifier.group(1), known_vendor_tokens, routing.board_names, function_tokens):
             manufacturer_tokens = {
                 token for item in entries if item[id_key] == entry[id_key]
                 for token in VENDOR_TOKEN.findall(item["manufacturer"])
@@ -125,7 +125,7 @@ def resolve_identities(query, entries, *, id_key, routing=NO_ROUTING_POLICY):
         if entry[id_key] not in candidates or entry["lcsc"] not in mentioned_lcsc:
             continue
         qualifier = re.search(rf"\b([A-Za-z][A-Za-z0-9+&.-]*)\s+{re.escape(entry['lcsc'])}(?![A-Za-z0-9])", query, re.I)
-        if qualifier and looks_like_vendor_hint(qualifier.group(1), known_vendor_tokens, routing.board_names):
+        if qualifier and looks_like_vendor_hint(qualifier.group(1), known_vendor_tokens, routing.board_names, function_tokens):
             manufacturer_tokens = {
                 token.casefold() for item in entries if item[id_key] == entry[id_key]
                 for token in VENDOR_TOKEN.findall(item["manufacturer"])

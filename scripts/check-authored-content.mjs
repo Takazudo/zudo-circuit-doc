@@ -179,7 +179,9 @@ const gitVisible = (() => {
       ["ls-files", "--cached", "--others", "--exclude-standard", "-z", "--", "."],
       { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
     );
-    return new Set(out.split("\0").filter(Boolean));
+    const listed = new Set(out.split("\0").filter(Boolean));
+    // An empty listing means the target sits in a gitignored dir: scan it unfiltered.
+    return listed.size > 0 ? listed : null;
   } catch {
     return null;
   }

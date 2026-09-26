@@ -113,16 +113,25 @@ export async function main(argv: string[], overrides: CliOverrides = {}): Promis
       }
     }
 
+    let gitFailed = false;
     if (plan.git) {
-      const outcome = await runGit(plan.destinationPath);
-      if (outcome.note) println(stdout, outcome.note);
+      try {
+        const outcome = await runGit(plan.destinationPath);
+        if (outcome.note) println(stdout, outcome.note);
+      } catch (error) {
+        gitFailed = true;
+        println(
+          stderr,
+          `Error: git init/commit failed: ${(error as Error).message} The generated files are left in place — they form a valid project; run git init yourself.`,
+        );
+      }
     }
 
     println(stdout, `Created ${plan.destinationPath}`);
     println(stdout, "");
     println(stdout, formatNextSteps({ displayDestination, installRan }));
 
-    return 0;
+    return gitFailed ? 1 : 0;
   } catch (error) {
     if (error instanceof CliUsageError) {
       println(stderr, `Error: ${error.message}`);

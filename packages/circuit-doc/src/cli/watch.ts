@@ -186,6 +186,7 @@ export async function startGenerateWatch(options: GenerateWatchOptions): Promise
   const { stdout, stderr } = options;
   let watchers: FSWatcher[] = [];
   let armed: readonly WatchTarget[] = [];
+  let closed = false;
   let project = await options.load({ fresh: true });
 
   const initial = await runOnce(project, "generate", createProjectValidator(project, options.env));
@@ -212,6 +213,7 @@ export async function startGenerateWatch(options: GenerateWatchOptions): Promise
   };
 
   function arm(targets: readonly WatchTarget[]): void {
+    if (closed) return;
     if (targetsKey(targets) === targetsKey(armed)) return;
     closeWatchers();
     armed = targets;
@@ -239,6 +241,7 @@ export async function startGenerateWatch(options: GenerateWatchOptions): Promise
     scheduler,
     targets: () => armed,
     close(): void {
+      closed = true;
       scheduler.stop();
       closeWatchers();
     },

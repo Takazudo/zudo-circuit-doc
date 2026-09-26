@@ -124,14 +124,31 @@ async function waitForExit(child: ChromeProcess): Promise<void> {
 }
 
 async function readDebuggingPort(chrome: ChromeProcess): Promise<number> {
-  let stderr = "";
-  for await (const chunk of chrome.stderr) {
-    stderr += String(chunk);
-    const match = /DevTools listening on ws:\/\/127\.0\.0\.1:(\d+)\//u.exec(stderr);
-    if (match !== null) return Number(match[1]);
-    if (stderr.length > 20_000) stderr = stderr.slice(-10_000);
-  }
-  throw new Error(`Chrome exited before opening DevTools: ${stderr.slice(-2000)}`);
+  // Listen with 'data' rather than `for await`: breaking out of an async
+  // iterator destroys the stream, leaving Chrome writing into a closed pipe.
+  return new Promise<number>((resolvePort, rejectPort) => {
+    let stderr = "";
+    const onData = (chunk: unknown): void => {
+      stderr += String(chunk);
+      const match = /DevTools listening on ws:\/\/127\.0\.0\.1:(\d+)\//u.exec(stderr);
+      if (match !== null) {
+        cleanup();
+        resolvePort(Number(match[1]));
+        return;
+      }
+      if (stderr.length > 20_000) stderr = stderr.slice(-10_000);
+    };
+    const onEnd = (): void => {
+      cleanup();
+      rejectPort(new Error(`Chrome exited before opening DevTools: ${stderr.slice(-2000)}`));
+    };
+    const cleanup = (): void => {
+      chrome.stderr.off("data", onData);
+      chrome.stderr.off("end", onEnd);
+    };
+    chrome.stderr.on("data", onData);
+    chrome.stderr.on("end", onEnd);
+  });
 }
 
 async function waitForJson(url: string): Promise<unknown> {

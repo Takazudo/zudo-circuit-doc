@@ -211,7 +211,7 @@ export async function diffAgainstDisk(plan: EmitPlan): Promise<readonly string[]
   for (const { page, existing } of targets) {
     if (conflicting.has(page.relativePath)) continue;
     if (existing === null) drift.push(`missing: ${page.relativePath}`);
-    else if (existing !== page.contents) drift.push(`changed: ${page.relativePath}`);
+    else if (existing.replace(/\r\n/gu, "\n") !== page.contents) drift.push(`changed: ${page.relativePath}`);
   }
   for (const path of leftovers) drift.push(`stale: ${toPosix(root, path)}`);
 

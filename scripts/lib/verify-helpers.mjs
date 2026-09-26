@@ -109,7 +109,7 @@ export function runCapture(command, args, cwd, options = {}) {
     child.stdout?.on("data", (chunk) => (stdout += String(chunk)));
     child.stderr?.on("data", (chunk) => (stderr += String(chunk)));
     child.on("error", (error) => reject(new VerifyError(`${command} could not start: ${error.message}`)));
-    child.on("close", (code) => resolvePromise({ status: code, stdout, stderr }));
+    child.on("close", (code, signal) => resolvePromise({ status: code, signal, stdout, stderr }));
   });
 }
 

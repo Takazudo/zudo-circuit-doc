@@ -42,8 +42,17 @@ export function resolvePlan(
   const title = options.title ?? titleCaseFromName(name);
   validateTitle(title);
 
-  const library = options.library ?? name;
-  validateLibrary(library);
+  const library = options.library ?? libraryFromName(name);
+  try {
+    validateLibrary(library);
+  } catch (error) {
+    if (options.library === undefined && error instanceof CliUsageError) {
+      throw new CliUsageError(
+        `Cannot derive a valid library name from "${name}": ${error.message} Pass --library explicitly.`,
+      );
+    }
+    throw error;
+  }
 
   return {
     destinationPath,
@@ -68,4 +77,9 @@ export function formatPlan(plan: Plan): string {
     `  install: ${plan.install ? "yes" : "no"}`,
     `  git: ${plan.git ? "yes" : "no"}`,
   ].join("\n");
+}
+
+/** Package names may be scoped or dotted; KiCad library names may not. */
+function libraryFromName(name: string): string {
+  return name.replace(/^@[^/]+\//, "").replace(/[^A-Za-z0-9_-]/g, "-").slice(0, 64);
 }

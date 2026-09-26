@@ -53,6 +53,15 @@ export const RESTRICTED_PUBLIC_EXTENSIONS: readonly string[] = [
 /** Relative to `docs.publicRoot`; this whole subtree is generator-owned. */
 export const COMPONENT_PREVIEWS_PREFIX = "assets/component-previews/";
 
+/** Only the preview generator's own output formats are exempt under the preview root. */
+const GENERATED_PREVIEW_EXTENSIONS: readonly string[] = [".svg", ".wrl"];
+const GENERATED_PREVIEW_MANIFEST = `${COMPONENT_PREVIEWS_PREFIX}footprints/manifest.json`;
+
+function isGeneratedPreviewAsset(relPath: string): boolean {
+  if (!relPath.startsWith(COMPONENT_PREVIEWS_PREFIX)) return false;
+  return relPath === GENERATED_PREVIEW_MANIFEST || GENERATED_PREVIEW_EXTENSIONS.includes(extname(relPath).toLowerCase());
+}
+
 export type PublicScopeViolation = {
   readonly path: string;
   readonly reason: string;
@@ -108,7 +117,7 @@ export async function findPublicScopeViolations(
       }
       if (!entry.isFile()) continue;
       if (!RESTRICTED_PUBLIC_EXTENSIONS.includes(extname(entry.name).toLowerCase())) continue;
-      if (relPath.startsWith(COMPONENT_PREVIEWS_PREFIX)) continue;
+      if (isGeneratedPreviewAsset(relPath)) continue;
       if (allowlist.has(relPath)) continue;
       violations.push({
         path: relPath,

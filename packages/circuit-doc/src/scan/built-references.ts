@@ -84,6 +84,15 @@ export async function checkBuiltReferences(input: BuiltReferencesInput): Promise
   const referencedModels = new Set<string>();
 
   const recordsBySlug = new Map(model.records.map((record) => [String(record.identity.slug), record]));
+  const builtSlugs = new Set(recordDirectories);
+  const missingSlugs = [...recordsBySlug.keys()].filter((slug) => !builtSlugs.has(slug)).sort(byCodeUnit);
+  const extraSlugs = recordDirectories.filter((slug) => !recordsBySlug.has(slug)).sort(byCodeUnit);
+  if (missingSlugs.length > 0 || extraSlugs.length > 0) {
+    fail("PUBLICATION_POLICY", "built component record routes do not match the published record slugs", {
+      missing: missingSlugs,
+      extra: extraSlugs,
+    });
+  }
   for (const slug of recordDirectories) {
     const html = await readFile(join(recordsRoot, slug, "index.html"), "utf8");
     const record = recordsBySlug.get(slug);

@@ -165,8 +165,11 @@ export interface ComposeParams {
 export function composeProject(params: ComposeParams): void {
   const { plan, templateDir, randomSuffix, beforeCopyFile } = params;
   const sourceDir = resolveTemplateDirPath(templateDir);
+  // An existing (empty) destination is filled in place: renaming over it would
+  // swap the directory inode out from under a shell whose cwd is that directory.
+  const destinationExists = fs.existsSync(plan.destinationPath);
   const stagingDir = path.join(
-    path.dirname(plan.destinationPath),
+    destinationExists ? plan.destinationPath : path.dirname(plan.destinationPath),
     `.create-zudo-circuit-doc-staging-${randomSuffix()}`,
   );
 
@@ -174,7 +177,14 @@ export function composeProject(params: ComposeParams): void {
     copyTemplateTree(sourceDir, stagingDir, placeholdersFromPlan(plan), beforeCopyFile, "");
     assertNoPlaceholdersRemain(stagingDir);
     applyAgentFilter(stagingDir, plan.agent);
-    fs.renameSync(stagingDir, plan.destinationPath);
+    if (destinationExists) {
+      for (const entry of fs.readdirSync(stagingDir)) {
+        fs.renameSync(path.join(stagingDir, entry), path.join(plan.destinationPath, entry));
+      }
+      fs.rmdirSync(stagingDir);
+    } else {
+      fs.renameSync(stagingDir, plan.destinationPath);
+    }
   } catch (error) {
     fs.rmSync(stagingDir, { recursive: true, force: true });
     throw new CliError(

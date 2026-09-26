@@ -234,6 +234,9 @@ function projectCases(
       // `Object.hasOwn`, not `in`: `in` walks the prototype chain, so a
       // `result_key` of `constructor` or `toString` would appear to be present
       // and the "result" would be an inherited function.
+      if (row === null || typeof row !== "object" || Array.isArray(row)) {
+        fail("ADAPTER_CONTRACT", "conditioned calculation result row is not an object", detail);
+      }
       if (!Object.hasOwn(row, resultKey)) {
         fail("ADAPTER_CONTRACT", "conditioned calculation result row has no result key", detail);
       }

@@ -19,7 +19,6 @@
 // AGENT-01 and BENCH-01 never count as passed — see the registry below.
 
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -45,7 +44,9 @@ const tsUnit = pnpm(["test:ts"]);
 const pyUnit = pnpm(["test:python"]);
 
 console.log("\n== integration tier: build, then the scripted project-level scenario checks ==");
-const built = existsSync(path.join(REPO_ROOT, "packages/circuit-doc/bin/zudo-circuit-doc.js")) ? { ok: true } : pnpm(["build"]);
+// Always rebuild: `bin/` is committed but only re-exports the gitignored `lib/`,
+// so a stale or missing `lib/` would otherwise go unnoticed.
+const built = pnpm(["build"]);
 const cad03 = built.ok ? node(["scripts/check-cad-freshness.mjs", "examples/minimal"]) : { ok: false, output: "" };
 const change01 = built.ok ? node(["scripts/scenarios/change-01.mjs", "examples/minimal"]) : { ok: false, output: "" };
 

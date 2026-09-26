@@ -6,7 +6,7 @@
  */
 
 import { lstat, readFile, realpath } from "node:fs/promises";
-import { basename, extname, isAbsolute, join, relative } from "node:path";
+import { basename, extname, isAbsolute, join, relative, sep } from "node:path";
 
 import { fail } from "../../core/errors.ts";
 import type { InstanceSelection } from "../../core/publication.ts";
@@ -275,8 +275,9 @@ async function readPackage(
   return {
     packageId: footprintName,
     footprintName,
-    footprintPath: relative(canonicalPathBase, footprintFile),
-    modelPath: relative(canonicalPathBase, modelFile),
+    // Published and hashed into committed manifests, so always POSIX separators.
+    footprintPath: relative(canonicalPathBase, footprintFile).split(sep).join("/"),
+    modelPath: relative(canonicalPathBase, modelFile).split(sep).join("/"),
     offset: transform(footprint, "offset", recordId, footprintName),
     rotation: transform(footprint, "rotate", recordId, footprintName),
     scale: transform(footprint, "scale", recordId, footprintName),

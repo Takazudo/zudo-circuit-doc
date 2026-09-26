@@ -12,10 +12,9 @@ def frontmatter(path: Path, expected_name: str):
     require(path.name == "SKILL.md", f"{path}: skill filename must be uppercase SKILL.md")
     text = path.read_text(encoding="utf-8")
     require(text.startswith("---\n"), f"{path}: missing YAML frontmatter")
-    try:
-        raw = text.split("---\n", 2)[1]
-    except IndexError as exc:
-        raise ContractError(f"{path}: unterminated frontmatter") from exc
+    parts = text.split("---\n", 2)
+    require(len(parts) == 3, f"{path}: unterminated frontmatter")
+    raw = parts[1]
     fields = {}
     for line in raw.splitlines():
         if ":" in line:

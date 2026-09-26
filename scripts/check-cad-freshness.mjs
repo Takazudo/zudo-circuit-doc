@@ -24,6 +24,8 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..");
 const CLI_BIN = path.join(REPO_ROOT, "packages/circuit-doc/bin/zudo-circuit-doc.js");
+// `bin/` is committed and only imports the gitignored build output, so probe that.
+const CLI_BUILT = path.join(REPO_ROOT, "packages/circuit-doc/lib/cli/main.js");
 const COPY_EXCLUDE = new Set(["node_modules", ".git", "dist", ".zfb", ".zfb-build", ".zudo-doc", ".circuit-cache"]);
 const EXIT_NOT_RUN = 4;
 const PREVIEW_MANIFEST = "doc/public/assets/component-previews/footprints/manifest.json";
@@ -41,8 +43,8 @@ if (positionals.length !== 1 || args.some((arg) => arg.startsWith("--") && arg !
 }
 const sourceProject = path.resolve(positionals[0]);
 if (!existsSync(sourceProject)) usage(`not a directory: ${positionals[0]}`);
-if (!existsSync(CLI_BIN)) {
-  console.error(`missing ${path.relative(REPO_ROOT, CLI_BIN)} — run \`pnpm build\` first`);
+if (!existsSync(CLI_BUILT)) {
+  console.error(`missing ${path.relative(REPO_ROOT, CLI_BUILT)} — run \`pnpm build\` first`);
   process.exit(1);
 }
 

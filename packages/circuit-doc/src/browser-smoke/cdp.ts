@@ -36,10 +36,22 @@ export async function connectCdp(url: string): Promise<CdpClient> {
     if (message.error !== undefined) callbacks.reject(new Error(`${callbacks.method}: ${message.error.message}`));
     else callbacks.resolve(message.result);
   });
+  let closedError: Error | undefined;
+  const failPending = (error: Error): void => {
+    closedError ??= error;
+    for (const callbacks of pending.values()) callbacks.reject(new Error(`${callbacks.method}: ${error.message}`));
+    pending.clear();
+  };
+  socket.addEventListener("close", () => failPending(new Error("CDP connection closed")));
+  socket.addEventListener("error", () => failPending(new Error("CDP connection error")));
   return {
     send(method, params = {}) {
       const id = (nextId += 1);
       return new Promise((resolveSend, rejectSend) => {
+        if (closedError !== undefined) {
+          rejectSend(new Error(`${method}: ${closedError.message}`));
+          return;
+        }
         pending.set(id, { resolve: resolveSend, reject: rejectSend, method });
         socket.send(JSON.stringify({ id, method, params }));
       });

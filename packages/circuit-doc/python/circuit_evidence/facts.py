@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import math
 
 from .errors import ContractError, require, required_keys
 from .sources import ID, LOCATOR_DETAIL
@@ -89,7 +90,9 @@ def validate_facts(facts, sources, schema):
         if fact["provenance"] == "CALCULATED":
             require(all(facts_by_id[dependency]["provenance"] != "DISTRIBUTOR-IDENTITY" for dependency in fact["depends_on"]), f"{fact['fact_id']}: calculations cannot depend on distributor identity evidence")
             dependency_values = {key.replace("-", "_"): values[key] for key in fact["depends_on"]}
-            require(arithmetic(fact["expression"], dependency_values) == fact["value"], f"{fact['fact_id']}: derived value is stale")
+            numeric = [fact["value"], *dependency_values.values()]
+            require(all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in numeric), f"{fact['fact_id']}: calculated fact and its dependencies must be numeric")
+            require(math.isclose(arithmetic(fact["expression"], dependency_values), fact["value"], rel_tol=1e-12, abs_tol=1e-12), f"{fact['fact_id']}: derived value is stale")
 
 
 def validate_pass_trust(facts, sources):

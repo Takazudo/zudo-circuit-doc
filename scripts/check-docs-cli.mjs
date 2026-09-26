@@ -18,10 +18,12 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..");
 const CLI_BIN = path.join(REPO_ROOT, "packages/circuit-doc/bin/zudo-circuit-doc.js");
+// `bin/` is committed and only imports the gitignored build output, so probe that.
+const CLI_BUILT = path.join(REPO_ROOT, "packages/circuit-doc/lib/cli/main.js");
 const CLI_REFERENCE_PAGE = path.join(REPO_ROOT, "doc/src/content/docs/reference/cli.mdx");
 
-if (!existsSync(CLI_BIN)) {
-  console.error(`missing ${path.relative(REPO_ROOT, CLI_BIN)} — run \`pnpm build\` first`);
+if (!existsSync(CLI_BUILT)) {
+  console.error(`missing ${path.relative(REPO_ROOT, CLI_BUILT)} — run \`pnpm build\` first`);
   process.exit(1);
 }
 if (!existsSync(CLI_REFERENCE_PAGE)) {
