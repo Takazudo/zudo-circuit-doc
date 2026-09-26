@@ -1,0 +1,50 @@
+# Pack-and-install verifier gate (#28, M5 acceptance).
+#
+# Triggered on PRs targeting `main` or any `base/**` branch (epic-PR stacks),
+# and on push to `main`.
+#
+# Jobs:
+#   empty — builds and packs both packages, then scaffolds, installs and
+#           builds a consumer project OUTSIDE this checkout (a fresh mkdtemp
+#           directory, no workspace link back to this repo) from the tarballs
+#           alone. `pnpm verify:pack` drives the whole flow; see
+#           scripts/verify-pack.mjs for the scenario list.
+#           `--fixture empty` is the default (#31 adds minimal and led).
+
+name: CI Verify Pack
+
+on:
+  pull_request:
+    branches:
+      - main
+      - "base/**"
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ci-verify-pack-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  empty:
+    name: verify:pack (examples/empty template)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Pack-and-install verifier
+        run: pnpm verify:pack
