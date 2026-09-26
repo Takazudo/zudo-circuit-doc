@@ -25,6 +25,16 @@ export const DEFAULT_REFERENCE_LIMITS: ReferenceLimitsConfig = {
   aggregateModelBytes: 8 * 1024 * 1024,
 };
 
+/** A ready-to-use `cad.previewRenderer` value; matches `examples/minimal/circuit.config.ts`. */
+export const DEFAULT_PREVIEW_RENDERER: PreviewRendererConfig = {
+  image: "kicad/kicad@sha256:e638b79b0321f29395a5b783e94bb9f3c73303e8da15da27b8f5cb4b67a37729",
+  version: "9.0.9",
+  platform: "linux/amd64",
+  layers: ["F.Cu", "F.Silkscreen", "F.Fabrication", "F.Courtyard"],
+  theme: "KiCad Default",
+  options: ["--black-and-white"],
+};
+
 /** A path relative to the config file's directory; absolute paths and `..` escapes are rejected. */
 export type ConfigPath = string;
 

@@ -21,6 +21,7 @@ export const PROJECT_COMMANDS = {
   doctor: "pnpm circuit:doctor",
   build: "pnpm build",
   models: "pnpm exec zudo-circuit-doc models",
+  previews: "pnpm previews:generate",
 } as const;
 
 export async function loadProject(options: {
