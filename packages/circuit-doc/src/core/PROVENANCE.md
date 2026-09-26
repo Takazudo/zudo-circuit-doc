@@ -102,3 +102,9 @@ The v0.1 pre-merge review (`provenance-allowed/review-hardening.txt`:
 browser resolves those against the current page. The same review made the
 `emit.ts`/`page.ts` generated-marker and drift comparison tolerate CRLF
 checkouts; those files were already allowed by #10.
+
+#39 (`provenance-allowed/39-pin-name-mdx.txt`: `render/record.ts`) renders a
+pin name, pin number, pad or fact unit containing `{` or `<` (a KiCad
+active-low name such as `~{RESET}`) as escaped plain text instead of inline
+code, which `assertMdxSafe` rejects; every other value keeps its monospace
+form, so the LED goldens are unchanged.
