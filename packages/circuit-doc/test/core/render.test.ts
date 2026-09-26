@@ -398,6 +398,37 @@ describe("record page — evidence semantics", () => {
     assert.ok(driverPage.includes("GND thermal pad, not a current-return substitute"));
   });
 
+  it("publishes evidence pin names, pads and units carrying MDX delimiters as escaped text", () => {
+    const t = (value: string) => safeText(value, { field: "test" });
+    const record = recordOf(model, FIXTURE_IDS.driverRecord);
+    const [pinMap] = record.pinMaps;
+    assert.ok(pinMap);
+    const [fact] = record.facts;
+    assert.ok(fact);
+    const hostilePins: PublicRecord = {
+      ...record,
+      pinMaps: [
+        {
+          ...pinMap,
+          pins: [
+            { ...pinMap.pins[0]!, symbolPin: t("<1"), name: t("~{RESET}"), footprintPad: t("{EP") },
+            { ...pinMap.pins[0]!, symbolPin: t("2}"), name: t("VDD"), footprintPad: t("2") },
+          ],
+        },
+        ...record.pinMaps.slice(1),
+      ],
+      facts: [{ ...fact, unit: t("{unit}") }, ...record.facts.slice(1)],
+    };
+    // Reaching the assertions means `assertMdxSafe` accepted the page.
+    const page = renderRecord(hostilePins, buildRecordIndex(model)).contents;
+    assert.ok(page.includes("~\\{RESET}"), "an active-low name renders as escaped text");
+    assert.ok(page.includes("\\<1"));
+    assert.ok(page.includes("\\{EP"));
+    assert.ok(page.includes("**Unit:** \\{unit}"));
+    // A value without an opening delimiter keeps its monospace form.
+    assert.match(page, /\| `2\}` +\| `VDD` +\| `2` +\|/u);
+  });
+
   it("links every record an interaction spans", () => {
     assert.ok(driverPage.includes(`### ${FIXTURE_IDS.interaction}`));
     assert.ok(driverPage.includes(`\`${FIXTURE_IDS.driverRecord}\` (this record)`));
