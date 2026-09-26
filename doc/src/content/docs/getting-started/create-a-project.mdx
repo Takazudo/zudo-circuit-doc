@@ -24,26 +24,21 @@ corepack pnpm --filter create-zudo-circuit-doc pack --pack-destination /tmp/zudo
 This produces `takazudo-zudo-circuit-doc-0.1.0.tgz` and `create-zudo-circuit-doc-0.1.0.tgz` in
 `/tmp/zudo-circuit-doc-tarballs` (pick any scratch directory outside the repository).
 
-## 2. Run the initializer from the tarball
+## 2. Run the initializer from the tarball, pointed at the runtime tarball
 
-Outside the monorepo, run the packed initializer directly with `pnpm dlx`, skipping its own
-install for a moment:
+Outside the monorepo, run the packed initializer directly with `pnpm dlx`. The initializer would
+normally scaffold `my-circuit/` with a real semver range, `"@takazudo/zudo-circuit-doc": "^0.1.0"`,
+in **two** places — the root `package.json` (`devDependencies`) and `doc/package.json`
+(`dependencies`, since the site itself imports the package's islands and MDX components) — but
+neither has anything to resolve against until a release is published. Use `--runtime-spec` to have
+the initializer write both files with the local tarball path directly, so there's no separate
+find-and-replace step and no dependency on a GNU-only `sed -i`:
 
 ```sh
 pnpm dlx /tmp/zudo-circuit-doc-tarballs/create-zudo-circuit-doc-0.1.0.tgz my-circuit \
-  --name my-circuit --title "My Circuit" --no-install --no-git
-```
-
-The initializer scaffolds `my-circuit/` with a real semver range,
-`"@takazudo/zudo-circuit-doc": "^0.1.0"`, in **two** places — the root `package.json`
-(`devDependencies`) and `doc/package.json` (`dependencies`, since the site itself imports the
-package's islands and MDX components). Neither has anything to resolve against until a release is
-published, so point both at the runtime tarball before installing:
-
-```sh
+  --name my-circuit --title "My Circuit" --no-git \
+  --runtime-spec file:/tmp/zudo-circuit-doc-tarballs/takazudo-zudo-circuit-doc-0.1.0.tgz
 cd my-circuit
-sed -i 's#"@takazudo/zudo-circuit-doc": "\^0.1.0"#"@takazudo/zudo-circuit-doc": "file:/tmp/zudo-circuit-doc-tarballs/takazudo-zudo-circuit-doc-0.1.0.tgz"#' package.json doc/package.json
-corepack pnpm install
 ```
 
 `create-zudo-circuit-doc` itself takes:
@@ -52,6 +47,7 @@ corepack pnpm install
 create-zudo-circuit-doc [destination] [--name <npm-name>] [--title <site title>]
                          [--library <kicad-lib-name>] [--agent claude|codex|both|none]
                          [--yes] [--install|--no-install] [--git|--no-git]
+                         [--runtime-spec <spec>]
 ```
 
 | Flag | Default | Effect |
@@ -63,6 +59,12 @@ create-zudo-circuit-doc [destination] [--name <npm-name>] [--title <site title>]
 | `--yes`, `-y` | off | Do not prompt; a missing destination becomes an error instead |
 | `--install` / `--no-install` | install on | Run `pnpm install` after scaffolding |
 | `--git` / `--no-git` | git on | Run `git init` plus an initial commit |
+| `--runtime-spec <spec>` | the template's own spec | Overrides the `@takazudo/zudo-circuit-doc` dependency written to both `package.json` and `doc/package.json`: a semver range/dist-tag, or a `file:` spec with an **absolute** path (a relative `file:` path is rejected, since `doc/package.json` sits one directory deeper than `package.json`) |
+
+With `--install` (the default), `pnpm install` runs against the spec you passed, so the example
+above needs no separate install step. With `--no-install`, the printed "Next steps" block echoes
+`Applied --runtime-spec "<spec>" to package.json and doc/package.json.` as a reminder before you run
+`pnpm install` yourself.
 
 `--agent both` (the default) is what makes [Claude Code and Codex share one workflow](../workflows/agent-collaboration.mdx):
 both `CLAUDE.md` and `AGENTS.md` are thin, near-identical pointers to the one canonical
