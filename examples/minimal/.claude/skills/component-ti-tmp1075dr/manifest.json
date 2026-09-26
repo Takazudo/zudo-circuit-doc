@@ -74,12 +74,15 @@
         "fact-tmp1075-ti-land-pattern",
         "fact-tmp1075-rthja-d",
         "fact-tmp1075-installed-accuracy",
-        "fact-tmp1075-self-heating"
+        "fact-tmp1075-self-heating",
+        "fact-tmp1075-footprint-choice",
+        "fact-tmp1075-model-fidelity",
+        "fact-tmp1075-cad-physical-fit"
       ],
       "interaction_ids": [],
       "open_domains": [
         "installed-accuracy-and-self-heating",
-        "cad-assets"
+        "cad-physical-fit"
       ]
     }
   ]

@@ -21,6 +21,11 @@ same-name vendor data.
 - The address `0x48` is the datasheet's binary `1001000` with A2 = A1 = A0 = GND.
 - LCSC is deliberately empty: this example exercises the generic (non-LCSC) inventory
   profile. The DigiKey order code in the inventory is display-only and not evidence.
+- CAD is the generic KiCad SOIC-8 set (symbol `TMP1075D`, footprint
+  `SOIC-8_3.9x4.9mm_P1.27mm`, KiCad 8.0.9 STEP+WRL pair), fidelity family, not TI CAD.
+  Its pads differ from TI's example land pattern by project choice
+  (`fact-tmp1075-footprint-choice`); receipts are in `circuit/cad-receipts/`. Seating and
+  solder fit stay `NEEDS BENCH` (`fact-tmp1075-cad-physical-fit`).
 - TI regenerates this PDF (the addendum is appended live). A later hash change at the same
   revision means "regenerated; re-verify locators", not corruption.
 

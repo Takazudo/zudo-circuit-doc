@@ -13,42 +13,42 @@ This is the continuation point for the project. Keep it short enough that a new 
 | Snapshot date | 2026-09-26 |
 | Current project goal | An evaluation breakout for the TMP1075DR; see the [project brief](./index.mdx) |
 | Design revision considered current | None; the [architecture overview](../architecture/overview.mdx) describes intent only |
-| Latest completed result and its evidence | TMP1075DR selected and onboarded: datasheet SBOS854F retrieved and hash-recorded, owner bundle `component-ti-tmp1075dr`, inventory line `line-tmp1075dr`, generated [record page](/docs/components/records/tmp1075dr/) |
+| Latest completed result and its evidence | TMP1075DR CAD acquired (Workflow D): KiCad symbol, footprint and 3D model with receipts under `circuit/cad-receipts/`, fidelity family, CAD enabled, pin-asset check performed and passing, footprint preview and 3D model on the [record page](/docs/components/records/tmp1075dr/) |
 | Most consequential remaining uncertainty | The breakout's installed measurement error and self-heating (`NEEDS BENCH`) |
-| Next result to produce | Symbol, footprint and 3D model for TMP1075DR with receipts and fidelity (Workflow D) |
+| Next result to produce | Exact passives and header, each with its own evidence, or a recorded decision to leave them generic |
 
 ## Open questions
 
 | Question ID | Exact question | Why the answer matters | Evidence needed | Owner or next task |
 |---|---|---|---|---|
-| Q-01 | Which footprint is used: the generic JEDEC SOIC-8 land pattern or TI's D0008A example land pattern? | The pads differ; the pin map and previews depend on the choice | Footprint files compared with `fact-tmp1075-ti-land-pattern` | Next action 1 |
-| Q-02 | How far does the fitted sensor read from the air or surface it measures, and how much does self-heating contribute? | Datasheet accuracy covers the sensor only | Bench comparison against a reference thermometer (`fact-tmp1075-installed-accuracy`, `fact-tmp1075-self-heating`) | Next action 3 |
-| Q-03 | Which exact capacitor, resistors and header are fitted? | The bypass and pullup values are datasheet recommendations, not selected parts | Exact MPNs with their own evidence records | Next action 2 |
+| Q-02 | How far does the fitted sensor read from the air or surface it measures, and how much does self-heating contribute? | Datasheet accuracy covers the sensor only | Bench comparison against a reference thermometer (`fact-tmp1075-installed-accuracy`, `fact-tmp1075-self-heating`) | Next action 2 |
+| Q-03 | Which exact capacitor, resistors and header are fitted? | The bypass and pullup values are datasheet recommendations, not selected parts | Exact MPNs with their own evidence records | Next action 1 |
+| Q-04 | Does the part seat and solder well on the generic SOIC-8 land pattern, with enough clearance? | The footprint is a generic JEDEC pattern, not TI's example land pattern, and a preview is not dimensional proof | Inspection of an assembled board (`fact-tmp1075-cad-physical-fit`) | Next action 2 |
 
-Classify the needed work in plain language: Q-01 is an asset audit, Q-02 is a physical measurement, Q-03 is identity resolution and source research.
+Classify the needed work in plain language: Q-02 and Q-04 are physical checks, Q-03 is identity resolution and source research.
 
 ## Next actions
 
 | Priority | Bounded action | Depends on | Concrete output | Completion condition |
 |---|---|---|---|---|
-| 1 | Acquire the TMP1075DR symbol, footprint and 3D model (Workflow D) and enable CAD in the project config | None | CAD receipts under `circuit/cad-receipts/`, a footprint preview, `expect.packages` updated | `pnpm circuit:check` runs the pin-asset check instead of skipping it, and passes |
-| 2 | Select exact passives and a header | The architecture overview | One owner bundle per exact part, or a recorded decision to leave them generic | Each fitted part is an inventory line with evidence, or listed as an open gap |
-| 3 | Plan the bring-up test | A built board | A verification page copied from the bring-up template | The method, reference instrument and pass criterion are written before measuring |
+| 1 | Select exact passives and a header | The architecture overview | One owner bundle per exact part, or a recorded decision to leave them generic | Each fitted part is an inventory line with evidence, or listed as an open gap |
+| 2 | Plan the bring-up test, including a seating and solder inspection of U1 | A built board | A verification page copied from the bring-up template | The method, reference instrument and pass criterion are written before measuring |
 
 ## Blocked work
 
 | Blocked task | Missing prerequisite | Work that can continue meanwhile | Revisit when |
 |---|---|---|---|
-| Bench measurement of installed accuracy | No board has been built | CAD acquisition and passive selection | A breakout is assembled |
+| Bench measurement of installed accuracy, and the U1 seating and solder check | No board has been built | Passive selection | A breakout is assembled |
 
 ## Recently resolved or reopened
 
 | Question or action | New state | Evidence or decision reference | Pages or records updated |
 |---|---|---|---|
+| Q-01: which footprint is used | Resolved: the generic JEDEC MS-012AA `SOIC-8_3.9x4.9mm_P1.27mm` from the KiCad library, not TI's example land pattern and not the KiCad symbol's default `SO-8_3.9x4.9mm_P1.27mm` | `fact-tmp1075-footprint-choice`, receipts under `circuit/cad-receipts/` | Owner bundle facts and coverage, pin map, CAD config, publication selection, record page |
 | Which sensor to use | Resolved: TMP1075DR | [Sensor selection](../decisions/sensor-selection.mdx), [candidate research](../research/tmp1075-candidate.mdx) | Owner bundle, inventory, publication selection, generated record page |
 
 ## Handoff to the next session
 
-Read the [project brief](./index.mdx) and this page, run `pnpm circuit:check` (it prints a `SCOPE:` line and skips the pin-asset check while CAD is disabled), then start next action 1. The expected artifact is a set of CAD receipts and an enabled pin-asset check.
+Read the [project brief](./index.mdx) and this page, run `pnpm circuit:check` (its `SCOPE:` line reports that the pin-asset check was performed; it still binds no schematic), then start next action 1. The expected artifact is one owner bundle per fitted passive and the header, or a recorded decision to keep them generic.
 
 The retained datasheet hash belongs to one retrieval. TI regenerates this PDF: if `pnpm exec zudo-circuit-doc validate --online` later reports a different hash at the same revision, treat it as "regenerated; re-verify locators", not as corruption.

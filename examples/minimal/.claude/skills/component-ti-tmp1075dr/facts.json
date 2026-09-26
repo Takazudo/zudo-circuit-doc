@@ -686,6 +686,48 @@
       "verdict": "NEEDS BENCH",
       "depends_on": [],
       "expression": ""
+    },
+    {
+      "fact_id": "fact-tmp1075-footprint-choice",
+      "record_id": "rec-tmp1075dr",
+      "source_id": "src-tmp1075-ds-land-pattern",
+      "class": "PROJECT_STATE",
+      "value": "KiCad library footprint Package_SO:SOIC-8_3.9x4.9mm_P1.27mm (kicad-footprints tag 9.0.9): generic JEDEC MS-012AA land pattern, 8 pads 1.95 x 0.6 mm at x = +/-2.475 mm (pad span 4.95 mm center-to-center), 1.27 mm pitch; fidelity family, not TI CAD",
+      "unit": "NONE",
+      "conditions": "project choice of a generic IPC/JEDEC land pattern; it differs from TI's D0008A example land pattern (1.55 x 0.6 mm pads, 5.4 mm row span), and the KiCad TMP1075D symbol's default Package_SO:SO-8_3.9x4.9mm_P1.27mm (an NXP PCF8523-derived pattern) is deliberately not used; receipt circuit/cad-receipts/kicad-soic8-footprint.receipt.json",
+      "locator": "src-tmp1075-ds-land-pattern: Mechanical drawing figure D0008A EXAMPLE BOARD LAYOUT 4214825/C, LAND PATTERN EXAMPLE, compared with footprints/kicad/SOIC-8_3.9x4.9mm_P1.27mm.kicad_mod pads 1-8",
+      "provenance": "PROJECT-CHOICE",
+      "verdict": "NOT APPLICABLE",
+      "depends_on": [],
+      "expression": ""
+    },
+    {
+      "fact_id": "fact-tmp1075-model-fidelity",
+      "record_id": "rec-tmp1075dr",
+      "source_id": "src-tmp1075-ds-outline",
+      "class": "PROJECT_STATE",
+      "value": "KiCad 3D model pair Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step + .wrl (kicad-packages3D tag 8.0.9): generic JEDEC MS-012AA package model, fidelity family, not TI CAD; WRL extents converted from 0.1-inch units: lead-tip span 6.00 mm, body 3.90 x 4.90 mm, top 1.75 mm above the seating plane",
+      "unit": "NONE",
+      "conditions": "a visual reference only; the extents fall inside the D0008A lead span 5.80-6.19 mm, body 3.81-3.98 x 4.81-5.00 mm and 1.75 mm maximum height, but a rendered model is not dimensional proof; receipt circuit/cad-receipts/kicad-soic8-model.receipt.json",
+      "locator": "src-tmp1075-ds-outline: Mechanical drawing figure D0008A PACKAGE OUTLINE 4214825/C, compared with footprints/kicad/example-minimal-circuit-lib.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.wrl coordinate extents",
+      "provenance": "PROJECT-CHOICE",
+      "verdict": "NOT APPLICABLE",
+      "depends_on": [],
+      "expression": ""
+    },
+    {
+      "fact_id": "fact-tmp1075-cad-physical-fit",
+      "record_id": "rec-tmp1075dr",
+      "source_id": "src-tmp1075-ds-land-pattern",
+      "class": "PROJECT_STATE",
+      "value": "Physical seating, solder fillet and clearance of TMP1075DR on the generic SOIC-8 land pattern",
+      "unit": "NONE",
+      "conditions": "no board has been assembled; the footprint, model and preview cannot establish seating, solder joint quality or mechanical clearance",
+      "locator": "src-tmp1075-ds-land-pattern: Mechanical drawing figure D0008A EXAMPLE BOARD LAYOUT 4214825/C, notes 6-7",
+      "provenance": "UNVERIFIED",
+      "verdict": "NEEDS BENCH",
+      "depends_on": [],
+      "expression": ""
     }
   ]
 }
