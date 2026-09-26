@@ -11,6 +11,7 @@
 import { lstat, readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
+import { PROJECT_COMMANDS } from "../cli/project.ts";
 import type { PreviewRendererConfig } from "../config/define.ts";
 import { fail } from "../core/errors.ts";
 import { aggregateHash, sha256 } from "./hash.ts";
@@ -37,7 +38,7 @@ export async function checkFootprintPreviews(options: CheckFootprintPreviewsOpti
   });
   if (rootStat === null) {
     if (selections.length === 0) return;
-    fail("ADAPTER_CONTRACT", "footprint preview root is missing", { path: previewRoot });
+    fail("ADAPTER_CONTRACT", `footprint preview root is missing; run \`${PROJECT_COMMANDS.previews}\``, { path: previewRoot });
   }
   if (!rootStat.isDirectory() || rootStat.isSymbolicLink()) {
     fail("PATH_CONTAINMENT", "footprint preview root must be a real directory", { path: previewRoot });
@@ -45,7 +46,11 @@ export async function checkFootprintPreviews(options: CheckFootprintPreviewsOpti
 
   const manifestPath = join(previewRoot, "manifest.json");
   const manifestText = await readFile(manifestPath, "utf8").catch((error: NodeJS.ErrnoException) => {
-    if (error.code === "ENOENT") fail("ADAPTER_CONTRACT", "footprint preview manifest is missing", { path: manifestPath });
+    if (error.code === "ENOENT") {
+      fail("ADAPTER_CONTRACT", `footprint preview manifest is missing; run \`${PROJECT_COMMANDS.previews}\``, {
+        path: manifestPath,
+      });
+    }
     throw error;
   });
   const manifest = JSON.parse(manifestText) as FootprintPreviewManifest;

@@ -118,6 +118,26 @@ test("collision: a non-empty destination is rejected with exit-1-worthy CliError
   assert.equal(after, before);
 });
 
+test("--runtime-spec overwrites the runtime dependency in both package.json and doc/package.json", () => {
+  const destinationPath = path.join(mkdtemp(), "proj");
+  composeProject({
+    plan: makePlan({ destinationPath, runtimeSpec: "file:/abs/path/zudo-circuit-doc-0.2.0.tgz" }),
+    templateDir: TEMPLATE_DIR,
+    randomSuffix: () => "runtime-spec-1",
+  });
+  const pkg = JSON.parse(fs.readFileSync(path.join(destinationPath, "package.json"), "utf8"));
+  assert.equal(pkg.devDependencies["@takazudo/zudo-circuit-doc"], "file:/abs/path/zudo-circuit-doc-0.2.0.tgz");
+  const docPkg = JSON.parse(fs.readFileSync(path.join(destinationPath, "doc", "package.json"), "utf8"));
+  assert.equal(docPkg.dependencies["@takazudo/zudo-circuit-doc"], "file:/abs/path/zudo-circuit-doc-0.2.0.tgz");
+});
+
+test("no --runtime-spec leaves the template's own dependency spec untouched", () => {
+  const destinationPath = path.join(mkdtemp(), "proj");
+  composeProject({ plan: makePlan({ destinationPath }), templateDir: TEMPLATE_DIR, randomSuffix: () => "runtime-spec-2" });
+  const pkg = JSON.parse(fs.readFileSync(path.join(destinationPath, "package.json"), "utf8"));
+  assert.equal(pkg.devDependencies["@takazudo/zudo-circuit-doc"], "^0.1.0");
+});
+
 test("a staging failure injected mid-copy leaves no destination and no leftover staging directory", () => {
   const parent = mkdtemp();
   const destinationPath = path.join(parent, "proj");

@@ -135,6 +135,35 @@ function assertNoPlaceholdersRemain(dir: string, relPath = ""): void {
   }
 }
 
+const RUNTIME_PACKAGE_NAME = "@takazudo/zudo-circuit-doc";
+const RUNTIME_SPEC_MANIFESTS = ["package.json", "doc/package.json"];
+const DEPENDENCY_FIELDS = ["dependencies", "devDependencies"] as const;
+
+/**
+ * Overwrites the `@takazudo/zudo-circuit-doc` dependency spec in both
+ * manifests with `runtimeSpec` (spec #58's `--runtime-spec`). Both manifests
+ * are required to already declare the dependency — every shipped template
+ * does — so a missing one is a template bug, not a user error.
+ */
+function applyRuntimeSpec(stagingDir: string, runtimeSpec: string): void {
+  for (const relPath of RUNTIME_SPEC_MANIFESTS) {
+    const manifestPath = path.join(stagingDir, ...relPath.split("/"));
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    let found = false;
+    for (const field of DEPENDENCY_FIELDS) {
+      const dependencies = manifest[field];
+      if (dependencies && typeof dependencies === "object" && RUNTIME_PACKAGE_NAME in dependencies) {
+        dependencies[RUNTIME_PACKAGE_NAME] = runtimeSpec;
+        found = true;
+      }
+    }
+    if (!found) {
+      throw new Error(`${relPath} has no "${RUNTIME_PACKAGE_NAME}" dependency to apply --runtime-spec to.`);
+    }
+    fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+  }
+}
+
 /** claude removes AGENTS.md, codex removes CLAUDE.md, none removes both, both removes neither (spec #6). `.claude/skills/**` is never touched here, so it always stays. */
 function applyAgentFilter(dir: string, agent: Plan["agent"]): void {
   const removeIfExists = (name: string): void => {
@@ -177,6 +206,7 @@ export function composeProject(params: ComposeParams): void {
     copyTemplateTree(sourceDir, stagingDir, placeholdersFromPlan(plan), beforeCopyFile, "");
     assertNoPlaceholdersRemain(stagingDir);
     applyAgentFilter(stagingDir, plan.agent);
+    if (plan.runtimeSpec !== undefined) applyRuntimeSpec(stagingDir, plan.runtimeSpec);
     if (destinationExists) {
       for (const entry of fs.readdirSync(stagingDir)) {
         fs.renameSync(path.join(stagingDir, entry), path.join(plan.destinationPath, entry));

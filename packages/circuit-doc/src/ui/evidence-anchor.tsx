@@ -15,15 +15,14 @@
  * SSR-only by design — it is not an island and hydrates nothing, so the page
  * remains complete with JavaScript disabled.
  *
- * Known, non-suppressed false positive (#33): zfb's source-level link
- * checker statically scans MDX source text for literal `id="..."` strings,
- * so it cannot see the `id` this component renders at build time and warns
- * "broken link: #<id>" for every generated page that links to one of its own
- * anchors. The build-time HTML scan (`doc check:links --strict-anchors
- * --strict-broken`, run against the actual built output) finds the anchor
- * and passes — this is a zfb source-scan gap, not a real broken link. Do not
- * suppress the warning by renaming the component or inlining a literal
- * `id="..."`; both would defeat the point documented above.
+ * zfb's source-level `linkValidation` only registers literal `id`s on
+ * intrinsic elements, never the `id` a component renders, so it reported
+ * "broken link: #<id>" for every in-page evidence link (#33, #68). The host
+ * `doc/zfb.config.ts` therefore turns that source-level check off; the
+ * built-HTML scan (`doc check:links --strict-anchors --strict-broken`) finds
+ * these anchors and remains the gate. Do not "fix" it by inlining a literal
+ * `id="..."` in the generated MDX instead: that changes the byte-identical
+ * generated-page contract for no gain.
  */
 
 import type { JSX } from "preact";

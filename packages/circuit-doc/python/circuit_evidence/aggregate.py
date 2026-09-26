@@ -5,9 +5,41 @@ from __future__ import annotations
 from pathlib import Path
 
 from .bundle import BUNDLE_FILES, load_skill_bundle, validate_bundle
-from .errors import require
+from .errors import ContractError, require
 from .routing import NO_ROUTING_POLICY
 from .skillmd import frontmatter
+from .template import check_placeholder_leak
+
+
+def _owner_directory_mismatch_message(owners, actual_component_dirs, bundles_root):
+    """Report the set difference, plus (best effort) any placeholder leak already
+    sitting in an unexpected directory.
+
+    ``new-component`` copies a fresh bundle straight from the template, so right after
+    it runs the new directory both fails this owner-set check and still carries the
+    template's example values. Surfacing the placeholder leak in the same message saves
+    a second `validate` round trip once the directory is registered in the inventory.
+    """
+    unexpected = sorted(actual_component_dirs - owners)
+    missing = sorted(owners - actual_component_dirs)
+    detail = []
+    if unexpected:
+        detail.append(f"unexpected directories with no inventory owner: {unexpected}")
+    if missing:
+        detail.append(f"missing directories for inventory owners: {missing}")
+    message = f"owner skills: expected exact directories {sorted(owners)}, got {sorted(actual_component_dirs)} ({'; '.join(detail)})"
+    placeholder_notes = []
+    for name in unexpected:
+        try:
+            bundle = load_skill_bundle(bundles_root / name)
+            check_placeholder_leak({name: bundle})
+        except ContractError as exc:
+            placeholder_notes.append(str(exc))
+        except (OSError, ValueError, KeyError, TypeError, AttributeError):
+            continue
+    if placeholder_notes:
+        message += "; also in this run: " + "; ".join(placeholder_notes)
+    return message
 
 
 def validate_owner_bundles(schema, inventory, bundles_root, *, owner_prefix="component-", reserved_dirs=(), routing=NO_ROUTING_POLICY):
@@ -20,7 +52,8 @@ def validate_owner_bundles(schema, inventory, bundles_root, *, owner_prefix="com
         path.name for path in bundles_root.glob(f"{owner_prefix}*")
         if path.is_dir() and path.name not in reserved
     }
-    require(actual_component_dirs == owners, f"owner skills: expected exact directories {sorted(owners)}, got {sorted(actual_component_dirs)}")
+    if actual_component_dirs != owners:
+        raise ContractError(_owner_directory_mismatch_message(owners, actual_component_dirs, bundles_root))
     global_ids = {label: set() for label in ("record", "source", "fact", "interaction")}
     aggregate = {key: [] for key in BUNDLE_FILES}
     bundles_by_owner = {}

@@ -25,6 +25,7 @@
 import { lstat, readFile, readdir } from "node:fs/promises";
 import { basename, extname, join, relative, sep } from "node:path";
 
+import { PROJECT_COMMANDS } from "../cli/project.ts";
 import { fail } from "../core/errors.ts";
 import { byCodeUnit } from "../core/ids.ts";
 import { CATALOG_ROUTE, FOOTPRINT_ASSET_BASE, MODEL_ASSET_BASE, RECORDS_ROUTE } from "../core/site.ts";
@@ -119,7 +120,9 @@ export async function checkBuiltReferences(input: BuiltReferencesInput): Promise
   if (manifest.existed) {
     await checkPreviewOutputFiles(previewRoot, manifest.names, referencedModels);
   } else if (expectedPackages !== 0) {
-    fail("PUBLICATION_POLICY", "footprint preview manifest is missing", { path: join(footprintRoot, "manifest.json") });
+    fail("PUBLICATION_POLICY", `footprint preview manifest is missing; run \`${PROJECT_COMMANDS.previews}\``, {
+      path: join(footprintRoot, "manifest.json"),
+    });
   }
   await checkCatalogIsViewerFree(catalogFile);
 

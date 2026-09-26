@@ -8,7 +8,8 @@ import { after, before, describe, it } from "node:test";
 
 import { EXIT } from "../../src/cli/command.ts";
 import { which } from "../../src/browser-smoke/chrome.ts";
-import { runCli, writeEmptyProject } from "./project-fixture.ts";
+import { writePreflight, writeRecordPage } from "../browser-smoke/derived-fixture.ts";
+import { GENERATED, PREFLIGHT, runCli, writeEmptyProject } from "./project-fixture.ts";
 
 let scratch = "";
 
@@ -80,5 +81,74 @@ describe("check-browser", () => {
     const run = await runCli(root, ["check-browser"], { env: { PATH: path } });
     assert.equal(run.code, EXIT.USAGE);
     assert.match(run.stderr, /CONFIG_NOT_FOUND/u);
+  });
+
+  describe("representatives derived from published records (no browserSmoke config)", () => {
+    /** A project whose preflight publishes `pages` records and which never set `browserSmoke`. */
+    async function publishedProject(
+      name: string,
+      pages: ReadonlyArray<{ slug: string; identity: string; references?: boolean }>,
+      extra?: string,
+    ): Promise<string> {
+      const root = await writeEmptyProject(join(scratch, name), extra === undefined ? {} : { extra });
+      await writePreflight(join(root, PREFLIGHT), pages.map((page) => page.slug));
+      for (const page of pages) await writeRecordPage(join(root, GENERATED), page.slug, page);
+      return root;
+    }
+
+    it("derives representatives from qualifying records and prints them", async () => {
+      const root = await publishedProject("derived", [
+        { slug: "c529334", identity: "STM32G031F8P6" },
+        { slug: "c22807", identity: "C22807", references: false },
+      ]);
+      const path = await shimPath(join(scratch, "bin-derived"), ["node"]);
+      const run = await runCli(root, ["check-browser", "--chrome", process.execPath], { env: { PATH: path } });
+      assert.match(run.stdout, /INFO: using derived representatives: \/docs\/components\/records\/c529334\/ \(STM32G031F8P6\)\n/u);
+      assert.doesNotMatch(run.stdout, /c22807/u);
+      assert.notEqual(run.code, EXIT.NOT_RUN);
+      assert.doesNotMatch(`${run.stdout}${run.stderr}`, /declared-zero/u);
+    });
+
+    it("exits 4 (not run) when records are published but none qualifies", async () => {
+      const root = await publishedProject("none-qualify", [
+        { slug: "a", identity: "A", references: false },
+        { slug: "b", identity: "B", references: false },
+      ]);
+      const path = await shimPath(join(scratch, "bin-none-qualify"), ["node"]);
+      const run = await runCli(root, ["check-browser", "--chrome", process.execPath], { env: { PATH: path } });
+      assert.equal(run.code, EXIT.NOT_RUN);
+      assert.match(run.stderr, /2 record\(s\) are published but none qualifies for a default browser smoke/u);
+      assert.match(run.stderr, /set browserSmoke\.representatives in circuit\.config\.ts/u);
+      assert.doesNotMatch(`${run.stdout}${run.stderr}`, /declared-zero/u);
+    });
+
+    it("keeps the declared-zero path when the preflight publishes no records", async () => {
+      const root = await publishedProject("zero-records", []);
+      const path = await shimPath(join(scratch, "bin-zero-records"), ["node"]);
+      const run = await runCli(root, ["check-browser", "--chrome", process.execPath], { env: { PATH: path } });
+      assert.notEqual(run.code, EXIT.NOT_RUN);
+      assert.doesNotMatch(run.stdout, /INFO: using derived representatives/u);
+    });
+
+    it("uses explicit config representatives unchanged, without deriving", async () => {
+      const extra = `
+  browserSmoke: {
+    representatives: [{ kind: "IC", path: "/docs/components/records/a/", slug: "a", identity: "A" }],
+  },`;
+      const root = await publishedProject("explicit-config", [{ slug: "a", identity: "A", references: false }], extra);
+      const path = await shimPath(join(scratch, "bin-explicit-config"), ["node"]);
+      const run = await runCli(root, ["check-browser", "--chrome", process.execPath], { env: { PATH: path } });
+      assert.notEqual(run.code, EXIT.NOT_RUN);
+      assert.doesNotMatch(run.stdout, /INFO: using derived representatives/u);
+    });
+
+    it("keeps the Chrome-not-found check first", async () => {
+      const root = await publishedProject("no-chrome-first", [{ slug: "a", identity: "A", references: false }]);
+      const path = await shimPath(join(scratch, "bin-no-chrome-first"), ["node"]);
+      const run = await runCli(root, ["check-browser"], { env: { PATH: path } });
+      assert.equal(run.code, EXIT.NOT_RUN);
+      assert.match(run.stderr, /not run: Chrome not found/u);
+      assert.doesNotMatch(run.stderr, /none qualifies/u);
+    });
   });
 });

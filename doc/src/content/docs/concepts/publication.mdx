@@ -75,6 +75,26 @@ Raw evidence and CAD files never belong under a built site's public directory by
 Each entry names a `path` relative to `publicRoot`, a human `reason`, and an optional `source_id`.
 A file placed under `doc/public/` for any other reason fails the scan.
 
+The check only restricts file types that are plausible raw evidence or CAD/manufacturing exports —
+it doesn't scan every file under `doc/public/`. A restricted extension outside the exempt preview
+root always needs either the allowlist entry above or to not be there at all:
+
+```
+.pdf .step .stp                                          datasheets, drawings, mechanical exports
+.kicad_mod .kicad_sym .kicad_pcb .kicad_sch               KiCad library/board/schematic files
+.kicad_pro .kicad_prl                                     KiCad project files
+.zip .7z .json .wrl .svg                                  archives, raw evidence bundles, preview formats
+.stl .3mf .obj .glb .gltf                                 3D meshes
+.gbr .gtl .gbl .gto .gbo .gts .gbs .gtp .gbp .gko .gm1     Gerber fabrication layers
+.drl .xln                                                 drill files
+.csv                                                       BOM exports
+```
+
+`.svg` and `.wrl` are also the preview generator's own output formats, which is why they're on this
+list *and* exempted under `assets/component-previews/**` specifically — anywhere else on the public
+root they're exactly as unreviewed as any other restricted type. Source:
+`packages/circuit-doc/src/scan/public-scope.ts`'s `RESTRICTED_PUBLIC_EXTENSIONS`.
+
 ## `assetViewerExclude` is not privacy
 
 zudo-doc's generated asset viewer can hide a file from its own index with `assetViewerExclude`.

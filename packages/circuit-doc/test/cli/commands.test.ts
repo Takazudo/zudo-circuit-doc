@@ -93,6 +93,7 @@ describe("generate / check on an empty project", () => {
     assert.equal(run.code, EXIT.FAILED);
     assert.match(run.stderr, /missing: doc\/src\/content\/docs\/components\/index\.mdx/u);
     assert.match(run.stdout, /missing: circuit\/generated\/preflight\.json; run `pnpm circuit:generate`/u);
+    assert.match(run.stdout, /check failed \(exit \d+\); fix the steps marked FAIL, then run `pnpm check`/u);
     await assert.rejects(readdir(join(root, GENERATED)), { code: "ENOENT" });
   });
 

@@ -113,3 +113,26 @@ test("an invalid --agent value exits 2 as a usage error", async () => {
   const code = await main([destination, "--agent", "bogus"], overrides);
   assert.equal(code, 2);
 });
+
+test("--runtime-spec overwrites the dependency and is echoed in Next steps only when install did not run", async () => {
+  const overrides = baseOverrides();
+  const destination = path.join(overrides.cwd, "my-project");
+  const spec = "file:/abs/path/zudo-circuit-doc-0.2.0.tgz";
+  const code = await main([destination, "--no-install", "--runtime-spec", spec], overrides);
+
+  assert.equal(code, 0);
+  const pkg = JSON.parse(fs.readFileSync(path.join(destination, "package.json"), "utf8"));
+  assert.equal(pkg.devDependencies["@takazudo/zudo-circuit-doc"], spec);
+  const docPkg = JSON.parse(fs.readFileSync(path.join(destination, "doc", "package.json"), "utf8"));
+  assert.equal(docPkg.dependencies["@takazudo/zudo-circuit-doc"], spec);
+  assert.match(overrides.stdout.text(), /Applied --runtime-spec/);
+  assert.doesNotMatch(overrides.stdout.text(), /```/);
+});
+
+test("a relative --runtime-spec file: path exits 2 as a usage error", async () => {
+  const overrides = baseOverrides();
+  const destination = path.join(overrides.cwd, "my-project");
+  const code = await main([destination, "--runtime-spec", "file:../runtime.tgz"], overrides);
+  assert.equal(code, 2);
+  assert.ok(!fs.existsSync(destination));
+});

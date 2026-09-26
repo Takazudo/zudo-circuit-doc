@@ -192,7 +192,23 @@ describe("checkFootprintPreviews", () => {
           renderer: FIXTURE_RENDERER,
         }),
         "ADAPTER_CONTRACT",
-        /footprint preview manifest is missing/u,
+        /footprint preview manifest is missing; run `pnpm previews:generate`/u,
+      );
+    });
+
+    it("#57: a missing preview root (with packages expected) hints at `pnpm previews:generate`", async () => {
+      const paths = await zeroFixture("root-missing-nonzero-expected");
+      await rm(paths.footprintPreviewRoot, { recursive: true, force: true });
+      await rejectsWith(
+        checkFootprintPreviews({
+          selections: [{ packageId: "p", footprintName: "P", footprintPath: "P.kicad_mod", recordIds: ["rec-p"] }],
+          footprintMasterRoot: paths.footprintMasterRoot,
+          footprintLibraryRoot: paths.footprintLibraryRoot,
+          previewRoot: paths.footprintPreviewRoot,
+          renderer: FIXTURE_RENDERER,
+        }),
+        "ADAPTER_CONTRACT",
+        /footprint preview root is missing; run `pnpm previews:generate`/u,
       );
     });
 

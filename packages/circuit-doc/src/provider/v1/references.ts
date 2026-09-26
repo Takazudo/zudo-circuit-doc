@@ -289,9 +289,13 @@ async function readPackage(
   );
   const modelStat = await lstat(modelFile);
   assertReferenceSize("model", modelStat.size, recordId, limits);
+  // STEP previews are optional: only the WRL is published (issue #64), so a
+  // selected package with no STEP file on disk must still generate. When a
+  // STEP file is present, it is still subject to the same path-containment
+  // and regular-file checks as any other preview asset.
   const stepName = `${modelName.slice(0, -4)}.step`;
   assertSameBasenamePair(modelName, stepName, recordId);
-  await containedFile(roots.modelRoot, stepName, recordId, roots.projectRoot);
+  await containedFileIfPresent(roots.modelRoot, stepName, recordId);
   validateVrml(await readFile(modelFile, "utf8"), recordId, modelName);
 
   return {
@@ -469,6 +473,33 @@ async function containedFile(
       path: relative(projectRoot, join(root, name)),
       cause: error instanceof Error ? error.message : String(error),
     });
+  }
+  const rel = relative(canonicalRoot, canonicalFile);
+  if (rel.startsWith("..") || isAbsolute(rel)) {
+    fail("PATH_CONTAINMENT", "preview asset escapes its allowed root", { recordId, path: name });
+  }
+  const stat = await lstat(join(root, name));
+  if (!stat.isFile() || stat.isSymbolicLink()) {
+    fail("PATH_CONTAINMENT", "preview asset must be a regular non-symlink file", { recordId, path: name });
+  }
+  return canonicalFile;
+}
+
+/**
+ * Same containment and regular-file checks as `containedFile`, but a
+ * missing file is not an error: it returns `undefined` instead of failing.
+ * Used for the STEP preview, which is optional (issue #64) — unlike
+ * `containedFile`, this never reports "preview asset is missing".
+ */
+async function containedFileIfPresent(root: string, name: string, recordId: string): Promise<string | undefined> {
+  assertSafePreviewAssetName(name, recordId);
+  let canonicalRoot: string;
+  let canonicalFile: string;
+  try {
+    canonicalRoot = await realpath(root);
+    canonicalFile = await realpath(join(root, name));
+  } catch {
+    return undefined;
   }
   const rel = relative(canonicalRoot, canonicalFile);
   if (rel.startsWith("..") || isAbsolute(rel)) {

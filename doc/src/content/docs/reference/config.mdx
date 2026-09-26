@@ -115,6 +115,48 @@ Discriminated on `enabled`:
 | `previewRenderer` | Yes | — | `{ image, version, platform, layers[], theme, options[] }` — the pinned KiCad container and render settings |
 | `limits` | No | see below | Partial override of the byte-size limits |
 
+A project doesn't need to invent its own `previewRenderer`: the package exports the exact settings
+the LED regression corpus renders against as `DEFAULT_PREVIEW_RENDERER`, so most projects can spread
+or reference it verbatim rather than re-typing the pinned image digest:
+
+```ts
+import type { CircuitConfig } from "@takazudo/zudo-circuit-doc/config";
+import { DEFAULT_PREVIEW_RENDERER } from "@takazudo/zudo-circuit-doc/config";
+
+export default {
+  // ...
+  cad: {
+    enabled: true,
+    libraryName: "my-project",
+    symbolLibraries: ["symbols/my-project.kicad_sym"],
+    footprintMasterRoot: "footprints/kicad",
+    footprintLibraryRoot: "footprints/kicad/my-project.pretty",
+    modelRoot: "footprints/kicad/my-project.3dshapes",
+    modelLocatorPrefix: "${KIPRJMOD}/../../footprints/kicad/my-project.3dshapes/",
+    previewRenderer: DEFAULT_PREVIEW_RENDERER,
+  },
+} satisfies CircuitConfig;
+```
+
+`DEFAULT_PREVIEW_RENDERER` (type `PreviewRendererConfig`) currently pins:
+
+```ts
+{
+  image: "kicad/kicad@sha256:e638b79b0321f29395a5b783e94bb9f3c73303e8da15da27b8f5cb4b67a37729",
+  version: "9.0.9",
+  platform: "linux/amd64",
+  layers: ["F.Cu", "F.Silkscreen", "F.Fabrication", "F.Courtyard"],
+  theme: "KiCad Default",
+  options: ["--black-and-white"],
+}
+```
+
+`pnpm previews:generate` (`footprints generate`) needs Docker to pull and run that image; without it
+you'll see `footprint preview root is missing; run \`pnpm previews:generate\`` or `footprint preview
+manifest is missing; run \`pnpm previews:generate\``. STEP files are optional cosmetic input to CAD
+authoring — see [Concepts → CAD fidelity](../concepts/cad-fidelity.mdx) for what's actually required
+(WRL) versus optional (STEP).
+
 Reference-limit defaults (from upstream zudo-led-lamp `REFERENCE_LIMITS`), overridable per key under
 `cad.limits`:
 
@@ -129,7 +171,7 @@ Reference-limit defaults (from upstream zudo-led-lamp `REFERENCE_LIMITS`), overr
 | Field | Required | Default | Notes |
 | --- | --- | --- | --- |
 | `pythonMinVersion` | No | `"3.10"` | `"MAJOR.MINOR"`; must be ≥ `3.10` |
-| `policy` | No | `null` | Path to a data-driven project policy JSON |
+| `policy` | No | `null` | Path to a data-driven project policy JSON — see [Schemas → `validation.policy`](./schemas.mdx#validation-policy) for the shape and every check type |
 | `userAgent` | No | `null` | Sent as the `User-Agent` header for online source fetches |
 
 ## `scan` (overrides only)
@@ -143,7 +185,38 @@ upstream's LED-specific fixed floors.
 ## `browserSmoke`
 
 `{ representatives: [{ kind, path, slug, identity, availability? }, ...] }`. `path` must be a site
-route starting with `/`.
+route starting with `/`. Example, from the LED regression fixture:
+
+```json
+{
+  "representatives": [
+    { "kind": "passive", "path": "/docs/components/records/c22807/", "slug": "c22807", "identity": "C22807" },
+    { "kind": "IC", "path": "/docs/components/records/al8860mp-13/", "slug": "al8860mp-13", "identity": "AL8860MP-13" },
+    { "kind": "connector", "path": "/docs/components/records/type-c-31-m-17/", "slug": "type-c-31-m-17", "identity": "TYPE-C-31-M-17" }
+  ]
+}
+```
+
+`representatives` is what [`check-browser`](./cli.mdx#check-browser) exercises: the first entry
+whose built page publishes a component-references section is the deep-interaction page (dialogs,
+SPA navigation, forced failures); every entry with references is checked at every viewport/theme.
+
+**Leaving `browserSmoke` unset is a supported default, not an oversight.** With no config value and
+no `--representatives` flag, `check-browser` derives up to 3 representatives itself, in this order:
+
+1. Read the preflight report's published record slugs, sorted.
+2. For each slug (site not yet built), a record qualifies when its generated page
+   (`<generatedContent>/records/<slug>/index.mdx`) has a `ComponentReferences` descriptor that
+   decodes to a reviewed PDF label, an `http(s)` URL, a non-empty authority, a footprint and a WRL
+   model, followed by at least one `<EvidenceFact>` and a `## Sources` heading.
+3. If the site is already built, a qualifying record must also have its built page carry the
+   `zcd-component-references` marker, with the footprint SVG and model WRL present in `docs.dist`.
+4. The first 3 qualifying slugs (in sorted order) become derived representatives:
+   `{ kind: "derived <slug>", identity: <page title, i.e. the MPN>, path: "/docs/components/records/<slug>/" }`.
+
+Zero published records is a legitimate "declared-zero project" and still exits `0` (nothing to
+smoke). Published records that exist but none of which qualifies exits `4` — see
+[CLI → `check-browser`](./cli.mdx#check-browser) for the exact messages.
 
 ## Validation errors
 
