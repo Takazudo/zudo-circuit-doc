@@ -118,8 +118,9 @@ in published WRLs, so official KiCad StepUp models publish without a derivation 
 
 The [v0.1 validation report](./v0-1-validation.mdx) covers all 31 acceptance scenarios, and the
 [scenario traceability matrix](./scenario-matrix.mdx) maps each one to its check. 29 pass through
-automated checks. AGENT-01, the Claude→Codex continuation, was **not run** because the Codex CLI
-hit its usage limit; see the [AGENT-01 summary](./agent-01-transcript-summary.mdx). BENCH-01 is
+automated checks. AGENT-01, the agent-to-agent continuation, was run with a fresh Claude Code
+process as the second agent (the Codex CLI had hit its usage limit). It is **not passed**: *Continue*
+passed and *Query* failed one criterion. See the [AGENT-01 summary](./agent-01-transcript-summary.mdx). BENCH-01 is
 **not run** because it requires physical hardware.
 
 Publishing is a separate, explicit action. Nothing in this epic publishes to npm or deploys a site.

@@ -15,8 +15,9 @@ tiers) and prints this same table from a single source of truth,
 regression and every `verify:pack` fixture), which needs the LED fixture materialized and drives
 full packed-tarball builds, so it is opt-in and heavy.
 
-Two rows are never marked passed here: **AGENT-01** is an agent run (a Claude session hands a task
-to a Codex session over committed evidence alone), recorded in the
+Two rows are never marked passed here: **AGENT-01** is an agent run (one agent session hands a task
+to a fresh second session over committed evidence alone; run as a Claude Code variant, not passed),
+recorded in the
 [v0.1 validation report](./v0-1-validation.mdx#agent-01), and **BENCH-01** requires physical
 hardware and is not run.
 
@@ -114,7 +115,7 @@ re-derives the committed outputs from the committed inputs and fails if either h
 
 | ID | Scenario | Check | Type |
 | --- | --- | --- | --- |
-| AGENT-01 | Claude completes task, Codex continues | Agent run, recorded in the [v0.1 validation report](./v0-1-validation.mdx#agent-01); structural scaffold only here (`verify-pack.mjs --fixture empty` scenario `AGENT-VARIANTS` proves `CLAUDE.md`/`AGENTS.md`/`.claude/skills/**` exist per `--agent` mode) | agent-run — **never marked passed here** |
+| AGENT-01 | Claude completes task, a fresh agent continues (Claude Code variant run; Codex variant not run) | Agent run, recorded in the [v0.1 validation report](./v0-1-validation.mdx#agent-01); structural scaffold only here (`verify-pack.mjs --fixture empty` scenario `AGENT-VARIANTS` proves `CLAUDE.md`/`AGENTS.md`/`.claude/skills/**` exist per `--agent` mode) | agent-run — **never marked passed here** |
 | CHANGE-01 | A component or net changes | `scripts/scenarios/change-01.mjs`, four cases on a throwaway copy of `examples/minimal` (below) | automated integration |
 | BENCH-01 | User submits actual measured results | Not run: requires physical hardware. `circuit/WORKFLOW.md` Workflow F and `circuit/templates/project-docs/verification/bring-up.mdx` reviewed | **manual — not run** |
 
