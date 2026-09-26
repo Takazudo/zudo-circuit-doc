@@ -1,0 +1,237 @@
+---
+title: CLI
+description: Every zudo-circuit-doc command, flag and exit code, taken from the real --help output.
+sidebar_position: 2
+---
+
+`zudo-circuit-doc <command> [options] [--config <path>]` is the runtime CLI a generated project
+depends on. It's invoked directly (`pnpm exec zudo-circuit-doc <command>`) or through the root
+scripts the initializer writes (`pnpm circuit:check`, `pnpm build`, …) — see
+[The generated project](./generated-project.mdx#root-scripts) for that mapping.
+
+Every command accepts a global `--config <path>` (default `./circuit.config.ts`) and `--help`.
+`zudo-circuit-doc --version` prints the package version.
+
+```
+$ zudo-circuit-doc --help
+zudo-circuit-doc 0.1.0 — component-evidence documentation for circuit projects
+
+Usage: zudo-circuit-doc <command> [options] [--config <path>]
+
+Commands:
+  generate       validate the evidence and write the generated component pages and preflight report
+  check          read-only: validator, generated-page drift, preflight, models and footprints
+  validate       run the canonical evidence validator (offline unless asked)
+  models         publish (or --check) the selected 3D model previews
+  footprints     generate (Docker + KiCad) or check the footprint preview SVGs
+  scan           scan the built site for published evidence that should have been withheld
+  check-built    check the built site's component pages, previews and models against the selection
+  check-browser  browser smoke of the built site in system Chrome (islands, viewers, no-JS fallback)
+  doctor         report required and optional tools, config validity and required files
+  new-component  start a component evidence bundle from the packaged template
+
+Options:
+  --config <path>  config file (default: ./circuit.config.ts)
+  --help           show help (also `<command> --help`)
+  --version        print the package version
+
+Exit codes: 0 pass, 1 check failed, 2 usage/config error, 4 not run (optional tool missing).
+Run `zudo-circuit-doc <command> --help` for a command's options and exit codes.
+```
+
+Every exit code means the same thing across every command: `0` pass, `1` check failed, `2`
+usage/config error, `4` not run because an optional tool is missing. Exit `4` is never "passed" —
+see [Capability & tool matrix](./capability-matrix.mdx) for which commands can return it.
+
+## `generate`
+
+```
+Usage: zudo-circuit-doc generate [--watch] [--config <path>]
+
+validate the evidence and write the generated component pages and preflight report
+
+Options:
+  --watch  regenerate on evidence, selection or config changes
+
+Exit codes:
+  0  generated (watch: stopped cleanly)
+  1  validation, projection or emit failed
+  2  usage or config error
+```
+
+Writes are all-or-nothing: `generate` plans and validates every write before touching disk, so a
+conflict (a marker-less target, a stray non-generated file inside `docs.generatedContent`) fails
+with zero bytes changed rather than a half-written tree.
+
+## `check`
+
+```
+Usage: zudo-circuit-doc check [--config <path>]
+
+read-only: validator, generated-page drift, preflight, models and footprints
+
+Exit codes:
+  0  everything is up to date
+  1  validation failed or generated output is out of date
+  2  usage or config error (or a step that is not implemented yet)
+  4  a step could not run because an optional tool is missing
+```
+
+Runs the validator once and replays its result across every step (drift, models, footprints)
+rather than re-invoking Python per step. Exits `1` if any step failed, else `2` if a step reported a
+config problem, else `4` if a step couldn't run, else `0`.
+
+## `validate`
+
+```
+Usage: zudo-circuit-doc validate [--online] [--refresh-source <id>…] [--json] [--config <path>]
+
+run the canonical evidence validator (offline unless asked)
+
+Options:
+  --online                re-download and hash-check every source (VOLATILE-HTML sources are skipped)
+  --refresh-source <id>…  re-download and hash-check only these source IDs
+  --json                  print one JSON result object
+
+Exit codes:
+  0  the evidence satisfies the contract
+  1  validation failed (or Python is missing/too old)
+  2  usage or config error
+```
+
+Offline by default — the documentation build never goes online. `--online` and `--refresh-source`
+are explicit agent operations, never triggered implicitly by `check` or `build`.
+
+## `models`
+
+```
+Usage: zudo-circuit-doc models [--check] [--config <path>]
+
+publish (or --check) the selected 3D model previews
+
+Options:
+  --check  report drift without writing
+
+Exit codes:
+  0  models published / up to date
+  1  validation failed or the published models are out of date
+  2  usage or config error
+```
+
+## `footprints`
+
+```
+Usage: zudo-circuit-doc footprints generate|check [--pull] [--config <path>]
+
+generate (Docker + KiCad) or check the footprint preview SVGs
+
+Arguments:
+  <action>  generate or check
+
+Options:
+  --pull  generate: pull the pinned KiCad image when it is absent
+
+Exit codes:
+  0  previews generated / up to date
+  1  previews are out of date or unsafe
+  2  usage/config error
+  4  not run: Docker is required for generate (check does not need it)
+```
+
+`check` never touches Docker, and a project with zero selected packages never touches Docker for
+`generate` either — the zero-package path is a pure no-op, not a "Docker missing" failure.
+
+## `scan`
+
+```
+Usage: zudo-circuit-doc scan [--agent-skill <dir>] [--config <path>]
+
+scan the built site for published evidence that should have been withheld
+
+Options:
+  --agent-skill <dir>  also scan this agent-skill mirror directory
+
+Exit codes:
+  0  no leak found
+  1  a withheld value or credential pattern reached the built output
+  2  usage/config error
+```
+
+Runs against a built site (`docs.dist`) and includes the public-scope check described in
+[Concepts → Publication](../concepts/publication.mdx#the-assets-allowlist).
+
+## `check-built`
+
+```
+Usage: zudo-circuit-doc check-built [--config <path>]
+
+check the built site's component pages, previews and models against the selection
+
+Exit codes:
+  0  built output matches the selection
+  1  built output is missing or has unexpected component artifacts
+  2  usage/config error
+```
+
+## `check-browser`
+
+```
+Usage: zudo-circuit-doc check-browser [--dist <dir>] [--representatives <json>] [--chrome <bin>] [--shell-assertions] [--search-assertions] [--config <path>]
+
+browser smoke of the built site in system Chrome (islands, viewers, no-JS fallback)
+
+Options:
+  --dist <dir>              built site directory (default: docs.dist)
+  --representatives <json>  representative pages (default: config browserSmoke.representatives)
+  --chrome <bin>            Chrome binary (default: $CHROME_BIN)
+  --shell-assertions        also assert the zudo-doc shell DOM
+  --search-assertions       also assert search and llms output
+
+Exit codes:
+  0  every browser check passed
+  1  a browser check failed
+  2  usage/config error
+  4  not run: Chrome not found (set CHROME_BIN)
+```
+
+Drives system Chrome over the Chrome DevTools Protocol — no Playwright or other browser-automation
+dependency anywhere in the package. Representatives with declared-zero availability print `SKIP`
+lines and still exit `0`.
+
+## `doctor`
+
+```
+Usage: zudo-circuit-doc doctor [--config <path>]
+
+report required and optional tools, config validity and required files
+
+Exit codes:
+  0  every required item is present (optional tools may be missing)
+  1  a required item failed
+  2  usage error
+```
+
+See [Getting Started → The first run](../getting-started/first-run.mdx) for sample output, and
+[Capability & tool matrix](./capability-matrix.mdx) for what each row gates.
+
+## `new-component`
+
+```
+Usage: zudo-circuit-doc new-component <suffix> [--dry-run] [--config <path>]
+
+start a component evidence bundle from the packaged template
+
+Arguments:
+  <suffix>  bundle name after the owner prefix, e.g. `tmp1075` -> component-tmp1075 (lowercase, digits, dashes)
+
+Options:
+  --dry-run  print what would be created; write nothing
+
+Exit codes:
+  0  bundle created (or dry run printed)
+  2  usage/config error, invalid suffix, or the directory already exists
+```
+
+Copies the package's own template — never a copy of some other component's bundle — so every new
+owner bundle starts from the same deliberately-placeholdered baseline. The validator fails on any
+placeholder value left behind, by design.

@@ -1,0 +1,169 @@
+---
+title: circuit.config.ts
+description: Every field of the CircuitConfig contract, its default, and the validation errors the loader raises.
+sidebar_position: 3
+---
+
+`circuit.config.ts` sits at the project root and is loaded by dynamic import, relying on Node's
+native TypeScript type stripping — no bundler, no build step. Its canonical form:
+
+```ts
+import type { CircuitConfig } from "@takazudo/zudo-circuit-doc/config";
+
+export default {
+  configVersion: 1,
+  // ...
+} satisfies CircuitConfig;
+```
+
+The type-only import is erased by type stripping, so the file loads even in places where the
+package itself isn't resolvable yet — a fresh scaffold before `pnpm install`, a fixture, a temp
+directory. `defineCircuitConfig()` also exists as an optional identity helper for the same shape.
+
+**Every path field is relative to this file's own directory**, and every path is rejected if it's
+absolute, uses backslashes, or escapes the directory with `..`. The loader resolves all of them to
+absolute paths before anything else runs, so "absent file" and "empty file" stay distinguishable in
+one place (the CLI/adapter), never confused inside the schema check itself.
+
+## Top-level fields
+
+| Field | Required | Default | Notes |
+| --- | --- | --- | --- |
+| `configVersion` | Yes | — | Must be exactly `1` |
+| `root` | No | `"."` | The project data root; used as the validator's `projectRoot`/cwd, the default `cad.footprintPathBase`, and the base for paths stored *inside* evidence data (for example, `inventoryProvider` generator spec paths) |
+| `project` | Yes | — | `{ name, title }`, both non-empty strings |
+| `docs` | Yes | — | See below |
+| `evidence` | Yes | — | See below |
+| `inventoryProvider` | Yes | — | `{ kind: "manual" }` or `{ kind: "led-generator-v1", specs: [...] }` — see [Concepts → Inventory profiles](../concepts/inventory-profiles.mdx) |
+| `publication` | Yes | — | See below |
+| `cad` | Yes | — | `{ enabled: false, libraryName? }` or the full enabled shape — see below |
+| `validation` | No | `{}` | See below |
+| `scan` | No | `undefined` (no overrides) | `ScanPolicyConfig` overrides, passed verbatim to the scan policy owner |
+| `browserSmoke` | No | `undefined` | `{ representatives: [...] }` |
+
+## `docs`
+
+| Field | Required | Default | Notes |
+| --- | --- | --- | --- |
+| `root` | Yes | — | The zudo-doc site directory, e.g. `"doc"` |
+| `generatedContent` | Yes | — | Where generated component MDX is written. The route `/docs/components/` itself is fixed in v1 |
+| `preflight` | Yes | — | Where `generate` writes the preflight report JSON |
+| `publicRoot` | Yes | — | zudo-doc's `public/` directory; previews go under `<publicRoot>/assets/component-previews/{footprints,models}` |
+| `dist` | Yes | — | The built-site directory `check-built`/`scan`/`check-browser` read by default |
+| `agentResources` | No | `true` | Generated pages link `/docs/claude/` and `/docs/claude-skills/<owner>/` (needs zudo-doc's `claudeResources`) |
+| `generatedMarker` | No | the neutral marker | A custom generated-page marker string (single line). The LED regression fixture sets its legacy marker here so its goldens stay byte-identical |
+| `integrationGloss` | No | `null` | An optional JSON file `{ domain: text }` |
+
+## `evidence`
+
+| Field | Required | Default | Notes |
+| --- | --- | --- | --- |
+| `contractVersion` | Yes | — | Must be exactly `1` |
+| `bundlesRoot` | Yes | — | e.g. `.claude/skills` |
+| `ownerPrefix` | Yes | — | e.g. `component-`; must be a single path segment |
+| `auditSkill` | Yes | — | Directory name under `bundlesRoot`, e.g. `component-spec-audit` |
+| `integrationSkill` | Yes | — | Directory name under `bundlesRoot`, e.g. `circuit-spec-integration` |
+| `inventory` | Yes | — | Path to `inventory.json` |
+| `integrationRules` | Yes | — | Path to `rules.json` |
+| `directRouting` | Yes | — | Path to `direct-routing.json` |
+| `vendorQualifiers` | Yes | — | Path to `external-vendor-qualifiers.json` |
+| `forwardTests` | No | `null` | Path to `forward-tests.json`, or `null`/omitted |
+| `sourceCache` | Yes | — | e.g. `.circuit-cache/sources` (git-ignored working cache) |
+
+## `inventoryProvider`
+
+```ts
+{ kind: "manual" }
+// or
+{ kind: "led-generator-v1", specs: [{ path: "scripts/schgen/board_p_spec.py" }, ...] }
+```
+
+`kind` must be one of the two registered values; `led-generator-v1`'s `specs` array must be
+non-empty. See [Concepts → Inventory profiles](../concepts/inventory-profiles.mdx).
+
+## `publication`
+
+| Field | Required | Default | Notes |
+| --- | --- | --- | --- |
+| `selection` | Yes | — | Path to `selection.json` — see [Publication schemas](./schemas.mdx#selection-json) |
+| `assets` | Yes | — | Path to `assets.json` — see [Publication schemas](./schemas.mdx#assets-json) |
+| `matrix` | No | package preset `component-evidence-v1` | Path to a custom `FieldKey → PUBLISH \| DENY` matrix JSON |
+
+## `cad`
+
+Discriminated on `enabled`:
+
+**Disabled** (the default for a new project):
+
+```ts
+{ enabled: false, libraryName?: string }
+```
+
+**Enabled:**
+
+| Field | Required | Default | Notes |
+| --- | --- | --- | --- |
+| `enabled` | Yes | — | `true` |
+| `libraryName` | Yes | — | The KiCad library name |
+| `symbolLibraries` | Yes | — | Non-empty array of `.kicad_sym` paths |
+| `footprintMasterRoot` | Yes | — | Where footprints are authored/merged |
+| `footprintLibraryRoot` | Yes | — | The `.pretty` library directory footprints must also match byte-for-byte |
+| `modelRoot` | Yes | — | The `.3dshapes` directory |
+| `modelLocatorPrefix` | Yes | — | A KiCad model locator prefix such as `${KIPRJMOD}/../../footprints/kicad/<lib>.3dshapes/` — **not** a filesystem path |
+| `footprintPathBase` | No | `root` | Base for footprint paths recorded in preview manifests |
+| `previewRenderer` | Yes | — | `{ image, version, platform, layers[], theme, options[] }` — the pinned KiCad container and render settings |
+| `limits` | No | see below | Partial override of the byte-size limits |
+
+Reference-limit defaults (from upstream zudo-led-lamp `REFERENCE_LIMITS`), overridable per key under
+`cad.limits`:
+
+| Limit | Default |
+| --- | --- |
+| `footprintBytes` | 512 KiB |
+| `modelBytes` | 2 MiB |
+| `aggregateModelBytes` | 8 MiB |
+
+## `validation`
+
+| Field | Required | Default | Notes |
+| --- | --- | --- | --- |
+| `pythonMinVersion` | No | `"3.10"` | `"MAJOR.MINOR"`; must be ≥ `3.10` |
+| `policy` | No | `null` | Path to a data-driven project policy JSON |
+| `userAgent` | No | `null` | Sent as the `User-Agent` header for online source fetches |
+
+## `scan` (overrides only)
+
+`minimumOwnedCanaries`, `minimumOwnedFiles`, `minimumSiteCanaries`, `minimumSiteFiles`,
+`expectedWithheld` (all non-negative integers), and `positiveControlRecord` (a slug, or `null` to
+pick one deterministically). Omitting `scan` entirely means "derive a proportional policy from the
+resolved config" — a project supplies nothing and gets a generic, proportional policy rather than
+upstream's LED-specific fixed floors.
+
+## `browserSmoke`
+
+`{ representatives: [{ kind, path, slug, identity, availability? }, ...] }`. `path` must be a site
+route starting with `/`.
+
+## Validation errors
+
+Every loader failure is a `ConfigError`, mapped by the CLI to exit `2`:
+
+| Code | Meaning |
+| --- | --- |
+| `CONFIG_NOT_FOUND` | No `circuit.config.ts` at the resolved path |
+| `CONFIG_LOAD_FAILED` | The file exists but throws or fails to import |
+| `CONFIG_INVALID` | The file loaded, but its shape fails validation |
+| `NODE_VERSION_UNSUPPORTED` | The running Node version can't type-strip the config |
+
+A `CONFIG_INVALID` error lists **every** issue at once (never just the first one), each with its
+dotted field path and message. For example, a config missing `docs.dist` and `cad.enabled`, with a
+stray top-level `extraTypo` key, reports all three together:
+
+```
+CONFIG_INVALID: docs.dist is required; cad.enabled is required; extraTypo unknown key
+(allowed: configVersion, root, project, docs, evidence, inventoryProvider, publication,
+cad, validation, scan, browserSmoke)
+```
+
+Unknown keys anywhere in the shape are reported by name, listing every allowed key at that level —
+a typo in a field name fails loudly instead of being silently ignored.

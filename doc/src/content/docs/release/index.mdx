@@ -1,6 +1,94 @@
 ---
 title: Release
+description: Release readiness for Circuit Doc v0.1 — package names, contents, licensing, the tested dependency family, and known limits.
 sidebar_position: 1
 ---
 
-Release readiness, acceptance-scenario results, and the validation report for each milestone of the Circuit Doc v0.1 epic.
+Release readiness, acceptance-scenario results, and the validation report for each milestone of the
+Circuit Doc v0.1 epic. **No npm publish and no site deploy are part of this epic** — a packed
+initializer and runtime, installed and run outside the monorepo (see
+[Getting Started → Create a project](../getting-started/create-a-project.mdx)), is the release
+evidence instead.
+
+## Package names
+
+`create-zudo-circuit-doc` and `@takazudo/zudo-circuit-doc` are both **unclaimed on npm** (confirmed
+2026-09-26; `npm view` returns 404 for each). **Neither package is published.** Publishing is a
+separate, explicit action outside this epic's scope — see
+[Getting Started → Create a project](../getting-started/create-a-project.mdx) for how to try the
+tool from packed tarballs in the meantime.
+
+## Package contents
+
+| Package | `files` |
+| --- | --- |
+| `@takazudo/zudo-circuit-doc` | `bin`, `lib`, `python`, `templates`, `contract`, `styles.css`, `README.md`, `LICENSE` (excluding `lib/**/*.test.*`, `python/tests`, `python/**/__pycache__`) |
+| `create-zudo-circuit-doc` | `bin`, `dist`, `templates`, `README.md`, `LICENSE` (excluding `dist/**/*.test.*`) |
+
+The runtime package ships compiled JavaScript under `lib/` — not `dist/` — because zfb 2.21.0's
+workspace-package staging hard-prunes any directory literally named `dist` from a workspace package
+before bundling ([zudo-front-builder#3154](https://github.com/Takazudo/zudo-front-builder/issues/3154),
+reported upstream). This is an implementation detail of how the package is *produced*; it doesn't
+change how a consumer resolves it — `exports` still points wherever the built output actually is.
+It also ships its own Python validator (`python/`) and the frozen evidence contract (`contract/`)
+as data, so a consumer never needs a separate install step for either.
+
+## License and provenance
+
+Both packages, and this repository as a whole, are **MIT-licensed**. Two carve-outs:
+
+- **`fixtures/led/upstream/`** (the pinned zudo-led-lamp regression corpus) is explicitly **not**
+  covered by this repository's MIT license — see its own `NOTICE.md` for what it contains and its
+  actual provenance (owner-authored evidence and validator code, `easyeda2kicad`-derived KiCad
+  assets, and manufacturer/distributor datasheet extracts). No datasheet PDFs are committed anywhere
+  in this repository.
+- **`examples/minimal`** includes unmodified and lightly-modified files from the official KiCad
+  libraries (`kicad-symbols`, `kicad-footprints`, `kicad-packages3D`), licensed
+  [CC-BY-SA 4.0 with the KiCad library exception](https://creativecommons.org/licenses/by-sa/4.0/legalcode) —
+  see its own `NOTICE.md` for the exact file-by-file mapping to source library, tag and CAD receipt.
+
+## Tested dependency family
+
+The version family is exact-pinned across the whole repository — see [Design → ADR-003](../design/decisions.mdx):
+
+| Package | Version |
+| --- | --- |
+| `@takazudo/zudo-doc` | 5.27.0 |
+| `@takazudo/zfb`, `@takazudo/zfb-runtime`, `@takazudo/zfb-md-wasm` | 2.21.0 |
+| pnpm (`packageManager`, via corepack) | 11.5.2 |
+| Node | ≥22.18.0 |
+| Python | ≥3.10 (standard library only) |
+
+## Known limits and deferred items
+
+Out of scope for v0.1, deliberately:
+
+- **No `update`/migrate command.** A generated project's authored content is create-only; see
+  [Concepts → Ownership and upgrades](../concepts/ownership-and-upgrades.mdx#create-only-there-is-no-update-command).
+- **No manufacturing export profile** (Gerbers, pick-and-place, JLCPCB-style fabrication export).
+  This project stops at documentation and CAD previews.
+- **No supplier-specific acquisition helpers** beyond the optional `easyeda2kicad` import for
+  LCSC-listed parts — there is no built-in integration for any other distributor's API.
+- **No STEP viewer; no general CAD-format converter.** The 3D preview stays WRL-only; a matching
+  STEP+WRL pair from the same tagged KiCad library release is the supported path (see
+  [Concepts → CAD fidelity](../concepts/cad-fidelity.mdx)).
+- **No supplier-SKU / same-name cross-vendor alias routing.** Routing alias classes are fixed to
+  `mpn`, `lcsc`, `manufacturer`, `function`; a same-named part from a different manufacturer is
+  handled by exact manufacturer-qualified identity, never by a shared-name shortcut (see
+  [Design → ADR-009](../design/decisions.mdx)).
+
+Two follow-ups were opened against the runtime for a future release, tracked upstream rather than
+blocking v0.1:
+[#36](https://github.com/Takazudo/zudo-circuit-doc/issues/36) (an explicit `docs.generatedNotice`
+config field, instead of inferring it from the legacy generated-page marker) and
+[#37](https://github.com/Takazudo/zudo-circuit-doc/issues/37) (allowing material-only `DEF`/`USE`
+in published WRLs, so official KiCad StepUp models publish without a derivation step).
+
+## Coming
+
+The acceptance-scenario traceability matrix and the full v0.1 validation report — covering all
+scenarios from the epic's acceptance plan, including the Claude→Codex continuation run and the
+explicit "not run: requires physical hardware" bench scenario — are tracked as epic sub-issues
+[#32](https://github.com/Takazudo/zudo-circuit-doc/issues/32) and
+[#34](https://github.com/Takazudo/zudo-circuit-doc/issues/34), and will land on this page once
+complete.

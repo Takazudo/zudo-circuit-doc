@@ -1,0 +1,85 @@
+---
+title: Publication
+description: The three gates a value must clear to reach a built page, the selection lock, the assets allowlist, and why assetViewerExclude is not privacy.
+sidebar_position: 3
+---
+
+Adding evidence to a bundle never publishes it. Publication is default-zero and opt-in: a value
+reaches a built page only if it clears three independent gates, enforced structurally rather than
+by convention.
+
+## The three gates
+
+| Gate | What it checks | Enforced by |
+| --- | --- | --- |
+| **INSTANCE** | The record's ID (and, for a source, its source ID) appears in the project's committed `InstanceSelection` (`circuit/publication/selection.json`) | An ID not listed is simply never read; an ID listed but absent from the evidence is a fatal `STALE_SELECTION` |
+| **FIELD** | The value's `FieldKey` is `PUBLISH` in the publication matrix | `PublicationMatrix` is `Record<FieldKey, FieldDecision>` — adding a field to the view model without recording a decision is a compile error, not a runtime gap |
+| **VALUE** | The value survives text-safety and URL-classification checks at render time | Applied uniformly, regardless of the first two gates |
+
+Repository visibility is irrelevant to all three: a field that is readable in the evidence bundle
+you have checked out is still unpublished until it clears INSTANCE, FIELD and VALUE. The default
+matrix denies a handful of fields outright regardless of selection — for example
+`source.sha256`, `source.evidenceExtract`, `pinMap.reviewedBy` and the routing prompt lists — so
+that hashes, raw extract text, reviewer names and search-avoidance prompts never reach a built
+page even for a fully selected record.
+
+## The selection lock
+
+`circuit/publication/selection.json` is the reviewed publication lock:
+
+```json
+{
+  "schema_version": 1,
+  "recordIds": [],
+  "sourceIds": [],
+  "linkableSourceIds": [],
+  "documentSelections": [],
+  "expect": { "records": 0, "sources": 0, "integrationRules": 0, "packages": 0 }
+}
+```
+
+- `recordIds` / `sourceIds` — which records and sources clear the INSTANCE gate.
+- `linkableSourceIds` — selecting a source publishes its metadata; an outbound link is published
+  only for source IDs also listed here.
+- `documentSelections` — one document choice per record (`documentKind`: `datasheet`,
+  `specification` or `drawing`), decided after inspecting the content.
+- `expect` — a reviewed count lock (`records`, `sources`, `integrationRules`, `packages`), each of
+  which may be `0`. It gates `generate`/`check`/`build`; it is **never serialized into the
+  preflight report**, so the LED regression corpus's goldens stayed byte-identical when this gate
+  was introduced. `cad.enabled` is a separate capability flag — a selected PCB record while CAD is
+  disabled is an explicit error, never a silent skip, except the one declared-zero exception
+  described in [CAD fidelity](./cad-fidelity.mdx#the-declared-zero-exception).
+
+Selection and assets-allowlist edits happen **in the same task** as the evidence change they
+publish, and the diff is the review — no separate per-part conversational permission prompt is
+expected.
+
+## The assets allowlist
+
+Raw evidence and CAD files never belong under a built site's public directory by accident. The
+**public-scope check** fails on any such file under `doc/public/`, with exactly two exceptions:
+
+- generator-owned previews under `assets/component-previews/**` (footprint SVGs, published WRL
+  models), and
+- files listed in `circuit/publication/assets.json`, the deliberate-publication allowlist:
+
+```json
+{
+  "schema_version": 1,
+  "assets": [
+    { "path": "favicon.svg", "reason": "Site favicon shipped by the zudo-doc scaffold; not component evidence or CAD." }
+  ]
+}
+```
+
+Each entry names a `path` relative to `publicRoot`, a human `reason`, and an optional `source_id`.
+A file placed under `doc/public/` for any other reason fails the scan.
+
+## `assetViewerExclude` is not privacy
+
+zudo-doc's generated asset viewer can hide a file from its own index with `assetViewerExclude`.
+That setting changes **visibility in one navigation surface** — it does not make the file private,
+does not remove it from the built output, and does not exempt it from the public-scope check above.
+A file under `doc/public/` is public the moment it is built, whether or not the asset viewer lists
+it. If a file should not be public, it should not be under `publicRoot` at all — or it needs a
+genuine entry (with a genuine reason) in `assets.json`, not an exclusion flag.

@@ -1,0 +1,57 @@
+---
+title: Inventory profiles
+description: The manual (generic-v1) inventory profile and the led-generator-v1 profile, and what each one does and does not verify.
+sidebar_position: 5
+---
+
+The inventory (`.claude/skills/component-spec-audit/references/inventory.json`) holds orderable
+identities and declared placements; the owner bundle holds evidence. How the inventory is
+populated and checked is pluggable — `inventoryProvider.kind` in `circuit.config.ts` selects one of
+two profiles.
+
+## `manual` (generic-v1)
+
+The default for every new project. Set with:
+
+```ts
+inventoryProvider: { kind: "manual" },
+```
+
+- **Identity** is a unique `line_id` plus a unique (manufacturer, complete MPN) pair.
+- **`lcsc`** is a required key, but an empty string is allowed. A non-empty value must be a real
+  LCSC C-number read from the supplier listing for the exact part — never fabricated or guessed;
+  leave it empty when the part isn't on LCSC, or hasn't been checked yet.
+- **`suppliers: [{ supplier, order_code }]`** is optional and display-only — it never creates a
+  routing alias.
+- **`placements`** may be `[]`, and is **declared, not verified**: the manual profile does not bind
+  a placement to a schematic or netlist.
+
+Every run of `pnpm circuit:check` prints a `SCOPE:` line stating exactly this — how many lines and
+declared placements it saw, and whether the pin-asset check ran or was skipped because CAD is
+disabled. That line is the honest limit of what the check proved, and the workflow asks you to
+repeat it in a completion report rather than letting a green check imply more than it showed.
+
+## `led-generator-v1`
+
+Ported from zudo-led-lamp's board-generator-driven inventory. Set with:
+
+```ts
+inventoryProvider: { kind: "led-generator-v1", specs: [{ path: "scripts/schgen/board_p_spec.py" }] },
+```
+
+- Specs come **explicitly from config** — there is no implicit fallback to a hard-coded board list.
+- Board names come from each spec's `PROJECT_NAME`.
+- `inventory.json`'s `generator_specs` must equal the configured spec paths, exactly.
+
+This profile exists to keep the LED regression corpus's inventory byte-identical during extraction;
+a new project has no reason to choose it unless it is driving inventory from the same kind of
+generator script LED used.
+
+## The shared pin-asset rule
+
+Independent of which profile is active, every pin map declares a symbol and a footprint. When CAD
+is enabled, both must exist in the configured `cad.symbolLibraries` / footprint directories, and
+symbol pins must equal footprint pads — the `led-generator-v1` profile additionally keeps the
+generator's own symbol/footprint parity. **When CAD is disabled, this check is SKIPPED**, with an
+explicit line, never silently treated as passing. See [CAD fidelity](./cad-fidelity.mdx) for what a
+passing pin-asset check does and does not establish.

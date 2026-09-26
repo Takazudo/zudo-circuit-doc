@@ -1,0 +1,78 @@
+---
+title: The generated project
+description: The exhaustive file-by-file layout of a generated project, and every root script.
+sidebar_position: 4
+---
+
+This is the exhaustive version of [Getting Started → What you get](../getting-started/generated-project.mdx).
+
+## Root files
+
+| File | Purpose |
+| --- | --- |
+| `package.json` | `private: true`, `"type": "module"`, `packageManager` pinned to `pnpm@11.5.2` |
+| `pnpm-workspace.yaml` | `packages: [doc]`, `minimumReleaseAge: 0`, `allowBuilds.esbuild`, any required `trustPolicyExclude` — no `.npmrc` files exist, because `pnpm pack` drops them and pnpm only reads them at the workspace root |
+| `circuit.config.ts` | See [Reference → circuit.config.ts](./config.mdx) |
+| `README.md` | Commands, the first circuit task, tool requirements |
+| `CLAUDE.md`, `AGENTS.md` | Thin pointers to `circuit/WORKFLOW.md`, written per `--agent` |
+| `.gitignore` | Includes `.circuit-cache/` |
+| `ZUDO_DEPS_PINS.md` | Provenance for the vendored zudo-doc scaffold — see [Concepts → Ownership and upgrades](../concepts/ownership-and-upgrades.mdx#the-scaffold-refresh-procedure) |
+
+## `circuit/`
+
+| Path | Purpose |
+| --- | --- |
+| `WORKFLOW.md` | The canonical workflows A–G — see [Workflows](../workflows/) |
+| `agent-task-examples.md` | Nine short example requests, English + Japanese |
+| `templates/` | The 10 unpublished authoring templates, plus the CAD asset receipt template (`.json` and `.md`) |
+| `checks/README.md` | What each check establishes, and what it doesn't |
+| `publication/selection.json`, `publication/assets.json` | Empty at scaffold time — see [Publication schemas](./schemas.mdx) |
+| `generated/preflight.json` | The generated preflight report |
+| `cad-receipts/` | Created when the first CAD asset is acquired (not present at scaffold time) |
+
+## `.claude/skills/`
+
+| Path | Purpose |
+| --- | --- |
+| `component-spec-audit/SKILL.md` | Owner-audit skill entry |
+| `component-spec-audit/references/inventory.json` | Explicitly empty at scaffold time |
+| `component-spec-audit/references/direct-routing.json`, `external-vendor-qualifiers.json` | Routing configuration |
+| `component-spec-audit/references/new-component-workflow.md` | The step-by-step checklist Workflow B follows |
+| `circuit-spec-integration/SKILL.md` | Cross-component integration skill entry |
+| `circuit-spec-integration/references/rules.json` | `{ "schema_version": 1, "rules": [] }` at scaffold time |
+| `component-<suffix>/` | One owner bundle per exact component, created by `new-component` — see [Concepts → The evidence contract](../concepts/evidence-contract.mdx#files-of-a-v1-owner-bundle) |
+
+## `doc/` (the zudo-doc app)
+
+| Path | Purpose |
+| --- | --- |
+| `pages/docs/[[...slug]].tsx`, `pages/index.tsx` | The host route stub, with the islands seed import added |
+| `pages/lib/_circuit-doc-islands.ts` | Side-effect import of `@takazudo/zudo-circuit-doc/islands` |
+| `src/chrome-bindings.tsx` | Spreads `circuitDocMdxExtras` into the host's MDX component set |
+| `src/styles/global.css` | Imports the package's `styles.css` after zudo-doc's own CSS |
+| `zfb.config.ts` | `claudeResources { claudeDir: "../.claude", scanRoot: ".." }`, `docHistoryExclude ["components", "components/**"]`, `defaultLocaleOnlyPrefixes` for `/docs/components/` and `/docs/claude*/`, `themePacks: ["default"]`, `dynamicPageTransition`, `llmsTxt`, `strictContentBridge` |
+| `src/content/docs/{project,architecture,research,decisions,verification}/` | Authored — yours to write |
+| `src/content/docs/components/**` | Generated — never hand-edited |
+| `public/assets/component-previews/**` | Generated footprint SVGs and published WRL models |
+
+**Not generated:** `boards/`, `symbols/`, `footprints/`, `manufacturing/`, any LED-specific value, or
+deploy configuration of any kind.
+
+## Root scripts
+
+| Script | Runs |
+| --- | --- |
+| `pnpm dev` | `pnpm --dir doc dev` |
+| `pnpm build` | `zudo-circuit-doc models && zudo-circuit-doc generate && pnpm --dir doc build` |
+| `pnpm check` | `zudo-circuit-doc check && pnpm --dir doc check` |
+| `pnpm circuit:check` | `zudo-circuit-doc validate` |
+| `pnpm circuit:generate` | `zudo-circuit-doc generate` |
+| `pnpm circuit:doctor` | `zudo-circuit-doc doctor` |
+| `pnpm check:site` | `zudo-circuit-doc check-built && zudo-circuit-doc scan && pnpm --dir doc check:links -- --strict-anchors --strict-broken` |
+| `pnpm previews:generate` | `zudo-circuit-doc footprints generate` (optional; needs Docker) |
+
+`doc/scripts/check-links.js` is vendored byte-identical from the pinned `create-zudo-doc` scaffold —
+`check:site` runs it through `pnpm --dir doc check:links` (rather than pointing `node` at its path
+from the project root) specifically so the vendored file's own `process.cwd()`-relative behavior
+stays unmodified. See [Concepts → Ownership and upgrades](../concepts/ownership-and-upgrades.mdx)
+for how this file is kept in sync with upstream.

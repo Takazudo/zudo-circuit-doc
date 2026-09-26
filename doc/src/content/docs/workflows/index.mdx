@@ -1,6 +1,72 @@
 ---
 title: Workflows
+description: The canonical agent workflows A–G, and where the full text lives.
 sidebar_position: 1
 ---
 
-The canonical agent workflows a generated project ships with — the step-by-step tasks an agent runs to turn a short request into durable, honest project knowledge.
+Every generated project ships one canonical agent workflow, at `circuit/WORKFLOW.md`. `CLAUDE.md`
+and `AGENTS.md` are thin pointers to it — this site never copies its text, because the shipped file
+is what your agent actually reads, and a second, drifting copy here would be worse than no copy at
+all. What follows is an index of what each workflow covers, so you know which one to open.
+
+## In this section
+
+- [How Claude Code and Codex share one workflow](./agent-collaboration.mdx) — why there is one
+  `WORKFLOW.md` and two thin entry files, not two workflows.
+
+## The shared entry
+
+Every workflow starts the same way: read the brief and next actions, read the relevant inventory
+and owner bundles, run `pnpm circuit:check` **before** editing anything (so pre-existing gaps
+aren't confused with new ones), and route by exact manufacturer + complete MPN + supplier order
+code + project role — a bare base name or family name is never enough to resolve an identity.
+
+## Workflow A — Start a circuit
+
+**Input:** an idea, constraints, sketches, or an existing design. **Produces:** the project brief,
+a first architecture overview, and a next-actions list — with unknowns left as unknowns. This is
+the first thing to run on a brand-new project; see [Getting Started → The first task](../getting-started/first-task.mdx).
+
+## Workflow B — Add or replace an exact component
+
+**Input:** an exact part or link, its function, a proposed placement, or a requested substitution.
+**Produces:** an owner evidence bundle, an inventory line, a pin map, and (for a substitution) a
+change-impact comparison. See [Getting Started → The first task](../getting-started/first-task.mdx)
+for a walkthrough of adding the first one.
+
+## Workflow C — Find or download a datasheet or source
+
+**Input:** an exact component and the fact(s) that need evidence. **Produces:** a retained source
+record with its authority class, hash and locator — or, if acquisition is blocked, an honest
+`SOURCE UNAVAILABLE` entry instead of a fabricated one.
+
+## Workflow D — Obtain symbol, footprint and 3D model
+
+**Input:** the exact orderable variant and its intended board or mechanical use. **Produces:** a
+CAD asset receipt with a fidelity classification — see [Concepts → CAD fidelity](../concepts/cad-fidelity.mdx).
+Runs only when `cad.enabled` is `true`; otherwise the pin-asset check reports itself as skipped.
+
+## Workflow E — Verify a specification
+
+**Input:** a claim, a component record, a design decision, or a changed source. **Produces:** one
+of the six verdicts (see [Concepts → The evidence contract](../concepts/evidence-contract.mdx#verdicts)),
+recorded against its exact locator and conditions.
+
+## Workflow F — Record a bench result
+
+**Input:** actual measurements or a supplied test log. **Produces:** a verification report scoped
+to one board revision, configuration and set of conditions — a later successful measurement never
+overwrites an earlier failure.
+
+## Workflow G — Handle a source or design change
+
+**Input:** an updated datasheet, a substitution, a footprint edit, a firmware change, or a
+schematic/net change. **Produces:** one small, reviewable diff containing the evidence change, the
+design-state update, the regenerated pages, and any revised decision — with everything still
+pending named alongside its reason.
+
+## Completion report
+
+Every workflow ends the same way too: what was obtained or checked, the exact identity involved,
+what changed (including any `SCOPE:`/`SKIP:` lines the checks printed), and what remains open, each
+item with its reason.
