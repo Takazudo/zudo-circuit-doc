@@ -1,0 +1,93 @@
+# check-browser regression gate (#27, ADR-017).
+#
+# Triggered on PRs targeting `main` or any `base/**` branch (epic-PR stacks),
+# and on push to `main`.
+#
+# Builds the packages and the LED fixture site (#23) exactly like the `site`
+# job in ci-led-fixture.yml (same STEP cache key), then runs the package's own
+# dependency-free CDP browser smoke against it with every optional assertion
+# group on (`--shell-assertions --search-assertions`), on ubuntu-latest, where
+# `google-chrome` is preinstalled — no extra Chrome setup step is needed.
+#
+# The run's own stdout/stderr is captured to a log file so a failure's full
+# diagnostics (including the browser-side state dump `run.ts` attaches to a
+# thrown error) survive as a downloadable artifact, not only in the raw
+# Actions log.
+
+name: CI Browser
+
+on:
+  pull_request:
+    branches:
+      - main
+      - "base/**"
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ci-browser-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    name: check-browser (LED fixture site)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      # Same cache key as ci-led-fixture.yml's `regression`/`site` jobs — all
+      # three need the exact same pinned STEP files.
+      - name: Cache LED STEP files
+        id: step-cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: fixtures/led/upstream/footprints/kicad/zudo-led-lamp.3dshapes/*.step
+          key: led-step-194d8a297e3545588197342130c3111a66c10973
+
+      - name: Materialize STEP (cache miss)
+        if: steps.step-cache.outputs.cache-hit != 'true'
+        run: pnpm fixtures:led:materialize
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Build LED fixture site
+        run: node scripts/build-fixture-site.mjs --fixture led --out ${{ runner.temp }}/led-fixture-site --keep
+
+      - name: check-browser
+        id: check-browser
+        working-directory: fixtures/led
+        run: |
+          set -o pipefail
+          node ../../packages/circuit-doc/bin/zudo-circuit-doc.js \
+            --config circuit.config.ts \
+            check-browser \
+            --dist "${{ runner.temp }}/led-fixture-site/doc/dist" \
+            --representatives circuit/browser-representatives.json \
+            --shell-assertions \
+            --search-assertions \
+            2>&1 | tee "${{ runner.temp }}/check-browser.log"
+
+      - name: Upload check-browser log
+        if: failure() && steps.check-browser.outcome == 'failure'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: check-browser-log
+          path: ${{ runner.temp }}/check-browser.log
+          retention-days: 7

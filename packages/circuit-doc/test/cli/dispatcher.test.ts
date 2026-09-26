@@ -78,15 +78,6 @@ describe("zudo-circuit-doc dispatcher", () => {
     assert.match(run.stderr, /CONFIG_NOT_FOUND/u);
   });
 
-  for (const [argv, issue] of [
-    [["check-browser"], 27],
-  ] as const) {
-    it(`stub \`${argv.join(" ")}\` prints its tracking issue and exits 2`, async () => {
-      const run = await runCli(NOWHERE, [...argv]);
-      assert.equal(run.code, EXIT.USAGE);
-      assert.equal(run.stderr, `${argv[0]}: not implemented yet (tracked in #${issue})\n`);
-    });
-  }
 });
 
 describe("argument parsing", () => {
