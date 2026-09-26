@@ -165,6 +165,16 @@ export function renderRecord(
   );
 }
 
+/**
+ * What a record page says in place of the reference viewer when no package is
+ * published; `scan/built-references.ts` asserts the built page carries it.
+ */
+export const PACKAGELESS_REFERENCE_TEXT = {
+  external:
+    "External panel-mounted component, hand-wired to the PCB. No PCB footprint or package model applies. Consult the manufacturer drawing for panel cutout and terminal orientation.",
+  pcb: "No footprint or 3D model is published for this record: CAD is not enabled for this project.",
+} as const;
+
 function componentReferencesSection(record: PublicRecord): RootContent[] {
   const footprint = record.reference.footprint;
   const document = record.reference.document;
@@ -180,15 +190,7 @@ function componentReferencesSection(record: PublicRecord): RootContent[] {
       paragraph(field("Selected source ID", [code(document.sourceId)])),
       paragraph(field("Authority", [text(document.authorityClass)])),
       paragraph(field("Availability", [text(document.availability)])),
-      paragraph([
-        text(
-          literal(
-            record.reference.mounting === "external"
-              ? "External panel-mounted component, hand-wired to the PCB. No PCB footprint or package model applies. Consult the manufacturer drawing for panel cutout and terminal orientation."
-              : "No footprint or 3D model is published for this record: CAD is not enabled for this project.",
-          ),
-        ),
-      ]),
+      paragraph([text(literal(PACKAGELESS_REFERENCE_TEXT[record.reference.mounting]))]),
     ];
   }
   const modelName = String(footprint.modelPath).split("/").at(-1);

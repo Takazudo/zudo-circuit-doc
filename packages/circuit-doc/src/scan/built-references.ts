@@ -27,7 +27,8 @@ import { basename, extname, join, relative, sep } from "node:path";
 import { fail } from "../core/errors.ts";
 import { byCodeUnit } from "../core/ids.ts";
 import { CATALOG_ROUTE, FOOTPRINT_ASSET_BASE, MODEL_ASSET_BASE, RECORDS_ROUTE } from "../core/site.ts";
-import type { PublicViewModel } from "../core/view-model.ts";
+import { PACKAGELESS_REFERENCE_TEXT } from "../core/render/record.ts";
+import type { PublicRecord, PublicViewModel } from "../core/view-model.ts";
 
 /**
  * Mirrors the `labels` map `provider/v1/index.ts` `projectRecordReference`
@@ -81,8 +82,14 @@ export async function checkBuiltReferences(input: BuiltReferencesInput): Promise
   const referencedFootprints = new Set<string>();
   const referencedModels = new Set<string>();
 
+  const recordsBySlug = new Map(model.records.map((record) => [String(record.identity.slug), record]));
   for (const slug of recordDirectories) {
     const html = await readFile(join(recordsRoot, slug, "index.html"), "utf8");
+    const record = recordsBySlug.get(slug);
+    if (record !== undefined && record.reference.footprint === null) {
+      checkPackagelessRecordPage(slug, html, record);
+      continue;
+    }
     checkRecordPage(slug, html, referencedFootprints, referencedModels);
   }
 
@@ -216,6 +223,31 @@ async function listFiles(root: string, current: string = root): Promise<string[]
     }
   }
   return files;
+}
+
+// --- package-less record pages (external part, or CAD off with expect.packages 0) --
+
+/**
+ * A record with no published package renders no viewer: it must still link its
+ * selected document, say plainly why no footprint or model is shown, and
+ * reference no preview asset.
+ */
+function checkPackagelessRecordPage(slug: string, html: string, record: PublicRecord): void {
+  if (extractReferenceSections(html).length !== 0) {
+    fail("PUBLICATION_POLICY", `${slug} renders a Component references viewer without a published package`, { slug });
+  }
+  const statement = PACKAGELESS_REFERENCE_TEXT[record.reference.mounting];
+  if (!html.includes(`>${statement}</p>`)) {
+    fail("PUBLICATION_POLICY", `${slug} must state why no footprint or 3D model is published`, { slug });
+  }
+  const documentUrl = String(record.reference.document.url);
+  const hrefs = [...html.matchAll(/<a\b[^>]*\bhref=[^>]*>/gu)].map((match) => decodeHtml(readAttribute(match[0], "href", slug)));
+  if (!hrefs.includes(documentUrl)) {
+    fail("PUBLICATION_POLICY", `${slug} must link its selected document`, { slug, url: documentUrl });
+  }
+  if (html.includes(FOOTPRINT_ASSET_BASE) || html.includes(MODEL_ASSET_BASE)) {
+    fail("PUBLICATION_POLICY", `${slug} references a preview asset without a published package`, { slug });
+  }
 }
 
 // --- per-record structural assertions (kept verbatim from upstream) --------
