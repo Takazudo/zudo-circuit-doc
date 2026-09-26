@@ -438,7 +438,12 @@ export function withFixtureReferences(index: EvidenceIndex): EvidenceIndex {
   const packageByRecordId = new Map(
     packages.map((entry) => [entry.recordIds[0] as string, entry]),
   );
-  const references: CircuitReferenceContract = { documentsByRecordId, packages, packageByRecordId };
+  const references: CircuitReferenceContract = {
+    documentsByRecordId,
+    packages,
+    packageByRecordId,
+    unpublishedPackageRecordIds: new Set(),
+  };
   return { ...index, references };
 }
 

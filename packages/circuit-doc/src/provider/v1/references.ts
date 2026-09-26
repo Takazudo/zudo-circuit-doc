@@ -48,6 +48,13 @@ export type CircuitReferenceContract = {
   readonly documentsByRecordId: ReadonlyMap<string, CircuitDocumentReference>;
   readonly packages: readonly CircuitPackageReference[];
   readonly packageByRecordId: ReadonlyMap<string, CircuitPackageReference>;
+  /**
+   * Selected PCB-mounted records that deliberately have no package reference:
+   * CAD is disabled and the reviewed selection locks `expect.packages` to 0
+   * (ADR-012 declared-zero exception). Their pages state that no footprint or
+   * 3D model is published; they are never silently treated as external.
+   */
+  readonly unpublishedPackageRecordIds: ReadonlySet<string>;
 };
 
 /** The project roots the reference contract reads from. */
@@ -71,8 +78,10 @@ export type CircuitReferenceOptions = {
    * CAD capability flag (config `cad.enabled`). Defaults to `true`, matching
    * upstream (CAD was always available). `false` is a capability that must be
    * respected: a selected PCB-mounted record still requiring a footprint is a
-   * fatal `ADAPTER_CONTRACT`, never a silent skip. An `external` (non-PCB)
-   * record is unaffected either way.
+   * fatal `ADAPTER_CONTRACT`, never a silent skip — unless the reviewed
+   * selection declares `expect.packages: 0`, in which case the record is listed
+   * in `unpublishedPackageRecordIds` and its page says so (ADR-012). An
+   * `external` (non-PCB) record is unaffected either way.
    */
   readonly enabled?: boolean;
   /** The only footprint model locator prefix accepted as a local WRL. */
@@ -110,6 +119,7 @@ export async function readCircuitReferenceContract(
   const documentsByRecordId = selectDocuments(index, selection);
   const packageByRecordId = new Map<string, CircuitPackageReference>();
   const packagesByName = new Map<string, CircuitPackageReference>();
+  const unpublishedPackageRecordIds = new Set<string>();
   let aggregateModelBytes = 0;
 
   for (const recordId of selection.recordIds) {
@@ -119,6 +129,10 @@ export async function readCircuitReferenceContract(
       if (entry.line.lcsc !== "" || entry.pinMaps.length !== 1 || entry.pinMaps[0]?.footprint !== "") {
         fail("ADAPTER_CONTRACT", "external component has a PCB identity or footprint", { recordId });
       }
+      continue;
+    }
+    if (!enabled && selection.expect.packages === 0) {
+      unpublishedPackageRecordIds.add(recordId);
       continue;
     }
     if (!enabled) {
@@ -164,7 +178,7 @@ export async function readCircuitReferenceContract(
       actual: packages.length,
     });
   }
-  return { documentsByRecordId, packages, packageByRecordId };
+  return { documentsByRecordId, packages, packageByRecordId, unpublishedPackageRecordIds };
 }
 
 function selectDocuments(

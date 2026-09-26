@@ -73,7 +73,11 @@ async function run(context: CommandContext): Promise<number> {
 
   // 5. footprints
   if (!project.config.cad.enabled && project.selection.expect.packages === 0) {
-    step("footprints", EXIT.PASS, "ok: zero selected footprints");
+    step(
+      "footprints",
+      EXIT.PASS,
+      "ok: zero selected footprints (cad disabled, expect.packages = 0: no footprint or 3D model is published)",
+    );
   } else {
     const code = await checkFootprintsStep(project, io);
     step("footprints", code, code === EXIT.PASS ? "previews up to date" : `footprints check exited ${code}`);

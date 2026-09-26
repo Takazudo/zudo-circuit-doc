@@ -265,7 +265,9 @@ function projectRecordReference(
   const recordId = entry.record.record_id;
   const document = references.documentsByRecordId.get(recordId);
   const footprint = references.packageByRecordId.get(recordId);
-  if (document === undefined || (footprint === undefined && entry.line.mounting !== "external")) {
+  const mounting = entry.line.mounting === "external" ? "external" : "pcb";
+  const declaredUnpublished = references.unpublishedPackageRecordIds.has(recordId);
+  if (document === undefined || (footprint === undefined && mounting === "pcb" && !declaredUnpublished)) {
     fail("ADAPTER_CONTRACT", "record has no complete reference descriptor", { recordId });
   }
   const classified = classifyUrl(document.source.authoritative_url);
@@ -296,6 +298,7 @@ function projectRecordReference(
       availability: policy.publishRequired("reference.document.availability", safeText(document.source.availability, { field: `${recordId}.reference.availability` })),
       documentKind: policy.publishRequired("reference.document.documentKind", document.documentKind),
     },
+    mounting,
     footprint: footprint === undefined ? null : projectFootprint(footprint, policy),
   };
 }
@@ -372,7 +375,10 @@ function buildIdentity(
       "record.manufacturer",
       safeText(line.manufacturer, { field: "manufacturer" }),
     ),
-    lcsc: policy.publishRequired("record.lcsc", safeText(line.lcsc, { field: "lcsc", allowEmpty: line.mounting === "external" })),
+    // Empty is legal for external parts and for generic-v1 (manual) lines (ADR-010);
+    // the Python inventory provider, not this projection, enforces a C-number
+    // where the led-generator-v1 profile requires one.
+    lcsc: policy.publishRequired("record.lcsc", safeText(line.lcsc, { field: "lcsc", allowEmpty: true })),
     packageName: policy.publishRequired(
       "record.package",
       safeText(line.package, { field: "package" }),

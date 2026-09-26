@@ -283,6 +283,40 @@ describe("readCircuitReferenceContract", () => {
     );
   });
 
+  it("CAD disabled with a non-zero package lock still refuses the PCB-mounted record", async () => {
+    const roots = await makeRoots("disabled-pcb-locked", false);
+    const { line, record: rec, route: rt, pinMap: pm } = pcbFixture("rec-pcb", "line-pcb", "PKG-A");
+    const index = indexEvidence(inventoryOf([line]), [bundleOf([rec], [rt], [pm])], []);
+
+    await rejectsWith(
+      readCircuitReferenceContract(index, selectionFor(["rec-pcb"], 1), roots, { enabled: false }),
+      "ADAPTER_CONTRACT",
+      /CAD capability disabled but record rec-pcb requires a footprint\/model reference/u,
+    );
+  });
+
+  it("CAD disabled with a declared-zero package lock lists the PCB record as unpublished, not external (ADR-012)", async () => {
+    const roots = await makeRoots("disabled-pcb-declared-zero", false);
+    const { line, record: rec, route: rt, pinMap: pm } = pcbFixture("rec-pcb", "line-pcb", "PKG-A");
+    const index = indexEvidence(inventoryOf([line]), [bundleOf([rec], [rt], [pm])], []);
+
+    const contract = await readCircuitReferenceContract(index, selectionFor(["rec-pcb"], 0), roots, { enabled: false });
+
+    assert.deepEqual(contract.packages, []);
+    assert.equal(contract.packageByRecordId.has("rec-pcb"), false);
+    assert.deepEqual([...contract.unpublishedPackageRecordIds], ["rec-pcb"]);
+  });
+
+  it("an external record is never listed as unpublished, even with CAD disabled", async () => {
+    const roots = await makeRoots("enabled-no-unpublished", false);
+    const { line, record: rec, route: rt, pinMap: pm } = externalFixture("rec-ext", "line-ext");
+    const index = indexEvidence(inventoryOf([line]), [bundleOf([rec], [rt], [pm])], []);
+
+    const contract = await readCircuitReferenceContract(index, selectionFor(["rec-ext"], 0), roots, { enabled: false });
+
+    assert.deepEqual([...contract.unpublishedPackageRecordIds], []);
+  });
+
   it("a lock mismatch names the expected and actual package counts", async () => {
     const roots = await makeRoots("lock-mismatch");
     await writeGoodPackage(roots, "PKG-A");

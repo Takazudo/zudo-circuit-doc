@@ -88,6 +88,7 @@ const ONE_RECORD_MODEL: PublicViewModel = {
           availability: t("AVAILABLE"),
           documentKind: "datasheet",
         },
+        mounting: "pcb",
         footprint: {
           packageId: t(PACKAGE_ID),
           footprintName: t(PACKAGE_ID),

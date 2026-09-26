@@ -254,6 +254,48 @@ describe("record page — structure", () => {
   });
 });
 
+describe("record page — PCB record without a published package (ADR-012 declared zero)", () => {
+  function withReference(mounting: "pcb" | "external"): PublicViewModel {
+    const base = fixtureModel();
+    return {
+      ...base,
+      records: base.records.map((record) =>
+        record.identity.recordId === FIXTURE_IDS.driverRecord
+          ? {
+              ...record,
+              identity: { ...record.identity, lcsc: safeText("", { field: "lcsc", allowEmpty: true }) },
+              reference: { ...record.reference, mounting, footprint: null },
+            }
+          : record,
+      ),
+    };
+  }
+
+  it("states that no footprint or 3D model is published, without calling the part external", () => {
+    const page = pageFor(withReference("pcb"), FIXTURE_IDS.driverRecord);
+    assert.match(page, /No footprint or 3D model is published for this record: CAD is not enabled for this project\./u);
+    assert.match(page, /Datasheet PDF/u);
+    assert.doesNotMatch(page, /External panel-mounted component|external solder lugs|External terminal/u);
+    assert.doesNotMatch(page, /<ComponentReferences/u);
+    assert.match(page, /Footprint pad/u);
+  });
+
+  it("keeps the exact external-part wording for an external record", () => {
+    const page = pageFor(withReference("external"), FIXTURE_IDS.driverRecord);
+    assert.match(page, /External panel-mounted component, hand-wired to the PCB\./u);
+    assert.match(page, /Not applicable — external solder lugs/u);
+    assert.match(page, /External terminal/u);
+    assert.doesNotMatch(page, /CAD is not enabled/u);
+  });
+
+  it("omits the catalog's Orderable ID row for a record with no LCSC ID", () => {
+    const withoutLcsc = renderCatalog(withReference("pcb")).contents;
+    const orderableRows = [...withoutLcsc.matchAll(/\| Orderable ID/gu)].length;
+    const allRows = [...catalogPage.matchAll(/\| Orderable ID/gu)].length;
+    assert.equal(orderableRows, allRows - 1);
+  });
+});
+
 describe("record page — evidence semantics", () => {
   it("keeps value, unit, conditions, verdict and provenance as labeled fields", () => {
     assert.match(driverPage, /<EvidenceFact>[\s\S]*?\*\*Value:\*\*[\s\S]*?\*\*Unit:\*\*[\s\S]*?\*\*Conditions:\*\*[\s\S]*?\*\*Verdict:\*\*[\s\S]*?\*\*Provenance:\*\*[\s\S]*?\*\*Evidence:\*\*/u);
