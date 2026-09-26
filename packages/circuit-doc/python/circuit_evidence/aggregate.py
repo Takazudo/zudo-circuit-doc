@@ -35,7 +35,7 @@ def _owner_directory_mismatch_message(owners, actual_component_dirs, bundles_roo
             check_placeholder_leak({name: bundle})
         except ContractError as exc:
             placeholder_notes.append(str(exc))
-        except OSError:
+        except (OSError, ValueError, KeyError, TypeError, AttributeError):
             continue
     if placeholder_notes:
         message += "; also in this run: " + "; ".join(placeholder_notes)
