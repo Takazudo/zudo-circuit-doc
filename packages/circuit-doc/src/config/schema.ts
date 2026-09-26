@@ -203,6 +203,7 @@ const DOCS_SHAPE: Shape = {
   dist: required(configPath),
   agentResources: optional(boolean),
   generatedMarker: optional(singleLineText),
+  generatedNotice: optional(boolean),
   integrationGloss: optional(configPath),
 };
 

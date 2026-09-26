@@ -52,6 +52,7 @@ one place (the CLI/adapter), never confused inside the schema check itself.
 | `dist` | Yes | — | The built-site directory `check-built`/`scan`/`check-browser` read by default |
 | `agentResources` | No | `true` | Generated pages link `/docs/claude/` and `/docs/claude-skills/<owner>/` (needs zudo-doc's `claudeResources`) |
 | `generatedMarker` | No | the neutral marker | A custom generated-page marker string (single line). The LED regression fixture sets its legacy marker here so its goldens stay byte-identical |
+| `generatedNotice` | No | `true`, unless `generatedMarker` is a legacy marker and this is unset (then `false`) | Whether generated pages carry the generated-page notice paragraph. Set it explicitly to decouple the notice from the marker, e.g. a custom marker with no notice, or the legacy marker with a notice |
 | `integrationGloss` | No | `null` | An optional JSON file `{ domain: text }` |
 
 ## `evidence`

@@ -91,6 +91,25 @@ describe("mapCircuitConfig", () => {
     assert.equal(render.agentResources, false);
   });
 
+  it("an explicit docs.generatedNotice: true overrides the legacy-marker inference", async () => {
+    const { resolved } = await fixture((config) => {
+      config.docs.generatedMarker = LEGACY_MARKERS[0];
+      config.docs.generatedNotice = true;
+    });
+    const { render } = await mapCircuitConfig(resolved);
+    assert.equal(render.generatedMarker, LEGACY_MARKERS[0]);
+    assert.equal(render.generatedNotice, true);
+  });
+
+  it("an explicit docs.generatedNotice: false turns off the notice for a non-legacy marker", async () => {
+    const { resolved } = await fixture((config) => {
+      config.docs.generatedNotice = false;
+    });
+    const { render } = await mapCircuitConfig(resolved);
+    assert.equal(render.generatedMarker, undefined);
+    assert.equal(render.generatedNotice, false);
+  });
+
   it("reads the integration gloss and a full matrix override", async () => {
     const { root, resolved } = await fixture((config) => {
       config.docs.integrationGloss = "gloss.json";
