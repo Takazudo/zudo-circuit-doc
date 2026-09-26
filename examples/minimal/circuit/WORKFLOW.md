@@ -31,12 +31,27 @@ Do this at the start of every task.
 | `circuit/cad-receipts/` | CAD asset receipts (see Workflow D), created when the first asset is acquired | Project | Yes |
 | `.circuit-cache/sources/` | Local working copies of downloaded sources (git-ignored) | Project, local only | Yes |
 | `circuit.config.ts` | Project configuration read by the CLI | Project | Yes |
+| `doc/zfb.config.ts` | Site config: header nav, sidebar categories, features | Project | Yes |
+| `doc/src/**` outside `content/docs/` | Chrome bindings, styles and other site-shell code | Project | Yes |
+| `doc/public/**` except `doc/public/assets/component-previews/` | Files you publish by hand (favicons, downloadable drawings, …) | Project | Yes, listed in `circuit/publication/assets.json` when restricted |
+| Root `package.json` `scripts` | The project's command surface (`pnpm check`, `pnpm build`, …) | Project | Yes |
 | `doc/src/content/docs/components/**` | Generated catalog, record and integration pages | Generator | **Never** |
 | `circuit/generated/preflight.json` | Generated preflight report | Generator | **Never** |
 | `doc/public/assets/component-previews/**` | Generated footprint SVGs and published WRL models | Generator | **Never** |
 | `node_modules/@takazudo/zudo-circuit-doc/` | Renderer, validator, contract and component template | Package | **Never** |
 
 Generated MDX is never hand-edited. Change the evidence or the selection, then regenerate. A hand-edited generated file is reported as drift by `pnpm check`; one with its generated marker removed is reported as an ownership conflict.
+
+The five authored sections above (`project`, `architecture`, `research`, `decisions`, `verification`) are a default, not a ceiling — see [Adding an authored section](#adding-an-authored-section) to add your own.
+
+## Adding an authored section
+
+A project may add its own top-level authored section (for example `testing/` or `manufacturing/`) alongside the five defaults.
+
+1. Add the content under `doc/src/content/docs/<section>/`, with an `index.mdx` as the section's landing page.
+2. Give it a matching `categoryMatch` (equal to the section's directory name) wherever it appears in `headerNav` in `doc/zfb.config.ts`. Without a matching `categoryMatch`, the section's sidebar stays empty even though the pages exist.
+3. The header nav is capped at **6 top-level items** (zudo-doc 5.27.0; the zudo-circuit-doc project documentation's "Getting started → What you get" page states the same cap). Project, Architecture, Research, Decisions, Verification and Components already fill it, so add the new section as a `children` entry under one of the existing dropdown items instead of a seventh top-level entry.
+4. `project/index.mdx` and `project/next-actions.mdx` stay required regardless of what you add — the Shared entry above reads them first, on every task.
 
 ## Commands
 
@@ -58,7 +73,7 @@ Run these from the project root.
 | `pnpm exec zudo-circuit-doc validate --json` | Same validation, machine-readable | No |
 | `pnpm exec zudo-circuit-doc models` / `models --check` | Publish or check the selected WRL models | No |
 | `pnpm exec zudo-circuit-doc footprints check` | Check committed footprint previews against their inputs | No |
-| `pnpm exec zudo-circuit-doc check-browser` | Browser smoke of the built site with system Chrome | No |
+| `pnpm exec zudo-circuit-doc check-browser` | Browser smoke of the built site with system Chrome, using `browserSmoke.representatives` or, absent that, up to 3 derived representatives | No |
 
 Exit codes: `0` pass, `1` check failed, `2` usage or config error, `4` not run because an optional tool (Docker, Chrome) is missing. Exit `4` is "not run", never "passed". What each check does and does not prove is in [checks/README.md](./checks/README.md).
 
@@ -66,7 +81,7 @@ The documentation build never goes online. `--online` and `--refresh-source` are
 
 ## Evidence contract essentials
 
-The frozen contract prose ships with the package: [contract.md](../node_modules/@takazudo/zudo-circuit-doc/contract/contract.md) (available after `pnpm install`). The summary below does not replace it.
+The frozen contract prose is [`.claude/skills/component-spec-audit/references/contract.md`](../.claude/skills/component-spec-audit/references/contract.md); the package's own copy, [contract.md](../node_modules/@takazudo/zudo-circuit-doc/contract/contract.md) (available after `pnpm install`), is the fallback if the skill copy is ever missing. The summary below does not replace either.
 
 ### Files of a v1 owner bundle
 
@@ -210,6 +225,35 @@ If acquisition is blocked (paywall, login, bot wall, dead link, transport error)
 ## Workflow D — obtain symbol, footprint and 3D model
 
 **Input:** the exact orderable variant and its intended board or mechanical use. CAD checks run only when `cad.enabled` is `true` in `circuit.config.ts`, with its symbol libraries, footprint roots and model root configured; otherwise the pin-asset check is reported as SKIPPED.
+
+A complete enabled block, with real values taken from this repository's own `examples/minimal/circuit.config.ts`:
+
+```ts
+import type { CircuitConfig } from "@takazudo/zudo-circuit-doc/config";
+import { DEFAULT_PREVIEW_RENDERER } from "@takazudo/zudo-circuit-doc/config";
+
+export default {
+  // ...
+  cad: {
+    enabled: true,
+    libraryName: "example-minimal-circuit-lib",
+    symbolLibraries: ["symbols/example-minimal-circuit-lib.kicad_sym"],
+    footprintMasterRoot: "footprints/kicad",
+    footprintLibraryRoot: "footprints/kicad/example-minimal-circuit-lib.pretty",
+    modelRoot: "footprints/kicad/example-minimal-circuit-lib.3dshapes",
+    modelLocatorPrefix: "${KIPRJMOD}/../../footprints/kicad/example-minimal-circuit-lib.3dshapes/",
+    previewRenderer: DEFAULT_PREVIEW_RENDERER,
+  },
+  // ...
+} satisfies CircuitConfig;
+```
+
+- `libraryName` — the KiCad library name the project's symbols and footprints live under.
+- `symbolLibraries` — one or more `.kicad_sym` paths merged for pin lookups.
+- `footprintMasterRoot` / `footprintLibraryRoot` — the canonical footprint directory and the `.pretty` library directory the check keeps byte-identical (`cmp -s`) when both are configured.
+- `modelRoot` — the `.3dshapes` directory holding the published WRL models (and any optional STEP siblings).
+- `modelLocatorPrefix` — the `${KIPRJMOD}`-relative prefix written into a footprint's 3D-model reference.
+- `previewRenderer` — reuse the package's `DEFAULT_PREVIEW_RENDERER` (`import { DEFAULT_PREVIEW_RENDERER } from "@takazudo/zudo-circuit-doc/config"`; the pinned KiCad Docker image, version, platform, render layers and theme) unless the project needs a different renderer. A missing rendered preview means running `pnpm previews:generate`, not hand-authoring one.
 
 1. Resolve the exact part and package, and check whether the project already has the symbol, footprint or model.
 2. Acquire assets, recording provider, exact product page, original filename, date and SHA-256 in a receipt. Keep the unmodified import next to any documented derived version.
