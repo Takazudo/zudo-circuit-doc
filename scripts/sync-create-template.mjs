@@ -103,7 +103,7 @@ const SENTINELS = [
   {
     token: "Example Empty Circuit",
     replacement: "__SITE_TITLE__",
-    expectedFiles: ["circuit.config.ts", "doc/zfb.config.ts"],
+    expectedFiles: ["circuit.config.ts", "doc/zfb.config.ts", "README.md"],
   },
 ];
 

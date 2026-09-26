@@ -64,3 +64,8 @@ test("an invalid --agent value is a usage error", () => {
 test("no destination leaves it undefined", () => {
   assert.equal(parseCliArgs([]).destination, undefined);
 });
+
+test("--runtime-spec is parsed; omitted leaves it undefined", () => {
+  assert.equal(parseCliArgs(["dest", "--runtime-spec", "^0.2.0"]).runtimeSpec, "^0.2.0");
+  assert.equal(parseCliArgs(["dest"]).runtimeSpec, undefined);
+});

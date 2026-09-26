@@ -329,13 +329,27 @@ async function assertGitignoreWorks(projectDir) {
   assert(trackedCheck.status === 1, ".gitignore unexpectedly ignores package.json");
 }
 
+// #58 dropped the literal ``` fences from the initializer's "Next steps:"
+// block, so the block is now found by its header and its two-space
+// indentation instead: the commands are every indented, nonblank line
+// directly after the header (stopping at the first blank line — any
+// trailing paragraph, e.g. the --runtime-spec notice, is not indented and is
+// never part of this block).
 function parseNextSteps(stdout) {
-  const match = /```\n([\s\S]*?)```/u.exec(stdout);
-  assert(match !== null, `could not find the fenced "Next steps" block in initializer output:\n${stdout}`);
-  return match[1]
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
+  const headerIndex = stdout.indexOf("Next steps:");
+  assert(headerIndex !== -1, `could not find the "Next steps:" header in initializer output:\n${stdout}`);
+  const lines = stdout.slice(headerIndex + "Next steps:".length).split("\n");
+
+  let i = 0;
+  while (i < lines.length && lines[i].trim().length === 0) i += 1;
+
+  const commands = [];
+  while (i < lines.length && lines[i].startsWith("  ") && lines[i].trim().length > 0) {
+    commands.push(lines[i].trim());
+    i += 1;
+  }
+  assert(commands.length > 0, `could not find the indented "Next steps" commands in initializer output:\n${stdout}`);
+  return commands;
 }
 
 async function main() {
@@ -385,27 +399,50 @@ async function emptyFixtureFlow({ scratch, initBin, runtimeTarball, packedTempla
   await scenario("INIT-05", "packed initializer scaffolds a spaced destination with explicit --name/--title", async () => {
     scaffoldStdout = await runStreamed(
       process.execPath,
-      [initBin, hostDir, "--name", "my-circuit", "--title", "My Circuit", "--yes", "--no-install", "--no-git"],
+      [
+        initBin,
+        hostDir,
+        "--name",
+        "my-circuit",
+        "--title",
+        "My Circuit",
+        "--yes",
+        "--no-install",
+        "--no-git",
+        // #58: point the scaffolded dependency straight at the packed
+        // runtime tarball instead of verify-pack rewriting both manifests
+        // itself afterward (that rewrite is still used by minimalFixtureFlow,
+        // which never runs the initializer).
+        "--runtime-spec",
+        `file:${runtimeTarball}`,
+      ],
       scratch,
     );
     const { actual } = await assertScaffoldShape("INIT-05", hostDir, packedTemplateDir);
     scaffoldFiles = actual;
     const manifest = await readJson(path.join(hostDir, "package.json"));
     assert(manifest.name === "my-circuit", `package.json name is ${manifest.name}, expected my-circuit`);
+    assert(
+      manifest.devDependencies?.[RUNTIME_NAME] === `file:${runtimeTarball}`,
+      `package.json's ${RUNTIME_NAME} spec is ${manifest.devDependencies?.[RUNTIME_NAME]}, expected file:${runtimeTarball}`,
+    );
     const docManifest = await readJson(path.join(hostDir, "doc", "package.json"));
     assert(docManifest.name === "my-circuit-doc", `doc/package.json name is ${docManifest.name}, expected my-circuit-doc`);
+    assert(
+      docManifest.dependencies?.[RUNTIME_NAME] === `file:${runtimeTarball}`,
+      `doc/package.json's ${RUNTIME_NAME} spec is ${docManifest.dependencies?.[RUNTIME_NAME]}, expected file:${runtimeTarball}`,
+    );
     const circuitConfig = await readFile(path.join(hostDir, "circuit.config.ts"), "utf8");
     assert(circuitConfig.includes('title: "My Circuit"'), "circuit.config.ts project.title is not \"My Circuit\"");
     const zfbConfig = await readFile(path.join(hostDir, "doc", "zfb.config.ts"), "utf8");
     assert(zfbConfig.includes('siteName: "My Circuit"'), "doc/zfb.config.ts siteName is not \"My Circuit\"");
+    const readme = await readFile(path.join(hostDir, "README.md"), "utf8"); // #60: README's line 1 uses the site title
+    assert(readme.startsWith("# My Circuit\n"), `README.md does not start with the site-title heading:\n${readme.split("\n")[0]}`);
     await assertGitignoreWorks(hostDir); // also proves ADR-002's zfb/circuit-cache ignore rules
     await assertTemplatePermissions(hostDir, packedTemplateDir, scaffoldFiles);
-    pass("INIT-05", `scaffolded ${scaffoldFiles.length} files at a spaced destination with distinct name/title, no placeholder or lamp string, .gitignore proven, modes match the template`);
+    pass("INIT-05", `scaffolded ${scaffoldFiles.length} files at a spaced destination with distinct name/title, no placeholder or lamp string, .gitignore proven, modes match the template, --runtime-spec applied to both manifests`);
   });
   if (failures > 0) fail("INIT-05 scaffold failed; the rest of the packed-consumer flow depends on it");
-
-  await installLocalTarball(hostDir, runtimeTarball, "package.json", RUNTIME_NAME);
-  await installLocalTarball(hostDir, runtimeTarball, "doc/package.json", RUNTIME_NAME, "../");
 
   console.log("corepack pnpm install --config.strict-dep-builds=true (CI-like strictness; this machine's user config sets strictDepBuilds:false)");
   await runHeavy(

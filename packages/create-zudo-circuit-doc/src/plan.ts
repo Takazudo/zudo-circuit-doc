@@ -5,6 +5,7 @@ import {
   titleCaseFromName,
   validateLibrary,
   validateName,
+  validateRuntimeSpec,
   validateTitle,
 } from "./validate.ts";
 
@@ -17,6 +18,8 @@ export interface Plan {
   agent: AgentChoice;
   install: boolean;
   git: boolean;
+  /** Overrides the template's `@takazudo/zudo-circuit-doc` dependency spec in package.json + doc/package.json (spec #58). `undefined` keeps the template's own spec. */
+  runtimeSpec: string | undefined;
 }
 
 /** Applies defaults (spec #2) and validates each value separately (spec #3). */
@@ -54,6 +57,8 @@ export function resolvePlan(
     throw error;
   }
 
+  if (options.runtimeSpec !== undefined) validateRuntimeSpec(options.runtimeSpec);
+
   return {
     destinationPath,
     name,
@@ -62,6 +67,7 @@ export function resolvePlan(
     agent: options.agent,
     install: options.install,
     git: options.git,
+    runtimeSpec: options.runtimeSpec,
   };
 }
 
@@ -76,6 +82,7 @@ export function formatPlan(plan: Plan): string {
     `  agent: ${plan.agent}`,
     `  install: ${plan.install ? "yes" : "no"}`,
     `  git: ${plan.git ? "yes" : "no"}`,
+    `  runtimeSpec: ${plan.runtimeSpec ?? "(template default)"}`,
   ].join("\n");
 }
 

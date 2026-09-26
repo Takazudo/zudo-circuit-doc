@@ -1,4 +1,4 @@
-# Circuit project
+# __SITE_TITLE__
 
 A circuit-development project documented with [zudo-circuit-doc](https://github.com/Takazudo/zudo-circuit-doc) on top of [zudo-doc](https://github.com/zudolab/zudo-doc).
 

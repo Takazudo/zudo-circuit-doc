@@ -17,6 +17,7 @@ function baseOptions(overrides: Partial<ParsedOptions> = {}): ParsedOptions {
     agent: "both",
     install: true,
     git: true,
+    runtimeSpec: undefined,
     ...overrides,
   };
 }
@@ -67,4 +68,31 @@ test("formatPlan renders every field", () => {
   assert.match(text, /agent: both/);
   assert.match(text, /install: yes/);
   assert.match(text, /git: yes/);
+  assert.match(text, /runtimeSpec: \(template default\)/);
+});
+
+test("a valid --runtime-spec (semver range) passes through unchanged", () => {
+  const plan = resolvePlan(baseOptions({ runtimeSpec: "^0.2.0" }), "my-project", "/cwd");
+  assert.equal(plan.runtimeSpec, "^0.2.0");
+  assert.match(formatPlan(plan), /runtimeSpec: \^0\.2\.0/);
+});
+
+test("a valid --runtime-spec (absolute file: spec) passes through unchanged", () => {
+  const spec = path.resolve("/tmp/zudo-circuit-doc-0.2.0.tgz");
+  const plan = resolvePlan(baseOptions({ runtimeSpec: `file:${spec}` }), "my-project", "/cwd");
+  assert.equal(plan.runtimeSpec, `file:${spec}`);
+});
+
+test("a relative --runtime-spec file: path is rejected", () => {
+  assert.throws(
+    () => resolvePlan(baseOptions({ runtimeSpec: "file:../tarballs/runtime.tgz" }), "my-project", "/cwd"),
+    (error: unknown) => error instanceof CliUsageError && /absolute/.test((error as Error).message),
+  );
+});
+
+test("a garbled --runtime-spec is rejected", () => {
+  assert.throws(
+    () => resolvePlan(baseOptions({ runtimeSpec: "not a spec!!" }), "my-project", "/cwd"),
+    CliUsageError,
+  );
 });

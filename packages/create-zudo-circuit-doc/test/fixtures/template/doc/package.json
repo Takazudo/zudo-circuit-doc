@@ -1,9 +1,9 @@
 {
-  "name": "__PROJECT_NAME__",
-  "version": "0.1.0",
+  "name": "__PROJECT_NAME__-doc",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
-  "devDependencies": {
+  "dependencies": {
     "@takazudo/zudo-circuit-doc": "^0.1.0"
   }
 }
