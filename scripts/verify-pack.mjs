@@ -30,7 +30,7 @@
 // (see the check-browser note) prints `SKIP: <ID> ...` instead of a fabricated
 // PASS — see the Verification policy in issue #28 ("no fabricated evidence").
 
-import { cp, mkdir, readFile, stat, unlink, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, realpath, stat, unlink, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -886,27 +886,44 @@ async function ledFixtureFlow(root, runtimeTarball, scratch, ledOutDir) {
     },
   );
 
-  const distRoot = path.join(ledOutDir, "doc", "dist");
-  const fixtureDir = path.join(root, "fixtures/led");
   await scenario(
     "M4",
     "check-browser on the packed LED fixture site: 4 representatives (passive/IC/connector/unavailable-history), footprint dialogs, WRL viewers, SPA dispose/remount, shell + search assertions",
     async () => {
+      // #41: must run through the tarball-installed CLI (ledOutDir's own
+      // node_modules/.bin), not the monorepo's packages/circuit-doc/bin —
+      // otherwise a `files` packaging gap would never surface on this leg.
+      // ledOutDir already carries its own circuit.config.ts (docs.dist ==
+      // "doc/dist", matching the site build's actual output) and
+      // circuit/browser-representatives.json, both derived from the fixture
+      // by build-fixture-site.mjs, so no --config/--dist override is needed
+      // — mirrors the `minimal` leg's `pnpm exec zudo-circuit-doc` call above.
+      await assertForeignPackage(ledOutDir, RUNTIME_NAME);
+      const cliRealpath = await realpath(path.join(ledOutDir, "node_modules", ".bin", "zudo-circuit-doc"));
+      const rootRealpath = `${await realpath(root)}${path.sep}`;
+      assert(
+        !cliRealpath.startsWith(rootRealpath),
+        `check-browser would run the monorepo's own CLI instead of the packed one: ${cliRealpath}`,
+      );
+      const scratchRealpath = `${await realpath(ledOutDir)}${path.sep}`;
+      assert(
+        cliRealpath.startsWith(scratchRealpath),
+        `resolved CLI path is not inside the scratch consumer (${ledOutDir}): ${cliRealpath}`,
+      );
+
       const result = await runCapture(
-        process.execPath,
+        PNPM[0],
         [
-          path.join(root, "packages/circuit-doc/bin/zudo-circuit-doc.js"),
-          "--config",
-          "circuit.config.ts",
+          ...PNPM.slice(1),
+          "exec",
+          "zudo-circuit-doc",
           "check-browser",
-          "--dist",
-          distRoot,
           "--representatives",
           "circuit/browser-representatives.json",
           "--shell-assertions",
           "--search-assertions",
         ],
-        fixtureDir,
+        ledOutDir,
       );
       if (result.status === 4 && !process.env.CI) {
         skip("M4", `check-browser: not run: Chrome not found (${(result.stdout + result.stderr).trim()})`);
