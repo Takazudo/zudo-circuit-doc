@@ -46,6 +46,7 @@ memory. Codex resuming the same project reads the identical `WORKFLOW.md`, the i
 This project's acceptance scenario AGENT-01 is defined around exactly that handoff: one agent
 completes a bounded task, and a second, different agent continues from the committed evidence and
 the next-actions handoff alone, with no shared conversation history and no separate, divergent
-database to keep in sync. Whether the v0.1 run of it happened, and what it showed, is recorded in the
-[AGENT-01 summary](../release/agent-01-transcript-summary.mdx) — it is never inferred from the
-structure described above.
+database to keep in sync. The v0.1 run used a fresh Claude Code process as the second agent, because
+the Codex CLI had hit its usage limit, so the cross-tool handoff to Codex is still unexercised. What
+that run showed is recorded in the [AGENT-01 summary](../release/agent-01-transcript-summary.mdx). It
+is never inferred from the structure described above.

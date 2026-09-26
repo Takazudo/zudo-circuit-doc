@@ -120,7 +120,7 @@ const registry = [
   { id: "OUT-01", type: "automated unit", evidence: 'test/core/emit.test.ts, "OUT-01 ..."', status: tsUnit.ok ? "PASS" : "FAIL" },
   { id: "OUT-02", type: "automated unit", evidence: 'test/core/emit.test.ts, "OUT-02 ..."', status: tsUnit.ok ? "PASS" : "FAIL" },
   { id: "OUT-03", type: "automated unit", evidence: 'test/core/emit.test.ts, "OUT-03 ..."', status: tsUnit.ok ? "PASS" : "FAIL" },
-  { id: "AGENT-01", type: "agent-run", evidence: "agent run (a Claude session hands off to a Codex session over committed evidence alone), recorded in doc/src/content/docs/release/v0-1-validation.mdx; structural scaffold only here (verify-pack.mjs --fixture empty, scenario \"AGENT-VARIANTS\")", status: "NOT RUN here (agent run; see v0.1 report)" },
+  { id: "AGENT-01", type: "agent-run", evidence: "agent run (a Claude session hands off to a fresh agent session over committed evidence alone): Claude Code variant run, Continue PASS / Query FAIL, Codex variant not run; recorded in doc/src/content/docs/release/agent-01-transcript-summary.mdx; structural scaffold only here (verify-pack.mjs --fixture empty, scenario \"AGENT-VARIANTS\")", status: "NOT PASSED (agent run; see summary)" },
   { id: "CHANGE-01", type: "automated integration", evidence: "scripts/scenarios/change-01.mjs (a-d); (c) reuses scripts/check-cad-freshness.mjs unchanged", status: change01.ok ? "PASS" : "FAIL" },
   { id: "BENCH-01", type: "manual", evidence: "not run: requires physical hardware; Workflow F (circuit/WORKFLOW.md) and circuit/templates/project-docs/verification/bring-up.mdx reviewed", status: "NOT RUN (manual)" },
 ];

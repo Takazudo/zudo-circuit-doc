@@ -4,9 +4,13 @@ description: The Circuit Doc v0.1 release-candidate validation report — all 31
 sidebar_position: 3
 ---
 
-**Result: 29 of 31 acceptance scenarios pass through automated checks, and 2 are not run.**
+**Result: 29 of 31 acceptance scenarios pass through automated checks. AGENT-01 was run and did
+not pass, and BENCH-01 was not run.**
 
-- **AGENT-01 was not run**: the Codex CLI hit its account usage limit.
+- **AGENT-01 was run as a Claude Code variant and did not pass.** A fresh Claude Code process
+  passed *Continue*. It failed *Query* on one criterion: the answer does not show that it read
+  `AGENTS.md` and `circuit/WORKFLOW.md`. The Codex variant, the cross-tool handoff, hit the Codex
+  CLI's usage limit and has not run.
 - **BENCH-01 was not run**: it needs physical hardware.
 - **FACT-03 passes only as a limit test.** The actual catch is the human or agent review step in
   Workflow E, and the validator makes no claim of dimensional correctness.
@@ -151,7 +155,7 @@ runs. See the [scenario traceability matrix](./scenario-matrix.mdx) for the exac
 
 | ID | Fixture / revision | Command or action | Result | Artifact / log | Limitation |
 | --- | --- | --- | --- | --- | --- |
-| AGENT-01 | M (temporary copy, packed runtime) | `codex exec` Continue and Query steps | **NOT RUN**: the Codex CLI usage limit was reached | [AGENT-01 summary](./agent-01-transcript-summary.mdx) | The Claude side and the structural preconditions are in place. The Codex continuation, which is the point of the scenario, is unproven. |
+| AGENT-01 | M (temporary copy, packed runtime) | Continue and Query steps, each in a fresh `claude -p` process (Claude Code variant). The `codex exec` attempt hit the usage limit | **NOT PASSED**: Continue PASS; Query FAIL on one criterion (the answer does not show it read `AGENTS.md` / `circuit/WORKFLOW.md`) | [AGENT-01 summary](./agent-01-transcript-summary.mdx) | Both agents were Claude Code. A cross-tool handoff (Codex) is still unproven. |
 | CHANGE-01 | M (scratch copies) | `scripts/scenarios/change-01.mjs`, sub-cases (a)–(d) | PASS | G8 | The changes are synthetic mutations. No real design change was carried through. |
 | BENCH-01 | — | None | **NOT RUN: requires physical hardware** | [BENCH-01](#bench-01) | No board exists. |
 
@@ -209,13 +213,24 @@ installed accuracy, self-heating, and CAD physical fit. See [BENCH-01](#bench-01
 
 ## AGENT-01
 
-**Not run.** The Codex CLI (codex-cli 0.156.1) returned its account usage-limit error on the first
-turn of both the *Continue* step and the read-only *Query* step, so no Codex output exists. Before
-the attempt, the temporary packed copy of `examples/minimal` passed `pnpm circuit:check` and
-`pnpm check`. It was checked to have a single evidence root and a thin, byte-identical
-`CLAUDE.md`/`AGENTS.md` pair. Afterwards the copy's diff was empty. The
-[AGENT-01 summary](./agent-01-transcript-summary.mdx) has the prompts, the grading key and the
-re-run steps. The consequence for M6 is in the milestone table below.
+**Run as a Claude Code variant; not passed.** On 2026-09-26 the owner re-scoped the scenario
+([#38](https://github.com/Takazudo/zudo-circuit-doc/issues/38)) after the Codex CLI (codex-cli
+0.156.1) returned its account usage-limit error on both steps. Each step then ran in its own fresh
+headless Claude Code process, isolated from the orchestrating session's settings, on a temporary
+packed copy of `examples/minimal`. The runtime was packed from `main` at `486a383`, which is later
+than the base this report's other results used. The copy passed `pnpm circuit:check` and
+`pnpm check` before the run.
+
+- ***Continue* passed.** The agent added a coverage note and a next-action entry for the I²C address
+  strapping. It cited the existing facts and locators and invented no value. Both checks passed
+  afterwards, and the diff touched only project-owned files.
+- ***Query* failed one of seven criteria.** Every fact ID, source, locator, NOT APPLICABLE and
+  NEEDS BENCH item was correct. The answer, however, never says that the agent read `AGENTS.md` and
+  `circuit/WORKFLOW.md`, which the key requires.
+
+The [AGENT-01 summary](./agent-01-transcript-summary.mdx) has the commands, the per-criterion grades,
+a traced diagnostic of the *Query* step, the unchanged prompts and key, and the re-run steps for both
+variants. The consequence for M6 is in the milestone table below.
 
 ## BENCH-01
 
@@ -241,7 +256,7 @@ was actually delivered for each milestone.
 | M3: portable onboarding | One real exact component through the full source, facts and selection workflow, and a non-LCSC / manual fixture | Delivered. TMP1075DR is onboarded under the generic-v1 profile, with no C-number and a real datasheet acquired and hash-locked on 2026-09-26. NOT APPLICABLE no longer blocks (ADR-008), and the resolver narrows by manufacturer first (ADR-009). | [#6](https://github.com/Takazudo/zudo-circuit-doc/issues/6), [#12](https://github.com/Takazudo/zudo-circuit-doc/issues/12), [#25](https://github.com/Takazudo/zudo-circuit-doc/issues/25) |
 | M4: CAD previews | A selected footprint and WRL preview in the external consumer, with fidelity labels and working controls | Delivered. The packed minimal consumer shows the footprint SVG and the WRL viewer, and both hydrate after client navigation (G5b `M4`). Fidelity is labelled "family". Zero selected models need no converter (CAD-05). | [#15](https://github.com/Takazudo/zudo-circuit-doc/issues/15), [#20](https://github.com/Takazudo/zudo-circuit-doc/issues/20), [#27](https://github.com/Takazudo/zudo-circuit-doc/issues/27), [#29](https://github.com/Takazudo/zudo-circuit-doc/issues/29), [#31](https://github.com/Takazudo/zudo-circuit-doc/issues/31) |
 | M5: initializer | A packed initializer that creates a new circuit repository | Delivered. `templates/default` is synced mechanically from `examples/empty` and checked for drift. Both tarballs install and run outside the monorepo, and all of their resources resolve (G5a). | [#7](https://github.com/Takazudo/zudo-circuit-doc/issues/7), [#24](https://github.com/Takazudo/zudo-circuit-doc/issues/24), [#28](https://github.com/Takazudo/zudo-circuit-doc/issues/28) |
-| M6: user tasks | A release candidate with clear commands, capability boundaries and a reproducible validation report | **Mostly delivered, one gap.** The empty, one-component (non-LCSC) and LED fixtures were all exercised, and a real acquisition was retained ([#25](https://github.com/Takazudo/zudo-circuit-doc/issues/25)). The seed's acceptance clause "continue the project with another agent" is **not demonstrated**: AGENT-01 was not run. | [#23](https://github.com/Takazudo/zudo-circuit-doc/issues/23), [#30](https://github.com/Takazudo/zudo-circuit-doc/issues/30), [#32](https://github.com/Takazudo/zudo-circuit-doc/issues/32), [#33](https://github.com/Takazudo/zudo-circuit-doc/issues/33), [#34](https://github.com/Takazudo/zudo-circuit-doc/issues/34); this page |
+| M6: user tasks | A release candidate with clear commands, capability boundaries and a reproducible validation report | **Mostly delivered, one gap.** The empty, one-component (non-LCSC) and LED fixtures were all exercised, and a real acquisition was retained ([#25](https://github.com/Takazudo/zudo-circuit-doc/issues/25)). The seed's acceptance clause "continue the project with another agent" is **partly demonstrated**: a fresh Claude Code process continued the project from committed evidence alone and passed *Continue*. It failed one *Query* criterion, and no cross-tool (Codex) handoff has run. | [#23](https://github.com/Takazudo/zudo-circuit-doc/issues/23), [#30](https://github.com/Takazudo/zudo-circuit-doc/issues/30), [#32](https://github.com/Takazudo/zudo-circuit-doc/issues/32), [#33](https://github.com/Takazudo/zudo-circuit-doc/issues/33), [#34](https://github.com/Takazudo/zudo-circuit-doc/issues/34); this page |
 
 ### Known issues from the seed, and how they were closed
 
@@ -274,8 +289,9 @@ These follow-ups are open against the runtime:
 key) and [#37](https://github.com/Takazudo/zudo-circuit-doc/issues/37) (allow material-only
 `DEF`/`USE` in WRLs). An upstream zfb bug,
 [zudo-front-builder#3154](https://github.com/Takazudo/zudo-front-builder/issues/3154), is the reason
-the runtime ships `lib/` rather than `dist/`. For AGENT-01, re-run the Codex side once the usage limit
-resets; see the [AGENT-01 summary](./agent-01-transcript-summary.mdx).
+the runtime ships `lib/` rather than `dist/`. For AGENT-01, the Codex variant can be run once its usage limit
+resets, and the *Query* criterion that failed can be re-graded on a new run; see the
+[AGENT-01 summary](./agent-01-transcript-summary.mdx).
 
 ## After cleanup
 
