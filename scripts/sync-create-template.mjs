@@ -13,6 +13,7 @@
 // `--check` never writes. It compares the generated tree with the committed
 // template and reports every missing, extra, or changed path.
 
+import { execFileSync } from "node:child_process";
 import { realpathSync } from "node:fs";
 import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join, relative, resolve } from "node:path";
@@ -161,7 +162,8 @@ export async function buildTemplate({
   /** @type {Map<string, Set<string>>} */
   const sentinelHits = new Map(SENTINELS.map((sentinel) => [sentinel.token, new Set()]));
 
-  await collectFiles(files, sourceDir, "", runtimeVersion, sentinelHits);
+  const visible = gitVisibleFiles(sourceDir);
+  await collectFiles(files, sourceDir, "", runtimeVersion, sentinelHits, visible);
   checkSentinelCoverage(sentinelHits);
 
   if (files.has("pnpm-workspace.yaml")) {
@@ -194,7 +196,28 @@ function exactVersion(version, description) {
  * @param {string} runtimeVersion
  * @param {Map<string, Set<string>>} sentinelHits
  */
-async function collectFiles(files, directory, relativeDirectory, runtimeVersion, sentinelHits) {
+/**
+ * Files git would track under `directory` (tracked + untracked-not-ignored), so
+ * build output the fixture's .gitignore excludes (e.g. zudo-doc's generated
+ * doc/src/content/docs/claude*\/ mirror) never leaks into the template.
+ * Returns null outside a git work tree (sandboxed tests), meaning "no filter".
+ * @param {string} directory
+ * @returns {Set<string> | null}
+ */
+function gitVisibleFiles(directory) {
+  try {
+    const out = execFileSync(
+      "git",
+      ["ls-files", "--cached", "--others", "--exclude-standard", "-z", "--", "."],
+      { cwd: directory, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
+    );
+    return new Set(out.split("\0").filter(Boolean));
+  } catch {
+    return null;
+  }
+}
+
+async function collectFiles(files, directory, relativeDirectory, runtimeVersion, sentinelHits, visible = null) {
   const entries = await readdir(directory, { withFileTypes: true });
   for (const entry of entries) {
     if (
@@ -211,12 +234,13 @@ async function collectFiles(files, directory, relativeDirectory, runtimeVersion,
       throw new Error(`Symlinks are not supported in examples/empty: ${relativePath}`);
     }
     if (entry.isDirectory()) {
-      await collectFiles(files, sourcePath, relativePath, runtimeVersion, sentinelHits);
+      await collectFiles(files, sourcePath, relativePath, runtimeVersion, sentinelHits, visible);
       continue;
     }
     if (!entry.isFile()) {
       throw new Error(`Unsupported fixture entry: ${sourcePath}`);
     }
+    if (visible && !visible.has(relativePath)) continue;
 
     const targetPath = relativePath === ".gitignore" ? "_gitignore" : relativePath;
     const source = await readFile(sourcePath);
