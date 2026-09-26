@@ -61,7 +61,11 @@ export async function runBrowserSmoke(options: BrowserSmokeOptions): Promise<Bro
     }
   }
   if (record === undefined) {
-    lines.push("SKIP: no representative publishes a component-references section (declared-zero project)");
+    lines.push(
+      resolved.all.length === 0
+        ? "SKIP: no representative publishes a component-references section (declared-zero project)"
+        : "SKIP: none of the declared representatives publishes a component-references section",
+    );
   }
 
   const site = await serveStaticSite(options.distRoot);
