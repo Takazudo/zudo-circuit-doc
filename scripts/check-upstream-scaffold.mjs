@@ -41,7 +41,8 @@ export const EXAMPLE_DOC_DIR = join(ROOT_DIR, "examples", "empty", "doc");
 // package.json `exports` only publishes "." (dist/api.js), so this list
 // cannot be imported from the package itself and must be kept in sync by
 // hand against the pinned version — the same constraint recorded in
-// _temp-resource/1-circuit-doc-seed/planning/explore/zudo-doc-host.md.
+// epic #1 planning note planning/explore/zudo-doc-host.md (removed from the tree
+// in #34; in git history).
 export const DEFAULT_FEATURES = [
   "search",
   "sidebarFilter",

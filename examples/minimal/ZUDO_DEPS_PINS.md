@@ -14,7 +14,7 @@ Updated by `/dev-bump-zudo-deps` on every sync — keep `pinned:` accurate.
   `doc/src/styles/global.css` (the `@import`/`@source` chain; the `@theme` override slot is empty
   by design), `doc/scripts/check-links.js`
 - source: `packages/create-zudo-doc/templates/default/app/{pages/docs/[[...slug]].tsx,pages/index.tsx,tsconfig.json,src/styles/global.css,scripts/check-links.js}`
-  (the pinned `create-zudo-doc@5.27.0` output probed at `_temp-resource/1-circuit-doc-seed/planning/zudo-doc-probe/app/`)
+  (the pinned `create-zudo-doc@5.27.0` output, probed during planning and re-derived by the zudo-circuit-doc monorepo's upstream-scaffold parity check)
 - track: releases
 - pinned: 50cbd5c6c9e5a795d72a74a855e105e4939d4eab (v5.27.0)
 - updated: 2026-09-26

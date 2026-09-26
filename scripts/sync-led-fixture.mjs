@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Lock, verify and (re-)materialize fixtures/led/upstream — the pinned zudo-led-lamp
 // regression corpus. See fixtures/led/README.md for the modes below and
-// _temp-resource/1-circuit-doc-seed/planning/explore/led-fixture-ci.md for how the
-// vendored path set was derived and verified.
+// the epic #1 planning note planning/explore/led-fixture-ci.md (removed from the tree
+// in #34; in git history) for how the vendored path set was derived and verified.
 //
 // Modes:
 //   (default) --check                          offline: verify committed files against fixture.lock.json
