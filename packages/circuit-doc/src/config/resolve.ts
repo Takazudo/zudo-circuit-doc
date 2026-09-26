@@ -52,6 +52,8 @@ export type ResolvedCircuitConfig = {
     readonly dist: string;
     readonly agentResources: boolean;
     readonly generatedMarker: string | null;
+    /** `null` means unset: `map.ts` falls back to the legacy-marker inference. */
+    readonly generatedNotice: boolean | null;
     readonly integrationGloss: string | null;
   };
   readonly evidence: {
@@ -113,6 +115,7 @@ export function resolveCircuitConfig(config: CircuitConfig, configDir: string): 
       dist: at(docs.dist, "docs.dist"),
       agentResources: docs.agentResources ?? true,
       generatedMarker: docs.generatedMarker ?? null,
+      generatedNotice: docs.generatedNotice ?? null,
       integrationGloss: atOrNull(docs.integrationGloss, "docs.integrationGloss"),
     },
     evidence: {

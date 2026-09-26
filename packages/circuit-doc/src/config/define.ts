@@ -47,6 +47,13 @@ export type DocsConfig = {
   readonly agentResources?: boolean;
   /** LED fixture only: the legacy generated-page marker. */
   readonly generatedMarker?: string;
+  /**
+   * Whether generated pages carry the ADR-020 generated-page notice
+   * paragraph. Default `true`, except when `generatedMarker` is a legacy
+   * marker (see `LEGACY_MARKERS`) and this is left unset, in which case the
+   * notice stays off to reproduce pre-extraction output byte-for-byte.
+   */
+  readonly generatedNotice?: boolean;
   /** Optional JSON file `{ domain: text }`. */
   readonly integrationGloss?: ConfigPath;
 };
