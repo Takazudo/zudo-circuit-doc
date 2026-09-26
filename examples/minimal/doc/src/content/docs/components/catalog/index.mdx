@@ -9,4 +9,49 @@ Generated from the component evidence records — edit the records, not this pag
 
 Every component record this project publishes, in the order the bill of materials lists them, with each subordinate record directly after the part it belongs to. The identity, placement and state columns are projected from stored evidence; the record pages behind them carry the facts, sources and coverage themselves.
 
-No component record is published yet. Add the first exact component with Workflow B in `circuit/WORKFLOW.md`, then select it in `circuit/publication/selection.json`.
+## How to read this catalog
+
+Four columns describe state. None of them is a grade, and there is deliberately no column combining them — a part is not summarised into a verdict here or anywhere else in this section.
+
+- **Fit** — Whether the part is fitted in the as-built design, or is marked do-not-populate or hand-fit.
+- **Identity** — Whether the exact orderable part has been confirmed. Unresolved does not mean the wrong part is fitted; it means the confirmation is not on record, so a same-name part from another vendor may not be substituted on the strength of it.
+- **Sources** — Whether any document backing this line could be retrieved. A line whose sources are unavailable still publishes, so the gap stays visible rather than absent.
+- **Open domains** — How many of the record's published coverage domains are unresolved, out of how many were published at all. The denominator is the point: no open domains out of none published means nothing was checked, not that everything passed.
+
+## Parts at a glance
+
+<EvidenceAnchor id="catalog-index" />
+
+<EvidenceTable label="parts-index">
+  | Part                                                                                  | Record          | Function               | Fit    | Identity | Sources   | Open domains |
+  | ------------------------------------------------------------------------------------- | --------------- | ---------------------- | ------ | -------- | --------- | ------------ |
+  | <EvidenceAnchor id="rec-tmp1075dr" />[TMP1075DR](/docs/components/records/tmp1075dr/) | `rec-tmp1075dr` | I2C temperature sensor | Fitted | VERIFIED | AVAILABLE | 2 of 10      |
+</EvidenceTable>
+
+## Part entries
+
+One entry per record, carrying the orderable identity and every board placement. Each entry links to its record page, where the evidence itself is published, and to the raw agent resource that evidence is stored in.
+
+### TMP1075DR
+
+| Field          | Recorded value                        |
+| -------------- | ------------------------------------- |
+| Record ID      | `rec-tmp1075dr`                       |
+| Kind           | standalone — audited in its own right |
+| Manufacturer   | Texas Instruments                     |
+| Function       | I2C temperature sensor                |
+| Package        | `SOIC-8`                              |
+| Inventory line | `line-tmp1075dr`                      |
+| Owner skill    | `component-ti-tmp1075dr`              |
+
+**Placements:** sensor-breakout U1
+
+**Fit:** Fitted
+
+**Identity state:** VERIFIED
+
+**Source state:** AVAILABLE
+
+**Open coverage domains:** 2 open of 10 published
+
+[TMP1075DR record details](/docs/components/records/tmp1075dr/) — [TMP1075DR raw agent resource](/docs/claude-skills/component-ti-tmp1075dr/)
