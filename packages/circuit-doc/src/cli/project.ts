@@ -21,6 +21,8 @@ export const PROJECT_COMMANDS = {
   doctor: "pnpm circuit:doctor",
   build: "pnpm build",
   models: "pnpm exec zudo-circuit-doc models",
+  /** The scaffold's aggregate script (`circuit check` + the doc site's own `check`), not the CLI's own `check` step. */
+  fullCheck: "pnpm check",
 } as const;
 
 export async function loadProject(options: {

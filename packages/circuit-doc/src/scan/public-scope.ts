@@ -33,7 +33,10 @@ import type { PublicationAssets } from "../config/map.ts";
  * under the exempt `component-previews` root). `.svg`/`.wrl` are the
  * generator's own preview formats — exempt under `component-previews`, but
  * anywhere else on the public root they are exactly as unreviewed as any other
- * restricted type.
+ * restricted type. Meshes/3D (`.stl` `.3mf` `.obj` `.glb` `.gltf`), Gerber and
+ * drill outputs, and `.kicad_pro`/`.kicad_prl` project files are the same
+ * fabrication-house evidence as the CAD types above, just from a different
+ * export step. `.csv` covers a raw BOM export.
  */
 export const RESTRICTED_PUBLIC_EXTENSIONS: readonly string[] = [
   ".pdf",
@@ -43,11 +46,36 @@ export const RESTRICTED_PUBLIC_EXTENSIONS: readonly string[] = [
   ".kicad_sym",
   ".kicad_pcb",
   ".kicad_sch",
+  ".kicad_pro",
+  ".kicad_prl",
   ".zip",
   ".7z",
   ".json",
   ".wrl",
   ".svg",
+  // Meshes and 3D
+  ".stl",
+  ".3mf",
+  ".obj",
+  ".glb",
+  ".gltf",
+  // Gerber
+  ".gbr",
+  ".gtl",
+  ".gbl",
+  ".gto",
+  ".gbo",
+  ".gts",
+  ".gbs",
+  ".gtp",
+  ".gbp",
+  ".gko",
+  ".gm1",
+  // Drill
+  ".drl",
+  ".xln",
+  // BOM
+  ".csv",
 ];
 
 /** Relative to `docs.publicRoot`; this whole subtree is generator-owned. */

@@ -177,7 +177,7 @@ function finish(results: readonly StepResult[], io: CliIo): number {
   io.stdout.write(
     exitCode === EXIT.PASS
       ? "check passed: generated output is up to date\n"
-      : `check failed (exit ${exitCode}); fix the steps marked FAIL, then run \`${PROJECT_COMMANDS.check}\`\n`,
+      : `check failed (exit ${exitCode}); fix the steps marked FAIL, then run \`${PROJECT_COMMANDS.fullCheck}\`\n`,
   );
   return exitCode;
 }

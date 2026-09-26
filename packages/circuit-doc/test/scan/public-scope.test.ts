@@ -82,6 +82,47 @@ describe("PUB-03: a raw evidence/CAD file under docs.publicRoot", () => {
     const violations = await findPublicScopeViolations(publicRoot, EMPTY_ASSETS);
     assert.deepEqual(violations, []);
   });
+
+  it("fails on every mesh/3D, Gerber, drill, KiCad project, and BOM extension", async () => {
+    const publicRoot = await root("fabrication-extensions");
+    const names = [
+      "board.stl",
+      "board.3mf",
+      "board.obj",
+      "board.glb",
+      "board.gltf",
+      "board.gbr",
+      "board.gtl",
+      "board.gbl",
+      "board.gto",
+      "board.gbo",
+      "board.gts",
+      "board.gbs",
+      "board.gtp",
+      "board.gbp",
+      "board.gko",
+      "board.gm1",
+      "board.drl",
+      "board.xln",
+      "board.kicad_pro",
+      "board.kicad_prl",
+      "bom.csv",
+    ];
+    for (const name of names) await writeFile(join(publicRoot, name), "fixture bytes");
+    const violations = await findPublicScopeViolations(publicRoot, EMPTY_ASSETS);
+    assert.equal(violations.length, names.length);
+  });
+
+  it("passes a Gerber file once allowlisted with a reason", async () => {
+    const publicRoot = await root("gerber-allowlisted");
+    await writeFile(join(publicRoot, "board.gtl"), "fixture bytes");
+    const assets: PublicationAssets = {
+      schema_version: 1,
+      assets: [{ path: "board.gtl", reason: "deliberately mirrored for a fab-house review" }],
+    };
+    const violations = await findPublicScopeViolations(publicRoot, assets);
+    assert.deepEqual(violations, []);
+  });
 });
 
 describe("generator-owned assets/component-previews/** is exempt without an allowlist entry", () => {
