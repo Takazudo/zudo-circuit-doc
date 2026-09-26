@@ -6,8 +6,10 @@ upstream sha256 — unless the changed file's path is listed in one of the
 `.txt` files in this directory.
 
 Each sub-issue that deliberately changes a `src/core/**` file owned by #5
-(currently #10, #14, #15) gets its own file here, named after the issue's
-branch slug, e.g. `10-emit-ownership.txt`. One relative path per line,
+(currently #10, #14, #15, #18 and #25 — see `../PROVENANCE.md`'s "Later
+changes" section for what each one changed) gets its own file here, named
+after the issue's branch slug, e.g. `emit-ownership.txt`. One relative path
+per line,
 relative to `packages/circuit-doc/src/core/`. This keeps each issue's allowed
 drift isolated, so two parallel branches never need to touch the same file to
 add their own exception, and a reviewer can see at a glance which issue owns

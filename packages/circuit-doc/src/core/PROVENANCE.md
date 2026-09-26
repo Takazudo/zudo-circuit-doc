@@ -44,8 +44,9 @@ directory's README).
 | `render/record.ts` | `doc/component-docs/core/render/record.ts` | `3eca8931041e2a6106037704928f3deb1617a58cc567f71c9089c1f4f8531472` |
 
 `descriptors.ts` in this same directory is **not** covered by this provenance
-record — it is a stub target owned by #13 (package UI / MDX components), not a
-copy of upstream core.
+record — it is the `"./descriptors"` export barrel (`export * from
+"./model-descriptor.ts"` / `"./reference-descriptor.ts"`) that #13 (package UI
+/ MDX components) filled in, not a copy of upstream core.
 
 `site.ts` is likewise **not** covered — it is new code introduced by #14,
 consolidating the route and asset-URL constants that used to be duplicated
@@ -61,14 +62,37 @@ location. It is not part of the hashed set above (it lives under `test/`, not
 
 ## Later changes
 
-Sub-issues #10, #14 and #15 change specific files in this directory
+Sub-issues #10, #14, #15, #18 and #25 change specific files in this directory
 deliberately. Each records its allowed paths in
 `src/core/provenance-allowed/<issue-slug>.txt` (one relative path per line, see
 that directory's README) so the check tolerates only those files, and parallel
 branches never touch the same file.
+
+#10 (`provenance-allowed/emit-ownership.txt`: `emit.ts`, `page.ts`,
+`pipeline.ts`) made `emit()` a plan → validate-all → write → remove pipeline
+that changes zero bytes on any conflict (a marker-less target, a stray `.mdx`,
+or any non-`.mdx` file under the generated root) and reports `PATH_CONTAINMENT`
+instead; and made `page.ts`'s generated-file marker configurable
+(`GENERATED_MARKER` neutral by default, `LEGACY_MARKERS` keeping the old LED
+marker for backward compatibility, `PipelineOptions.generatedMarker`).
 
 #14 (`provenance-allowed/render-options.txt`) moved the route/asset-URL
 constants into the new, unhashed `site.ts`, added `RenderOptions`
 (`agentResources`, `integrationDomainGloss`, `generatedNotice`) threaded
 through every renderer and `pipeline.ts`, and rewrote the catalog/landing/
 integration zero-state copy.
+
+#15 (`provenance-allowed/cad-lock.txt`: `publication.ts`) added the
+`expect.packages` reviewed CAD-package lock (ADR-012) to
+`InstanceSelection.expect`, gated only when the project has CAD-mounted
+records to publish and never serialized into the preflight report.
+
+#18 (`provenance-allowed/view-model-v2.txt`: `view-model.ts`) bumped
+`VIEW_MODEL_VERSION` to 2 (ADR-011), so the unified CLI's adapter-contract
+check can refuse a provider that still emits the v1 shape.
+
+#25 (`provenance-allowed/25-examples-minimal.txt`: `view-model.ts`,
+`render/record.ts`, `render/catalog.ts`) rendered a PCB-mounted record with no
+published package as neutral "CAD is not enabled" text instead of an error
+(ADR-012's declared-zero exception), and stopped the catalog from showing an
+empty Orderable ID cell.

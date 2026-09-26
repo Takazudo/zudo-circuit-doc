@@ -10,9 +10,10 @@
   "scripts": {
     "build": "pnpm -r --filter \"./packages/*\" build",
     "typecheck": "pnpm -r --filter \"./packages/*\" typecheck",
-    "test": "pnpm test:ts && pnpm test:python",
+    "test": "pnpm test:ts && pnpm test:python && pnpm test:scripts",
     "test:ts": "pnpm -r --filter \"./packages/*\" test",
     "test:python": "python3 -B -m unittest discover -s packages/circuit-doc/python/tests -p \"test_*.py\"",
+    "test:scripts": "node --experimental-strip-types --test scripts/__tests__/*.test.mjs",
     "test:scenarios": "node scripts/run-scenarios.mjs",
     "fixtures:led:check": "node scripts/sync-led-fixture.mjs --check",
     "fixtures:led:materialize": "node scripts/sync-led-fixture.mjs --materialize-step",
