@@ -36,10 +36,12 @@ option is a FAIL. The check types:
     ``requiredFiles``: files that must exist, e.g. the integration skill's artifacts.
 
 ``seeded-fixtures``
-    ``directRouting``: the direct-routing fixture the config must point at (its per-line
-    cases then run in the routing step). ``invalidCases``: ``[{name, base: "inventory",
-    target, value, expected_error}]``, each applied to a copy of the inventory and run
-    through the configured inventory provider, which must fail with ``expected_error``.
+    ``directRouting``: optional; the direct-routing fixture the config must point at (its
+    per-line cases then run in the routing step). When omitted, defaults to the resolved
+    config's own ``routing.directRouting`` (which must then be configured). ``invalidCases``:
+    ``[{name, base: "inventory", target, value, expected_error}]``, each applied to a copy
+    of the inventory and run through the configured inventory provider, which must fail
+    with ``expected_error``.
 """
 
 from __future__ import annotations
@@ -231,10 +233,13 @@ def check_integration(check, context):
 
 
 def check_seeded_fixtures(check, context):
-    check_options(check, ("directRouting", "invalidCases"))
-    fixture = project_file(context, check["directRouting"], "seeded-fixtures directRouting")
+    check_options(check, ("invalidCases",), ("directRouting",))
     configured = context.config["routing"]["directRouting"]
-    require(configured is not None and Path(configured).resolve() == fixture, f"policy seeded-fixtures: routing.directRouting must be {check['directRouting']}")
+    if "directRouting" in check:
+        fixture = project_file(context, check["directRouting"], "seeded-fixtures directRouting")
+        require(configured is not None and Path(configured).resolve() == fixture, f"policy seeded-fixtures: routing.directRouting must be {check['directRouting']}")
+    else:
+        require(configured is not None, "policy seeded-fixtures: routing.directRouting must be configured when the check omits directRouting")
     cases = check["invalidCases"]
     require(isinstance(cases, list) and cases, "policy seeded-fixtures: invalidCases must be a non-empty list")
     for case in cases:

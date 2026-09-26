@@ -307,6 +307,36 @@ class ContractTests(unittest.TestCase):
             with self.assertRaisesRegex(validator.ContractError, "missing local manifest files"):
                 validator.validate_local_skills(self.schema, lines, root, reserved_dirs=("component-spec-audit",))
 
+    def test_owner_directory_mismatch_reports_the_set_difference(self):
+        lines = [dict(line("line-tst", "TST-100", "Test Maker", "C123", owner="component-tst"), package="EXAMPLE")]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            # "component-tst" is missing (no directory); "component-extra" is unexpected
+            # (no inventory line owns it) and empty, so it carries no placeholder leak.
+            (root / "component-extra").mkdir()
+            with self.assertRaisesRegex(
+                validator.ContractError,
+                r"owner skills: expected exact directories \['component-tst'\], got \['component-extra'\] "
+                r"\(unexpected directories with no inventory owner: \['component-extra'\]; "
+                r"missing directories for inventory owners: \['component-tst'\]\)",
+            ):
+                validator.validate_local_skills(self.schema, lines, root)
+
+    def test_owner_directory_mismatch_surfaces_a_same_run_placeholder_leak(self):
+        lines = [dict(line("line-tst", "TST-100", "Test Maker", "C123", owner="component-tst"), package="EXAMPLE")]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_bundle(root / "component-tst", clean_bundle())
+            # Mimic `new-component`: a fresh bundle copied straight from the template,
+            # not yet registered as an inventory owner and still full of example values.
+            write_bundle(root / "component-new", template_bundle())
+            with self.assertRaisesRegex(
+                validator.ContractError,
+                r"owner skills: expected exact directories.*"
+                r"also in this run:.*component-new.*template placeholder leaked",
+            ):
+                validator.validate_local_skills(self.schema, lines, root)
+
     def test_owner_prefix_and_inventory_parity_are_configurable(self):
         lines = [dict(line("line-tst", "TST-100", "Test Maker", "C123", owner="part-tst"), package="EXAMPLE")]
         with tempfile.TemporaryDirectory() as directory:
