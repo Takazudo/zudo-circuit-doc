@@ -251,6 +251,34 @@ describe("readCircuitReferenceContract", () => {
     assert.equal(contract.packageByRecordId.get("rec-pcb")?.packageId, "PKG-A");
   });
 
+  it("reads the multi-line model transforms KiCad 9 writes", async () => {
+    const roots = await makeRoots("kicad9-transforms");
+    await writeGoodPackage(roots, "PKG-A");
+    await writeFile(
+      join(roots.footprintLibraryRoot, "PKG-A.kicad_mod"),
+      [
+        '(footprint "PKG-A"',
+        `\t(model "${MODEL_PREFIX}PKG-A.wrl"`,
+        "\t\t(offset\n\t\t\t(xyz 0 0 0.1)\n\t\t)",
+        "\t\t(scale\n\t\t\t(xyz 1 1 1)\n\t\t)",
+        "\t\t(rotate\n\t\t\t(xyz 0 0 -90)\n\t\t)",
+        "\t)",
+        ")",
+        "",
+      ].join("\n"),
+    );
+    const { line, record: rec, route: rt, pinMap: pm } = pcbFixture("rec-pcb", "line-pcb", "PKG-A");
+    const index = indexEvidence(inventoryOf([line]), [bundleOf([rec], [rt], [pm])], []);
+
+    const contract = await readCircuitReferenceContract(index, selectionFor(["rec-pcb"], 1), roots, {
+      modelLocatorPrefix: MODEL_PREFIX,
+    });
+
+    assert.deepEqual(contract.packages[0]?.offset, { x: 0, y: 0, z: 0.1 });
+    assert.deepEqual(contract.packages[0]?.scale, { x: 1, y: 1, z: 1 });
+    assert.deepEqual(contract.packages[0]?.rotation, { x: 0, y: 0, z: -90 });
+  });
+
   it("CAD-05: 0 selected packages passes with no CAD directories at all", async () => {
     const roots = await makeRoots("zero-state", false);
     const index = indexEvidence(inventoryOf([]), [bundleOf([], [], [])], []);

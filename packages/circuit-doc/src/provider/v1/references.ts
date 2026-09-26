@@ -352,7 +352,8 @@ function resolveLimits(overrides: Partial<ReferenceLimits> | undefined): Referen
 }
 
 function transform(body: string, key: string, recordId: string, footprint: string): Transform3d {
-  const match = new RegExp(`\\(${key}\\s+\\(xyz\\s+([^\\s)]+)\\s+([^\\s)]+)\\s+([^\\s)]+)\\)\\)`, "u").exec(body);
+  // KiCad 9 writes each transform over several lines: `(offset\n\t\t\t(xyz 0 0 0)\n\t\t)`.
+  const match = new RegExp(`\\(${key}\\s+\\(xyz\\s+([^\\s)]+)\\s+([^\\s)]+)\\s+([^\\s)]+)\\s*\\)\\s*\\)`, "u").exec(body);
   if (match === null) {
     fail("ADAPTER_CONTRACT", `footprint model has no ${key} transform`, { recordId, footprint });
   }
