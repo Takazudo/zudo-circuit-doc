@@ -1,8 +1,9 @@
 /**
  * The publication-safety scan on the BUILT site (port of upstream
  * `scan-artifacts.ts`, generalized: see the epic #1 planning note
- * `planning/explore/led-engine.md` EU8 (removed from the tree in #34; in git history), and the module doc on `core/scan.ts` for why a naive substring search
- * does not work).
+ * `planning/explore/led-engine.md` EU8, removed from the tree in #34 and kept
+ * in git history, and the module doc on `core/scan.ts` for why a naive
+ * substring search does not work).
  *
  * Every other check in this feature runs against structured data: the matrix
  * refuses a field, the branded types refuse an unsanitised string, preflight
