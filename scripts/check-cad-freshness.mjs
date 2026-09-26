@@ -85,8 +85,7 @@ function selectedFootprint(projectDir) {
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   const entry = manifest.packages?.[0];
   if (entry === undefined) {
-    console.error(`${path.relative(projectDir, manifestPath)} selects no package: CAD-03 needs a CAD-enabled project with one`);
-    process.exit(1);
+    throw new Error(`${path.relative(projectDir, manifestPath)} selects no package: CAD-03 needs a CAD-enabled project with one`);
   }
   const libraryCopy = path.join(projectDir, entry.footprintPath);
   const masterCopy = path.join(path.dirname(path.dirname(libraryCopy)), `${entry.footprintName}.kicad_mod`);
@@ -95,10 +94,7 @@ function selectedFootprint(projectDir) {
 
 function findPreviewManifest(projectDir) {
   const manifestPath = path.join(projectDir, PREVIEW_MANIFEST);
-  if (!existsSync(manifestPath)) {
-    console.error(`no committed footprint preview manifest at ${PREVIEW_MANIFEST}`);
-    process.exit(1);
-  }
+  if (!existsSync(manifestPath)) throw new Error(`no committed footprint preview manifest at ${PREVIEW_MANIFEST}`);
   return manifestPath;
 }
 
@@ -178,10 +174,14 @@ try {
   caseBaseline();
   notRun = caseEditedFootprintIsStale() === EXIT_NOT_RUN;
   caseMasterOnlyEditBreaksParity();
+} catch (error) {
+  console.error(`CAD-03: ${error.message}`);
+  process.exitCode = 1;
 } finally {
   for (const dir of scratchDirs) rmSync(dir, { recursive: true, force: true });
 }
 
+if (process.exitCode === 1) process.exit(1);
 if (failures > 0) {
   console.log(`\nCAD-03: ${failures} case(s) failed`);
   process.exit(1);
