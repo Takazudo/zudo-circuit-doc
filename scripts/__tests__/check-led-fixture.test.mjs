@@ -3,8 +3,8 @@
 // the committed selection/document-verification ports against the pinned
 // upstream .ts literal, and the expected-preflight single-field diff.
 //
-// Not wired into `pnpm test` (see scripts/__tests__/sync-led-fixture.test.mjs
-// for the same pre-existing gap) — run directly with
+// Runs as part of `pnpm test:scripts` (and the root `pnpm test`); run just
+// this file directly with
 // `node --test scripts/__tests__/check-led-fixture.test.mjs`.
 import assert from "node:assert/strict";
 import { test } from "node:test";

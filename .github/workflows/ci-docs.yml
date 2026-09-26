@@ -2,6 +2,11 @@
 #
 # Full history is fetched (fetch-depth: 0) so zudo-doc's docHistory feature
 # does not log git errors from a shallow clone.
+#
+# check-docs-cli.mjs diffs the reference/cli.mdx page against the real CLI
+# --help output, so it needs packages/circuit-doc built first (#33: this was
+# a script that existed but no workflow ran it, so the reference page could
+# drift from the CLI silently).
 
 name: CI Docs
 
@@ -34,6 +39,12 @@ jobs:
 
       - name: Setup
         uses: ./.github/actions/setup
+
+      - name: Build circuit-doc CLI
+        run: pnpm --filter @takazudo/zudo-circuit-doc build
+
+      - name: Check CLI reference page matches the built CLI
+        run: node scripts/check-docs-cli.mjs
 
       - name: Build doc site
         run: pnpm doc:build

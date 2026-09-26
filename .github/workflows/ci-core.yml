@@ -6,6 +6,8 @@
 # Jobs:
 #   build-typecheck — pnpm build && pnpm typecheck
 #   ts-unit         — pnpm test:ts, on a node matrix [22, 24]
+#   scripts-unit    — pnpm test:scripts (root scripts/__tests__/*.test.mjs;
+#                      #33: these existed but no workflow ran them)
 
 name: CI Core
 
@@ -58,3 +60,17 @@ jobs:
 
       - name: Run unit tests
         run: pnpm test:ts
+
+  scripts-unit:
+    name: Root Scripts Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Run root script tests
+        run: pnpm test:scripts

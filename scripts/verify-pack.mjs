@@ -631,10 +631,18 @@ async function emptyFixtureFlow({ scratch, initBin, runtimeTarball, packedTempla
       `create-zudo-circuit-doc --version printed ${JSON.stringify(initVersion)} (exit ${initResult.status})\n${initResult.stderr}`,
     );
     const runtimeResult = await runCapture(PNPM[0], [...PNPM.slice(1), "exec", "zudo-circuit-doc", "--version"], hostDir);
-    const runtimeVersion = runtimeResult.stdout.trim();
+    // `pnpm exec` can print its own reporter lines ("Scope: …", "Recreating
+    // …/node_modules", "Progress: …") to stdout ahead of the invoked
+    // command's own output whenever it reconciles node_modules against this
+    // call's effective config (e.g. after an earlier install ran with a
+    // different --config.strict-dep-builds value, as NEXTSTEPS's verbatim
+    // "pnpm install" does versus this scenario's ambient config) — take the
+    // last non-blank line as the actual --version output.
+    const runtimeLines = runtimeResult.stdout.split("\n").map((line) => line.trim()).filter(Boolean);
+    const runtimeVersion = runtimeLines.at(-1) ?? "";
     assert(
       runtimeVersion === (await readJson(path.join(runtimeExtract, "package.json"))).version,
-      `zudo-circuit-doc --version printed ${JSON.stringify(runtimeVersion)} (exit ${runtimeResult.status})\n${runtimeResult.stderr}`,
+      `zudo-circuit-doc --version printed ${JSON.stringify(runtimeResult.stdout)} (exit ${runtimeResult.status})\n${runtimeResult.stderr}`,
     );
     pass("VERSION-MATCH", `create-zudo-circuit-doc --version=${initVersion}, zudo-circuit-doc --version=${runtimeVersion}`);
   });
