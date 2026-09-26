@@ -128,6 +128,18 @@ export async function runBrowserSmoke(options: BrowserSmokeOptions): Promise<Bro
   }
 }
 
+async function settledRenderCount(cdp: CdpClient, timeoutMs = 3000): Promise<number> {
+  let previous = await renderCount(cdp);
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    await delay(250);
+    const current = await renderCount(cdp);
+    if (current === previous) return current;
+    previous = current;
+  }
+  throw new Error(`render-on-demand never settled within ${timeoutMs}ms (last count ${previous})`);
+}
+
 async function runRecordChecks(
   cdp: CdpClient,
   origin: string,
@@ -149,9 +161,11 @@ async function runRecordChecks(
   await exerciseViewerInteractions(cdp);
 
   // No continuous animation loop: after interaction/resize settles, the
-  // diagnostic render count stays unchanged without input.
-  await delay(300);
-  const renders = await renderCount(cdp);
+  // diagnostic render count stays unchanged without input. Slow CI runners can
+  // still be flushing damping/resize frames after a fixed short delay, so wait
+  // for the count to stop moving first; a continuous loop never settles and
+  // still fails here.
+  const renders = await settledRenderCount(cdp);
   await delay(500);
   assertEqual(await renderCount(cdp), renders, "render-on-demand remains idle");
 
