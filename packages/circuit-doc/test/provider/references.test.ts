@@ -30,6 +30,7 @@ import {
 import {
   REFERENCE_LIMITS,
   UPSTREAM_MODEL_PREFIX,
+  assertPathWithinBase,
   assertReferenceSize,
   assertSafePreviewAssetName,
   assertSameBasenamePair,
@@ -145,6 +146,36 @@ describe("preview assets fail closed", () => {
     const overridden = { footprintBytes: 1, modelBytes: REFERENCE_LIMITS.modelBytes, aggregateModelBytes: REFERENCE_LIMITS.aggregateModelBytes };
     assert.doesNotThrow(() => assertReferenceSize("footprint", 1, "rec-fixture", overridden));
     rejects(() => assertReferenceSize("footprint", 2, "rec-fixture", overridden), "PUBLICATION_POLICY");
+  });
+
+  it("assertPathWithinBase: a caller-supplied `path` in detail wins over the computed relative path", () => {
+    // model-assets.ts's containedRepositoryFile/containedPublicTarget pass their
+    // own `path`/`name` in `detail` — that value must survive in the thrown
+    // error, not get clobbered by the freshly computed `rel` (regression: an
+    // earlier `{ ...detail, path: rel }` spread order overwrote it).
+    assert.throws(
+      () =>
+        assertPathWithinBase("/project", "/elsewhere/evil.wrl", "PATH_CONTAINMENT", "escapes", {
+          path: "../../shared-lib/evil.wrl",
+        }),
+      (error: unknown) => {
+        assert.ok(error instanceof ComponentDocsError);
+        assert.equal(error.detail.path, "../../shared-lib/evil.wrl");
+        return true;
+      },
+    );
+  });
+
+  it("assertPathWithinBase: defaults `path` to the computed relative path when the caller doesn't supply one", () => {
+    assert.throws(
+      () => assertPathWithinBase("/project", "/elsewhere/evil.wrl", "PATH_CONTAINMENT", "escapes", { recordId: "rec-1" }),
+      (error: unknown) => {
+        assert.ok(error instanceof ComponentDocsError);
+        assert.equal(error.detail.path, "../elsewhere/evil.wrl");
+        assert.equal(error.detail.recordId, "rec-1");
+        return true;
+      },
+    );
   });
 });
 

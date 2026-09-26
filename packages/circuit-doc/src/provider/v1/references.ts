@@ -444,7 +444,10 @@ export function assertPathWithinBase(
 ): void {
   const rel = relative(base, target);
   if (rel === "" || rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel)) {
-    fail(code, message, { ...detail, path: rel });
+    // `detail` wins on key collision: a caller that already names the
+    // offending path (e.g. model-assets.ts's stored `path`/`name`) keeps
+    // reporting that value, not the freshly computed `rel`.
+    fail(code, message, { path: rel, ...detail });
   }
 }
 
