@@ -19,6 +19,7 @@ describe("resolveCircuitConfig", () => {
     assert.equal(resolved.docs.preflight, join(DIR, "circuit/generated/preflight.json"));
     assert.equal(resolved.docs.agentResources, true);
     assert.equal(resolved.docs.generatedMarker, null);
+    assert.equal(resolved.docs.generatedNotice, null);
     assert.equal(resolved.docs.integrationGloss, null);
     assert.equal(resolved.evidence.bundlesRoot, join(DIR, ".claude/skills"));
     assert.equal(resolved.evidence.ownerPrefix, "component-");
@@ -63,6 +64,14 @@ describe("resolveCircuitConfig", () => {
     assert.ok(resolved.cad.enabled);
     assert.equal(resolved.cad.footprintPathBase, DIR);
     assert.deepEqual(resolved.cad.limits, { ...DEFAULT_REFERENCE_LIMITS, modelBytes: 4096 });
+  });
+
+  test("an explicit docs.generatedNotice resolves through as a boolean, not the null default", () => {
+    const config = mutable(DEFAULT_PROJECT_CONFIG);
+    config.docs.generatedNotice = false;
+    assert.equal(resolveCircuitConfig(config as typeof DEFAULT_PROJECT_CONFIG, DIR).docs.generatedNotice, false);
+    config.docs.generatedNotice = true;
+    assert.equal(resolveCircuitConfig(config as typeof DEFAULT_PROJECT_CONFIG, DIR).docs.generatedNotice, true);
   });
 
   test("a relative configDir is made absolute", () => {

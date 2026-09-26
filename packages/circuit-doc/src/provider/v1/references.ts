@@ -103,6 +103,14 @@ const ALLOWED_VRML_NODES = new Set([
   "Material",
   "Shape",
 ]);
+// A `USE` may only re-instance a material: the field it fills and the node type
+// every `DEF` of its name declares must match one of these pairs.
+const REUSABLE_VRML_FIELDS = new Map([
+  ["material", "Material"],
+  ["appearance", "Appearance"],
+]);
+// three.js VRMLLoader's `Identifier` token (examples/jsm/loaders/VRMLLoader.js).
+const VRML_IDENTIFIER = /^[^\d\0-\x20"'#+,\-.[\]\\{}][^\0-\x20"'#+,.[\]\\{}]*$/u;
 
 export async function readCircuitReferenceContract(
   index: EvidenceIndex,
@@ -310,7 +318,7 @@ export function validateVrml(contents: string, recordId: string, modelName: stri
       model: modelName,
     });
   }
-  if (/(?:https?:|file:|javascript:|data:)|\burl\s|\b(?:Inline|Script|EXTERNPROTO|PROTO|ImageTexture|MovieTexture|AudioClip|Anchor|WWWInline|LoadSensor|ROUTE|IMPORT|EXPORT|USE|IS)\b/iu.test(withoutComments)) {
+  if (/(?:https?:|file:|javascript:|data:)|\burl\s|\b(?:Inline|Script|EXTERNPROTO|PROTO|ImageTexture|MovieTexture|AudioClip|Anchor|WWWInline|LoadSensor|ROUTE|IMPORT|EXPORT|IS)\b/iu.test(withoutComments)) {
     fail("PUBLICATION_POLICY", "model contains a resource-loading or executable VRML construct", {
       recordId,
       model: modelName,
@@ -323,6 +331,45 @@ export function validateVrml(contents: string, recordId: string, modelName: stri
         recordId,
         model: modelName,
         node,
+      });
+    }
+  }
+  validateVrmlReuse(withoutComments, recordId, modelName);
+}
+
+function validateVrmlReuse(contents: string, recordId: string, modelName: string): void {
+  const tokens = contents.match(/[{}[\]]|[^\0-\x20{}[\],]+/gu) ?? [];
+  // VRMLLoader resolves a USE against the last DEF of that name anywhere in the
+  // file, so every DEF of a reused name must declare the reusable node type.
+  const definedTypes = new Map<string, Set<string>>();
+  for (let index = 0; index < tokens.length; index += 1) {
+    if (tokens[index] !== "DEF") continue;
+    const name = tokens[index + 1] ?? "";
+    const types = definedTypes.get(name) ?? new Set<string>();
+    types.add(tokens[index + 2] ?? "");
+    definedTypes.set(name, types);
+  }
+  const seen = new Set<string>();
+  for (let index = 0; index < tokens.length; index += 1) {
+    const token = tokens[index] as string;
+    if (token === "DEF") seen.add(tokens[index + 1] ?? "");
+    if (token.toUpperCase() !== "USE") continue;
+    const field = tokens[index - 1] ?? "";
+    const name = tokens[index + 1] ?? "";
+    const expectedType = REUSABLE_VRML_FIELDS.get(field);
+    const types = definedTypes.get(name);
+    if (
+      token !== "USE" ||
+      expectedType === undefined ||
+      !VRML_IDENTIFIER.test(name) ||
+      !seen.has(name) ||
+      types === undefined ||
+      [...types].some((type) => type !== expectedType)
+    ) {
+      fail("PUBLICATION_POLICY", "model USE may only reuse a previously DEF'd Material or Appearance", {
+        recordId,
+        model: modelName,
+        node: name,
       });
     }
   }

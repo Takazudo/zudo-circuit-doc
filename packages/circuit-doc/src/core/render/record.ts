@@ -500,7 +500,7 @@ function factBlock(fact: PublicFact, record: PublicRecord): RootContent {
   return containerComponent("EvidenceFact", {}, [
     evidenceAnchor(fact.anchor),
     paragraph(field("Fact", [code(fact.factId)])),
-    paragraph([...field("Value", valueCell(fact)), space(), text(literal("·")), space(), ...field("Unit", [code(fact.unit)])]),
+    paragraph([...field("Value", valueCell(fact)), space(), text(literal("·")), space(), ...field("Unit", [codeOrText(fact.unit)])]),
     paragraph(field("Conditions", [text(fact.conditions)])),
     paragraph([...field("Verdict", [text(fact.verdict)]), space(), text(literal("·")), space(), ...field("Provenance", [text(fact.provenance)])]),
     paragraph(field("Evidence", evidenceCell(fact, record))),
@@ -665,6 +665,17 @@ function pinMapSection(record: PublicRecord): RootContent[] {
   return [...head, ...record.pinMaps.flatMap((pinMap) => pinMapEntry(pinMap, record.reference.mounting === "external"))];
 }
 
+/*
+ * Pin names, pin numbers, pads and units come from evidence, not from our id
+ * grammar: a KiCad active-low name such as `~{RESET}` carries a brace, and
+ * `assertMdxSafe` rejects any unescaped `{` or `<` even inside a code span (see
+ * the note in integration.ts). Such a value renders as escaped plain text; every
+ * other value keeps its monospace form, so ordinary pages do not change.
+ */
+function codeOrText(value: SafeText): PhrasingContent {
+  return /[{<]/u.test(value) ? text(value) : code(value);
+}
+
 function pinMapEntry(pinMap: PublicPinMap, external = false): RootContent[] {
   const blocks: RootContent[] = [
     heading(3, pinMap.pinMapId),
@@ -692,9 +703,9 @@ function pinMapEntry(pinMap: PublicPinMap, external = false): RootContent[] {
           literal("Function"),
         ],
         pinMap.pins.map((pin) => [
-          [code(pin.symbolPin)],
-          [code(pin.name)],
-          [code(pin.footprintPad)],
+          [codeOrText(pin.symbolPin)],
+          [codeOrText(pin.name)],
+          [codeOrText(pin.footprintPad)],
           [text(pin.function)],
         ]),
       ),

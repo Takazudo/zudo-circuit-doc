@@ -40,8 +40,9 @@ function replaceOnce(text, from, to, label) {
   return parts.join(to);
 }
 
-// The publication policy rejects VRML `USE`, so each `material USE <name>` gets the
-// body of its `DEF` inlined; geometry and material values are unchanged.
+// Each `material USE <name>` gets the body of its `DEF` inlined; geometry and material
+// values are unchanged. Optional now that the publication policy accepts material-only
+// USE, but kept so the committed copy matches its recorded hash.
 function inlineMaterials(wrl) {
   const bodies = new Map();
   for (const [, name, body] of wrl.matchAll(/material DEF (\S+) Material \{([^}]*)\}/gu)) bodies.set(name, body);

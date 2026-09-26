@@ -146,10 +146,12 @@ export async function mapCircuitConfig(config: ResolvedCircuitConfig): Promise<C
   const render: PipelineRenderOptions = {
     agentResources: config.docs.agentResources,
     integrationDomainGloss: gloss,
-    // There is no config key for the notice: a project that keeps a legacy
-    // marker is reproducing pre-extraction output byte-for-byte (the LED
-    // fixture, ADR-011/ADR-020), which never carried the notice.
-    generatedNotice: generatedMarker === undefined || !LEGACY_MARKERS.includes(generatedMarker),
+    // `docs.generatedNotice` wins when set explicitly. Left unset, a project
+    // that keeps a legacy marker is reproducing pre-extraction output
+    // byte-for-byte (the LED fixture, ADR-011/ADR-020), which never carried
+    // the notice — so the fallback infers it off from the marker.
+    generatedNotice:
+      config.docs.generatedNotice ?? (generatedMarker === undefined || !LEGACY_MARKERS.includes(generatedMarker)),
     ...(generatedMarker === undefined ? {} : { generatedMarker }),
   };
 

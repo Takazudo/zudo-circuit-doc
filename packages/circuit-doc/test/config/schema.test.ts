@@ -33,6 +33,15 @@ describe("valid configs", () => {
     assert.deepEqual(collectCircuitConfigIssues(config), []);
   });
 
+  test("docs.generatedNotice accepts a boolean, independent of generatedMarker", () => {
+    const config = mutable(DEFAULT_PROJECT_CONFIG);
+    config.docs.generatedNotice = false;
+    assert.deepEqual(collectCircuitConfigIssues(config), []);
+    config.docs.generatedMarker = "any single-line marker";
+    config.docs.generatedNotice = true;
+    assert.deepEqual(collectCircuitConfigIssues(config), []);
+  });
+
   test("root may be the config directory itself", () => {
     assert.deepEqual(collectCircuitConfigIssues({ ...DEFAULT_PROJECT_CONFIG, root: "." }), []);
     assert.deepEqual(collectCircuitConfigIssues({ ...DEFAULT_PROJECT_CONFIG, root: "./data/../data" }), []);
@@ -96,6 +105,7 @@ describe("error classes, every error reported", () => {
     config.project.title = 3;
     config.docs.agentResources = "yes";
     config.docs.generatedMarker = "line1\nline2";
+    config.docs.generatedNotice = "yes";
     config.evidence.ownerPrefix = "a/b";
     config.validation.pythonMinVersion = 3.1;
     config.validation.userAgent = "";
@@ -106,6 +116,7 @@ describe("error classes, every error reported", () => {
       "project.title",
       "docs.agentResources",
       "docs.generatedMarker",
+      "docs.generatedNotice",
       "evidence.ownerPrefix",
       "validation.pythonMinVersion",
       "validation.userAgent",
