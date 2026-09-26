@@ -417,6 +417,55 @@ describe("readCircuitReferenceContract", () => {
     );
   });
 
+  it("issue #40: a modelRoot symlinked outside the project fails PATH_CONTAINMENT early, not at publication", async () => {
+    const projectRoot = join(scratch, "symlinked-model-root");
+    const footprintLibraryRoot = join(projectRoot, "footprints", "pretty");
+    await mkdir(footprintLibraryRoot, { recursive: true });
+    await mkdir(join(projectRoot, "footprints"), { recursive: true });
+    // The real model directory lives outside the project entirely (an
+    // external library), and `modelRoot` is a symlink to it — the exact shape
+    // `cad.modelRoot` takes when it points at a shared library checkout.
+    const externalModelRoot = join(scratch, "symlinked-model-root-external-lib");
+    await mkdir(externalModelRoot, { recursive: true });
+    const modelRoot = join(projectRoot, "footprints", "3dshapes");
+    await symlink(externalModelRoot, modelRoot, "dir");
+    const roots: CircuitReferenceRoots = { projectRoot, footprintLibraryRoot, modelRoot };
+    await writeFile(join(footprintLibraryRoot, "PKG-A.kicad_mod"), footprintText("PKG-A", `${MODEL_PREFIX}PKG-A.wrl`));
+    await writeFile(join(externalModelRoot, "PKG-A.wrl"), WRL_TEXT);
+    await writeFile(join(externalModelRoot, "PKG-A.step"), STEP_TEXT);
+    const { line, record: rec, route: rt, pinMap: pm } = pcbFixture("rec-pcb", "line-pcb", "PKG-A");
+    const index = indexEvidence(inventoryOf([line]), [bundleOf([rec], [rt], [pm])], []);
+
+    await rejectsWith(
+      readCircuitReferenceContract(index, selectionFor(["rec-pcb"], 1), roots, { modelLocatorPrefix: MODEL_PREFIX }),
+      "PATH_CONTAINMENT",
+      /model root escapes the project/u,
+    );
+  });
+
+  it("issue #40: a footprintLibraryRoot symlinked outside the project fails PATH_CONTAINMENT the same way", async () => {
+    const projectRoot = join(scratch, "symlinked-footprint-root");
+    await mkdir(join(projectRoot, "footprints"), { recursive: true });
+    const externalFootprintRoot = join(scratch, "symlinked-footprint-root-external-lib");
+    await mkdir(externalFootprintRoot, { recursive: true });
+    const footprintLibraryRoot = join(projectRoot, "footprints", "pretty");
+    await symlink(externalFootprintRoot, footprintLibraryRoot, "dir");
+    const modelRoot = join(projectRoot, "footprints", "3dshapes");
+    await mkdir(modelRoot, { recursive: true });
+    const roots: CircuitReferenceRoots = { projectRoot, footprintLibraryRoot, modelRoot };
+    await writeFile(join(externalFootprintRoot, "PKG-A.kicad_mod"), footprintText("PKG-A", `${MODEL_PREFIX}PKG-A.wrl`));
+    await writeFile(join(modelRoot, "PKG-A.wrl"), WRL_TEXT);
+    await writeFile(join(modelRoot, "PKG-A.step"), STEP_TEXT);
+    const { line, record: rec, route: rt, pinMap: pm } = pcbFixture("rec-pcb", "line-pcb", "PKG-A");
+    const index = indexEvidence(inventoryOf([line]), [bundleOf([rec], [rt], [pm])], []);
+
+    await rejectsWith(
+      readCircuitReferenceContract(index, selectionFor(["rec-pcb"], 1), roots, { modelLocatorPrefix: MODEL_PREFIX }),
+      "PATH_CONTAINMENT",
+      /footprint root escapes the project/u,
+    );
+  });
+
   it("defaults the model locator prefix to the upstream one, not the project's own", async () => {
     const roots = await makeRoots("default-prefix");
     await writeGoodPackage(roots, "PKG-A");

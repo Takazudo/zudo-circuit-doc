@@ -8,7 +8,7 @@
 import { lstat, readFile, realpath } from "node:fs/promises";
 import { basename, extname, isAbsolute, join, relative, sep } from "node:path";
 
-import { fail } from "../../core/errors.ts";
+import { fail, type ErrorCode, type ErrorDetail } from "../../core/errors.ts";
 import type { InstanceSelection } from "../../core/publication.ts";
 import type { EvidenceIndex, IndexedRecord, ProviderSource } from "./evidence.ts";
 import type { CircuitProjectPaths } from "./paths.ts";
@@ -237,6 +237,13 @@ async function readPackage(
   limits: ReferenceLimits,
 ): Promise<CircuitPackageReference> {
   const footprintFile = await containedFile(roots.footprintLibraryRoot, `${footprintName}.kicad_mod`, recordId, roots.projectRoot);
+  assertPathWithinBase(
+    canonicalPathBase,
+    footprintFile,
+    "PATH_CONTAINMENT",
+    "footprint root escapes the project (symlinked CAD root?)",
+    { recordId, footprint: footprintName },
+  );
   const footprintStat = await lstat(footprintFile);
   assertReferenceSize("footprint", footprintStat.size, recordId, limits);
   const footprint = await readFile(footprintFile, "utf8");
@@ -265,6 +272,13 @@ async function readPackage(
     });
   }
   const modelFile = await containedFile(roots.modelRoot, modelName, recordId, roots.projectRoot);
+  assertPathWithinBase(
+    canonicalPathBase,
+    modelFile,
+    "PATH_CONTAINMENT",
+    "model root escapes the project (symlinked CAD root?)",
+    { recordId, footprint: footprintName, model: modelName },
+  );
   const modelStat = await lstat(modelFile);
   assertReferenceSize("model", modelStat.size, recordId, limits);
   const stepName = `${modelName.slice(0, -4)}.step`;
@@ -363,6 +377,28 @@ function transform(body: string, key: string, recordId: string, footprint: strin
     fail("ADAPTER_CONTRACT", `footprint model has invalid ${key} transform`, { recordId, footprint });
   }
   return { x: values[0] as number, y: values[1] as number, z: values[2] as number };
+}
+
+/**
+ * Shared containment rule (issue #40): `target` must resolve inside `base`
+ * with no upward escape and no absolute jump. `references.ts` uses it to
+ * check a resolved footprint/model file against the *project* root (catching
+ * a `footprintLibraryRoot`/`modelRoot` that is itself a symlink to somewhere
+ * outside the project), and `model-assets.ts` uses the same rule against a
+ * stored relative path — one rule, so a project-escaping path is rejected in
+ * both places instead of only late, at publication.
+ */
+export function assertPathWithinBase(
+  base: string,
+  target: string,
+  code: ErrorCode,
+  message: string,
+  detail: ErrorDetail,
+): void {
+  const rel = relative(base, target);
+  if (rel === "" || rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel)) {
+    fail(code, message, { ...detail, path: rel });
+  }
 }
 
 async function containedFile(
