@@ -49,6 +49,105 @@ each field gates.
 Each entry: `path` (relative to `docs.publicRoot`), `reason` (a human-readable justification), and
 an optional `source_id`. See [Concepts → Publication](../concepts/publication.mdx#the-assets-allowlist).
 
+## `validation.policy`
+
+A generic project configures no policy and runs none of these checks — `validation.policy` (see
+[Reference → `circuit.config.ts`](./config.mdx#validation)) is entirely opt-in, data-driven
+assertions a project layers on top of the generic contract. The file:
+
+```json
+{
+  "schema_version": 1,
+  "checks": [{ "type": "<check type>", "...": "options" }]
+}
+```
+
+Every path inside a check is relative to the project root (`root` in `circuit.config.ts`) and is
+rejected if it escapes it. An unknown check `type`, a missing required option, or an unknown option
+is a `FAIL`. `checks` run in file order; there is no ordering requirement between check types.
+
+### `pin-locks`
+
+Locks each pin map's canonical hash, evidence facts and critical pins, and lets the policy assert
+against those locks.
+
+| Option | Notes |
+| --- | --- |
+| `locks` | Path to a file `{ schema_version, locks: [{ record_id, pin_map_id, canonical_sha256, evidence_fact_ids, trust_status, critical_pins, reviewer }] }`. Exactly one lock per pin map is required — exact record/pin-map parity. |
+| `assertions` | `[{ recordId, label?, trustStatus?, pin?: { name, symbolPin, footprintPad } }]`. `trustStatus` pins a lock's trust status; `pin` pins one named pin's symbol-pin-to-footprint-pad numbering. |
+
+### `critical-fact-review`
+
+Requires an independent second review pass (a different reviewer than the one who recorded the
+fact) for facts in named risk domains.
+
+| Option | Notes |
+| --- | --- |
+| `review` | Path to a file `{ schema_version, independent_review_passes, fact_locks, reviews }`. |
+| `requiredDomains` | Domains that must each have at least one review. |
+| `minPasses` | Minimum number of independent review passes (positive integer). |
+| `reviewLogsRoot` | Directory every pass's `review_log` is resolved against (and must stay inside); each log is locked by `review_log_sha256`. |
+
+Every fact needs exactly one independent-pass reviewer distinct from the reviewer who authored the
+review itself; an unavailable source or an `UNSOURCED` fact can only be reviewed `OPEN` or
+`UNSOURCED`, never `CONFIRMED`.
+
+### `refresh-evidence`
+
+Requires fresh, hash-checked re-downloads for at least one source per required authority class.
+
+| Option | Notes |
+| --- | --- |
+| `evidence` | Path to a file `{ schema_version, evidence: [{ source_id, authoritative_url, sha256, checked_at, result, retrieval_profile }] }`. |
+| `requiredAuthorityClasses` | Authority classes that must each have a refresh example. |
+| `retrievalProfile` | The only accepted `retrieval_profile` value. |
+
+Each entry's source must be `AVAILABLE`, and its URL/hash must still match the source record exactly
+— a refresh entry for a source whose evidence has since changed is stale and fails.
+
+### `integration`
+
+Constrains the cross-component integration rules (`evidence.integrationRules`).
+
+| Option | Notes |
+| --- | --- |
+| `exactDomains` | The rule domains, exactly — no more, no fewer. |
+| `allowedVerdicts` | The rule verdict whitelist. |
+| `requireChainRule` | Boolean; `true` requires at least one rule to carry an `evidence_chain`. |
+| `chainConstraints` | `{ <stage>: <status>, trailingOpen?: N }` — a required status per named chain stage, plus how many trailing stages must stay `OPEN` (downstream proof not yet closed out). |
+| `requiredFiles` | Optional; files that must exist, e.g. the integration skill's own artifacts. |
+
+### `seeded-fixtures`
+
+Proves the inventory provider actually rejects bad data, by mutating a copy of the inventory and
+asserting it fails with the expected error.
+
+| Option | Notes |
+| --- | --- |
+| `directRouting` | Optional; the direct-routing fixture that `circuit.config.ts`'s `evidence.directRouting` (`routing.directRouting` in the resolved config Python reads — see [the resolved-validator-config pointer](#the-resolved-validator-config-pointer) below) must point at. **When omitted, it defaults to whatever `evidence.directRouting` already resolves to**, which must then be configured some other way — this check no longer hardcodes a project-specific fixture path. |
+| `invalidCases` | `[{ name, base: "inventory", target, value, expected_error }]`, each applied to a copy of the inventory (`target` is a dotted path, e.g. `lines.line-c283540.mpn`) and run through the configured inventory provider, which must fail with a message containing `expected_error`. |
+
+### A full example
+
+The LED regression fixture's policy (`fixtures/led/circuit/policy.json` in this repository) uses
+every check type; here it is trimmed to shape:
+
+```json
+{
+  "schema_version": 1,
+  "checks": [
+    { "type": "pin-locks", "locks": "...", "assertions": [{ "recordId": "rec-stusb4500qtr", "trustStatus": "UNSOURCED" }] },
+    { "type": "critical-fact-review", "review": "...", "requiredDomains": ["connector", "polarity"], "minPasses": 2, "reviewLogsRoot": "..." },
+    { "type": "refresh-evidence", "evidence": "...", "requiredAuthorityClasses": ["PROJECT_GENERATOR", "MANUFACTURER_PRIMARY"], "retrievalProfile": "browser-like-v1" },
+    { "type": "integration", "exactDomains": ["rail-envelope", "..."], "allowedVerdicts": ["NEEDS BENCH", "UNSOURCED"], "requireChainRule": true, "chainConstraints": { "generated-netlist": "MIXED", "trailingOpen": 5 } },
+    { "type": "seeded-fixtures", "directRouting": "...", "invalidCases": [{ "name": "wrong-mpn", "base": "inventory", "target": "lines.line-c283540.mpn", "value": "WRONG-MPN", "expected_error": "MPN" }] }
+  ]
+}
+```
+
+Source: `packages/circuit-doc/python/circuit_evidence/policy/checks.py` (the check implementations
+and their docstring) and `fixtures/led/circuit/policy.json` (the full working example).
+
 ## The resolved-validator-config pointer
 
 The JS CLI never hands Python a config path to resolve itself. It loads and resolves

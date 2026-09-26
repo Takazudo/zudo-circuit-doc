@@ -7,7 +7,10 @@ sidebar_position: 2
 `zudo-circuit-doc <command> [options] [--config <path>]` is the runtime CLI a generated project
 depends on. It's invoked directly (`pnpm exec zudo-circuit-doc <command>`) or through the root
 scripts the initializer writes (`pnpm circuit:check`, `pnpm build`, …) — see
-[The generated project](./generated-project.mdx#root-scripts) for that mapping.
+[The generated project](./generated-project.mdx#root-scripts) for that mapping. This page covers
+that runtime CLI only; for the separate `create-zudo-circuit-doc` initializer CLI's flags (including
+`--runtime-spec`, used to point a fresh scaffold at an unpublished tarball) see
+[Getting Started → Create a project](../getting-started/create-a-project.mdx).
 
 Every command accepts a global `--config <path>` (default `./circuit.config.ts`) and `--help`.
 `zudo-circuit-doc --version` prints the package version.
@@ -79,7 +82,12 @@ Exit codes:
 
 Runs the validator once and replays its result across every step (drift, models, footprints)
 rather than re-invoking Python per step. Exits `1` if any step failed, else `2` if a step reported a
-config problem, else `4` if a step couldn't run, else `0`.
+config problem, else `4` if a step couldn't run, else `0`. On failure it prints a hint naming the
+project's own aggregate script, not the CLI's own `check` step:
+
+```
+check failed (exit 1); fix the steps marked FAIL, then run `pnpm check`
+```
 
 ## `validate`
 
@@ -182,7 +190,7 @@ browser smoke of the built site in system Chrome (islands, viewers, no-JS fallba
 
 Options:
   --dist <dir>              built site directory (default: docs.dist)
-  --representatives <json>  representative pages (default: config browserSmoke.representatives)
+  --representatives <json>  representative pages (default: config browserSmoke.representatives, else up to 3 derived from published records)
   --chrome <bin>            Chrome binary (default: $CHROME_BIN)
   --shell-assertions        also assert the zudo-doc shell DOM
   --search-assertions       also assert search and llms output
@@ -191,12 +199,38 @@ Exit codes:
   0  every browser check passed
   1  a browser check failed
   2  usage/config error
-  4  not run: Chrome not found (set CHROME_BIN)
+  4  not run: Chrome not found (set CHROME_BIN), or records are published but none qualifies for a
+     default smoke (set browserSmoke.representatives)
 ```
 
 Drives system Chrome over the Chrome DevTools Protocol — no Playwright or other browser-automation
 dependency anywhere in the package. Representatives with declared-zero availability print `SKIP`
 lines and still exit `0`.
+
+### Representative resolution and exit `4`
+
+`--representatives <json>` (a file shaped like [`browserSmoke`](./config.mdx#browsersmoke)) wins if
+given; otherwise `browserSmoke.representatives` from `circuit.config.ts` is used unchanged, even an
+explicit `[]`; otherwise representatives are **derived** from the built preflight report — see
+[Config → `browserSmoke`](./config.mdx#browsersmoke) for the exact derivation rule. The Chrome check
+always runs first, so a missing Chrome is reported before the config is even inspected for
+representatives.
+
+The Chrome-found path then has three outcomes:
+
+- **Zero published records** ("declared-zero project"): nothing to smoke, exits `0`.
+- **Derived successfully**: stdout prints which pages were picked before the smoke itself runs:
+  ```
+  INFO: using derived representatives: /docs/components/records/al8860mp-13/ (AL8860MP-13), /docs/components/records/c22807/ (C22807)
+  ```
+- **Records are published, but none qualifies** (no component-references section with a reviewed
+  PDF, footprint and WRL model): exits `4` with
+  ```
+  not run: 2 record(s) are published but none qualifies for a default browser smoke (a
+  component-references section with a reviewed PDF, footprint and WRL model); set
+  browserSmoke.representatives in circuit.config.ts
+  ```
+  A missing or invalid preflight report while deriving is a usage error (exit `2`), not exit `4`.
 
 ## `doctor`
 

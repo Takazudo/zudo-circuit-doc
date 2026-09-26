@@ -16,6 +16,10 @@ sidebar_position: 4
 | `circuit/publication/selection.json`, `circuit/publication/assets.json` | Project | Yes, as a reviewed diff — see [Publication](./publication.mdx) |
 | `circuit/cad-receipts/` | Project | Yes, created when the first asset is acquired |
 | `circuit.config.ts` | Project | Yes |
+| `doc/zfb.config.ts` | Project | Yes — `headerNav`, `headerRightItems`, `footer`, `claudeResources`, etc. See [Adding an authored section](#adding-an-authored-section) below before adding a nav entry |
+| `doc/src/chrome-bindings.tsx`, `doc/src/styles/global.css`, and the rest of `doc/src/**` outside `content/docs/components/` | Project | Yes |
+| `doc/public/**`, excluding the generator-owned `doc/public/assets/component-previews/**` below | Project | Yes, subject to the [publication assets allowlist](./publication.mdx#the-assets-allowlist) for anything that shouldn't be public |
+| Root `package.json` `scripts` | Project | Yes — a custom pre-build step, a deploy hook, or any other project-specific command goes here; see [Workflows → Migrating an existing project](../workflows/migrate-existing-project.mdx#what-cannot-be-ported) for why this is the seam for things that can't be ported directly |
 | `doc/src/content/docs/components/**` | Generator | **Never** |
 | `circuit/generated/preflight.json` | Generator | **Never** |
 | `doc/public/assets/component-previews/**` | Generator | **Never** |
@@ -72,3 +76,41 @@ This repository's own dev-time **upstream-scaffold parity check**
 diff, kept green so `templates/default` never silently drifts from a real `create-zudo-doc` output.
 A generated project does not ship that script; the manual procedure above is the same idea, run by
 hand, on your own schedule.
+
+## Adding an authored section
+
+A new top-level section (a sibling of `project/`, `architecture/`, `research/`, `decisions/`,
+`verification/`) needs three things, all in `doc/zfb.config.ts`, which is project-owned:
+
+1. **A content directory.** `doc/src/content/docs/<section>/` with its own `index.mdx`.
+2. **A `headerNav` entry whose `categoryMatch` matches that directory name exactly.**
+   `categoryMatch` is how zudo-doc decides which sidebar to render for a given page — a section
+   with no matching `categoryMatch` gets an empty sidebar, silently, with no build error. Copy an
+   existing entry's shape rather than writing one from scratch:
+   ```ts
+   { label: "My Section", path: "/docs/my-section", categoryMatch: "my-section" }
+   ```
+3. **A slot in the 6-item header nav cap.** The scaffold's default `headerNav` already uses 6 items
+   (Project, Architecture, Research, Decisions, Verification, Components) — the same number the
+   generated site's own [What you get](../getting-started/generated-project.mdx) page counts. Adding
+   a 7th top-level entry means either removing one, or nesting the new section as a `children` entry
+   under an existing one (see `headerNav[].children` — the scaffold's own Components entry nests
+   "Catalog & Records" and "Raw agent resources" this way):
+   ```ts
+   {
+     label: "Components",
+     path: "/docs/components",
+     categoryMatch: "components",
+     children: [
+       { label: "Catalog & Records", path: "/docs/components", categoryMatch: "components" },
+       { label: "My Section", path: "/docs/my-section", categoryMatch: "my-section" },
+     ],
+   }
+   ```
+
+The **`project/` entry is required by the [shared workflow entry](../workflows/index.mdx#the-shared-entry)**:
+every workflow starts by reading the brief and next actions there, so removing or renaming it breaks
+the workflow text's own instructions, not just navigation. The other four scaffold sections
+(`architecture`, `research`, `decisions`, `verification`) are conventional, not load-bearing —
+rename or drop them if your project structures its authored docs differently, as long as `project/`
+stays.
