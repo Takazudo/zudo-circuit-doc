@@ -6,6 +6,7 @@
 //
 // Exit codes: 0 pass, 1 problems found, 2 usage error.
 
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 
@@ -168,7 +169,23 @@ for (const rel of REQUIRED_FILES) {
   if (!existsSync(path.join(root, rel))) report(rel, 0, "required authored file is missing");
 }
 
-const files = walk(root).map((abs) => ({ abs, rel: toRel(abs), text: readFileSync(abs, "utf8") }));
+// Authored content is what git would track: skip gitignored build output a local
+// build leaves behind (doc/.zfb-build/, zudo-doc's claude* mirror). Outside a git
+// work tree (scratch copies) no filter applies.
+const gitVisible = (() => {
+  try {
+    const out = execFileSync(
+      "git",
+      ["ls-files", "--cached", "--others", "--exclude-standard", "-z", "--", "."],
+      { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
+    );
+    return new Set(out.split("\0").filter(Boolean));
+  } catch {
+    return null;
+  }
+})();
+
+const files = walk(root).filter((abs) => !gitVisible || gitVisible.has(toRel(abs))).map((abs) => ({ abs, rel: toRel(abs), text: readFileSync(abs, "utf8") }));
 
 // Authored agent-facing content: root docs, circuit/, .claude/ and the
 // non-generated doc pages. The upstream doc host scaffold is not ours to check.
