@@ -347,6 +347,26 @@ describe("readCircuitReferenceContract", () => {
     assert.equal(contract.packageByRecordId.get("rec-pcb")?.packageId, "PKG-A");
   });
 
+  it("issue #64: a selected package with only a WRL on disk generates without error", async () => {
+    const roots = await makeRoots("wrl-only");
+    await writeFile(join(roots.footprintLibraryRoot, "PKG-A.kicad_mod"), footprintText("PKG-A", `${MODEL_PREFIX}PKG-A.wrl`));
+    await writeFile(join(roots.modelRoot, "PKG-A.wrl"), WRL_TEXT);
+    // Deliberately no PKG-A.step: only the WRL is published, so STEP is optional.
+    const { line, record: rec, route: rt, pinMap: pm } = pcbFixture("rec-pcb", "line-pcb", "PKG-A");
+    const index = indexEvidence(inventoryOf([line]), [bundleOf([rec], [rt], [pm])], []);
+
+    const contract = await readCircuitReferenceContract(
+      index,
+      selectionFor(["rec-pcb"], 1),
+      roots,
+      { modelLocatorPrefix: MODEL_PREFIX },
+    );
+
+    assert.equal(contract.packages.length, 1);
+    assert.equal(contract.packages[0]?.packageId, "PKG-A");
+    assert.equal(contract.packages[0]?.modelPath, "footprints/3dshapes/PKG-A.wrl");
+  });
+
   it("reads the multi-line model transforms KiCad 9 writes", async () => {
     const roots = await makeRoots("kicad9-transforms");
     await writeGoodPackage(roots, "PKG-A");
