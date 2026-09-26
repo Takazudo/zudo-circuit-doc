@@ -16,6 +16,7 @@ export function makePlan(overrides: Partial<Plan> = {}): Plan {
     agent: "both" as AgentChoice,
     install: true,
     git: true,
+    runtimeSpec: undefined,
     ...overrides,
   };
 }

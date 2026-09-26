@@ -15,6 +15,7 @@ export interface ParsedOptions {
   agent: AgentChoice;
   install: boolean;
   git: boolean;
+  runtimeSpec: string | undefined;
 }
 
 /**
@@ -42,6 +43,7 @@ export function parseCliArgs(argv: string[]): ParsedOptions {
         "no-install": { type: "boolean" },
         git: { type: "boolean" },
         "no-git": { type: "boolean" },
+        "runtime-spec": { type: "string" },
       },
     });
   } catch (error) {
@@ -84,5 +86,6 @@ export function parseCliArgs(argv: string[]): ParsedOptions {
     agent: agentRaw as AgentChoice,
     install,
     git,
+    runtimeSpec: values["runtime-spec"],
   };
 }

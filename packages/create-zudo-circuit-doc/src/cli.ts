@@ -105,9 +105,7 @@ export async function main(argv: string[], overrides: CliOverrides = {}): Promis
         );
         println(
           stdout,
-          ["Recovery:", "", "```", `cd ${shellQuote(displayDestination)}`, "pnpm install", "```"].join(
-            "\n",
-          ),
+          ["Recovery:", "", `  cd ${shellQuote(displayDestination)}`, "  pnpm install"].join("\n"),
         );
         return 1;
       }
@@ -129,7 +127,7 @@ export async function main(argv: string[], overrides: CliOverrides = {}): Promis
 
     println(stdout, `Created ${plan.destinationPath}`);
     println(stdout, "");
-    println(stdout, formatNextSteps({ displayDestination, installRan }));
+    println(stdout, formatNextSteps({ displayDestination, installRan, runtimeSpec: plan.runtimeSpec }));
 
     return gitFailed ? 1 : 0;
   } catch (error) {

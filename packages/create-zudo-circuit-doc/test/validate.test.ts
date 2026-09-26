@@ -5,6 +5,7 @@ import {
   titleCaseFromName,
   validateLibrary,
   validateName,
+  validateRuntimeSpec,
   validateTitle,
 } from "../src/validate.ts";
 
@@ -52,6 +53,22 @@ test("validateLibrary rejects leading symbols, bad chars, and over-length", () =
   for (const lib of ["-lib", "_lib", "lib name", "lib!", "a".repeat(65)]) {
     assert.throws(() => validateLibrary(lib), CliUsageError, lib);
   }
+});
+
+test("validateRuntimeSpec accepts semver ranges/dist-tags and absolute file: specs", () => {
+  for (const spec of ["^0.2.0", "~1.2.3", ">=1.0.0 <2.0.0", "1.x", "*", "0.1.0-next.5", "latest"]) {
+    assert.doesNotThrow(() => validateRuntimeSpec(spec), spec);
+  }
+  assert.doesNotThrow(() => validateRuntimeSpec("file:/abs/path/runtime.tgz"));
+});
+
+test("validateRuntimeSpec rejects empty, relative file:, and garbled values", () => {
+  assert.throws(() => validateRuntimeSpec(""), CliUsageError);
+  assert.throws(() => validateRuntimeSpec("file:"), CliUsageError);
+  assert.throws(() => validateRuntimeSpec("file:relative/path.tgz"), CliUsageError);
+  assert.throws(() => validateRuntimeSpec("file:../up/one/path.tgz"), CliUsageError);
+  assert.throws(() => validateRuntimeSpec("not a spec!!"), CliUsageError);
+  assert.throws(() => validateRuntimeSpec("bad\ncontrol"), CliUsageError);
 });
 
 test("titleCaseFromName title-cases hyphen/underscore-separated names", () => {

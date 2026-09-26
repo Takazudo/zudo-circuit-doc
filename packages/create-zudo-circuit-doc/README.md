@@ -26,6 +26,7 @@ If `destination` is omitted, the CLI prompts for one on an interactive terminal;
 | `--yes`, `-y` | off | Never prompt; a missing destination is an error. |
 | `--install` / `--no-install` | `--install` | Run `pnpm install` in the destination after scaffolding. |
 | `--git` / `--no-git` | `--git` | Run `git init -b main` and commit the scaffold. Skipped with a note if the destination is already inside a git work tree. |
+| `--runtime-spec <spec>` | the template's own spec | Overrides the `@takazudo/zudo-circuit-doc` dependency in both `package.json` and `doc/package.json`. Accepts a semver range/dist-tag, or a `file:` spec with an **absolute** path — a relative `file:` path is rejected, since `doc/package.json` sits one directory deeper than `package.json` and one relative string cannot be correct in both. |
 | `--help`, `-h` | | Print usage and exit. |
 | `--version`, `-v` | | Print the installed version and exit. |
 
