@@ -1,0 +1,38 @@
+---
+title: Getting Started
+description: What zudo-circuit-doc is, how it relates to zudo-doc and zudo-sg, and how to try it before it is published on npm.
+sidebar_position: 1
+---
+
+`zudo-circuit-doc` is a circuit-development project initializer built on
+[zudo-doc](https://github.com/zudolab/zudo-doc). It follows the same initializer/runtime split as
+[zudo-sg](https://github.com/Takazudo/zudo-sg):
+
+- **`create-zudo-circuit-doc`** — an initializer that generates a new project.
+- **`@takazudo/zudo-circuit-doc`** — the runtime package a generated project depends on: the CLI,
+  the MDX renderer and preview islands, and the canonical Python evidence validator.
+
+Both packages sit on top of zudo-doc the same way zudo-sg does: the generated project is an
+ordinary zudo-doc site (`doc/`), with `@takazudo/zudo-circuit-doc` adding one more kind of
+content — component evidence — on top of zudo-doc's authored documentation. If you already know
+zudo-doc or zudo-sg, the generated project's `doc/` directory, `zfb.config.ts` and header
+navigation will look familiar; what's new is the `circuit/` directory and the `.claude/skills/`
+evidence bundles described in [Concepts](../concepts/).
+
+A generated project opens as useful documentation before it has any component, board, KiCad file
+or firmware. It carries one canonical agent workflow, so a short request such as "download this
+datasheet", "get the 3D model" or "check this spec" becomes durable, honest project knowledge:
+exact identity, retained evidence, regenerated documentation and a truthful statement of what is
+still unknown.
+
+## In this section
+
+- [Requirements](./requirements.mdx) — what has to be on your machine, and what is optional.
+- [Create a project](./create-a-project.mdx) — the tarball-based trial, since neither package is
+  published on npm yet.
+- [The first run](./first-run.mdx) — `pnpm circuit:doctor` and `pnpm dev`.
+- [The first task](./first-task.mdx) — the project brief (Workflow A), then the first component
+  (Workflow B).
+- [What you get](./generated-project.mdx) — the generated-project layout, at a glance.
+
+For the exhaustive file-by-file reference, see [Reference → The generated project](../reference/generated-project.mdx).

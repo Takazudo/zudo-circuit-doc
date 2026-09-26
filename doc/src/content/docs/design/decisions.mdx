@@ -1,0 +1,417 @@
+---
+title: Architecture Decisions
+description: ADR-001 through ADR-020 for the Circuit Doc v0.1 epic, with rationale, rejected alternatives and owning issues.
+sidebar_position: 2
+---
+
+If an implementing issue needs to deviate from the decision recorded here, it updates this
+page in the same PR — this record follows the code, it does not trail it.
+
+These 20 ADRs were made during planning for the
+[Circuit Doc v0.1 epic](https://github.com/Takazudo/zudo-circuit-doc/issues/1) and are binding
+for every sub-issue unless a later ADR on this page supersedes one. All are **Accepted**.
+
+## ADR-001 — Monorepo layout
+
+**Status:** Accepted
+
+**Context:** The runtime, the initializer, the pinned LED regression corpus, two example
+projects and this project's own documentation site all need to iterate together during
+extraction, but only some of them should ever be published.
+
+**Decision:** The monorepo contains `packages/circuit-doc` (`@takazudo/zudo-circuit-doc`),
+`packages/create-zudo-circuit-doc`, `examples/empty` (the template source of truth),
+`examples/minimal` (a real one-part portability fixture), `fixtures/led` (a pinned regression
+corpus) and `doc/` (this project's own zudo-doc site). The `examples/*` and `doc/` directories
+are workspace members that use `workspace:*`.
+
+**Rejected alternative:** A zudo-sg-style out-of-workspace `file:.tarball` fixture. It makes
+in-repo iteration slow; the packed consumer outside the monorepo (see the
+[extraction baseline's empty-consumer test](./extraction-baseline.mdx#planned-empty-consumer-test))
+is the portability proof instead.
+
+**Consequences / PR-time review target:** The workspace globs and unique package names.
+
+**Owning issue:** [#2](https://github.com/Takazudo/zudo-circuit-doc/issues/2)
+
+## ADR-002 — Fixture-derived template
+
+**Status:** Accepted
+
+**Context:** `examples/empty` needs to be both a buildable workspace member (for fast
+iteration) and the literal source of the generated project template.
+
+**Decision:** zudo-doc composition uses a fixture-derived template: `examples/empty` is synced
+into `templates/default`. A dev-time upstream parity check diffs the upstream-owned host files
+against `createZudoDoc()` output from the pinned `create-zudo-doc@5.27.0`.
+
+**Rejected alternative:** Calling `create-zudo-doc` at user runtime. It needs `chdir`, has no
+staging, swallows install failures, and skips nested `pnpm-workspace.yaml`.
+
+**Consequences / PR-time review target:** The drift check output.
+
+**Owning issue:** [#24](https://github.com/Takazudo/zudo-circuit-doc/issues/24)
+
+## ADR-003 — Version family
+
+**Status:** Accepted
+
+**Context:** LED (zfb 2.20.2), zudo-sg (zfb 2.20.3) and zudo-doc HEAD (zfb 2.21.0) all pin
+slightly different dependency families, and the validator's declared `>=3.12` Python floor was
+only ever a CI-parity pin (the measured floor is 3.9, see the
+[extraction baseline](./extraction-baseline.mdx#toolchain)).
+
+**Decision:** The version family is exact-pinned: `@takazudo/zudo-doc` 5.27.0,
+`@takazudo/zfb`/`zfb-runtime`/`zfb-md-wasm` 2.21.0, pnpm 11.5.2 (via `packageManager` and
+corepack), Node >=22.18.0, Python >=3.10 (stdlib only). Fallback rule: if the M1 host or island
+hydration fails on zfb 2.21.0 but passes on 2.20.3, pin 2.20.3 across the family and file an
+upstream report with `/dev-upstream-report`. Generated-project pnpm settings live only in the
+root `pnpm-workspace.yaml` — there are no `.npmrc` files, because `pnpm pack` drops them and
+pnpm only reads them at the workspace root. The file sets `minimumReleaseAge: 0` (a known
+trade-off, to revisit at publish time in [#34](https://github.com/Takazudo/zudo-circuit-doc/issues/34)),
+`allowBuilds.esbuild`, and any required `trustPolicyExclude`. pnpm 11 ignores the package.json
+`"pnpm"` field.
+
+**Rejected alternative:** Mixed pins across LED, zudo-sg and zudo-doc HEAD.
+
+**Consequences / PR-time review target:** The single recorded family in `ZUDO_DEPS_PINS.md`.
+
+**Owning issue:** [#2](https://github.com/Takazudo/zudo-circuit-doc/issues/2)
+
+## ADR-004 — Runtime package build (tsc emit)
+
+**Status:** Accepted
+
+**Context:** Node refuses type stripping for any `.ts` file under `node_modules`
+(`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`, verified on Node 24.13.1), so the runtime
+package cannot ship `.ts` sources for anything Node executes. LED's engine carries 313 relative
+`.ts` import specifiers.
+
+**Decision:** The runtime package is built with `tsc` emit using
+`rewriteRelativeImportExtensions`. Sources keep LED's `.ts` specifiers, so the code stays
+near-verbatim and tests run via `node --experimental-strip-types --test`. Emit is per-file, so
+`"use client"` survives on island files. The output directory is `lib/`, not `dist/` — zfb
+2.21.0's workspace-package staging hard-prunes any directory named `dist` from workspace
+packages ([zudo-front-builder#3154](https://github.com/Takazudo/zudo-front-builder/issues/3154)).
+
+**Rejected alternative:** `tsup bundle:false` — it does not rewrite the 313 `.ts` specifiers.
+
+**Consequences / PR-time review target:** The shape-check output: no `.ts` imports in `lib/`,
+and island files start with `"use client"`.
+
+**Owning issues:** [#5](https://github.com/Takazudo/zudo-circuit-doc/issues/5),
+[#13](https://github.com/Takazudo/zudo-circuit-doc/issues/13)
+
+## ADR-005 — `circuit.config.ts` contract
+
+**Status:** Accepted
+
+**Context:** The config file must load in places where the package may not be resolvable yet
+(fixtures, temp dirs, before install), and must work under native Node type stripping with no
+bundler.
+
+**Decision:** `circuit.config.ts` sits at the project root. Its canonical form is
+`import type { CircuitConfig } from "@takazudo/zudo-circuit-doc/config"; export default { … } satisfies CircuitConfig;`.
+The type-only import strips cleanly, so the file loads even where the package cannot be
+resolved. `defineCircuitConfig()` also exists, but is optional. The CLI loads the config by
+dynamic import, relying on native type stripping, and re-imports with a cache-busting query in
+watch mode. A generated root `package.json` has `"type": "module"`. Every path is resolved
+relative to the config file's directory, and paths that escape it are rejected. `zfb.config.ts`
+stays independent.
+
+**Rejected alternative:** A `.mjs` config (the zudo-sg precedent) or a bundler loader.
+
+**Consequences / PR-time review target:** The loader error messages.
+
+**Owning issue:** [#9](https://github.com/Takazudo/zudo-circuit-doc/issues/9)
+
+## ADR-006 — Evidence storage layout
+
+**Status:** Accepted
+
+**Context:** LED's evidence records already live under `.claude/skills/component-*`, agent-
+discoverable and validated by the Python contract. The seed forbids combining a storage
+migration with the extraction itself.
+
+**Decision:** Evidence stays in the v1 layout under a configurable `.claude/skills/`: owner
+bundles `component-*`, plus `component-spec-audit` and `circuit-spec-integration`.
+`circuit/WORKFLOW.md` is the canonical agent entry, and `CLAUDE.md`/`AGENTS.md` are thin
+pointers. The evidence JSON is never duplicated into another tool directory.
+
+**Rejected alternative:** A neutral `circuit/evidence/` directory.
+
+**Owning issue:** [#8](https://github.com/Takazudo/zudo-circuit-doc/issues/8)
+
+## ADR-007 — Python validator packaging and transport
+
+**Status:** Accepted
+
+**Context:** The canonical validator must run from inside an installed npm tarball, never
+against a fixed project path (concurrent watch/check would race, and the LED fixture tree is
+hash-locked), and must not write bytecode into the pnpm store.
+
+**Decision:** The canonical validator is a Python stdlib package inside the npm tarball
+(`packages/circuit-doc/python/`), split into generic contract, inventory providers, integration,
+data-driven project policy and CLI. JS writes the resolved-config JSON to a unique temp file
+(`mkdtemp` under the OS temp directory, removed afterwards) or pipes it on stdin (`--config -`).
+Python runs as `python3 -B circuit_validate.py --config <json>` with
+`PYTHONDONTWRITEBYTECODE=1`. The interpreter can be overridden with `CIRCUIT_DOC_PYTHON`. The
+generic seeded self-test (mutation and golden fixtures) ships as package data and runs on every
+validate, as upstream does. There is no weaker TS re-implementation.
+
+**Rejected alternative:** Copying `validate.py` into every project.
+
+**Consequences / PR-time review target:** Python resource discovery from a packed consumer.
+
+**Owning issues:** [#6](https://github.com/Takazudo/zudo-circuit-doc/issues/6),
+[#16](https://github.com/Takazudo/zudo-circuit-doc/issues/16)
+
+## ADR-008 — NOT APPLICABLE never blocks
+
+**Status:** Accepted
+
+**Context:** `validate.py:563-566` (`fact_blocks_domain`) currently blocks a NOT APPLICABLE fact
+that sits on an unavailable source, contradicting the frozen `contract.md:9` prose and the
+schema's own comment. This is confirmed and reproduced — see the
+[extraction baseline's findings table](./extraction-baseline.mdx#pre-existing-findings). Fixing
+it is measured corpus-neutral: no LED coverage entry references a NOT APPLICABLE fact on an
+unavailable source.
+
+**Decision:** The code is aligned to the frozen `contract.md:9` and schema prose. The change is
+corpus-neutral (measured), and regression tests cover both directions.
+
+**Rejected alternative:** Amending the frozen prose to match the code.
+
+**Owning issue:** [#6](https://github.com/Takazudo/zudo-circuit-doc/issues/6)
+
+## ADR-009 — Resolver: manufacturer narrowing before rejection
+
+**Status:** Accepted
+
+**Context:** `resolve_identities` (`validate.py:317`) rejects more than one MPN match before
+manufacturer narrowing runs (`:374-381`), so `Vishay SS26` and `Rectron SS26` are both
+unresolvable even though they are unambiguous once the manufacturer alias is applied. A
+prototype fix is measured corpus-neutral for LED.
+
+**Decision:** Manufacturer qualification is applied before multi-candidate rejection. An
+ambiguous bare MPN is still refused, and `validate_routing` is aware of duplicate MPNs. This is
+corpus-neutral (measured).
+
+**Owning issue:** [#6](https://github.com/Takazudo/zudo-circuit-doc/issues/6)
+
+## ADR-010 — Two inventory profiles
+
+**Status:** Accepted
+
+**Context:** LED's inventory logic hard-codes LCSC as the identity key and silently falls back
+to three hardcoded board specs (`validate.py:192-198`, the `specs or (...)` bug — see the
+[extraction baseline](./extraction-baseline.mdx#pre-existing-findings)) even when the caller
+passes no specs at all. A generic project has neither LCSC parts nor a generator spec by
+default.
+
+**Decision:** There are two inventory profiles:
+- **generic-v1** (`inventoryProvider.kind: "manual"`): `lcsc` key present but `""` allowed;
+  identity = unique `line_id` + unique (manufacturer, complete MPN); optional
+  `suppliers: [{supplier, order_code}]`, display only; placements may be `[]` and are declared,
+  not verified. The CLI prints a `SCOPE:` line.
+- **led-generator-v1**: specs come explicitly from config, board names from the spec's
+  `PROJECT_NAME`, and the `specs or (...)` fallback is removed.
+
+`inventory.json` stays byte-identical for LED. Generic pin-asset rule: each pin map declares a
+symbol and a footprint, both must exist in the configured `cad.symbolLibraries`/footprint dirs,
+and symbol pins must equal footprint pads. When CAD is disabled, the check is SKIPPED with a
+line. led-generator-v1 additionally keeps the generator symbol/footprint parity.
+The TypeScript projection accepts `lcsc: ""` for any line and the catalog then omits its
+Orderable ID row; the Python led-generator-v1 provider still enforces a C-number ([#25](https://github.com/Takazudo/zudo-circuit-doc/issues/25)).
+
+**Rejected alternative:** An LCSC-only product limit.
+
+**Consequences / PR-time review target:** The wording of the `SCOPE:` line.
+
+**Owning issues:** [#12](https://github.com/Takazudo/zudo-circuit-doc/issues/12),
+[#17](https://github.com/Takazudo/zudo-circuit-doc/issues/17)
+
+## ADR-011 — Neutral generated-page marker
+
+**Status:** Accepted
+
+**Context:** `isGeneratedContents` recognizes ownership of a generated file only by exact
+marker text, and that text currently embeds `doc/component-docs` and a lamp-specific pnpm
+command. `VIEW_MODEL_VERSION` is pinned to the literal type `1` in the upstream code.
+
+**Decision:** The generated-page marker becomes neutral:
+`# GENERATED by @takazudo/zudo-circuit-doc — do not edit; run \`zudo-circuit-doc generate\``.
+The marker is a pipeline option, and `isGeneratedContents` also accepts the legacy LED marker.
+The LED fixture config sets the legacy marker, so its goldens stay byte-identical.
+`VIEW_MODEL_VERSION` becomes **2** in [#18](https://github.com/Takazudo/zudo-circuit-doc/issues/18),
+before any example or fixture output is committed, so no committed preflight goes stale.
+[#21](https://github.com/Takazudo/zudo-circuit-doc/issues/21) proves the only LED golden
+difference is `viewModelVersion`.
+
+**Rejected alternative:** Normalizing line 2 in golden comparisons, which weakens the check.
+
+**Consequences / PR-time review target:** `fixtures/led/EXPECTED-CHANGES.md`.
+
+**Owning issue:** [#10](https://github.com/Takazudo/zudo-circuit-doc/issues/10)
+
+## ADR-012 — Expected package count as a reviewed publication lock
+
+**Status:** Accepted
+
+**Context:** LED hard-codes "exactly 25 packages" in three places
+(`references.ts:93`, `model-assets.ts:37`, the footprint check/generate gates), none of which
+allow zero — a genuine empty project fails all three.
+
+**Decision:** The expected package count lives in `selection.json` as `expect.packages`, a
+reviewed publication lock, and 0 is allowed. It is a gate only and is never serialized into the
+preflight report; upstream `PreflightReport` never echoes `expect`, so the LED goldens stay
+byte-identical. `cad.enabled` is a capability flag. A selected PCB record while CAD is disabled
+is an explicit error, never a silent skip.
+Declared-zero exception ([#25](https://github.com/Takazudo/zudo-circuit-doc/issues/25)): with
+CAD disabled **and** `expect.packages: 0`, a selected PCB record resolves no package and its page
+visibly states that no footprint or 3D model is published; `expect.packages` undefined or above
+0 keeps the error.
+
+**Rejected alternative:** A separate CAD count field.
+
+**Owning issue:** [#15](https://github.com/Takazudo/zudo-circuit-doc/issues/15)
+
+## ADR-013 — `fixtures/led` layout and STEP materialization
+
+**Status:** Accepted
+
+**Context:** The full LED footprint/STEP corpus is 46 MB of third-party CAD data, and every LED
+generate/check path needs STEP (`references.ts:187`), but committing 46 MB of third-party CAD
+to public history is not reversible the way a materialization script is.
+
+**Decision:** `fixtures/led` is organized as follows: `upstream/` holds the pinned bytes of the
+verified subset (evidence, specs, symbols, 25 footprints, WRLs, previews, goldens), in the LED
+repo-relative layout and hash-locked. The 25 STEP files (46 MB) are not committed —
+`sync-led-fixture.mjs` materializes them from the pinned commit, locally or via codeload with a
+CI cache. `NOTICE.md` states that the content is not MIT-licensed and records third-party CAD
+and extract provenance. Intentional output changes are recorded in `expected/` and
+`EXPECTED-CHANGES.md`. LED-corpus tests live outside the default test globs: `test-led/` runs
+as `pnpm test:led` in the LED CI job, with STEP cached. The validator oracle does not need STEP.
+
+**Rejected alternative:** Vendoring STEP.
+
+**Consequences / PR-time review target:** Whether the STEP policy is acceptable.
+
+**Owning issue:** [#3](https://github.com/Takazudo/zudo-circuit-doc/issues/3)
+
+## ADR-014 — Portability part: TI TMP1075DR
+
+**Status:** Accepted
+
+**Context:** `examples/minimal` needs one real component onboarded end-to-end through the
+generic inventory profile, deliberately not the LCSC-linked path LED always used.
+
+**Decision:** The portability part is Texas Instruments TMP1075DR (SOIC-8), datasheet SBOS854F
+rev F. It uses the KiCad 9.0.9 footprint `Package_SO:SOIC-8_3.9x4.9mm_P1.27mm` (JEDEC MS-012AA)
+and the KiCad 8.0.9 matched STEP+WRL pair (KiCad 9 ships no WRL). Fidelity is family/generic —
+the pads differ from TI's D0008A example land pattern. Supplier: DigiKey `296-51833-1-ND`. LCSC
+`C2878381` exists but is deliberately not used, to exercise the generic profile. The viewer
+stays WRL-only.
+
+**Rejected alternative:** A STEP→WRL converter, which the seed forbids ("no general CAD
+converter").
+
+**Consequences / PR-time review target:** The fidelity receipt.
+
+**Owning issues:** [#25](https://github.com/Takazudo/zudo-circuit-doc/issues/25),
+[#29](https://github.com/Takazudo/zudo-circuit-doc/issues/29)
+
+## ADR-015 — CSS prefix `zld-` → `zcd-`
+
+**Status:** Accepted
+
+**Context:** LED's component-doc CSS uses an 83-use `zld-` (zudo-led-lamp) class prefix
+throughout `global.css` and the UI components. The prefix never appears in generated MDX, only
+in the package's own markup and stylesheet.
+
+**Decision:** The CSS prefix changes from `zld-` to `zcd-` everywhere at once. The package ships
+an unlayered `styles.css`, imported after the zudo-doc CSS. The generated MDX never contains
+class names, so the goldens are unaffected.
+
+**Owning issue:** [#13](https://github.com/Takazudo/zudo-circuit-doc/issues/13)
+
+## ADR-016 — Island seams
+
+**Status:** Accepted
+
+**Context:** LED's islands reach into host `src/` files (a cyclic import that must be extracted
+together), and zudo-doc's own guide is conservative about whether a virtual-module chrome-
+bindings export alone makes islands discoverable — even though `zfb` >=2.18.0's scanner
+resolves plugin virtual modules before probing `node_modules` (measured and proven in a packed
+consumer by the zudo-sg ADR).
+
+**Decision:** Islands have two seams: `@takazudo/zudo-circuit-doc/islands`, a side-effect seed
+module that the host's `pages/lib/_circuit-doc-islands.ts` imports from the docs route, and a
+host `src/chrome-bindings.tsx` shim that spreads `circuitDocMdxExtras`. Hydration is proven in
+the packed consumer and in the browser.
+
+**Rejected alternative:** Relying on virtual-module discovery only; zudo-doc still calls it
+experimental (zudo-doc issue #2718).
+
+**Owning issues:** [#13](https://github.com/Takazudo/zudo-circuit-doc/issues/13),
+[#22](https://github.com/Takazudo/zudo-circuit-doc/issues/22)
+
+## ADR-017 — Browser smoke: dependency-free CDP over system Chrome
+
+**Status:** Accepted
+
+**Context:** LED's browser smoke is a hand-rolled CDP client over Node's global WebSocket,
+driving system Chrome — it has no Playwright dependency anywhere in the repository.
+
+**Decision:** The browser smoke is LED's dependency-free CDP harness driving system Chrome
+(`CHROME_BIN`). It is opt-in, and a missing browser gives exit 4 ("not run").
+
+**Rejected alternative:** Playwright, which adds 30–60 s per CI job.
+
+**Owning issue:** [#27](https://github.com/Takazudo/zudo-circuit-doc/issues/27)
+
+## ADR-018 — Public-scope check
+
+**Status:** Accepted
+
+**Context:** Raw evidence and CAD files must never land under the built site's public directory
+by accident; only generator-owned previews and deliberately-selected publication assets should.
+
+**Decision:** A public-scope check fails on raw evidence/CAD files under `doc/public/`, except
+generator-owned `assets/component-previews/**` and entries in `circuit/publication/assets.json`
+(the deliberate-publication allowlist). `assetViewerExclude` is not treated as "not public".
+
+**Owning issue:** [#19](https://github.com/Takazudo/zudo-circuit-doc/issues/19)
+
+## ADR-019 — Validator online behavior stays explicit and skips VOLATILE-HTML
+
+**Status:** Accepted
+
+**Context:** `--online` currently fails deterministically on this corpus because every
+AVAILABLE VOLATILE-HTML source hits the HASH-LOCKED requirement (see the
+[extraction baseline's findings table](./extraction-baseline.mdx#pre-existing-findings)).
+
+**Decision:** `circuit.config.ts` also declares `validation.pythonMinVersion`, which defaults to
+`3.10`. The validator never runs online during builds; `--online` and `--refresh-source` are
+explicit agent operations. Under `--online`, VOLATILE-HTML sources are SKIPPED with an explicit
+line.
+
+**Owning issue:** [#12](https://github.com/Takazudo/zudo-circuit-doc/issues/12)
+
+## ADR-020 — Generated pages carry a visible notice
+
+**Status:** Accepted
+
+**Context:** A reviewer or agent needs to tell at a glance whether a page is hand-authored or
+generated from evidence records, without checking file diffs.
+
+**Decision:** Generated pages are visually distinct from authored pages through the render
+option `generatedNotice` (default on): a short plain-text notice at the top of each generated
+page ("Generated from the component evidence records — edit the records, not this page"). The
+LED fixture turns it off to keep its goldens byte-identical. Templates set the locale explicitly
+(`defaultLocale: "en"`).
+
+**Rejected alternative:** A new MDX component or CSS-only marker, which would churn the
+allowlist or goldens.
+
+**Owning issue:** [#14](https://github.com/Takazudo/zudo-circuit-doc/issues/14)

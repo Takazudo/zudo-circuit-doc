@@ -1,3 +1,39 @@
-node_modules/
-dist/
+# Build output
+node_modules
+dist
+# @takazudo/zudo-circuit-doc builds to lib/, not dist/ — workaround for
+# https://github.com/Takazudo/zudo-front-builder/issues/3154 (zfb prunes
+# workspace-package dirs named "dist"). Anchored: examples/empty/doc/pages/lib
+# is authored source and must stay tracked.
+packages/circuit-doc/lib/
+.zfb
+.zfb-build/
+.zudo-doc/
+
+# zfb dev/build transient files
+.zfb-esbuild-entry-*.tsx
+.zfb-islands-tsconfig-*.json
+.zfb-virtual-*.mjs
+
+# Validator scratch cache (component evidence source cache)
+.circuit-cache/
+
+# Packed tarballs at the repo root (verify:pack, npm pack output)
+/*.tgz
+
+# Python
+__pycache__/
+
+# macOS
 .DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*

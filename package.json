@@ -1,0 +1,36 @@
+{
+  "name": "zudo-circuit-doc-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.5.2",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "build": "pnpm -r --filter \"./packages/*\" build",
+    "typecheck": "pnpm -r --filter \"./packages/*\" typecheck",
+    "test": "pnpm test:ts && pnpm test:python && pnpm test:scripts",
+    "test:ts": "pnpm -r --filter \"./packages/*\" test",
+    "test:python": "python3 -B -m unittest discover -s packages/circuit-doc/python/tests -p \"test_*.py\"",
+    "test:scripts": "node --experimental-strip-types --test scripts/__tests__/*.test.mjs",
+    "test:scenarios": "node scripts/run-scenarios.mjs",
+    "fixtures:led:check": "node scripts/sync-led-fixture.mjs --check",
+    "fixtures:led:materialize": "node scripts/sync-led-fixture.mjs --materialize-step",
+    "fixtures:led:oracle": "node scripts/run-led-oracle.mjs",
+    "test:led": "node scripts/check-led-fixture.mjs && pnpm --filter @takazudo/zudo-circuit-doc test:led-corpus",
+    "build:led-site": "node scripts/build-fixture-site.mjs --fixture led",
+    "examples:build": "pnpm --filter \"./examples/*\" --workspace-concurrency=1 build",
+    "sync:template": "node scripts/sync-create-template.mjs",
+    "check:template": "node scripts/sync-create-template.mjs --check",
+    "check:upstream-scaffold": "node scripts/check-upstream-scaffold.mjs",
+    "verify:pack": "node scripts/verify-pack.mjs",
+    "doc:build": "pnpm --filter zudo-circuit-doc-site build"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0",
+    "@types/node": "^22.0.0",
+    "@takazudo/zfb": "2.21.0",
+    "create-zudo-doc": "5.27.0"
+  }
+}

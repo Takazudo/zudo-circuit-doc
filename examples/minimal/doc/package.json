@@ -1,0 +1,37 @@
+{
+  "name": "example-minimal-circuit-doc",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "dev": "zudo-circuit-doc generate --config ../circuit.config.ts && run-parallel dev:zfb dev:history dev:circuit",
+    "build": "zfb build",
+    "preview": "zfb preview",
+    "check": "zfb check",
+    "check:links": "node scripts/check-links.js",
+    "dev:zfb": "zfb dev",
+    "dev:zfb:network": "zfb dev --host 0.0.0.0",
+    "dev:network": "run-parallel dev:zfb:network dev:history",
+    "dev:history": "doc-history-server --port 4322 --content-dir src/content/docs",
+    "dev:circuit": "zudo-circuit-doc generate --watch --config ../circuit.config.ts"
+  },
+  "dependencies": {
+    "@takazudo/zfb": "2.21.0",
+    "@takazudo/zfb-runtime": "2.21.0",
+    "@takazudo/zfb-md-wasm": "2.21.0",
+    "@takazudo/zudo-doc": "5.27.0",
+    "@takazudo/zudo-doc-history-server": "5.27.0",
+    "@takazudo/zudo-circuit-doc": "workspace:*",
+    "zod": "^4.3.6",
+    "preact": "^10.29.1",
+    "preact-render-to-string": "^6.6.6",
+    "diff": "^8.0.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0",
+    "@types/node": "^22.0.0"
+  }
+}

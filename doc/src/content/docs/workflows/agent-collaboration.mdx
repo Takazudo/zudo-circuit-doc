@@ -1,0 +1,51 @@
+---
+title: How Claude Code and Codex share one workflow
+description: One canonical WORKFLOW.md and two thin, near-identical entry files, so either agent can pick up work the other started.
+sidebar_position: 2
+---
+
+A generated project supports both Claude Code and Codex out of the box (`--agent both`, the
+initializer's default), without maintaining two workflows.
+
+## One canonical file, two thin pointers
+
+`circuit/WORKFLOW.md` is the entry point every agent follows, regardless of which tool runs it.
+`CLAUDE.md` (Claude Code's convention) and `AGENTS.md` (the emerging cross-tool convention Codex and
+others read) are generated as **thin, near-identical pointers**:
+
+```md
+# Agent instructions
+
+Read [circuit/WORKFLOW.md](circuit/WORKFLOW.md) first. It is the canonical workflow for this
+circuit project; this file only points to it.
+
+- Exact-component evidence lives in the owner bundles under `.claude/skills/component-*/`, indexed
+  by `.claude/skills/component-spec-audit/references/inventory.json`. Cross-component rules live in
+  `.claude/skills/circuit-spec-integration/references/rules.json`.
+- Run `pnpm circuit:check` before editing and again after.
+- Never hand-edit the generated pages under `doc/src/content/docs/components/`; change the evidence
+  and run `pnpm circuit:generate`.
+```
+
+Neither file restates a workflow step, a verdict, a command, or a file-ownership rule — everything
+substantive lives in `WORKFLOW.md` exactly once. `--agent claude`, `--agent codex` or `--agent none`
+write only the file(s) you ask for; `both` is the default because it's the cheaper default, not
+because both tools are assumed to be in use.
+
+## Why this makes continuation possible
+
+Because both entry points converge on the same file, evidence contract and command set, an agent
+picking up a task never has to reconcile "the Claude way" against "the Codex way" — there isn't a
+second way. A task Claude Code starts (a new owner bundle, an updated selection, a regenerated
+preflight report) is durable project state the moment it's committed: sources, facts, coverage and
+the publication lock in `circuit/publication/selection.json`, not anything held in either tool's own
+memory. Codex resuming the same project reads the identical `WORKFLOW.md`, the identical
+`.claude/skills/` evidence, and the identical `pnpm circuit:check` output — including the same
+`SCOPE:` and `SKIP:` lines — that Claude Code would have seen.
+
+This project's acceptance scenario AGENT-01 is defined around exactly that handoff: one agent
+completes a bounded task, and a second, different agent continues from the committed evidence and
+the next-actions handoff alone, with no shared conversation history and no separate, divergent
+database to keep in sync. Whether the v0.1 run of it happened, and what it showed, is recorded in the
+[AGENT-01 summary](../release/agent-01-transcript-summary.mdx) — it is never inferred from the
+structure described above.

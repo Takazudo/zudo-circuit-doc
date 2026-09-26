@@ -1,0 +1,58 @@
+---
+title: "Open questions and next actions"
+description: "A concise handoff of current uncertainties, dependencies, and the next concrete work."
+sidebar_position: 2
+---
+
+This is the continuation point for the project. Keep it short enough that a new session can identify what to do next without rereading the whole archive. The project has just been created: no design work, component research or verification has been done yet.
+
+## Current snapshot
+
+| Field | Entry |
+|---|---|
+| Snapshot date | Not entered |
+| Current project goal | Not entered; see the [project brief](./index.mdx) |
+| Design revision considered current | None exists yet |
+| Latest completed result and its evidence | None |
+| Most consequential remaining uncertainty | What the project is for; the brief is empty |
+| Next result to produce | A filled project brief |
+
+## Open questions
+
+| Question ID | Exact question | Why the answer matters | Evidence needed | Owner or next task |
+|---|---|---|---|---|
+| Not assigned | What should this circuit do, for whom, and under which constraints? | Every later choice depends on it | The owner's description | Next action 1 |
+
+Classify the needed work in plain language: source research, identity resolution, calculation, design choice, asset audit, supplier information, or physical measurement. This makes it clear whether another web lookup can answer the question or a bench test is required.
+
+## Next actions
+
+| Priority | Bounded action | Depends on | Concrete output | Completion condition |
+|---|---|---|---|---|
+| 1 | Fill the project brief from the owner's intent | The owner's description | An updated [project brief](./index.mdx) | Purpose and constraints are entered; unknowns are marked as unknown |
+| 2 | Draft the functional blocks and operating states | Action 1 | An updated [architecture overview](../architecture/overview.mdx) | Blocks are described by responsibility, without unselected part numbers |
+| 3 | Choose the first component question to research | Action 2 | A research page in [Research](../research/index.mdx) and an updated table here | One bounded research question with its criteria |
+
+Prefer actions with a visible result, such as retaining an exact document, mapping one connector, checking a model dimension, or producing one test report. “Investigate everything” gives the next agent no stopping point.
+
+## Blocked work
+
+| Blocked task | Missing prerequisite | Work that can continue meanwhile | Revisit when |
+|---|---|---|---|
+| No task entered | Not entered | Not entered | Not entered |
+
+Record the actual blocker. A failed download, missing hardware, unconfirmed identity, undecided requirement, and unavailable tool are different problems and require different follow-up.
+
+## Recently resolved or reopened
+
+| Question or action | New state | Evidence or decision reference | Pages or records updated |
+|---|---|---|---|
+| No entry | Not entered | Not entered | Not entered |
+
+Move a question here only with its supporting reference. A newer analysis can reopen a previously settled point; preserve both the earlier basis and the reason it no longer closes the question.
+
+## Handoff to the next session
+
+Read the [project brief](./index.mdx) and this page, run `pnpm circuit:check`, then start next action 1. The expected artifact is a filled brief. For a larger delegation, copy the task-request template described in [How we work](./how-we-work.mdx).
+
+When updating this page, remove stale imperative tasks that are already completed, keep historical work in its original decision or verification record, and carry forward only unresolved dependencies.

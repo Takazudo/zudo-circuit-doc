@@ -1,0 +1,5 @@
+{
+  "comment": "LED regression fixture: publication.assets is a config-required allowlist (ADR-018) for hand-picked public assets beyond what generation/models/footprints publish on their own. LED has none.",
+  "schema_version": 1,
+  "assets": []
+}

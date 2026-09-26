@@ -1,0 +1,54 @@
+# Template sync + upstream-scaffold parity gate (#24, ADR-002).
+#
+# Triggered on PRs targeting `main` or any `base/**` branch (epic-PR stacks),
+# and on push to `main`.
+#
+# Jobs:
+#   template — after install and a package build, `pnpm check:template` proves
+#              packages/create-zudo-circuit-doc/templates/default is exactly
+#              what a fresh sync of examples/empty produces (no drift), and
+#              `pnpm check:upstream-scaffold` proves examples/empty/doc still
+#              matches the pinned `create-zudo-doc` scaffold apart from the
+#              documented ADR-015/ADR-016 additions.
+
+name: CI Template
+
+on:
+  pull_request:
+    branches:
+      - main
+      - "base/**"
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ci-template-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  template:
+    name: Template sync + upstream parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Script tests
+        run: node --test scripts/__tests__/sync-create-template.test.mjs scripts/__tests__/check-upstream-scaffold.test.mjs
+
+      - name: check:template — templates/default matches examples/empty
+        run: pnpm check:template
+
+      - name: check:upstream-scaffold — examples/empty/doc matches the pinned create-zudo-doc scaffold
+        run: pnpm check:upstream-scaffold

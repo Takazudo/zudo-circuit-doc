@@ -1,0 +1,36 @@
+{
+  "formatVersion": 1,
+  "renderer": {
+    "image": "kicad/kicad@sha256:e638b79b0321f29395a5b783e94bb9f3c73303e8da15da27b8f5cb4b67a37729",
+    "version": "9.0.9"
+  },
+  "export": {
+    "layers": [
+      "F.Cu",
+      "F.Silkscreen",
+      "F.Fabrication",
+      "F.Courtyard"
+    ],
+    "theme": "KiCad Default",
+    "options": [
+      "--black-and-white"
+    ],
+    "textPolicy": "suppress-all-fp-text-in-temporary-library",
+    "postprocessor": "repository-svg-normalizer-v1"
+  },
+  "canonicalInputSha256": "3d1a48078e4b9735c3223bfce2c4a00aafd6a95d6a8a089ebdab47f6fa4c7bb2",
+  "generatedOutputSha256": "b05819d256695a7d0fc321e25a89a7a8646eb651c83793f68f832e845bc6d3b8",
+  "packages": [
+    {
+      "packageId": "SOIC-8_3.9x4.9mm_P1.27mm",
+      "footprintName": "SOIC-8_3.9x4.9mm_P1.27mm",
+      "footprintPath": "footprints/kicad/example-minimal-circuit-lib.pretty/SOIC-8_3.9x4.9mm_P1.27mm.kicad_mod",
+      "recordIds": [
+        "rec-tmp1075dr"
+      ],
+      "assetPath": "/assets/component-previews/footprints/SOIC-8_3.9x4.9mm_P1.27mm.svg",
+      "canonicalInputSha256": "399dfd8e6507193e2d1d929ad003a75992e009cf9eb809341e0836a47c3a47db",
+      "generatedOutputSha256": "b14137ccd4dae0fbcdfad9ba63ec282f38c40a74cb2ce47a452ca17e9c5aa392"
+    }
+  ]
+}

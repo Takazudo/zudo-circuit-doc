@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "routes": [
+    {
+      "route_id": "route-tmp1075dr",
+      "record_id": "rec-tmp1075dr",
+      "aliases": {
+        "mpn": [
+          "TMP1075DR"
+        ],
+        "lcsc": [],
+        "manufacturer": [
+          "Texas Instruments"
+        ],
+        "function": [
+          "I2C temperature sensor"
+        ]
+      },
+      "positive": [
+        "check TMP1075DR pinout",
+        "Texas Instruments TMP1075DR supply range",
+        "what I2C address does TMP1075DR use with A0 A1 A2 grounded"
+      ],
+      "negative": [
+        "check TMP1075 pinout",
+        "check TMP1075DGKR pinout",
+        "TMP75AIDR address table"
+      ]
+    }
+  ]
+}

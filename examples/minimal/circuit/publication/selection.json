@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "recordIds": [
+    "rec-tmp1075dr"
+  ],
+  "sourceIds": [
+    "src-tmp1075-ds-front",
+    "src-tmp1075-ds-pins",
+    "src-tmp1075-ds-ratings",
+    "src-tmp1075-ds-elec",
+    "src-tmp1075-ds-supply-current",
+    "src-tmp1075-ds-address",
+    "src-tmp1075-ds-config-register",
+    "src-tmp1075-ds-application",
+    "src-tmp1075-ds-supply-layout",
+    "src-tmp1075-ds-addendum",
+    "src-tmp1075-ds-outline",
+    "src-tmp1075-ds-land-pattern"
+  ],
+  "linkableSourceIds": [
+    "src-tmp1075-ds-front"
+  ],
+  "documentSelections": [
+    {
+      "recordId": "rec-tmp1075dr",
+      "sourceId": "src-tmp1075-ds-front",
+      "documentKind": "datasheet"
+    }
+  ],
+  "expect": {
+    "records": 1,
+    "sources": 12,
+    "integrationRules": 0,
+    "packages": 1
+  }
+}

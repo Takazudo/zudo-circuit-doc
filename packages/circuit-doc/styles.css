@@ -1,0 +1,516 @@
+/* @takazudo/zudo-circuit-doc — component-evidence page styles.
+
+   Provenance: Takazudo/zudo-led-lamp @ 194d8a297e3545588197342130c3111a66c10973,
+   doc/src/styles/global.css lines 30-535, verbatim except that the duplicate
+   `.component-references` blocks (upstream 100-102 and 137-139) are merged, the
+   unused `.…evidence-table--facts` selector (upstream 467-470) is dropped, and
+   the upstream LED class prefix is renamed to `zcd-` (ADR-015).
+
+   Unlayered on purpose; it uses only @takazudo/zudo-doc theme tokens (and the
+   zudo-doc safelisted `z-modal` utility). Import it after
+   `@takazudo/zudo-doc/features.css`:
+
+     @import "@takazudo/zudo-circuit-doc/styles.css"; */
+
+/* Generated component pages (doc/component-docs) anchor on evidence IDs rather
+   than heading text, so a reworded heading never breaks an external deep link.
+   The target is an empty inline element; scroll-margin keeps it clear of the
+   sticky header when a fragment URL lands on it. */
+.zcd-evidence-anchor {
+  display: inline;
+  scroll-margin-top: 6rem;
+}
+
+/* One fact remains a normal Markdown block. The inset separates adjacent
+   claims without compressing the class heading or gloss above the first fact. */
+.zcd-evidence-fact {
+  display: flow-root;
+  min-width: 0;
+  padding-inline-start: var(--spacing-hsp-sm);
+  border-inline-start: 2px solid var(--color-muted);
+}
+
+.zcd-evidence-fact > :where(* + *) {
+  margin-block-start: var(--spacing-vsp-2xs);
+}
+
+/* Pin-assignment tables are reference data a reader looks up rather than reads,
+   so they ship inside a native <details>. It opens with no JavaScript, and the
+   rows sit in the generated HTML and in llms-full.txt whether it is open or
+   closed. Only content that carries no claim is ever wrapped this way. */
+.zcd-evidence-details > summary {
+  cursor: pointer;
+  /* The default line box is right at the 24px minimum target size (WCAG 2.5.8);
+     this puts it clear of it without changing the rhythm noticeably. */
+  padding-block: 0.25rem;
+}
+
+.zcd-evidence-details > summary:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* ── Generated component pages: dense-table scrolling ─────────────────────
+   A fact keeps its value, unit, conditions, verdict, provenance and citation
+   as separate columns because they are separate claims, so these tables stay
+   wide at every viewport. The table scrolls inside this container; the page
+   body never scrolls sideways. */
+.zcd-evidence-table {
+  overflow-x: auto;
+  /* A sideways flick inside the table must not chain out to the page or to the
+     browser's back gesture. */
+  overscroll-behavior-x: contain;
+}
+
+/* The package's markdown <table> renderer already wraps every table in its own
+   `overflow-x-auto` div. Nested scroll boxes would put the scrollbar on the
+   inner one — the one that has no tab stop — so the inner box is flattened and
+   this element is the single scroll container. Written as `> div` so that if
+   the package ever stops wrapping, the rule simply matches nothing. */
+.zcd-evidence-table > div {
+  overflow: visible;
+}
+
+/* The container is focusable (see ui/evidence-table.tsx) precisely so it can be
+   scrolled from the keyboard, which means it needs a focus ring. currentColor
+   rather than an accent token: it is legible in both colour schemes by
+   construction, and it carries no status meaning. */
+.zcd-evidence-table:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Component package model. The MDX binding owns its markup so these rules are
+   limited to layout/state relationships that cannot live on one element. */
+.zcd-component-references {
+  container-type: inline-size;
+  margin-block: var(--spacing-vsp-lg);
+}
+
+.zcd-component-references__card-heading {
+  margin-block: 0;
+}
+
+.zcd-component-references__document {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(12rem, 0.8fr);
+  align-items: start;
+  gap: var(--spacing-vsp-xs) var(--spacing-hsp-lg);
+  min-width: 0;
+  padding: var(--spacing-hsp-lg);
+  border: 1px solid var(--color-muted);
+  background: var(--color-surface);
+}
+
+.zcd-component-references__previews {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-vsp-sm);
+  margin-top: var(--spacing-vsp-sm);
+}
+
+.zcd-component-references__preview {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  align-content: start;
+  gap: var(--spacing-vsp-xs);
+  min-width: 0;
+  padding: var(--spacing-hsp-lg);
+  border: 1px solid var(--color-muted);
+  background: var(--color-surface);
+}
+
+@container (max-width: 38rem) {
+  .zcd-component-references__document,
+  .zcd-component-references__previews {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.zcd-component-references__document-label,
+.zcd-component-references__document-title,
+.zcd-component-references__footprint,
+.zcd-component-references__metadata {
+  margin: 0;
+}
+
+.zcd-component-references__document-label {
+  color: var(--color-fg);
+  font-weight: 600;
+}
+
+.zcd-component-references__document-title {
+  overflow-wrap: anywhere;
+}
+
+.zcd-component-references__metadata {
+  display: grid;
+  gap: var(--spacing-vsp-xs);
+  color: var(--color-muted);
+  font-size: var(--text-caption);
+}
+
+.zcd-component-references__metadata > div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--spacing-hsp-xs);
+}
+
+.zcd-component-references__metadata dt {
+  font-weight: 600;
+}
+
+.zcd-component-references__metadata dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.zcd-component-references__footprint {
+  display: grid;
+  gap: var(--spacing-vsp-xs);
+}
+
+.zcd-component-references__footprint-frame,
+.zcd-model-viewer__viewport-frame {
+  position: relative;
+  min-width: 0;
+}
+
+.zcd-component-references__footprint-frame > a {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 12rem;
+  aspect-ratio: 16 / 9;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid var(--color-muted);
+  background: color-mix(in oklch, white 92%, var(--color-surface));
+}
+
+.zcd-component-references__footprint-frame > a:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.zcd-component-references__footprint img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.zcd-component-references__footprint figcaption {
+  color: var(--color-muted);
+  font-size: var(--text-caption);
+  overflow-wrap: anywhere;
+}
+
+.zcd-component-references__model-card .zcd-model-viewer {
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.zcd-model-viewer {
+  display: grid;
+  gap: var(--spacing-vsp-xs);
+  padding: var(--spacing-hsp-lg);
+  border: 1px solid var(--color-muted);
+  background: var(--color-surface);
+}
+
+.zcd-model-viewer__caption {
+  color: var(--color-fg);
+}
+
+.zcd-model-viewer__viewport {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 12rem;
+  overflow: hidden;
+  border: 1px solid var(--color-muted);
+  background: color-mix(in oklch, var(--color-bg) 82%, var(--color-fg));
+  touch-action: none;
+}
+
+.zcd-preview-enlarge-button {
+  position: absolute;
+  top: var(--spacing-image-overlay-inset);
+  right: var(--spacing-image-overlay-inset);
+  z-index: var(--z-index-local-1);
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: var(--spacing-image-overlay-inset);
+  border: 1px solid color-mix(in oklch, var(--color-image-overlay-fg) 35%, transparent);
+  background: color-mix(in oklch, var(--color-image-overlay-bg) 82%, transparent);
+  color: var(--color-image-overlay-fg);
+  cursor: pointer;
+  transition: opacity var(--default-transition-duration), border-color var(--default-transition-duration);
+}
+
+.zcd-preview-enlarge-button > svg {
+  width: var(--spacing-icon-sm);
+  height: var(--spacing-icon-sm);
+}
+
+.zcd-preview-enlarge-button:focus-visible,
+.zcd-preview-dialog__close:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .zcd-preview-enlarge-button:hover,
+  .zcd-preview-dialog__close:hover {
+    opacity: 0.8;
+  }
+}
+
+.zcd-component-references__footprint[data-footprint-preview-state="no-js"] .zcd-preview-enlarge-button,
+.zcd-model-viewer:not([data-viewer-state="ready"]) .zcd-preview-enlarge-button {
+  display: none;
+}
+
+.zcd-model-viewer__viewport:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.zcd-model-viewer__viewport > canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.zcd-model-viewer__status,
+.zcd-model-viewer__notice {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--text-caption);
+}
+
+.zcd-model-viewer[data-viewer-state="no-js"] .zcd-model-viewer__viewport,
+.zcd-model-viewer[data-viewer-state="error"] .zcd-model-viewer__viewport,
+.zcd-model-viewer[data-viewer-state="unavailable"] .zcd-model-viewer__viewport {
+  display: none;
+}
+
+.zcd-preview-dialog {
+  width: min(90rem, calc(100vw - 2rem));
+  height: min(64rem, calc(100vh - 2rem));
+  height: min(64rem, calc(100dvh - 2rem));
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  box-sizing: border-box;
+  padding: var(--spacing-vsp-sm);
+  overflow: hidden;
+  border: 1px solid var(--color-muted);
+  background: var(--color-surface);
+  color: var(--color-fg);
+}
+
+html:has(.zcd-preview-dialog:modal) {
+  overflow: hidden;
+}
+
+.zcd-preview-dialog::backdrop {
+  background: color-mix(in oklch, var(--color-overlay) 80%, transparent);
+}
+
+.zcd-preview-dialog__close {
+  position: fixed;
+  top: max(0.5rem, env(safe-area-inset-top));
+  right: max(0.5rem, env(safe-area-inset-right));
+  z-index: var(--z-index-local-2);
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: var(--spacing-image-overlay-inset);
+  border: 1px solid color-mix(in oklch, var(--color-image-overlay-fg) 35%, transparent);
+  background: color-mix(in oklch, var(--color-image-overlay-bg) 82%, transparent);
+  color: var(--color-image-overlay-fg);
+  cursor: pointer;
+  transition: opacity var(--default-transition-duration), border-color var(--default-transition-duration);
+}
+
+.zcd-preview-dialog__close-icon {
+  width: var(--spacing-icon-lg);
+  height: var(--spacing-icon-lg);
+}
+
+.zcd-preview-dialog__content {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.zcd-preview-dialog--footprint .zcd-preview-dialog__content {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in oklch, white 92%, var(--color-surface));
+}
+
+.zcd-preview-dialog--footprint .zcd-preview-dialog__content > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.zcd-preview-dialog__media-fallback {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid var(--color-muted);
+  border-radius: 50%;
+}
+
+.zcd-preview-dialog--model .zcd-preview-dialog__content {
+  place-items: stretch;
+  overflow: hidden;
+}
+
+.zcd-preview-dialog--model .zcd-model-viewer {
+  grid-template-rows: minmax(0, 1fr);
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.zcd-preview-dialog--model .zcd-model-viewer__status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.zcd-preview-dialog--model .zcd-model-viewer__viewport-frame,
+.zcd-preview-dialog--model .zcd-model-viewer__viewport {
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: auto;
+}
+
+.zcd-preview-dialog--model .zcd-model-viewer[data-viewer-state="error"] .zcd-model-viewer__viewport-frame::after,
+.zcd-preview-dialog--model .zcd-model-viewer[data-viewer-state="unavailable"] .zcd-model-viewer__viewport-frame::after {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 2rem;
+  height: 2rem;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border: 2px solid var(--color-muted);
+  border-radius: 50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zcd-model-viewer *,
+  .zcd-model-viewer *::before,
+  .zcd-model-viewer *::after,
+  .zcd-preview-enlarge-button,
+  .zcd-preview-dialog__close {
+    scroll-behavior: auto;
+    transition-duration: 0.01ms;
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+  }
+}
+
+/* Without a min-width a `width: 100%` table never overflows its container — it
+   crushes its columns instead, which at 375px turns every cell into a column of
+   single letters. These widths are what makes the container actually scroll. */
+.zcd-evidence-table table {
+  min-width: 30rem;
+}
+
+/* The seven-column tables: catalog index (part, record, function, fit,
+   identity, sources, open domains) and the fact tables. 46rem is about the
+   widest content column the site produces, so these fill the column on a
+   desktop and scroll below it rather than scrolling everywhere. */
+.zcd-evidence-table--parts-index table {
+  min-width: 46rem;
+}
+
+/* The integration page's tables. They were shipping in the package's plain
+   `overflow-x-auto` wrapper, which scrolls by pointer but carries no tab stop —
+   so at 375px the 5-column rules index (433px of content in a 327px column)
+   could not be scrolled from the keyboard at all, while the record pages could.
+   Narrower than the seven-column tables because they are narrower: the rules
+   index is 5 columns and the other two are 3. */
+.zcd-evidence-table--rules-index table {
+  min-width: 40rem;
+}
+
+.zcd-evidence-table--evidence-chain table {
+  min-width: 36rem;
+}
+
+.zcd-evidence-table--calculation-results table {
+  min-width: 30rem;
+}
+
+/* ── Generated component pages: long identifiers ──────────────────────────
+   `.zcd-evidence-anchor` is emitted only by doc/component-docs, so it is an
+   exact marker for a generated evidence page and scopes these rules to one.
+
+   Sources publish their URL verbatim as their own link text, and a retained
+   datasheet URL in this corpus runs to ~145 characters with no space in it.
+   Left alone it pushes the whole page into horizontal scroll on a phone.
+   `anywhere` rather than `break-word` because the URL also has to stop
+   inflating the min-content width of the column it sits in. Nothing is
+   injected into the string — no <wbr>, no U+200B — so what a reader copies is
+   still byte-for-byte the recorded URL. */
+/* Headings are in this list, `h1` included, because both the page title and the
+   section headings are evidence strings published verbatim.
+
+   `h1` is the MPN. A part number with no hyphen is a single unbreakable token:
+   `STUSB4500QTR` measured 425px against a 327px column at 375px wide, and
+   `CC0603KRX7R9BB104` 614px. 42 of the 64 record URLs overflowed on the title
+   alone. The ones that passed did so by accident of naming — `AL8860MP-13` has
+   hyphens, which Chrome treats as break opportunities.
+
+   `h2`/`h3` are coverage domains, several of them slash-joined:
+   `unpowered/reset/startup/normal/fault/disconnect behavior` is also one token,
+   because Chrome does not break at `/`.
+
+   Without this the whole PAGE BODY scrolls sideways, which is the one thing the
+   narrow-viewport acceptance criterion forbids. Verified in a browser at 375px. */
+.zd-content:has(.zcd-evidence-anchor) :where(p, li, td, th, h1, h2, h3, h4, h5, h6) {
+  overflow-wrap: break-word;
+}
+
+.zd-content:has(.zcd-evidence-anchor) :where(a, code) {
+  overflow-wrap: anywhere;
+}
+
+/* A wrapped fact ID still renders as one box per line — `clone` repeats the
+   decoration per fragment, it cannot merge fragments, and no CSS property can.
+   What it buys is that every fragment is fully formed: with the default
+   `slice`, the padding and border-radius are applied once across the whole
+   inline box, so the middle fragments of `fact-al8860-vin-absolute-max` come
+   out visually cut off at both ends. `clone` gives each fragment its own
+   padding and rounding, so the chips read as parts of one identifier rather
+   than as damaged boxes. Confirmed in a browser at 375px. */
+.zd-content:has(.zcd-evidence-anchor) code {
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}

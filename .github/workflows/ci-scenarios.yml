@@ -1,0 +1,55 @@
+# Acceptance-scenario traceability gate (#32, `pnpm test:scenarios`).
+#
+# `scripts/run-scenarios.mjs` does not reimplement any check: it re-runs
+# `pnpm test:ts` / `pnpm test:python` (already covered by ci-core.yml /
+# ci-python.yml) plus two integration-only scripts that had no other CI
+# coverage before this workflow — `scripts/check-cad-freshness.mjs` (CAD-03's
+# integration leg) and `scripts/scenarios/change-01.mjs` (CHANGE-01) — and
+# prints the scenario traceability table. The packed-consumer tier
+# (--with-pack) is intentionally NOT run here: it just re-drives
+# `pnpm verify:pack` / `pnpm test:led`, which already run as their own
+# dedicated, heavier workflows (ci-verify-pack.yml, ci-led-fixture.yml,
+# ci-led-corpus.yml).
+#
+# Triggered on PRs targeting `main` or any `base/**` branch (epic-PR stacks),
+# and on push to `main`.
+
+name: CI Scenarios
+
+on:
+  pull_request:
+    branches:
+      - main
+      - "base/**"
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ci-scenarios-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  scenarios:
+    name: Scenario Traceability
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Run acceptance scenarios
+        run: pnpm test:scenarios

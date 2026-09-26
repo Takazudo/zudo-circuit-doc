@@ -1,0 +1,15 @@
+# Pinned LED regression fixture: third-party CAD/evidence bytes, not our code.
+fixtures/** linguist-vendored
+# Hash-locked upstream bytes — no EOL conversion, so bytes stay hash-exact.
+fixtures/led/upstream/** -text
+
+# CAD binary/text formats: suppress line-oriented diffs.
+*.step -diff
+*.stp -diff
+*.wrl -diff
+*.kicad_mod -diff
+*.kicad_sym -diff
+fixtures/**/*.svg -diff
+
+# Cross-session handoff resources (see _temp-resource/README.md) — documentation, not source.
+_temp-resource/** linguist-documentation

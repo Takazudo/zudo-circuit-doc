@@ -1,0 +1,8 @@
+{
+  "minimumOwnedCanaries": 100,
+  "minimumOwnedFiles": 60,
+  "minimumSiteCanaries": 266,
+  "minimumSiteFiles": 185,
+  "expectedWithheld": 3,
+  "positiveControlRecord": "al8860mp-13"
+}

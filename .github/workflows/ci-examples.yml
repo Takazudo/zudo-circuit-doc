@@ -1,0 +1,120 @@
+# examples/* build gate.
+#
+# Triggered on PRs targeting `main` or any `base/**` branch (epic-PR stacks),
+# and on push to `main`.
+#
+# Jobs:
+#   empty — authored-content + negative-path checks, pnpm build (packages) ->
+#           pnpm --filter example-empty-circuit build/check/check:site, then a
+#           drift gate proving the committed generated output
+#           (docs.generatedContent, circuit/generated/preflight.json) is
+#           exactly what a fresh generate produces.
+#           `fetch-depth: 0` so zudo-doc's docHistory feature has real git
+#           history to read during the build.
+#           check-authored-content runs BEFORE any build: zudo-doc's own
+#           claudeResources feature writes a generated (gitignored) mirror
+#           under doc/src/content/docs/claude*/ during build/check/dev, and
+#           that generated tree must never be scanned as authored content.
+#   minimal — the same gate for examples/minimal (one exact component, TI
+#           TMP1075DR, generic inventory profile): authored content, pnpm build
+#           (packages) -> pnpm --filter example-minimal-circuit build/check/
+#           check:site, then the drift gate. Fully offline: the datasheet is
+#           never re-fetched; the evidence carries its recorded hash.
+
+name: CI Examples
+
+on:
+  pull_request:
+    branches:
+      - main
+      - "base/**"
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ci-examples-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  empty:
+    name: examples/empty
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Check authored content (examples/empty)
+        run: node scripts/check-authored-content.mjs examples/empty
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Negative-path checks (examples/empty)
+        run: node scripts/check-example-negatives.mjs examples/empty
+
+      - name: Build examples/empty
+        run: pnpm --filter example-empty-circuit build
+
+      - name: Check examples/empty
+        run: pnpm --filter example-empty-circuit check
+
+      - name: Check built site
+        run: pnpm --filter example-empty-circuit check:site
+
+      - name: Drift gate — committed generated output matches a fresh generate
+        run: |
+          git add --intent-to-add -A examples/empty
+          git diff --exit-code examples/empty
+
+  minimal:
+    name: examples/minimal
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Check authored content (examples/minimal)
+        run: node scripts/check-authored-content.mjs examples/minimal
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Build examples/minimal
+        run: pnpm --filter example-minimal-circuit build
+
+      - name: Check examples/minimal
+        run: pnpm --filter example-minimal-circuit check
+
+      - name: Check built site
+        run: pnpm --filter example-minimal-circuit check:site
+
+      - name: Drift gate — committed generated output matches a fresh generate
+        run: |
+          git add --intent-to-add -A examples/minimal
+          git diff --exit-code examples/minimal
