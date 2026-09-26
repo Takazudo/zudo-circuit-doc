@@ -1,7 +1,7 @@
 /** Deterministic publication of the manifest-selected, validated WRL models. */
 
 import { copyFile, lstat, mkdir, readdir, readFile } from "node:fs/promises";
-import { basename, extname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { basename, extname, join, resolve } from "node:path";
 
 import type { ValidationOutcome } from "../../core/adapter.ts";
 import { assertNotSymlink, assertPathNotSymlinked } from "../../core/emit.ts";
@@ -9,7 +9,7 @@ import { fail } from "../../core/errors.ts";
 import { byCodeUnit } from "../../core/ids.ts";
 import type { PublicationPolicy } from "../../core/publication.ts";
 import { readEvidenceIndex, type EvidenceIndexOptions } from "./index.ts";
-import { assertSafePreviewAssetName } from "./references.ts";
+import { assertPathWithinBase, assertSafePreviewAssetName } from "./references.ts";
 
 export type ModelAssetPlanEntry = {
   readonly name: string;
@@ -174,19 +174,14 @@ export async function syncModelAssets(
 function containedRepositoryFile(root: string, path: string): string {
   const base = resolve(root);
   const target = resolve(base, path);
-  const rel = relative(base, target);
-  if (rel === "" || rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel)) {
-    fail("PATH_CONTAINMENT", "selected model escapes its path base", { path });
-  }
+  assertPathWithinBase(base, target, "PATH_CONTAINMENT", "selected model escapes its path base", { path });
   return target;
 }
 
 function containedPublicTarget(outputRoot: string, name: string): string {
-  const target = resolve(outputRoot, name);
-  const rel = relative(resolve(outputRoot), target);
-  if (rel === "" || rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel)) {
-    fail("PATH_CONTAINMENT", "published model escapes its output root", { name });
-  }
+  const base = resolve(outputRoot);
+  const target = resolve(base, name);
+  assertPathWithinBase(base, target, "PATH_CONTAINMENT", "published model escapes its output root", { name });
   return target;
 }
 
