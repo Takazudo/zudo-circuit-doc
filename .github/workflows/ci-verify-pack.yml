@@ -1,15 +1,21 @@
-# Pack-and-install verifier gate (#28, M5 acceptance).
+# Pack-and-install verifier gate (#28 M5 acceptance; #31 extends it to real,
+# populated fixtures).
 #
 # Triggered on PRs targeting `main` or any `base/**` branch (epic-PR stacks),
 # and on push to `main`.
 #
-# Jobs:
-#   empty — builds and packs both packages, then scaffolds, installs and
-#           builds a consumer project OUTSIDE this checkout (a fresh mkdtemp
-#           directory, no workspace link back to this repo) from the tarballs
-#           alone. `pnpm verify:pack` drives the whole flow; see
-#           scripts/verify-pack.mjs for the scenario list.
-#           `--fixture empty` is the default (#31 adds minimal and led).
+# One job, matrixed over `fixture: [empty, minimal, led]`. Every leg builds
+# and packs both packages, then proves the packed tarballs work from a
+# consumer OUTSIDE this checkout (a fresh mkdtemp directory, no workspace
+# link back to this repo): `pnpm verify:pack --fixture <fixture>` drives the
+# whole flow — see scripts/verify-pack.mjs for the per-fixture scenario list.
+#   empty   — the generic template's scaffold-and-install proof (#28).
+#   minimal — examples/minimal (one CAD-enabled record: TMP1075DR footprint
+#             SVG + WRL model) overlaid onto a tarball-installed consumer,
+#             plus the Docker-missing case and check-browser.
+#   led     — the 35-record LED corpus via scripts/lib/fixture-site.mjs in
+#             tarball mode (#23), plus check-browser; needs the pinned STEP
+#             files, cached the same way as ci-browser.yml/ci-led-fixture.yml.
 
 name: CI Verify Pack
 
@@ -30,10 +36,14 @@ permissions:
   contents: read
 
 jobs:
-  empty:
-    name: verify:pack (examples/empty template)
+  verify-pack:
+    name: verify:pack (${{ matrix.fixture }})
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        fixture: [empty, minimal, led]
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
@@ -46,5 +56,32 @@ jobs:
         with:
           python-version: "3.12"
 
+      # Only the `led` leg's fixture site build touches the LED corpus (35
+      # records, 25 STEP files). Keyed on the pinned zudo-led-lamp commit
+      # (fixtures/led/README.md), same cache key as
+      # ci-browser.yml/ci-led-fixture.yml.
+      - name: Cache LED STEP files
+        if: matrix.fixture == 'led'
+        id: step-cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: fixtures/led/upstream/footprints/kicad/zudo-led-lamp.3dshapes/*.step
+          key: led-step-194d8a297e3545588197342130c3111a66c10973
+
+      - name: Materialize STEP (cache miss)
+        if: matrix.fixture == 'led' && steps.step-cache.outputs.cache-hit != 'true'
+        run: pnpm fixtures:led:materialize
+
       - name: Pack-and-install verifier
-        run: pnpm verify:pack
+        id: verify-pack
+        run: |
+          set -o pipefail
+          pnpm verify:pack --fixture ${{ matrix.fixture }} 2>&1 | tee "${{ runner.temp }}/verify-pack-${{ matrix.fixture }}.log"
+
+      - name: Upload verify:pack log
+        if: failure() && steps.verify-pack.outcome == 'failure'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: verify-pack-${{ matrix.fixture }}-log
+          path: ${{ runner.temp }}/verify-pack-${{ matrix.fixture }}.log
+          retention-days: 7
