@@ -35,6 +35,9 @@ async function run(context: CommandContext): Promise<number> {
     await writeReport(project, result.report);
 
     io.stdout.write(`${summarize(result.report)}\n`);
+    if (!project.config.cad.enabled && project.selection.expect.packages === 0 && project.selection.recordIds.length > 0) {
+      io.stdout.write("references      no footprint or 3D model is published: cad disabled (expect.packages = 0)\n");
+    }
     const emitted = result.emitted;
     if (emitted !== null) {
       io.stdout.write(

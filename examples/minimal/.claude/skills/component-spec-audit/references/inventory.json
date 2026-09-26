@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "generator_specs": [],
+  "assertions": {
+    "orderable_lines": 1,
+    "fitted_lines": 1,
+    "dnp_or_hand_fit_lines": 0
+  },
+  "exclusions": [],
+  "lines": [
+    {
+      "line_id": "line-tmp1075dr",
+      "mpn": "TMP1075DR",
+      "manufacturer": "Texas Instruments",
+      "lcsc": "",
+      "package": "SOIC-8",
+      "dnp": false,
+      "owner_skill": "component-ti-tmp1075dr",
+      "identity_state": "VERIFIED",
+      "source_state": "AVAILABLE",
+      "function": "I2C temperature sensor",
+      "suppliers": [
+        {
+          "supplier": "DigiKey",
+          "order_code": "296-51833-1-ND"
+        }
+      ],
+      "placements": [
+        {
+          "board": "sensor-breakout",
+          "refdes": "U1"
+        }
+      ]
+    }
+  ]
+}

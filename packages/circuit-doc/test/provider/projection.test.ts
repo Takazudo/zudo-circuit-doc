@@ -520,3 +520,48 @@ describe("repeated projection is byte-stable", () => {
     assert.equal(JSON.stringify(project().model), JSON.stringify(project().model));
   });
 });
+
+describe("PCB record without a published package (ADR-012 declared zero)", () => {
+  function projectWithout(options: { declared: boolean; lcsc?: string }): PublicViewModel {
+    const inventory = fixtureInventory();
+    const lines = inventory.lines.map((line) =>
+      line.line_id === "line-driver" && options.lcsc !== undefined ? { ...line, lcsc: options.lcsc } : line,
+    );
+    const index = withFixtureReferences(rawIndexEvidence({ ...inventory, lines }, [fixtureBundle()], fixtureIntegrationRules()));
+    const references = index.references;
+    assert.ok(references);
+    const packageByRecordId = new Map(references.packageByRecordId);
+    packageByRecordId.delete("rec-driver");
+    const withoutDriver = {
+      ...index,
+      references: {
+        ...references,
+        packageByRecordId,
+        unpublishedPackageRecordIds: new Set(options.declared ? ["rec-driver"] : []),
+      },
+    };
+    return projectIndex(withoutDriver, new PublicationPolicy(FIXTURE_MATRIX, FIXTURE_SELECTION));
+  }
+
+  it("projects a declared-unpublished PCB record as mounting pcb with no footprint", () => {
+    const driver = recordOf(projectWithout({ declared: true }), "driver");
+    assert.equal(driver.reference.mounting, "pcb");
+    assert.equal(driver.reference.footprint, null);
+    assert.equal(recordOf(projectWithout({ declared: true }), "sense").reference.footprint === null, false);
+  });
+
+  it("still refuses a PCB record whose package is missing without the declared-zero lock", () => {
+    assert.throws(
+      () => projectWithout({ declared: false }),
+      (error: unknown) =>
+        error instanceof ComponentDocsError &&
+        error.code === "ADAPTER_CONTRACT" &&
+        /no complete reference descriptor/u.test(error.message),
+    );
+  });
+
+  it("accepts an empty LCSC ID for a generic-profile line (ADR-010)", () => {
+    const driver = recordOf(projectWithout({ declared: true, lcsc: "" }), "driver");
+    assert.equal(String(driver.identity.lcsc), "");
+  });
+});

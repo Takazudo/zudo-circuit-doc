@@ -88,6 +88,7 @@ const ONE_RECORD_MODEL: PublicViewModel = {
           availability: t("AVAILABLE"),
           documentKind: "datasheet",
         },
+        mounting: "pcb",
         footprint: {
           packageId: t(PACKAGE_ID),
           footprintName: t(PACKAGE_ID),
@@ -445,6 +446,83 @@ describe("zero records is a valid state", () => {
       checkBuiltReferences({ distRoot, model: ZERO_RECORD_MODEL }),
       "PUBLICATION_POLICY",
       /must not create or reference live preview UI/u,
+    );
+  });
+});
+
+describe("a record without a published package (external, or CAD off with expect.packages 0)", () => {
+  function packagelessModel(mounting: "pcb" | "external"): PublicViewModel {
+    const [record] = ONE_RECORD_MODEL.records;
+    assert.ok(record);
+    return {
+      ...ONE_RECORD_MODEL,
+      records: [{ ...record, reference: { ...record.reference, mounting, footprint: null } }],
+      packagePreviews: [],
+    };
+  }
+
+  const PCB_TEXT = "No footprint or 3D model is published for this record: CAD is not enabled for this project.";
+
+  function packagelessHtml(statement: string, extra = ""): string {
+    return [
+      "<!doctype html><html><body>",
+      `<a class="x" href=https://example.invalid/reference.pdf>Datasheet PDF</a>`,
+      `<p>${statement}</p>`,
+      extra,
+      `<div class="zcd-evidence-table">facts</div>`,
+      "</body></html>",
+    ].join("\n");
+  }
+
+  async function scaffoldPackageless(name: string, recordHtml: string): Promise<string> {
+    const distRoot = join(scratch, name);
+    const recordDir = join(distRoot, "docs/components/records", SLUG);
+    await mkdir(recordDir, { recursive: true });
+    await writeFile(join(recordDir, "index.html"), recordHtml);
+    await mkdir(join(distRoot, "docs/components/catalog"), { recursive: true });
+    await writeFile(join(distRoot, "docs/components/catalog/index.html"), "<html><body>Catalog</body></html>");
+    return distRoot;
+  }
+
+  it("passes a PCB record that states CAD is not enabled and links its document", async () => {
+    const distRoot = await scaffoldPackageless("packageless-pcb", packagelessHtml(PCB_TEXT));
+    const report = await checkBuiltReferences({ distRoot, model: packagelessModel("pcb") });
+    assert.deepEqual(report, { records: 1, footprints: 0, models: 0 });
+  });
+
+  it("fails a PCB record that uses the external-part wording instead", async () => {
+    const distRoot = await scaffoldPackageless(
+      "packageless-pcb-wrong-text",
+      packagelessHtml("External panel-mounted component, hand-wired to the PCB. No PCB footprint or package model applies. Consult the manufacturer drawing for panel cutout and terminal orientation."),
+    );
+    await rejectsWith(
+      checkBuiltReferences({ distRoot, model: packagelessModel("pcb") }),
+      "PUBLICATION_POLICY",
+      /must state why no footprint or 3D model is published/u,
+    );
+  });
+
+  it("fails when the selected document link is missing", async () => {
+    const distRoot = await scaffoldPackageless(
+      "packageless-no-link",
+      `<html><body><p>${PCB_TEXT}</p></body></html>`,
+    );
+    await rejectsWith(
+      checkBuiltReferences({ distRoot, model: packagelessModel("pcb") }),
+      "PUBLICATION_POLICY",
+      /must link its selected document/u,
+    );
+  });
+
+  it("fails when a preview asset is referenced anyway", async () => {
+    const distRoot = await scaffoldPackageless(
+      "packageless-asset",
+      packagelessHtml(PCB_TEXT, `<img src="/assets/component-previews/footprints/${PACKAGE_ID}.svg">`),
+    );
+    await rejectsWith(
+      checkBuiltReferences({ distRoot, model: packagelessModel("pcb") }),
+      "PUBLICATION_POLICY",
+      /references a preview asset/u,
     );
   });
 });

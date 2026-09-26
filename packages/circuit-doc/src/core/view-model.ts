@@ -253,6 +253,14 @@ export type PublicFootprintReference = {
 
 export type PublicRecordReference = {
   readonly document: PublicDocumentReference;
+  /**
+   * Structural discriminator for rendering `footprint: null`: an `external`
+   * part has no PCB footprint at all, a `pcb` part may simply have no package
+   * published (CAD disabled with `expect.packages: 0`, ADR-012). Not a
+   * publication-matrix leaf: it selects fixed renderer text and carries no
+   * evidence value of its own.
+   */
+  readonly mounting: "pcb" | "external";
   readonly footprint: PublicFootprintReference | null;
 };
 

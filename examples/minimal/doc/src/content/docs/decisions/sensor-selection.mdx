@@ -1,0 +1,67 @@
+---
+title: "Sensor selection: TMP1075DR"
+description: "Decision record adopting Texas Instruments TMP1075DR as the breakout's temperature sensor, with alternatives, conditions and reopen triggers."
+sidebar_position: 10
+---
+
+## Record
+
+| Field | Entry |
+|---|---|
+| Decision ID | D-01 |
+| Topic | Temperature sensor for the example breakout |
+| State | Accepted |
+| Decision date | 2026-09-26 |
+| Decision maker | zudo-circuit-doc maintainers (example project) |
+| Applicable project revision | Architecture overview as of 2026-09-26; no schematic yet |
+| Replaces or is replaced by | Nothing |
+
+"Accepted" is the state of this decision. It is not a claim that the hardware has been built or verified.
+
+## Context
+
+The [project brief](../project/index.mdx) asks for an I²C temperature sensor that runs from the host's `3V3` rail, in a hand-solderable leaded package. The comparison is in [temperature sensor candidates](../research/tmp1075-candidate.mdx).
+
+## Alternatives considered
+
+| Alternative | Why it could work | Decisive tradeoff | Evidence still needed | Disposition |
+|---|---|---|---|---|
+| Texas Instruments TMP75AIDR | LM75-class sensor in SOIC | Shared TMP175/TMP75 datasheet with a pin-table text defect on SCL | None pursued | Not selected |
+| Texas Instruments TMP117 | Higher accuracy | Leadless package, against the hand-soldering preference | Its datasheet was not retrieved | Not selected |
+| Texas Instruments TMP102 | Small and low power | Very small SOT package, against the hand-soldering preference | Its datasheet was not retrieved | Not selected |
+
+"Not selected" reflects this example's criteria only.
+
+## Decision
+
+Adopt **Texas Instruments TMP1075DR** (SOIC-8, TI package D, tape and reel) as `U1` on the board `sensor-breakout`, with A0, A1 and A2 tied to GND. Exact record: [rec-tmp1075dr](/docs/components/records/tmp1075dr/); inventory line `line-tmp1075dr`, owner bundle `component-ti-tmp1075dr`.
+
+The inventory line uses the generic (manual) profile with an empty LCSC field on purpose; see the project README. DigiKey order code `296-51833-1-ND` (cut tape) is recorded as display-only supplier metadata.
+
+## Reasoning
+
+The TMP1075 has its own datasheet (SBOS854F), an LM75-compatible pinout and register set, and a supply range that covers the host rail (`fact-tmp1075-vplus-min`, `fact-tmp1075-vplus-max`). Its guaranteed accuracy (`fact-tmp1075-accuracy-d-40-110`) is enough for a bench evaluation board. The strongest reason to choose otherwise would be an accuracy requirement tighter than that guarantee.
+
+## Consequences and follow-up
+
+| Consequence | Required update or verification | Owner or next-action reference |
+|---|---|---|
+| The footprint must match the SOIC (D) package | Acquire CAD and compare with `fact-tmp1075-ti-land-pattern` | [Next action 1](../project/next-actions.mdx) |
+| A bypass capacitor and bus pullups are needed | Select exact parts against `fact-tmp1075-bypass-recommended` and `fact-tmp1075-pullup-recommended` | [Next action 2](../project/next-actions.mdx) |
+| Installed accuracy is unknown | Bench comparison with a reference thermometer | [Next action 3](../project/next-actions.mdx) |
+
+## What could reopen this decision
+
+- A tighter accuracy requirement than `fact-tmp1075-accuracy-d-40-110`.
+- The TMP1075DR orderable status changing from Active in a later addendum (`fact-tmp1075-orderable` is dated 17-Sep-2026).
+- A host whose logic rail falls outside the recommended supply range.
+- A regenerated datasheet whose re-verified locators contradict a fact used here.
+
+## Implementation and verification references
+
+| Item | Reference and present state |
+|---|---|
+| Intended change | `U1` on `sensor-breakout` |
+| Implemented revision | None; no schematic or PCB yet |
+| Evidence refresh | SBOS854F retrieved 2026-09-26, hash recorded in the owner bundle |
+| Verification report | None |

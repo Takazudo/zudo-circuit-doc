@@ -214,6 +214,7 @@ function referenceFor(recordId: string): PublicRecordReference {
       availability: t("AVAILABLE"),
       documentKind: "datasheet",
     },
+    mounting: "pcb",
     footprint: {
       packageId: t(packageId),
       footprintName: t(packageId),

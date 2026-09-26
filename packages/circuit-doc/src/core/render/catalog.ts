@@ -202,7 +202,7 @@ function entry(record: PublicRecord, options: RenderOptions): RootContent[] {
     metadataRow("Kind", kindValue(record)),
     metadataRow("Manufacturer", [text(identity.manufacturer)]),
     metadataRow("Function", [text(identity.function)]),
-    metadataRow("Orderable ID", [code(identity.lcsc)]),
+    ...(identity.lcsc ? [metadataRow("Orderable ID", [code(identity.lcsc)])] : []),
     metadataRow("Package", [code(identity.packageName)]),
     metadataRow("Inventory line", [code(identity.lineId)]),
     // Several records are routed by LCSC code rather than part number, so the

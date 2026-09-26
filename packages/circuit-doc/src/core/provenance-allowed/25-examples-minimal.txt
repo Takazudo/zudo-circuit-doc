@@ -1,0 +1,4 @@
+# #25 (examples/minimal): PCB record without a published package renders neutral text (ADR-012 declared zero); catalog omits an empty Orderable ID (ADR-010)
+view-model.ts
+render/record.ts
+render/catalog.ts

@@ -221,6 +221,8 @@ default.
 symbol and a footprint, both must exist in the configured `cad.symbolLibraries`/footprint dirs,
 and symbol pins must equal footprint pads. When CAD is disabled, the check is SKIPPED with a
 line. led-generator-v1 additionally keeps the generator symbol/footprint parity.
+The TypeScript projection accepts `lcsc: ""` for any line and the catalog then omits its
+Orderable ID row; the Python led-generator-v1 provider still enforces a C-number ([#25](https://github.com/Takazudo/zudo-circuit-doc/issues/25)).
 
 **Rejected alternative:** An LCSC-only product limit.
 
@@ -265,6 +267,10 @@ reviewed publication lock, and 0 is allowed. It is a gate only and is never seri
 preflight report; upstream `PreflightReport` never echoes `expect`, so the LED goldens stay
 byte-identical. `cad.enabled` is a capability flag. A selected PCB record while CAD is disabled
 is an explicit error, never a silent skip.
+Declared-zero exception ([#25](https://github.com/Takazudo/zudo-circuit-doc/issues/25)): with
+CAD disabled **and** `expect.packages: 0`, a selected PCB record resolves no package and its page
+visibly states that no footprint or 3D model is published; `expect.packages` undefined or above
+0 keeps the error.
 
 **Rejected alternative:** A separate CAD count field.
 
