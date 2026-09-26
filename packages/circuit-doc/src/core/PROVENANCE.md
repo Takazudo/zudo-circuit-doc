@@ -96,3 +96,9 @@ check can refuse a provider that still emits the v1 shape.
 published package as neutral "CAD is not enabled" text instead of an error
 (ADR-012's declared-zero exception), and stopped the catalog from showing an
 empty Orderable ID cell.
+
+The v0.1 pre-merge review (`provenance-allowed/review-hardening.txt`:
+`url.ts`) denies `https:host/x` and `https:/host/x` as `NOT_ABSOLUTE`, since a
+browser resolves those against the current page. The same review made the
+`emit.ts`/`page.ts` generated-marker and drift comparison tolerate CRLF
+checkouts; those files were already allowed by #10.
