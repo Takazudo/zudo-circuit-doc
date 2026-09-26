@@ -7,7 +7,8 @@
 //
 // Adapted from zudo-sg's scripts/verify-create-zudo-sg.mjs +
 // verify-styleguide-install.mjs @ b9b36ce35d98d6abc641d84e8535552eac0dbded
-// (see _temp-resource/1-circuit-doc-seed/planning/explore/sg-pattern.md).
+// (see the epic #1 planning note planning/explore/sg-pattern.md, removed from the
+// tree in #34 and kept in git history).
 // Generic run/pack/extract/dev-boot primitives live in scripts/lib/verify-helpers.mjs;
 // everything below is circuit-doc-specific.
 //

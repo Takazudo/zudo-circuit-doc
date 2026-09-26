@@ -4,7 +4,8 @@
  * built-output reference checker (`built-references.ts`) run against.
  *
  * Everything LED hard-coded into `scan-artifacts.ts` (upstream, see
- * `_temp-resource/1-circuit-doc-seed/planning/explore/led-engine.md` EU8) lives
+ * the epic #1 planning note `planning/explore/led-engine.md` EU8, removed from
+ * the tree in #34 and kept in git history) lives
  * here instead, as either a config override (`ScanPolicyConfig`, `scan` in
  * `circuit.config.ts`) or a value derived from the resolved config and
  * `core/site.ts`. A project supplies nothing and gets a generic, proportional

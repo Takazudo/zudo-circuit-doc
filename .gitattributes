@@ -11,5 +11,5 @@ fixtures/led/upstream/** -text
 *.kicad_sym -diff
 fixtures/**/*.svg -diff
 
-# Planning resources handed off for this epic — documentation, not source.
+# Cross-session handoff resources (see _temp-resource/README.md) — documentation, not source.
 _temp-resource/** linguist-documentation

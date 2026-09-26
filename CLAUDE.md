@@ -11,7 +11,7 @@ packages/
 examples/                    fixture hosts consumed by CI (empty, minimal)
 fixtures/led/                pinned zudo-led-lamp regression corpus (not a workspace member)
 doc/                         this project's own zudo-doc documentation site
-_temp-resource/               planning-only resources for the current epic (see below)
+_temp-resource/               cross-session handoff resources for in-flight work (see below)
 ```
 
 ## File ownership ("Owns")
@@ -45,7 +45,7 @@ Exit 75 means machine contention — retry later, it is not a test failure.
 
 ## `_temp-resource/`
 
-`_temp-resource/1-circuit-doc-seed/` holds the research seed and planning artifacts for the current epic (issues #1–#34). It is planning-only, excluded from lint/format/test globs, and deleted by the epic's last sub-issue (#34) before the root PR merges. Do not treat it as part of the shipped product.
+Committed scratch resources handed from one session to a later one (see `_temp-resource/README.md`): one `<issue-number>-<topic>/` subdirectory per topic, deleted when that work merges. It is excluded from lint/format/test globs and is never part of the shipped product. The v0.1 epic's planning seed (`1-circuit-doc-seed/`) was removed in #34; its durable knowledge lives in `doc/` and the rest in git history.
 
 ## Version family (ADR-003)
 

@@ -1,7 +1,8 @@
 /**
  * The built-output reference checker (port of upstream
  * `check-built-component-references.mjs`; see
- * `_temp-resource/1-circuit-doc-seed/planning/explore/led-ui-cad.md` U7).
+ * the epic #1 planning note `planning/explore/led-ui-cad.md` U7, removed from
+ * the tree in #34 and kept in git history).
  *
  * Every structural assertion the upstream script made about a record page
  * (exactly one "Component references" section, rendered before the evidence
