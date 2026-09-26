@@ -1,0 +1,82 @@
+{
+  "receipt_version": 1,
+  "identity": {
+    "asset_id": "kicad-tmp1075d-symbol",
+    "record_id": "rec-tmp1075dr",
+    "manufacturer": "Texas Instruments",
+    "mpn": "TMP1075DR",
+    "package": "SOIC-8 (TI package D, drawing D0008A, JEDEC MS-012 variation AA)",
+    "variant_notes": "Symbol TMP1075D for the SOIC (D) package pinout; the same symbol library also defines TMP1075DGK and TMP1075DSG, which are not used."
+  },
+  "acquisition": {
+    "provider": "KiCad official symbol library (gitlab.com/kicad/libraries/kicad-symbols)",
+    "library_release_tag": "9.0.9 (commit ad36cd14bcd1b1cd0484f629ccdd3481366f74f3)",
+    "source_url": "https://gitlab.com/kicad/libraries/kicad-symbols/-/raw/9.0.9/Sensor_Temperature.kicad_sym",
+    "acquired_on": "2026-09-26",
+    "original_filenames": [
+      "Sensor_Temperature.kicad_sym"
+    ],
+    "sha256": {
+      "Sensor_Temperature.kicad_sym": "a3bac5e8944de2e5ec229346de616e4459699ee755a812b976a20ba84a71f48f",
+      "Sensor_Temperature.kicad_sym#symbol TMP1075D (lines 15932-16157, as merged)": "53713a26457a07417c9ec4a2b60d1f97472508d9d1d5b244c11b17aafddd7dee"
+    },
+    "bytes": {
+      "Sensor_Temperature.kicad_sym": 356197
+    }
+  },
+  "representation": {
+    "files": [
+      "symbols/example-minimal-circuit-lib.kicad_sym"
+    ],
+    "formats": [
+      "KiCad symbol library (.kicad_sym), format version 20241209"
+    ],
+    "units": "mil grid as authored by KiCad (symbol geometry only; no physical dimensions)",
+    "original_paths": [
+      "not retained in the repository: the source library is 356197 bytes of unrelated symbols; the URL, tag and hash above identify it"
+    ]
+  },
+  "fidelity": {
+    "class": "family",
+    "reason": "A community-maintained KiCad library symbol, not published by TI. Its pin numbers and names match SBOS854F Table 5-1 for the D package.",
+    "evidence": [
+      "src-tmp1075-ds-pins (SBOS854F physical page index 3, Table 5-1): 1 SDA, 2 SCL, 3 ALERT, 4 GND, 5 A2, 6 A1, 7 A0, 8 V+"
+    ]
+  },
+  "derivation": {
+    "derived": false,
+    "input_sha256": {},
+    "tool": null,
+    "tool_version": null,
+    "parameters": {
+      "merge": "only the TMP1075D symbol block was copied, verbatim, under the upstream library header (version 20241209, generator kicad_symbol_editor, generator_version 9.0)"
+    },
+    "output_sha256": {
+      "symbols/example-minimal-circuit-lib.kicad_sym": "7b21fbbebb583bd2f692e71a133913ab942a809ab7aa3264b758ff48cd197ba4"
+    }
+  },
+  "cad_use": {
+    "symbol": "example-minimal-circuit-lib:TMP1075D",
+    "footprint": "example-minimal-circuit-lib:SOIC-8_3.9x4.9mm_P1.27mm (chosen explicitly; the symbol's default Footprint property Package_SO:SO-8_3.9x4.9mm_P1.27mm is not used)",
+    "model_path": null,
+    "transform": {
+      "offset": null,
+      "rotation": null,
+      "scale": null
+    },
+    "seating_plane": null
+  },
+  "checks": {
+    "performed": [
+      "Pins: SDA 1 (bidirectional), SCL 2 (input), ALERT 3 (open_collector), GND 4 (power_in), A2 5, A1 6, A0 7 (input), V+ 8 (power_in); matches Table 5-1",
+      "Default Footprint property is Package_SO:SO-8_3.9x4.9mm_P1.27mm, an NXP PCF8523-derived pattern (pads 1.75 x 0.6 mm at x = +/-2.575 mm); the project uses SOIC-8_3.9x4.9mm_P1.27mm instead so that footprint and 3D model come from one JEDEC MS-012AA package family (fact-tmp1075-footprint-choice). The symbol's ki_fp_filters 'SO*3.9x4.9mm*P1.27mm*' accepts both",
+      "Pin map: pnpm circuit:check compares pin-map.json symbol pins 1-8 with this symbol (pin-asset check performed, PASS on 2026-09-26)"
+    ],
+    "remaining_physical_checks": []
+  },
+  "publication": {
+    "preview_selected": false,
+    "download_published": false,
+    "permitted_scope": "CC-BY-SA 4.0 with the KiCad library exception; see NOTICE.md."
+  }
+}

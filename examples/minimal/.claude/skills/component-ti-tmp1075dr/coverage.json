@@ -147,10 +147,26 @@
       "coverage_id": "cov-tmp1075-cad-assets",
       "record_id": "rec-tmp1075dr",
       "domain": "cad-assets",
-      "status": "OPEN",
-      "reason": "No symbol, footprint or 3D model has been acquired and CAD is disabled in circuit.config.ts, so the pin-asset check does not run yet. Workflow D is the next step.",
-      "fact_ids": [],
+      "status": "COVERED",
+      "reason": "KiCad symbol TMP1075D (kicad-symbols 9.0.9), footprint SOIC-8_3.9x4.9mm_P1.27mm (kicad-footprints 9.0.9) and STEP+WRL model pair (kicad-packages3D 8.0.9) acquired with receipts under circuit/cad-receipts/; fidelity family (generic JEDEC MS-012AA), not TI CAD. The pin-asset check is performed. Physical fit stays open in cad-physical-fit.",
+      "fact_ids": [
+        "fact-tmp1075-footprint-choice",
+        "fact-tmp1075-model-fidelity"
+      ],
       "blocking_fact_ids": []
+    },
+    {
+      "coverage_id": "cov-tmp1075-cad-physical-fit",
+      "record_id": "rec-tmp1075dr",
+      "domain": "cad-physical-fit",
+      "status": "OPEN",
+      "reason": "Seating, solder fillet and clearance on the generic land pattern need an assembly or bench check (fact-tmp1075-cad-physical-fit is NEEDS BENCH).",
+      "fact_ids": [
+        "fact-tmp1075-cad-physical-fit"
+      ],
+      "blocking_fact_ids": [
+        "fact-tmp1075-cad-physical-fit"
+      ]
     }
   ]
 }

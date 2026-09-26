@@ -33,15 +33,15 @@ This record in the catalog: [TMP1075DR](/docs/components/catalog/#rec-tmp1075dr)
 
 **Source state:** AVAILABLE
 
-**Coverage:** 2 open of 10 published
+**Coverage:** 2 open of 11 published
 
 ## Documents and package
 
 <EvidenceAnchor id="component-references-heading" />
 
-<EvidenceAnchor id="component-references" />
+<ComponentReferences descriptor="7b2276657273696f6e223a312c22646f63756d656e74223a7b226c6162656c223a2244617461736865657420504446222c227469746c65223a22544d50313037352054656d70657261747572652053656e736f7220576974682049324320616e6420534d42757320496e7465726661636520696e20496e647573747279205374616e64617264204c4d373520466f726d20466163746f7220616e642050696e6f7574222c22617574686f72697479223a224d414e5546414354555245525f5052494d415259222c22617661696c6162696c697479223a22415641494c41424c45222c2275726c223a2268747470733a2f2f7777772e74692e636f6d2f6c69742f64732f73796d6c696e6b2f746d70313037352e706466227d2c22666f6f747072696e74223a7b226e616d65223a22534f49432d385f332e3978342e396d6d5f50312e32376d6d222c22617373657455726c223a222f6173736574732f636f6d706f6e656e742d70726576696577732f666f6f747072696e74732f534f49432d385f332e3978342e396d6d5f50312e32376d6d2e737667227d2c226d6f64656c44657363726970746f72223a22376232323736363537323733363936663665323233613331326332323730363136333662363136373635343936343232336132323533346634393433326433383566333332653339373833343265333936643664356635303331326533323337366436643232326332323730363136333662363136373635346336313632363536633232336132323533346634393433326433383566333332653339373833343265333936643664356635303331326533323337366436643232326332323664366636343635366335353732366332323361323232663631373337333635373437333266363336663664373036663665363536653734326437303732363537363639363537373733326636643666363436353663373332663533346634393433326433383566333332653339373833343265333936643664356635303331326533323337366436643265373737323663323232633232366636363636373336353734323233613762323237383232336133303263323237393232336133303263323237613232336133303764326332323732366637343631373436393666366532323361376232323738323233613330326332323739323233613330326332323761323233613330376432633232373336333631366336353232336137623232373832323361333132633232373932323361333132633232376132323361333137643764227d" />
 
-[Datasheet PDF](https://www.ti.com/lit/ds/symlink/tmp1075.pdf) — TMP1075 Temperature Sensor With I2C and SMBus Interface in Industry Standard LM75 Form Factor and Pinout
+**Selected document:** [Datasheet PDF](https://www.ti.com/lit/ds/symlink/tmp1075.pdf) — TMP1075 Temperature Sensor With I2C and SMBus Interface in Industry Standard LM75 Form Factor and Pinout
 
 **Selected source ID:** `src-tmp1075-ds-front`
 
@@ -49,7 +49,9 @@ This record in the catalog: [TMP1075DR](/docs/components/catalog/#rec-tmp1075dr)
 
 **Availability:** AVAILABLE
 
-No footprint or 3D model is published for this record: CAD is not enabled for this project.
+**Package footprint:** `SOIC-8_3.9x4.9mm_P1.27mm`
+
+This geometry represents a shared footprint package and may not exactly match the manufacturer part.
 
 ## Placements
 
@@ -220,13 +222,30 @@ Coverage is stated one domain at a time and is never rolled up. A domain marked 
 
 <EvidenceAnchor id="cov-tmp1075-cad-assets" />
 
-**Coverage ID:** `cov-tmp1075-cad-assets` · **Status:** OPEN
+**Coverage ID:** `cov-tmp1075-cad-assets` · **Status:** COVERED
 
-**Reason:** No symbol, footprint or 3D model has been acquired and CAD is disabled in circuit.config.ts, so the pin-asset check does not run yet. Workflow D is the next step.
+**Reason:** KiCad symbol TMP1075D (kicad-symbols 9.0.9), footprint SOIC-8\_3.9x4.9mm\_P1.27mm (kicad-footprints 9.0.9) and STEP+WRL model pair (kicad-packages3D 8.0.9) acquired with receipts under circuit/cad-receipts/; fidelity family (generic JEDEC MS-012AA), not TI CAD. The pin-asset check is performed. Physical fit stays open in cad-physical-fit.
 
-**Facts in this domain:** none are recorded against it.
+**Facts in this domain:**
 
-**Blocked by:** no blocking fact is recorded. What is missing has not been reduced to a specific recorded fact, so the reason above is the whole of what is known.
+- [`fact-tmp1075-footprint-choice`](#fact-tmp1075-footprint-choice)
+- [`fact-tmp1075-model-fidelity`](#fact-tmp1075-model-fidelity)
+
+### cad-physical-fit
+
+<EvidenceAnchor id="cov-tmp1075-cad-physical-fit" />
+
+**Coverage ID:** `cov-tmp1075-cad-physical-fit` · **Status:** OPEN
+
+**Reason:** Seating, solder fillet and clearance on the generic land pattern need an assembly or bench check (fact-tmp1075-cad-physical-fit is NEEDS BENCH).
+
+**Facts in this domain:**
+
+- [`fact-tmp1075-cad-physical-fit`](#fact-tmp1075-cad-physical-fit)
+
+**Blocked by:** these facts must be resolved before the domain can close. Each is listed in full under Facts.
+
+- [`fact-tmp1075-cad-physical-fit`](#fact-tmp1075-cad-physical-fit)
 
 ## Facts
 
@@ -942,6 +961,48 @@ A value this project recorded about how the part is used here — a chosen opera
   **Evidence:** [src-tmp1075-ds-supply-layout: Section 8.3 Power Supply Recommendations, self-heating recommendation list](#src-tmp1075-ds-supply-layout)
 </EvidenceFact>
 
+<EvidenceFact>
+  <EvidenceAnchor id="fact-tmp1075-footprint-choice" />
+
+  **Fact:** `fact-tmp1075-footprint-choice`
+
+  **Value:** KiCad library footprint Package\_SO:SOIC-8\_3.9x4.9mm\_P1.27mm (kicad-footprints tag 9.0.9): generic JEDEC MS-012AA land pattern, 8 pads 1.95 x 0.6 mm at x = +/-2.475 mm (pad span 4.95 mm center-to-center), 1.27 mm pitch; fidelity family, not TI CAD · **Unit:** `NONE`
+
+  **Conditions:** project choice of a generic IPC/JEDEC land pattern; it differs from TI's D0008A example land pattern (1.55 x 0.6 mm pads, 5.4 mm row span), and the KiCad TMP1075D symbol's default Package\_SO:SO-8\_3.9x4.9mm\_P1.27mm (an NXP PCF8523-derived pattern) is deliberately not used; receipt circuit/cad-receipts/kicad-soic8-footprint.receipt.json
+
+  **Verdict:** NOT APPLICABLE · **Provenance:** PROJECT-CHOICE
+
+  **Evidence:** [src-tmp1075-ds-land-pattern: Mechanical drawing figure D0008A EXAMPLE BOARD LAYOUT 4214825/C, LAND PATTERN EXAMPLE, compared with footprints/kicad/SOIC-8\_3.9x4.9mm\_P1.27mm.kicad\_mod pads 1-8](#src-tmp1075-ds-land-pattern)
+</EvidenceFact>
+
+<EvidenceFact>
+  <EvidenceAnchor id="fact-tmp1075-model-fidelity" />
+
+  **Fact:** `fact-tmp1075-model-fidelity`
+
+  **Value:** KiCad 3D model pair Package\_SO.3dshapes/SOIC-8\_3.9x4.9mm\_P1.27mm.step + .wrl (kicad-packages3D tag 8.0.9): generic JEDEC MS-012AA package model, fidelity family, not TI CAD; WRL extents converted from 0.1-inch units: lead-tip span 6.00 mm, body 3.90 x 4.90 mm, top 1.75 mm above the seating plane · **Unit:** `NONE`
+
+  **Conditions:** a visual reference only; the extents fall inside the D0008A lead span 5.80-6.19 mm, body 3.81-3.98 x 4.81-5.00 mm and 1.75 mm maximum height, but a rendered model is not dimensional proof; receipt circuit/cad-receipts/kicad-soic8-model.receipt.json
+
+  **Verdict:** NOT APPLICABLE · **Provenance:** PROJECT-CHOICE
+
+  **Evidence:** [src-tmp1075-ds-outline: Mechanical drawing figure D0008A PACKAGE OUTLINE 4214825/C, compared with footprints/kicad/example-minimal-circuit-lib.3dshapes/SOIC-8\_3.9x4.9mm\_P1.27mm.wrl coordinate extents](#src-tmp1075-ds-outline)
+</EvidenceFact>
+
+<EvidenceFact>
+  <EvidenceAnchor id="fact-tmp1075-cad-physical-fit" />
+
+  **Fact:** `fact-tmp1075-cad-physical-fit`
+
+  **Value:** Physical seating, solder fillet and clearance of TMP1075DR on the generic SOIC-8 land pattern · **Unit:** `NONE`
+
+  **Conditions:** no board has been assembled; the footprint, model and preview cannot establish seating, solder joint quality or mechanical clearance
+
+  **Verdict:** NEEDS BENCH · **Provenance:** UNVERIFIED
+
+  **Evidence:** [src-tmp1075-ds-land-pattern: Mechanical drawing figure D0008A EXAMPLE BOARD LAYOUT 4214825/C, notes 6-7](#src-tmp1075-ds-land-pattern)
+</EvidenceFact>
+
 ## Pin maps
 
 The mapping between schematic pins and PCB pads, or physical terminals for an external part, as recorded. A record may carry more than one map when the same part is documented in more than one context.
@@ -1239,10 +1300,11 @@ What the recorded terms on this page mean, in ordinary words. The exact terms ab
 
 ### Provenance
 
-| Recorded term  | What it means                                             |
-| -------------- | --------------------------------------------------------- |
-| `PRIMARY-SPEC` | Taken from the manufacturer's own specification document. |
-| `UNVERIFIED`   | Recorded, but not yet backed by an accepted source.       |
+| Recorded term    | What it means                                             |
+| ---------------- | --------------------------------------------------------- |
+| `PRIMARY-SPEC`   | Taken from the manufacturer's own specification document. |
+| `PROJECT-CHOICE` | A decision made by this project. No vendor asserts it.    |
+| `UNVERIFIED`     | Recorded, but not yet backed by an accepted source.       |
 
 ### Fact class
 

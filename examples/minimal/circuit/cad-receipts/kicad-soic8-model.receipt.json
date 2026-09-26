@@ -1,0 +1,110 @@
+{
+  "receipt_version": 1,
+  "identity": {
+    "asset_id": "kicad-soic8-model",
+    "record_id": "rec-tmp1075dr",
+    "manufacturer": "Texas Instruments",
+    "mpn": "TMP1075DR",
+    "package": "SOIC-8 (TI package D, drawing D0008A, JEDEC MS-012 variation AA)",
+    "variant_notes": "Generic SOIC-8 3D model pair from the official KiCad library (kicad StepUp export, 2017), not TI CAD."
+  },
+  "acquisition": {
+    "provider": "KiCad official 3D model library (gitlab.com/kicad/libraries/kicad-packages3D)",
+    "library_release_tag": "8.0.9 (commit fdd65b7b79d120b3c36b83c125297af7b4522f4f)",
+    "source_url": "https://gitlab.com/kicad/libraries/kicad-packages3D/-/tree/8.0.9/Package_SO.3dshapes",
+    "source_urls": {
+      "Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step": "https://gitlab.com/kicad/libraries/kicad-packages3D/-/raw/8.0.9/Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step",
+      "Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.wrl": "https://gitlab.com/kicad/libraries/kicad-packages3D/-/raw/8.0.9/Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.wrl"
+    },
+    "acquired_on": "2026-09-26",
+    "original_filenames": [
+      "Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step",
+      "Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.wrl"
+    ],
+    "sha256": {
+      "Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step": "d9b46f6dd6cf8c5e2028838eed38e2a6a7f26235856078511e5a71a594ca809e",
+      "Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.wrl": "2b84645ac35f878381da69ebf467feab9e5f054922c809c1b28a1586dd4e462d"
+    },
+    "bytes": {
+      "Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step": 253807,
+      "Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.wrl": 77404
+    },
+    "tag_choice": "The KiCad 9 3D library ships STEP only (no WRL at 9.0.9), and the web viewer renders WRL only. 8.0.9 is the latest tag with a matched STEP+WRL pair from one export. The 9.0.9 STEP is a different, regenerated file and is not paired with the 8.0.9 WRL."
+  },
+  "representation": {
+    "files": [
+      "footprints/kicad/example-minimal-circuit-lib.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step",
+      "footprints/kicad/example-minimal-circuit-lib.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.wrl"
+    ],
+    "formats": [
+      "STEP (ISO-10303-21)",
+      "VRML 2.0 (WRL)"
+    ],
+    "units": "STEP: millimetre (SI_UNIT .MILLI. .METRE.); WRL: 0.1 inch per unit (KiCad VRML convention, 1 unit = 2.54 mm)",
+    "original_paths": [
+      "footprints/kicad/example-minimal-circuit-lib.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step (unmodified)",
+      "footprints/vendor/kicad-soic8/SOIC-8_3.9x4.9mm_P1.27mm.wrl"
+    ]
+  },
+  "fidelity": {
+    "class": "family",
+    "reason": "A generic JEDEC MS-012AA SOIC-8 body produced by kicad StepUp, not a TI model of TMP1075DR. Its extents fall inside the D0008A outline, which shows it represents the package family; it does not prove the exact part.",
+    "evidence": [
+      "WRL/STEP header: 'Copyright (C) 2017, kicad StepUp'",
+      "WRL extents recomputed on 2026-09-26 from every point list (156 shapes, 1856 points), converted at 2.54 mm per unit: overall x -3.000..+3.000 mm, y -2.451..+2.451 mm, z 0.000..1.750 mm",
+      "per material: PIN-01 (leads) x +/-3.000, y +/-2.111, z 0.000..1.026 mm; IC-BODY-EPOXY-04 x +/-1.951, y +/-2.451, z 0.099..1.750 mm; IC-LABEL-01 (pin-1 dot) x -1.410..-0.810, y +1.311..+1.910, z 1.699..1.750 mm",
+      "src-tmp1075-ds-outline (SBOS854F physical page index 38, D0008A 4214825/C): lead-tip span 5.80-6.19 mm, body 4.81-5.00 x 3.81-3.98 mm, height 1.75 mm max, standoff 0.11-0.25 mm (.004-.010 in)"
+    ]
+  },
+  "derivation": {
+    "derived": true,
+    "input_sha256": {
+      "footprints/vendor/kicad-soic8/SOIC-8_3.9x4.9mm_P1.27mm.wrl": "2b84645ac35f878381da69ebf467feab9e5f054922c809c1b28a1586dd4e462d"
+    },
+    "tool": "footprints/vendor/kicad-soic8/derive.mjs",
+    "tool_version": "repository script, run with Node.js v24.13.1",
+    "parameters": {
+      "transformation": "inline each 'material USE <name>' with the body of its 'material DEF <name> Material { ... }' (3 materials, 156 references); the publication policy refuses VRML USE",
+      "geometry": "unchanged: every point and coordIndex list is byte-identical to the original",
+      "step": "not derived; the STEP is the unmodified 8.0.9 file"
+    },
+    "output_sha256": {
+      "footprints/kicad/example-minimal-circuit-lib.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.wrl": "cdc8e3df568dd4b2662a639d00976281aa155b336b831323faa9e63a0a62dc99",
+      "footprints/kicad/example-minimal-circuit-lib.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step": "d9b46f6dd6cf8c5e2028838eed38e2a6a7f26235856078511e5a71a594ca809e"
+    }
+  },
+  "cad_use": {
+    "symbol": null,
+    "footprint": "example-minimal-circuit-lib:SOIC-8_3.9x4.9mm_P1.27mm",
+    "model_path": "${KIPRJMOD}/../../footprints/kicad/example-minimal-circuit-lib.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.wrl",
+    "transform": {
+      "offset": "xyz 0 0 0",
+      "rotation": "xyz 0 0 0",
+      "scale": "xyz 1 1 1"
+    },
+    "seating_plane": "z = 0: the lead bottoms (PIN-01 minimum z) sit on the footprint plane; the body underside is at z = 0.099 mm"
+  },
+  "checks": {
+    "performed": [
+      "Units: WRL bbox converted from 0.1-inch units (x +/-1.181, y +/-0.965, z 0..0.689 units) to mm; STEP declares millimetres",
+      "Lead-tip span 6.000 mm: inside D0008A 5.80-6.19 mm",
+      "Body 3.902 x 4.902 mm: inside D0008A 3.81-3.98 x 4.81-5.00 mm",
+      "Height 1.750 mm above the seating plane: equal to the D0008A 1.75 mm maximum",
+      "Standoff: body underside at 0.099 mm, just below the D0008A 0.11 mm minimum standoff; a cosmetic difference of a generic model, recorded rather than corrected",
+      "Axis and orientation: long body axis along y as in the footprint; the pin-1 label dot lies in the -x / +VRML-y quadrant, which is KiCad's -x / -y quadrant of footprint pad 1",
+      "Transform: identity offset, rotation and scale, the same transform the kicad-footprints 8.0.9 footprint applied to this WRL",
+      "Pair: STEP and WRL come from the same tag and the same StepUp export"
+    ],
+    "remaining_physical_checks": [
+      "Physical seating on the land pattern: open, needs an assembly or bench check (fact-tmp1075-cad-physical-fit, NEEDS BENCH)",
+      "Solder fillet and joint quality: open, needs an assembly check",
+      "Mechanical clearance to neighbouring parts and the enclosure: open, no board or enclosure exists yet",
+      "The STEP body has not been compared with a TI mechanical model: TI publishes none in this record's evidence"
+    ]
+  },
+  "publication": {
+    "preview_selected": true,
+    "download_published": false,
+    "permitted_scope": "CC-BY-SA 4.0 with the KiCad library exception (LICENSE.md of the library at the pinned tag); redistribution of the libraries as a collection is not covered by the exception. See NOTICE.md."
+  }
+}
