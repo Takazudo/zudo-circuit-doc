@@ -262,50 +262,55 @@ import { zudoDoc } from "@takazudo/zudo-doc/config";
 // and a \`headerNav\` trimmed to the sections this fixture actually authors
 // (see that file's own header comment for the constraints that carry over
 // unchanged — no \`circuit.config.ts\` import, no \`node:*\` imports).
-export default defineConfig(
-  zudoDoc({
-    siteName: ${JSON.stringify(siteName)},
-    base: "/",
-    defaultLocale: "en",
-    themePacks: ["default"],
-    llmsTxt: true,
-    cjkFriendly: true,
-    dynamicPageTransition: true,
-    docHistory: true,
-    docHistoryExclude: ["components", "components/**"],
-    assetViewer: true,
-    strictContentBridge: true,
-    claudeResources: { claudeDir: "../.claude", scanRoot: ".." },
-    defaultLocaleOnlyPrefixes: [
-      "/docs/components/",
-      "/docs/claude/",
-      "/docs/claude-md/",
-      "/docs/claude-skills/",
-      "/docs/claude-agents/",
-      "/docs/claude-commands/",
-    ],
-    chromeBindingsModule: "./src/chrome-bindings.tsx",
-    headerNav: [
-      {
-        label: "Components",
-        path: "/docs/components",
-        categoryMatch: "components",
-        children: [
-          { label: "Catalog & Records", path: "/docs/components", categoryMatch: "components" },
-          { label: "Raw agent resources", path: "/docs/claude", categoryMatch: "claude", versioned: false },
-        ],
-      },
-    ],
-    headerRightItems: [
-      { type: "component", component: "theme-toggle" },
-      { type: "component", component: "search" },
-    ],
-    footer: {
-      links: [],
-      copyright: "Built with zudo-circuit-doc on zudo-doc.",
+const site = zudoDoc({
+  siteName: ${JSON.stringify(siteName)},
+  base: "/",
+  defaultLocale: "en",
+  themePacks: ["default"],
+  llmsTxt: true,
+  cjkFriendly: true,
+  dynamicPageTransition: true,
+  docHistory: true,
+  docHistoryExclude: ["components", "components/**"],
+  assetViewer: true,
+  strictContentBridge: true,
+  claudeResources: { claudeDir: "../.claude", scanRoot: ".." },
+  defaultLocaleOnlyPrefixes: [
+    "/docs/components/",
+    "/docs/claude/",
+    "/docs/claude-md/",
+    "/docs/claude-skills/",
+    "/docs/claude-agents/",
+    "/docs/claude-commands/",
+  ],
+  chromeBindingsModule: "./src/chrome-bindings.tsx",
+  headerNav: [
+    {
+      label: "Components",
+      path: "/docs/components",
+      categoryMatch: "components",
+      children: [
+        { label: "Catalog & Records", path: "/docs/components", categoryMatch: "components" },
+        { label: "Raw agent resources", path: "/docs/claude", categoryMatch: "claude", versioned: false },
+      ],
     },
-  }),
-);
+  ],
+  headerRightItems: [
+    { type: "component", component: "theme-toggle" },
+    { type: "component", component: "search" },
+  ],
+  footer: {
+    links: [],
+    copyright: "Built with zudo-circuit-doc on zudo-doc.",
+  },
+});
+
+// Same source-level \`linkValidation\` removal as examples/empty (#68): it
+// cannot see ids rendered by \`<EvidenceAnchor>\`, and the built-HTML
+// \`check:links --strict-anchors --strict-broken\` pass covers every page.
+delete site.markdown?.features?.linkValidation;
+
+export default defineConfig(site);
 `;
 }
 
