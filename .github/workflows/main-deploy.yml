@@ -1,0 +1,87 @@
+# Production deployment for this repository's documentation site.
+# Every push to main builds the static site and deploys it to Cloudflare Workers.
+
+name: Deploy Documentation Site
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  # Keep in sync with the local dry-run command in release/site-deploy.mdx.
+  WRANGLER_VERSION: "4.85.0"
+
+jobs:
+  build-doc:
+    name: Build Documentation Site
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build workspace packages
+        run: pnpm build
+
+      - name: Build doc site
+        run: pnpm doc:build
+
+      - name: Archive doc build output
+        run: tar -cf "$RUNNER_TEMP/doc-dist.tar" -C doc/dist .
+
+      - name: Upload doc build output
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: doc-dist
+          path: ${{ runner.temp }}/doc-dist.tar
+          retention-days: 1
+
+  deploy-doc:
+    name: Deploy Documentation Site to Cloudflare Workers
+    needs: [build-doc]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+
+      - name: Download doc build output
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: doc-dist
+          path: ${{ runner.temp }}
+
+      - name: Extract doc build output
+        run: mkdir -p doc/dist && tar -xf "$RUNNER_TEMP/doc-dist.tar" -C doc/dist
+
+      - name: Deploy to Cloudflare Workers
+        run: npx wrangler@${{ env.WRANGLER_VERSION }} deploy --config doc/wrangler.toml
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # Retries through the first-deploy DNS/cert propagation window.
+      - name: Smoke gate — documentation homepage
+        run: bash scripts/smoke-url.sh "https://zudo-circuit-doc.zudolab.dev/" 200
+
+      - name: Smoke gate — getting started page
+        run: bash scripts/smoke-url.sh "https://zudo-circuit-doc.zudolab.dev/docs/getting-started/" 200
+
+      - name: Smoke gate — missing page returns 404
+        run: bash scripts/smoke-url.sh "https://zudo-circuit-doc.zudolab.dev/this-page-does-not-exist" 404
