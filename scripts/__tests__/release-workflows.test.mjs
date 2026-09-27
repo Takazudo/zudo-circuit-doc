@@ -45,7 +45,7 @@ describe("npm publish workflows", () => {
       assert.match(source, new RegExp(`pnpm --filter ${escapeRegExp(workflow.selector)} publish`, "u"));
       assert.ok(source.includes(workflow.fixture), `missing verification command: ${workflow.fixture}`);
       assert.match(source, /git diff --exit-code -- packages\/circuit-doc\/CHANGELOG\.md packages\/create-zudo-circuit-doc\/CHANGELOG\.md/u);
-      assert.match(source, /doc\/src\/content\/docs\/release\/publishing\.mdx/u);
+      assert.match(source, /dev-docs\/publishing\.md/u);
     });
   }
 });

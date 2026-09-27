@@ -1,6 +1,6 @@
 """Acceptance-scenario gaps (#32) not already carried by another issue's test name.
 
-See doc/src/content/docs/release/scenario-matrix.mdx for the full 31-ID traceability
+See dev-docs/scenario-matrix.md for the full 31-ID traceability
 matrix; this file only holds the checks that had no home elsewhere. Every test name
 starts with its scenario ID.
 """

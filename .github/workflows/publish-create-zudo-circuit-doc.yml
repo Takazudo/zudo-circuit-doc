@@ -67,7 +67,7 @@ jobs:
       # NPM_TOKEN is the temporary publish credential. After the first
       # publish, configure npm Trusted Publishing for this workflow; OIDC
       # permissions and provenance are already enabled. See
-      # doc/src/content/docs/release/publishing.mdx.
+      # dev-docs/publishing.md.
       - name: Publish package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

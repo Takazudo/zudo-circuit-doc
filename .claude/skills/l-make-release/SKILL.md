@@ -27,7 +27,7 @@ manifest is its version source. Never bump the private root `package.json` as
 a release version. These are stable-only releases to npm `latest`; do not use
 prerelease suffixes or a `next` channel.
 
-Read [the publishing runbook](../../../doc/src/content/docs/release/publishing.mdx)
+Read [the publishing runbook](../../../dev-docs/publishing.md)
 when preparing or recovering a release. The two tag pushes start the publish
 workflows; a GitHub Release does not start publishing. The skill never runs
 `npm publish` or `pnpm publish` itself.
@@ -154,7 +154,7 @@ Prepare and finish each package separately in the selected order.
    Keep generated template files in the **same runtime release commit**. The
    generated template runtime dependency must be `^<runtime version>`, a
    caret range, never an exact pin. Leave generated `minimumReleaseAge: 0` for
-   the first release; [publishing.mdx](../../../doc/src/content/docs/release/publishing.mdx)
+   the first release; [publishing.md](../../../dev-docs/publishing.md)
    states when it can be reconsidered.
 2. Write English release notes in
    `doc/src/content/docs/changelog/zudo-circuit-doc/<version>.mdx` for runtime
@@ -244,15 +244,16 @@ In a combined run, start the initializer only after this runtime verification.
 If runtime does not reach npm, stop and report why; the initializer can be
 released later with `/l-make-release initializer`.
 
-After **both first releases** are live, make a **separate docs commit** on
-`main` replacing the "neither package is published" instructions in
-`doc/src/content/docs/release/index.mdx` and
-`doc/src/content/docs/getting-started/create-a-project.mdx` with working
-`pnpm create zudo-circuit-doc` instructions; run the relevant docs check and
-push the docs commit. Do this only once, after publication, never in either
-release commit. Remind the owner to configure npm Trusted Publishing (OIDC)
-for both workflows and verify an OIDC publish before removing `NPM_TOKEN`;
-the [publishing runbook](../../../doc/src/content/docs/release/publishing.mdx)
+After the first package release is live, make a **separate docs commit** on
+`main` updating the unpublished-status notice in
+`doc/src/content/docs/getting-started/create-a-project.mdx` and any other
+content that says a package is not published. Keep the status accurate while
+the other package remains unpublished. Once the initializer is live, replace
+its unpublished notice with the working `pnpm create zudo-circuit-doc`
+instructions. Run the relevant docs check and push the docs commit. Do this
+only after publication, never in a release commit. Remind the owner to
+configure npm Trusted Publishing (OIDC) for both workflows and verify an OIDC
+publish before removing `NPM_TOKEN`; the [publishing runbook](../../../dev-docs/publishing.md)
 records the January 2027 token deadline.
 
 ## Cancelling

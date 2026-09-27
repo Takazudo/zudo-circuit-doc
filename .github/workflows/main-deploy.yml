@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 env:
-  # Keep in sync with the local dry-run command in release/site-deploy.mdx.
+  # Keep in sync with the local dry-run command in dev-docs/site-deploy.md.
   WRANGLER_VERSION: "4.85.0"
 
 jobs:
