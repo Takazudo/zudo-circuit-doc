@@ -6,7 +6,7 @@
  */
 
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, before, describe, it } from "node:test";
@@ -283,7 +283,7 @@ describe("createPythonValidator", () => {
     assert.deepEqual(outcome.command.slice(1), [script, "--config", "-"]);
     const [argv, cwd, mark] = outcome.stdout.trim().split("\n");
     assert.equal(argv, "--config -");
-    assert.equal(cwd, paths.projectRoot);
+    assert.equal(cwd, await realpath(paths.projectRoot));
     assert.equal(mark, "marked");
   });
 
