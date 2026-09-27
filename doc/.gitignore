@@ -5,6 +5,13 @@ dist
 # zudo-doc copies installed package-owned route sources here during builds.
 .zudo-doc/
 
+# Generated Claude Code resource docs
+src/content/docs/claude/
+src/content/docs/claude-md/
+src/content/docs/claude-commands/
+src/content/docs/claude-skills/
+src/content/docs/claude-agents/
+
 # macOS
 .DS_Store
 

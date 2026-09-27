@@ -1,14 +1,10 @@
----
-title: Scenario traceability matrix
-description: All 31 acceptance-scenario IDs from the epic's validation plan, each mapped to an executable check or an explicit, reasoned "not automatable".
-sidebar_position: 2
----
+# Scenario traceability matrix
 
-Every acceptance scenario in the epic's validation plan (the planning seed's
-`design/07-validation-acceptance.md`, removed from the tree before release and kept in git history)
-is traceable to an
-executable check, or carries an explicit, reasoned "not automatable" / "deferred" note — never a
-fabricated PASS. `pnpm test:scenarios` runs the automated checks below (unit and integration
+All 31 acceptance-scenario IDs from the epic's validation plan, each mapped to an executable check or an explicit, reasoned "not automatable".
+
+Every acceptance scenario in the epic's validation plan, preserved in the planning seed's git
+history, is traceable to an executable check or carries an explicit, reasoned "not automatable" /
+"deferred" note — never a fabricated PASS. `pnpm test:scenarios` runs the automated checks below (unit and integration
 tiers) and prints this same table from a single source of truth,
 [`scripts/run-scenarios.mjs`](https://github.com/Takazudo/zudo-circuit-doc/blob/main/scripts/run-scenarios.mjs).
 `pnpm test:scenarios --with-pack` additionally runs the packed-consumer tier (the LED fixture
@@ -17,9 +13,8 @@ full packed-tarball builds, so it is opt-in and heavy.
 
 Two rows are never marked passed here: **AGENT-01** is an agent run (one agent session hands a task
 to a fresh second session over committed evidence alone; run as a Claude Code variant, not passed),
-recorded in the
-[v0.1 validation report](./v0-1-validation.mdx#agent-01), and **BENCH-01** requires physical
-hardware and is not run.
+recorded in the v0.1 validation report, which remains in git history, and **BENCH-01** requires
+physical hardware and is not run.
 
 ## INIT — initialize and run outside the monorepo
 
@@ -115,7 +110,7 @@ re-derives the committed outputs from the committed inputs and fails if either h
 
 | ID | Scenario | Check | Type |
 | --- | --- | --- | --- |
-| AGENT-01 | Claude completes task, a fresh agent continues (Claude Code variant run; Codex variant not run) | Agent run, recorded in the [v0.1 validation report](./v0-1-validation.mdx#agent-01); structural scaffold only here (`verify-pack.mjs --fixture empty` scenario `AGENT-VARIANTS` proves `CLAUDE.md`/`AGENTS.md`/`.claude/skills/**` exist per `--agent` mode) | agent-run — **never marked passed here** |
+| AGENT-01 | Claude completes task, a fresh agent continues (Claude Code variant run; Codex variant not run) | Agent run, detailed in the v0.1 validation report retained in git history; structural scaffold only here (`verify-pack.mjs --fixture empty` scenario `AGENT-VARIANTS` proves `CLAUDE.md`/`AGENTS.md`/`.claude/skills/**` exist per `--agent` mode) | agent-run — **never marked passed here** |
 | CHANGE-01 | A component or net changes | `scripts/scenarios/change-01.mjs`, four cases on a throwaway copy of `examples/minimal` (below) | automated integration |
 | BENCH-01 | User submits actual measured results | Not run: requires physical hardware. `circuit/WORKFLOW.md` Workflow F and `circuit/templates/project-docs/verification/bring-up.mdx` reviewed | **manual — not run** |
 

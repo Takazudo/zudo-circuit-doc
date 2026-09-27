@@ -11,6 +11,12 @@ export default defineConfig(
     cjkFriendly: true,
     dynamicPageTransition: true,
     docHistory: true,
+    sidebarToggle: true,
+    tocToggle: true,
+    claudeResources: {
+      claudeDir: "../packages/create-zudo-circuit-doc/templates/default/.claude",
+      scanRoot: "../packages/create-zudo-circuit-doc/templates/default",
+    },
     changelogs: [
       {
         sourceDir: "src/content/docs/changelog/zudo-circuit-doc",
@@ -45,14 +51,9 @@ export default defineConfig(
         categoryMatch: "reference",
       },
       {
-        label: "Design",
-        path: "/docs/design",
-        categoryMatch: "design",
-      },
-      {
-        label: "Release",
-        path: "/docs/release",
-        categoryMatch: "release",
+        label: "Claude Skills",
+        path: "/docs/claude",
+        categoryMatch: "claude",
       },
       {
         label: "Changelog",
@@ -60,6 +61,11 @@ export default defineConfig(
         categoryMatch: "changelog",
       },
     ],
+    footer: {
+      links: [],
+      copyright:
+        'Copyright © 2026 Takazudo. Built with <a href="https://zudo-doc.takazudomodular.com/docs/getting-started/">zudo-doc</a>.',
+    },
     headerRightItems: [
       { type: "component", component: "theme-toggle" },
       { type: "component", component: "search" },

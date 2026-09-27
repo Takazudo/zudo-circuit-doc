@@ -124,41 +124,31 @@ asserting it fails with the expected error.
 
 | Option | Notes |
 | --- | --- |
-| `directRouting` | Optional; the direct-routing fixture that `circuit.config.ts`'s `evidence.directRouting` (`routing.directRouting` in the resolved config Python reads — see [the resolved-validator-config pointer](#the-resolved-validator-config-pointer) below) must point at. **When omitted, it defaults to whatever `evidence.directRouting` already resolves to**, which must then be configured some other way — this check no longer hardcodes a project-specific fixture path. |
-| `invalidCases` | `[{ name, base: "inventory", target, value, expected_error }]`, each applied to a copy of the inventory (`target` is a dotted path, e.g. `lines.line-c283540.mpn`) and run through the configured inventory provider, which must fail with a message containing `expected_error`. |
+| `directRouting` | Optional path to the direct-routing fixture. If omitted, the check uses the path configured by `evidence.directRouting`. |
+| `invalidCases` | `[{ name, base: "inventory", target, value, expected_error }]`, each applied to a copy of the inventory (`target` is a dotted path, e.g. `lines.line-example.mpn`) and run through the configured inventory provider, which must fail with a message containing `expected_error`. |
 
-### A full example
+### Example policy shape
 
-The LED regression fixture's policy (`fixtures/led/circuit/policy.json` in this repository) uses
-every check type; here it is trimmed to shape:
+One policy can combine several check types. The paths, record IDs and domain names below are
+illustrative placeholders:
 
 ```json
 {
   "schema_version": 1,
   "checks": [
-    { "type": "pin-locks", "locks": "...", "assertions": [{ "recordId": "rec-stusb4500qtr", "trustStatus": "UNSOURCED" }] },
-    { "type": "critical-fact-review", "review": "...", "requiredDomains": ["connector", "polarity"], "minPasses": 2, "reviewLogsRoot": "..." },
+    { "type": "pin-locks", "locks": "circuit/reviews/pin-locks.json", "assertions": [{ "recordId": "rec-example", "trustStatus": "UNSOURCED" }] },
+    { "type": "critical-fact-review", "review": "circuit/reviews/critical-facts.json", "requiredDomains": ["power-input", "polarity"], "minPasses": 2, "reviewLogsRoot": "circuit/review-logs" },
     { "type": "refresh-evidence", "evidence": "...", "requiredAuthorityClasses": ["PROJECT_GENERATOR", "MANUFACTURER_PRIMARY"], "retrievalProfile": "browser-like-v1" },
-    { "type": "integration", "exactDomains": ["rail-envelope", "..."], "allowedVerdicts": ["NEEDS BENCH", "UNSOURCED"], "requireChainRule": true, "chainConstraints": { "generated-netlist": "MIXED", "trailingOpen": 5 } },
-    { "type": "seeded-fixtures", "directRouting": "...", "invalidCases": [{ "name": "wrong-mpn", "base": "inventory", "target": "lines.line-c283540.mpn", "value": "WRONG-MPN", "expected_error": "MPN" }] }
+    { "type": "integration", "exactDomains": ["power-envelope", "..."], "allowedVerdicts": ["NEEDS BENCH", "UNSOURCED"], "requireChainRule": true, "chainConstraints": { "generated-netlist": "MIXED", "trailingOpen": 2 } },
+    { "type": "seeded-fixtures", "directRouting": ".claude/skills/component-spec-audit/references/direct-routing.json", "invalidCases": [{ "name": "wrong-mpn", "base": "inventory", "target": "lines.line-example.mpn", "value": "WRONG-MPN", "expected_error": "MPN" }] }
   ]
 }
 ```
 
-Source: `packages/circuit-doc/python/circuit_evidence/policy/checks.py` (the check implementations
-and their docstring) and `fixtures/led/circuit/policy.json` (the full working example).
-
 ## The resolved-validator-config pointer
 
-The JS CLI never hands Python a config path to resolve itself. It loads and resolves
-`circuit.config.ts`, maps it into one resolved-config JSON object, and passes that object to
-`circuit_validate.py` as `--config <file>` (a unique `mkdtemp` temp file, removed afterwards) or on
-stdin (`--config -`) — never a fixed, potentially-racing project path. Every key in that JSON object
-is required, and every path in it is absolute; `null` means "not configured", and a configured path
-that doesn't exist is a `FAIL` naming it.
-
-The full shape — every key, what each one means, and the exact check order the validator runs in —
-is documented next to the validator itself:
-`packages/circuit-doc/python/RESOLVED_CONFIG.md` in this repository, shipped inside the npm tarball
-alongside `circuit_validate.py`. This site doesn't duplicate that file; treat it as this schema's
-source of truth for the validator's side of the config contract.
+The runtime resolves `circuit.config.ts` into an object before invoking the Python validator. That
+object contains absolute paths; `null` means a value is not configured, and any configured path that
+does not exist is an error. If you integrate the Python validator directly, the installed package
+includes `RESOLVED_CONFIG.md` beside `circuit_validate.py` with the full resolved shape and check
+order.

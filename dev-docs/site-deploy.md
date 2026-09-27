@@ -1,9 +1,6 @@
----
-title: Deploying this documentation site
-description: How this repository's documentation site is published to Cloudflare Workers.
----
-
 # Deploying this documentation site
+
+How this repository's documentation site is published to Cloudflare Workers.
 
 The public documentation site is hosted at [zudo-circuit-doc.zudolab.dev](https://zudo-circuit-doc.zudolab.dev) on Cloudflare Workers. The site is built from `doc/` into `doc/dist/` as static files; this deployment does not run a Worker script or server-side rendering.
 

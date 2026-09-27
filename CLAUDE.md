@@ -31,9 +31,9 @@ Later sub-issues add scripts for the LED fixture, template sync, packed-consumer
 ## Releasing
 
 Use `/l-make-release` to prepare a package release and follow the
-[publishing runbook](doc/src/content/docs/release/publishing.mdx). The documentation site deploys
+[publishing runbook](dev-docs/publishing.md). The documentation site deploys
 automatically from `main` to [zudo-circuit-doc.zudolab.dev](https://zudo-circuit-doc.zudolab.dev);
-see [site deployment](doc/src/content/docs/release/site-deploy.mdx).
+see [site deployment](dev-docs/site-deploy.md).
 
 ## Heavy runs
 
