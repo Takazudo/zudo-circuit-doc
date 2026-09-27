@@ -13,7 +13,7 @@
 // everything below is circuit-doc-specific.
 //
 // Usage:
-//   pnpm verify:pack [--keep] [--fixture empty|minimal|led]
+//   pnpm verify:pack [--keep] [--fixture empty|minimal|led] [--published-runtime]
 //
 // --keep leaves every temp directory in place and prints their paths instead
 // of removing them. --fixture accepts:
@@ -24,6 +24,9 @@
 //   - "led" (#31): drives scripts/lib/fixture-site.mjs (#23) in tarball mode
 //     — the 35-record LED corpus, byte-identical generation — then
 //     check-browser against the built site.
+// --published-runtime is valid with the default/empty fixture only: it probes
+// npm first, then verifies the packed initializer installs its template's
+// published runtime range from the registry.
 //
 // Every scenario below prints one `PASS: <ID> ...` or `FAIL: <ID> ...` line.
 // A scenario that cannot run because a DIFFERENT sub-issue has not landed yet
@@ -68,20 +71,138 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const RUNTIME_SELECTOR = "@takazudo/zudo-circuit-doc";
 const RUNTIME_NAME = "@takazudo/zudo-circuit-doc";
 const INIT_SELECTOR = "create-zudo-circuit-doc";
+const REGISTRY_URL = "https://registry.npmjs.org/";
+const PUBLISHED_RUNTIME_PROBE_TIMEOUT_MS = 20_000;
 
-const argv = process.argv.slice(2);
-const KEEP = argv.includes("--keep");
-const fixtureIndex = argv.indexOf("--fixture");
-const FIXTURE = fixtureIndex === -1 ? "empty" : argv[fixtureIndex + 1];
-const knownFlags = new Set(["--keep", "--fixture"]);
-for (const [index, argument] of argv.entries()) {
-  if (fixtureIndex !== -1 && index === fixtureIndex + 1) continue; // the --fixture value
-  if (!knownFlags.has(argument)) fail(`Unknown argument: ${argument}`);
-}
 const KNOWN_FIXTURES = new Set(["empty", "minimal", "led"]);
-if (!KNOWN_FIXTURES.has(FIXTURE)) {
-  console.error(`verify-pack: unknown --fixture ${JSON.stringify(FIXTURE)}; expected one of ${[...KNOWN_FIXTURES].join(", ")}.`);
-  process.exit(2);
+
+/** Parse the verifier's CLI args without performing any work, so the usage contract can be unit-tested. */
+export function parseVerifyPackArgs(args) {
+  const options = { keep: false, fixture: "empty", publishedRuntime: false };
+  for (let index = 0; index < args.length; index += 1) {
+    const argument = args[index];
+    if (argument === "--keep") {
+      options.keep = true;
+    } else if (argument === "--published-runtime") {
+      options.publishedRuntime = true;
+    } else if (argument === "--fixture") {
+      options.fixture = args[index + 1];
+      index += 1;
+    } else {
+      throw new VerifyError(`verify-pack: unknown argument ${JSON.stringify(argument)}.`);
+    }
+  }
+
+  if (!KNOWN_FIXTURES.has(options.fixture)) {
+    throw new VerifyError(
+      `verify-pack: unknown --fixture ${JSON.stringify(options.fixture)}; expected one of ${[...KNOWN_FIXTURES].join(", ")}.`,
+    );
+  }
+  if (options.publishedRuntime && options.fixture !== "empty") {
+    throw new VerifyError("verify-pack: --published-runtime is only valid with --fixture empty.");
+  }
+  return options;
+}
+
+function parseStableVersion(version) {
+  if (typeof version !== "string") return null;
+  const match = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:\+[0-9A-Za-z.-]+)?$/u.exec(version);
+  return match ? match.slice(1, 4).map(Number) : null;
+}
+
+/** True when a stable x.y.z version satisfies the stable caret range used by the template. */
+export function versionSatisfiesCaretRange(version, range) {
+  if (typeof range !== "string" || !range.startsWith("^")) return false;
+  const lower = parseStableVersion(range.slice(1));
+  const candidate = parseStableVersion(version);
+  if (!lower || !candidate) return false;
+  const [major, minor, patch] = lower;
+  const [candidateMajor, candidateMinor, candidatePatch] = candidate;
+  const atLeastLower =
+    candidateMajor > major ||
+    (candidateMajor === major && candidateMinor > minor) ||
+    (candidateMajor === major && candidateMinor === minor && candidatePatch >= patch);
+  if (!atLeastLower) return false;
+
+  if (major > 0) return candidateMajor === major;
+  if (minor > 0) return candidateMajor === 0 && candidateMinor === minor;
+  return candidateMajor === 0 && candidateMinor === 0 && candidatePatch === patch;
+}
+
+function probeVersions(stdout) {
+  const trimmed = stdout.trim();
+  if (trimmed.length === 0) return [];
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (parsed === null || parsed === "") return [];
+    if (Array.isArray(parsed)) return parsed.filter((version) => typeof version === "string");
+    if (typeof parsed === "string") return [parsed];
+    return null;
+  } catch {
+    // npm normally emits JSON here; tolerate a plain semver string for npm versions
+    // that omit JSON quoting for a single result.
+    return parseStableVersion(trimmed) ? [trimmed] : null;
+  }
+}
+
+/** Classify npm view results independently of the network process for deterministic tests. */
+export function classifyPublishedRuntimeProbe(result, range) {
+  if (result.timedOut) {
+    return { verdict: "inconclusive", detail: `npm view timed out after ${result.timeoutMs}ms` };
+  }
+  if (result.error) {
+    return { verdict: "inconclusive", detail: `npm view could not run: ${result.error}` };
+  }
+
+  const output = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
+  if (/\bE404\b|404\s+Not\s+Found/iu.test(output)) {
+    return { verdict: "not-published", detail: "npm registry returned E404" };
+  }
+
+  const versions = probeVersions(result.stdout ?? "");
+  if (versions?.length === 0 && result.status === 0) {
+    return { verdict: "not-published", detail: "npm registry returned an empty result" };
+  }
+  if (result.status !== 0) {
+    const detail = output.trim().replace(/\s+/gu, " ").slice(0, 500) || `npm view exited ${result.status}`;
+    return { verdict: "inconclusive", detail };
+  }
+  if (versions === null) {
+    return { verdict: "inconclusive", detail: "npm view returned an unrecognized response" };
+  }
+
+  const satisfyingVersions = versions.filter((version) => versionSatisfiesCaretRange(version, range));
+  if (satisfyingVersions.length === 0) {
+    return { verdict: "not-published", detail: `npm registry returned no versions satisfying ${range}` };
+  }
+  return { verdict: "found", versions: satisfyingVersions };
+}
+
+function runPublishedRuntimeProbe(range, timeoutMs = PUBLISHED_RUNTIME_PROBE_TIMEOUT_MS) {
+  const selector = `${RUNTIME_NAME}@${range}`;
+  const args = ["view", selector, "version", "--json", `--registry=${REGISTRY_URL}`];
+  return new Promise((resolve) => {
+    let stdout = "";
+    let stderr = "";
+    let settled = false;
+    const child = spawn("npm", args, { cwd: ROOT, env: process.env, stdio: ["ignore", "pipe", "pipe"] });
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      child.kill("SIGTERM");
+      resolve({ status: null, stdout, stderr, timedOut: true, timeoutMs });
+    }, timeoutMs);
+    const finish = (result) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve({ stdout, stderr, ...result });
+    };
+    child.stdout?.on("data", (chunk) => (stdout += String(chunk)));
+    child.stderr?.on("data", (chunk) => (stderr += String(chunk)));
+    child.once("error", (error) => finish({ status: null, error: error.message }));
+    child.once("close", (status, signal) => finish({ status, signal }));
+  });
 }
 
 // A grep list of upstream (zudo-led-lamp) identifiers that must never survive
@@ -94,15 +215,19 @@ const LAMP_STRINGS = ["AL8860", "STM32", "STUSB", "zudo-led-lamp", "15 V", "JLCP
 let devServer;
 
 let failures = 0;
+let scenarioSuffix = "";
+function taggedScenarioId(id) {
+  return `${id}${scenarioSuffix}`;
+}
 function pass(id, message) {
-  console.log(`PASS: ${id} — ${message}`);
+  console.log(`PASS: ${taggedScenarioId(id)} — ${message}`);
 }
 function scenarioFail(id, message) {
   failures += 1;
-  console.log(`FAIL: ${id} — ${message}`);
+  console.log(`FAIL: ${taggedScenarioId(id)} — ${message}`);
 }
 function skip(id, message) {
-  console.log(`SKIP: ${id} — ${message}`);
+  console.log(`SKIP: ${taggedScenarioId(id)} — ${message}`);
 }
 /** Runs one named scenario; a thrown error becomes a FAIL for that scenario without aborting the others. */
 async function scenario(id, description, body) {
@@ -232,6 +357,7 @@ async function tarballShapeChecks(root, artifacts, extraction) {
       runtimeEntries.some((entry) => entry.startsWith("templates/component-skill-template/")),
       "runtime tarball is missing templates/component-skill-template",
     );
+    assert(runtimeEntries.includes("CHANGELOG.md"), "runtime tarball is missing CHANGELOG.md");
     pass("TARBALL-RUNTIME-SHAPE", `${runtimeEntries.length} entries, exports resolved, no stray .ts specifiers, islands carry "use client"`);
   });
 
@@ -243,6 +369,7 @@ async function tarballShapeChecks(root, artifacts, extraction) {
       "init tarball is missing templates/default",
     );
     assert(initEntries.includes("templates/default/_gitignore"), "init tarball's templates/default is missing _gitignore");
+    assert(initEntries.includes("CHANGELOG.md"), "initializer tarball is missing CHANGELOG.md");
     await assertNoTsSpecifiers("init", path.join(initExtract, "dist"));
     pass("TARBALL-INIT-SHAPE", `${initEntries.length} entries, templates/default present with _gitignore`);
   });
@@ -280,6 +407,33 @@ async function assertScaffoldShape(id, projectDir, packedTemplateDir) {
     }
   }
   return { expected, actual };
+}
+
+async function assertPublishedTemplateDependencySpecs(packedTemplateDir, expectedRuntimeRange) {
+  const manifestPaths = (await listFiles(packedTemplateDir)).filter((relative) => path.basename(relative) === "package.json");
+  assert(manifestPaths.length > 0, "packed template contains no package.json manifests");
+  for (const relative of manifestPaths) {
+    const manifest = await readJson(path.join(packedTemplateDir, relative));
+    for (const field of ["dependencies", "devDependencies", "optionalDependencies", "peerDependencies"]) {
+      for (const [name, spec] of Object.entries(manifest[field] ?? {})) {
+        assert(
+          typeof spec !== "string" || !/^(?:workspace:|file:|link:)/u.test(spec),
+          `${relative}: ${field}.${name} uses a non-registry dependency spec ${JSON.stringify(spec)}`,
+        );
+      }
+    }
+  }
+
+  const rootManifest = await readJson(path.join(packedTemplateDir, "package.json"));
+  assert(
+    rootManifest.devDependencies?.[RUNTIME_NAME] === expectedRuntimeRange,
+    `packed template package.json's ${RUNTIME_NAME} spec is ${JSON.stringify(rootManifest.devDependencies?.[RUNTIME_NAME])}, expected ${expectedRuntimeRange}`,
+  );
+  const docManifest = await readJson(path.join(packedTemplateDir, "doc", "package.json"));
+  assert(
+    docManifest.dependencies?.[RUNTIME_NAME] === expectedRuntimeRange,
+    `packed template doc/package.json's ${RUNTIME_NAME} spec is ${JSON.stringify(docManifest.dependencies?.[RUNTIME_NAME])}, expected ${expectedRuntimeRange}`,
+  );
 }
 
 async function assertTemplatePermissions(projectDir, packedTemplateDir, files) {
@@ -352,7 +506,27 @@ function parseNextSteps(stdout) {
   return commands;
 }
 
-async function main() {
+async function main(options) {
+  scenarioSuffix = options.publishedRuntime ? "-PUB" : "";
+  let runtimeRange;
+  if (options.publishedRuntime) {
+    const runtimeManifest = await readJson(path.join(ROOT, "packages", "circuit-doc", "package.json"));
+    runtimeRange = `^${runtimeManifest.version}`;
+    console.log(`npm view ${RUNTIME_NAME}@${runtimeRange} version --json --registry=${REGISTRY_URL} (timeout ${PUBLISHED_RUNTIME_PROBE_TIMEOUT_MS}ms)`);
+    const probe = classifyPublishedRuntimeProbe(await runPublishedRuntimeProbe(runtimeRange), runtimeRange);
+    if (probe.verdict !== "found") {
+      const message =
+        probe.verdict === "not-published"
+          ? `published runtime not on registry — release ${RUNTIME_NAME} first (${runtimeRange})`
+          : `published runtime probe inconclusive — ${probe.detail}`;
+      scenarioFail("PUBLISHED-RUNTIME-PROBE", message);
+      console.error(`FAIL: verify-pack; ${failures} scenario(s) failed`);
+      process.exitCode = 1;
+      return;
+    }
+    pass("PUBLISHED-RUNTIME-PROBE", `registry returned ${probe.versions.join(", ")} for ${runtimeRange}`);
+  }
+
   const artifacts = await mkdtempIn("circuit-doc-verify-pack-artifacts-");
   const extraction = await mkdtempIn("circuit-doc-verify-pack-extract-");
   const scratch = await mkdtempIn("circuit-doc-verify-pack-host-");
@@ -364,17 +538,26 @@ async function main() {
     const initBin = path.join(initExtract, "bin", "create-zudo-circuit-doc.js");
     const runtimeBin = path.join(runtimeExtract, "bin", "zudo-circuit-doc.js");
 
-    if (FIXTURE === "minimal") {
+    if (options.fixture === "minimal") {
       await minimalFixtureFlow(ROOT, runtimeTarball, scratch);
-    } else if (FIXTURE === "led") {
+    } else if (options.fixture === "led") {
       const ledOutDir = path.join(scratch, "led-fixture-site");
       await ledFixtureFlow(ROOT, runtimeTarball, scratch, ledOutDir);
     } else {
-      await emptyFixtureFlow({ scratch, initBin, runtimeTarball, packedTemplateDir, initExtract, runtimeExtract });
+      await emptyFixtureFlow({
+        scratch,
+        initBin,
+        runtimeTarball,
+        packedTemplateDir,
+        initExtract,
+        runtimeExtract,
+        publishedRuntime: options.publishedRuntime,
+        runtimeRange,
+      });
     }
   } finally {
     if (devServer) stopProcessGroup(devServer);
-    if (KEEP) {
+    if (options.keep) {
       console.log(`--keep: left artifacts at ${artifacts}, extraction at ${extraction}, scratch host at ${scratch}.`);
       await removeAll(createdShimMirrorDirs()); // never useful to keep — just symlink mirrors of the real PATH
     } else {
@@ -391,46 +574,53 @@ async function main() {
 }
 
 /** The original #28 "empty" scaffold-and-install flow, unchanged apart from being extracted into its own function so `main()` can branch on `--fixture`. `devServer` is a module-scoped variable so `main()`'s `finally` can still stop it if this throws mid-flow. */
-async function emptyFixtureFlow({ scratch, initBin, runtimeTarball, packedTemplateDir, initExtract, runtimeExtract }) {
+async function emptyFixtureFlow({
+  scratch,
+  initBin,
+  runtimeTarball,
+  packedTemplateDir,
+  initExtract,
+  runtimeExtract,
+  publishedRuntime,
+  runtimeRange,
+}) {
   // --- INIT-05: destination with spaces, name/title/library distinct from the dir basename ---
   const hostDir = path.join(scratch, "my circuit");
   let scaffoldStdout = "";
   let scaffoldFiles = [];
   await scenario("INIT-05", "packed initializer scaffolds a spaced destination with explicit --name/--title", async () => {
-    scaffoldStdout = await runStreamed(
-      process.execPath,
-      [
-        initBin,
-        hostDir,
-        "--name",
-        "my-circuit",
-        "--title",
-        "My Circuit",
-        "--yes",
-        "--no-install",
-        "--no-git",
-        // #58: point the scaffolded dependency straight at the packed
-        // runtime tarball instead of verify-pack rewriting both manifests
-        // itself afterward (that rewrite is still used by minimalFixtureFlow,
-        // which never runs the initializer).
-        "--runtime-spec",
-        `file:${runtimeTarball}`,
-      ],
-      scratch,
-    );
+    if (publishedRuntime) await assertPublishedTemplateDependencySpecs(packedTemplateDir, runtimeRange);
+    const scaffoldArgs = [
+      initBin,
+      hostDir,
+      "--name",
+      "my-circuit",
+      "--title",
+      "My Circuit",
+      "--yes",
+      "--no-install",
+      "--no-git",
+    ];
+    const expectedRuntimeSpec = publishedRuntime ? runtimeRange : `file:${runtimeTarball}`;
+    if (!publishedRuntime) {
+      // #58: point the scaffolded dependency straight at the packed runtime
+      // tarball instead of verify-pack rewriting both manifests itself.
+      scaffoldArgs.push("--runtime-spec", expectedRuntimeSpec);
+    }
+    scaffoldStdout = await runStreamed(process.execPath, scaffoldArgs, scratch);
     const { actual } = await assertScaffoldShape("INIT-05", hostDir, packedTemplateDir);
     scaffoldFiles = actual;
     const manifest = await readJson(path.join(hostDir, "package.json"));
     assert(manifest.name === "my-circuit", `package.json name is ${manifest.name}, expected my-circuit`);
     assert(
-      manifest.devDependencies?.[RUNTIME_NAME] === `file:${runtimeTarball}`,
-      `package.json's ${RUNTIME_NAME} spec is ${manifest.devDependencies?.[RUNTIME_NAME]}, expected file:${runtimeTarball}`,
+      manifest.devDependencies?.[RUNTIME_NAME] === expectedRuntimeSpec,
+      `package.json's ${RUNTIME_NAME} spec is ${manifest.devDependencies?.[RUNTIME_NAME]}, expected ${expectedRuntimeSpec}`,
     );
     const docManifest = await readJson(path.join(hostDir, "doc", "package.json"));
     assert(docManifest.name === "my-circuit-doc", `doc/package.json name is ${docManifest.name}, expected my-circuit-doc`);
     assert(
-      docManifest.dependencies?.[RUNTIME_NAME] === `file:${runtimeTarball}`,
-      `doc/package.json's ${RUNTIME_NAME} spec is ${docManifest.dependencies?.[RUNTIME_NAME]}, expected file:${runtimeTarball}`,
+      docManifest.dependencies?.[RUNTIME_NAME] === expectedRuntimeSpec,
+      `doc/package.json's ${RUNTIME_NAME} spec is ${docManifest.dependencies?.[RUNTIME_NAME]}, expected ${expectedRuntimeSpec}`,
     );
     const circuitConfig = await readFile(path.join(hostDir, "circuit.config.ts"), "utf8");
     assert(circuitConfig.includes('title: "My Circuit"'), "circuit.config.ts project.title is not \"My Circuit\"");
@@ -440,7 +630,10 @@ async function emptyFixtureFlow({ scratch, initBin, runtimeTarball, packedTempla
     assert(readme.startsWith("# My Circuit\n"), `README.md does not start with the site-title heading:\n${readme.split("\n")[0]}`);
     await assertGitignoreWorks(hostDir); // also proves ADR-002's zfb/circuit-cache ignore rules
     await assertTemplatePermissions(hostDir, packedTemplateDir, scaffoldFiles);
-    pass("INIT-05", `scaffolded ${scaffoldFiles.length} files at a spaced destination with distinct name/title, no placeholder or lamp string, .gitignore proven, modes match the template, --runtime-spec applied to both manifests`);
+    pass(
+      "INIT-05",
+      `scaffolded ${scaffoldFiles.length} files at a spaced destination with distinct name/title, no placeholder or lamp string, .gitignore proven, modes match the template, ${publishedRuntime ? `${runtimeRange} retained in both manifests` : "--runtime-spec applied to both manifests"}`,
+    );
   });
   if (failures > 0) fail("INIT-05 scaffold failed; the rest of the packed-consumer flow depends on it");
 
@@ -656,34 +849,57 @@ async function emptyFixtureFlow({ scratch, initBin, runtimeTarball, packedTempla
     pass("NEG-INTERRUPTED-INSTALL", `exit 1, no success banner, recovery commands printed, scaffolded files kept at ${path.relative(scratch, destDir)}`);
   });
 
-  await scenario("VERSION-MATCH", "--version of both packed bins equals their own package.json version", async () => {
-    // create-zudo-circuit-doc has zero runtime dependencies, so its extracted
-    // (uninstalled) tarball copy runs standalone. @takazudo/zudo-circuit-doc
-    // does not: its CLI module graph eagerly imports real dependencies
-    // (three, mdast-util-*), so it can only run from an INSTALLED copy —
-    // the already-installed hostDir, via `pnpm exec`.
-    const initResult = await runCapture(process.execPath, [initBin, "--version"], scratch);
-    const initVersion = initResult.stdout.trim();
-    assert(
-      initVersion === (await readJson(path.join(initExtract, "package.json"))).version,
-      `create-zudo-circuit-doc --version printed ${JSON.stringify(initVersion)} (exit ${initResult.status})\n${initResult.stderr}`,
-    );
-    const runtimeResult = await runCapture(PNPM[0], [...PNPM.slice(1), "exec", "zudo-circuit-doc", "--version"], hostDir);
-    // `pnpm exec` can print its own reporter lines ("Scope: …", "Recreating
-    // …/node_modules", "Progress: …") to stdout ahead of the invoked
-    // command's own output whenever it reconciles node_modules against this
-    // call's effective config (e.g. after an earlier install ran with a
-    // different --config.strict-dep-builds value, as NEXTSTEPS's verbatim
-    // "pnpm install" does versus this scenario's ambient config) — take the
-    // last non-blank line as the actual --version output.
-    const runtimeLines = runtimeResult.stdout.split("\n").map((line) => line.trim()).filter(Boolean);
-    const runtimeVersion = runtimeLines.at(-1) ?? "";
-    assert(
-      runtimeVersion === (await readJson(path.join(runtimeExtract, "package.json"))).version,
-      `zudo-circuit-doc --version printed ${JSON.stringify(runtimeResult.stdout)} (exit ${runtimeResult.status})\n${runtimeResult.stderr}`,
-    );
-    pass("VERSION-MATCH", `create-zudo-circuit-doc --version=${initVersion}, zudo-circuit-doc --version=${runtimeVersion}`);
-  });
+  await scenario(
+    "VERSION-MATCH",
+    publishedRuntime
+      ? "the initializer version matches the installed published runtime and the runtime satisfies the template caret range"
+      : "--version of both packed bins equals their own package.json version",
+    async () => {
+      // create-zudo-circuit-doc has zero runtime dependencies, so its extracted
+      // (uninstalled) tarball copy runs standalone. @takazudo/zudo-circuit-doc
+      // does not: its CLI module graph eagerly imports real dependencies
+      // (three, mdast-util-*), so it can only run from an INSTALLED copy —
+      // the already-installed hostDir, via `pnpm exec`.
+      const initResult = await runCapture(process.execPath, [initBin, "--version"], scratch);
+      const initVersion = initResult.stdout.trim();
+      assert(initResult.status === 0, `create-zudo-circuit-doc --version exited ${initResult.status}:\n${initResult.stderr}`);
+      assert(
+        initVersion === (await readJson(path.join(initExtract, "package.json"))).version,
+        `create-zudo-circuit-doc --version printed ${JSON.stringify(initVersion)} (exit ${initResult.status})\n${initResult.stderr}`,
+      );
+      const runtimeResult = await runCapture(PNPM[0], [...PNPM.slice(1), "exec", "zudo-circuit-doc", "--version"], hostDir);
+      // `pnpm exec` can print its own reporter lines ("Scope: …", "Recreating
+      // …/node_modules", "Progress: …") to stdout ahead of the invoked
+      // command's own output whenever it reconciles node_modules against this
+      // call's effective config (e.g. after an earlier install ran with a
+      // different --config.strict-dep-builds value, as NEXTSTEPS's verbatim
+      // "pnpm install" does versus this scenario's ambient config) — take the
+      // last non-blank line as the actual --version output.
+      const runtimeLines = runtimeResult.stdout.split("\n").map((line) => line.trim()).filter(Boolean);
+      const runtimeVersion = runtimeLines.at(-1) ?? "";
+      assert(runtimeResult.status === 0, `zudo-circuit-doc --version exited ${runtimeResult.status}:\n${runtimeResult.stderr}`);
+      const installedRuntimeManifest = await readJson(path.join(hostDir, "node_modules", ...RUNTIME_NAME.split("/"), "package.json"));
+      if (publishedRuntime) {
+        assert(
+          versionSatisfiesCaretRange(installedRuntimeManifest.version, runtimeRange),
+          `installed runtime version ${installedRuntimeManifest.version} does not satisfy ${runtimeRange}`,
+        );
+      }
+      const expectedRuntimeVersion = publishedRuntime
+        ? installedRuntimeManifest.version
+        : (await readJson(path.join(runtimeExtract, "package.json"))).version;
+      assert(
+        runtimeVersion === expectedRuntimeVersion,
+        `zudo-circuit-doc --version printed ${JSON.stringify(runtimeResult.stdout)}, expected installed runtime ${expectedRuntimeVersion}\n${runtimeResult.stderr}`,
+      );
+      pass(
+        "VERSION-MATCH",
+        publishedRuntime
+          ? `create-zudo-circuit-doc --version=${initVersion}, installed runtime --version=${runtimeVersion}, satisfies ${runtimeRange}`
+          : `create-zudo-circuit-doc --version=${initVersion}, zudo-circuit-doc --version=${runtimeVersion}`,
+      );
+    },
+  );
 
   await scenario("AGENT-VARIANTS", "--agent none/codex/claude produce the documented CLAUDE.md/AGENTS.md subsets; .claude/skills/** always stays", async () => {
     const matrix = [
@@ -972,7 +1188,18 @@ async function ledFixtureFlow(root, runtimeTarball, scratch, ledOutDir) {
   );
 }
 
-main().catch((error) => {
-  console.error(error instanceof VerifyError || error instanceof Error ? error.message : String(error));
-  process.exitCode = 1;
-});
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
+  let options;
+  try {
+    options = parseVerifyPackArgs(process.argv.slice(2));
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 2;
+  }
+  if (options) {
+    main(options).catch((error) => {
+      console.error(error instanceof VerifyError || error instanceof Error ? error.message : String(error));
+      process.exitCode = 1;
+    });
+  }
+}
