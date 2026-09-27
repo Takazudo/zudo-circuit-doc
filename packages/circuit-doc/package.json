@@ -58,6 +58,7 @@
     "styles.css",
     "README.md",
     "LICENSE",
+    "CHANGELOG.md",
     "!lib/**/*.test.*",
     "!python/tests",
     "!python/**/__pycache__"
