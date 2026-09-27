@@ -1,65 +1,50 @@
 ---
 title: Migrating an existing in-repo component-docs project
-description: Moving a project that built its own component-evidence tooling in-repo (the zudo-led-lamp shape) onto the packaged runtime and initializer.
+description: Moving a project with its own component-evidence tooling onto the packaged runtime and initializer.
 sidebar_position: 3
 ---
 
-Before this package existed, a project that wanted component-evidence documentation built the whole
-pipeline itself: a bespoke generator under `doc/component-docs/`, hand-rolled CLI scripts, and a
-project-specific `package.json` script graph. `zudo-led-lamp` (pinned at commit
-[`194d8a2`](https://github.com/Takazudo/zudo-led-lamp/commit/194d8a297e3545588197342130c3111a66c10973))
-is exactly that shape, and this page walks through moving a project like it onto
-`@takazudo/zudo-circuit-doc` and `circuit.config.ts` instead of its own generator code.
+If your project already has its own component-evidence pipeline, it may include a custom generator
+under `doc/component-docs/`, hand-written CLI scripts and a project-specific `package.json` script
+graph. This page walks through moving evidence validation and publication to
+`@takazudo/zudo-circuit-doc` and `circuit.config.ts`, while retaining project-specific records and
+commands where needed.
 
-This is not a mechanical script — every step below is a reviewed decision, not a find-and-replace.
+This is a reviewed migration, not a find-and-replace. Check each step against the files and behavior
+your project currently uses.
 
 ## 1. Move the instance selection
 
-zudo-led-lamp's publication lock lived in TypeScript, hand-imported by the generator:
-`doc/component-docs/adapters/circuit/selection.ts`, exporting `CIRCUIT_SELECTION` (the
-`InstanceSelection` object: `recordIds`, `sourceIds`, `linkableSourceIds`, `documentSelections`,
-`expect`) and a separate `CIRCUIT_DOCUMENT_VERIFICATION` constant (which PDFs were independently
-re-downloaded and checked, and when).
-
-The packaged runtime reads this as plain, schema-validated JSON instead of code:
+If the old generator keeps its publication selection in a TypeScript module, map its
+`InstanceSelection` fields (`recordIds`, `sourceIds`, `linkableSourceIds`, `documentSelections`,
+`expect`) to the package's JSON selection file. The runtime reads this schema-validated file at
 `circuit/publication/selection.json` — see [Reference → Publication
-schemas](../reference/schemas.mdx#selection-json) for the exact shape. Move `CIRCUIT_SELECTION`'s
-fields across field-for-field; there's no behavior change, just a TS-object-to-JSON-file move.
-`CIRCUIT_DOCUMENT_VERIFICATION` has no equivalent field in the new schema — it was never consumed by
-generation (the comment on the original constant says so explicitly: "intentionally not consumed by
-generation"). Keep it as a project-owned record if you still want the re-audit trail, e.g. alongside
-`circuit/publication/selection.json` as a sibling file your own review process reads; it just isn't
-part of the config contract.
+schemas](../reference/schemas.mdx#selection-json) for its exact shape. Keep any separate
+document-verification history as a project-owned record if you still need it; it has no equivalent
+field in the config contract and is not consumed during generation.
 
 ## 2. Move the direct-routing fixture
 
-`.claude/skills/component-spec-audit/fixtures/direct-routing.json` (LED's location, one JSON case
-per inventory line asserting exact-match and negative-match routing queries) moves to
-`.claude/skills/component-spec-audit/references/direct-routing.json` — `fixtures/` was never a
-config-recognized directory name; `references/` is, alongside `inventory.json` and
-`external-vendor-qualifiers.json`. Point `evidence.directRouting` in `circuit.config.ts` at the new
-path (see [Reference → `circuit.config.ts`](../reference/config.mdx#evidence)). The file's own shape
-is unchanged.
+Place the direct-routing fixture at
+`.claude/skills/component-spec-audit/references/direct-routing.json` and set `evidence.directRouting`
+in `circuit.config.ts` to that path (see [Reference → `circuit.config.ts`](../reference/config.mdx#evidence)).
+The fixture's JSON shape stays the same.
 
-## 3. Check your inventory provider and `generator_specs`
+## 3. Choose an inventory provider
 
-LED uses the `led-generator-v1` inventory profile: `inventoryProvider.specs` in `circuit.config.ts`
-lists the board-spec Python files (`scripts/schgen/board_p_spec.py`, etc.), and the inventory JSON's
-own `generator_specs` field must equal those spec paths relative to the project root — see
-[Concepts → Inventory profiles](../concepts/inventory-profiles.mdx).
+If the existing inventory comes from board-generator scripts, set
+`inventoryProvider.kind` to `"led-generator-v1"` and list those scripts in
+`inventoryProvider.specs`. The inventory JSON's `generator_specs` field must match the configured
+paths exactly.
 
-Most migrating projects don't have a bespoke schematic-generator DSL like LED's, and will use the
-generic `{ kind: "manual" }` profile instead. **Under the manual profile, the inventory JSON's
-`generator_specs` field must be `[]`** — not omitted, and not carrying over stale paths from an old
-generator that no longer runs. Carrying over a non-empty `generator_specs` from a previous setup
-while switching to `manual` is a validation failure, not a silent no-op.
+Otherwise, use the generic `{ kind: "manual" }` profile. Under this profile, the inventory JSON's
+`generator_specs` field must be `[]` — not omitted or filled with stale paths from a generator that
+no longer runs. See [Concepts → Inventory profiles](../concepts/inventory-profiles.mdx).
 
-## 4. Move the validator policy
+## 4. Move project validation policy
 
-LED's project-specific validator gates — pin locks, the critical-fact independent-review
-requirement, refresh-evidence, exact integration domains — used to be hardcoded checks inside
-`validate.py` itself. They're now a single data-driven file referenced by `validation.policy`,
-covering exactly the same assertions with none of them baked into the validator's Python:
+If the old validator has project-specific gates, represent them in a policy JSON file and point
+`validation.policy` at it:
 
 ```ts
 validation: {
@@ -68,44 +53,30 @@ validation: {
 ```
 
 See [Reference → Publication schemas → `validation.policy`](../reference/schemas.mdx#validation-policy)
-for every check type (`pin-locks`, `critical-fact-review`, `refresh-evidence`, `integration`,
-`seeded-fixtures`) and their options, and `fixtures/led/circuit/policy.json` in this repository for
-LED's own migrated policy file as a complete worked example — it's the regression fixture this
-project checks itself against, so it's guaranteed to still be current.
+for the available check types and options. Move each existing assertion deliberately and compare
+the new policy's results with the old validator before relying on it.
 
 ## 5. Write the publication assets allowlist
 
-A pre-package project that never had a formal `doc/public/` review is very likely already serving
-files a fresh `scan` would flag. Run `zudo-circuit-doc scan` early (before wiring it into CI) to find
-them, then either move the file out of `publicRoot`, or add it to
-`circuit/publication/assets.json` with a real `reason` — see [Concepts →
-Publication](../concepts/publication.mdx#the-assets-allowlist) for the restricted-extension list and
-what's exempt by default (the generator's own footprint/model previews).
+A project without a formal `doc/public/` review may already serve files that a fresh `scan` flags.
+Run `zudo-circuit-doc scan` early, then either move each flagged file out of `publicRoot` or add it
+to `circuit/publication/assets.json` with a reason. See [Concepts → Publication](../concepts/publication.mdx#the-assets-allowlist)
+for restricted extensions and the preview files exempt by default.
 
 ## 6. Pick browser-smoke representatives
 
-`check-browser` can derive up to 3 representatives automatically once records are published (see
-[Reference → `circuit.config.ts` → `browserSmoke`](../reference/config.mdx#browsersmoke)), so this
-step is optional — but an existing project usually already knows which record pages are the most
-representative of its component mix (a passive, an IC, a connector, one with an unusual
-availability), and declaring them explicitly is more stable than a derived list that shifts as
-records are added. `fixtures/led/circuit/browser-representatives.json` in this repository is LED's
-own migrated list, covering one passive, one IC, one connector and one record with a
-`SOURCE UNAVAILABLE` history.
+`check-browser` can derive up to three representatives once records are published, so
+`browserSmoke.representatives` is optional. Set it in [Reference → `circuit.config.ts` →
+`browserSmoke`](../reference/config.mdx#browsersmoke) when you want specific component pages tested.
+Choose pages that represent different component types and availability states; the configured list
+stays stable as records are added.
 
 ## What cannot be ported
 
-- **Deploy configuration.** LED deploys `doc/`'s build output to Cloudflare Workers static assets
-  via `doc/wrangler.toml` and `.github/workflows/main-deploy.yml`. Neither the initializer nor the
-  runtime package has any opinion about deployment — write or keep your own deploy workflow pointed
-  at the built `doc/dist/` output; there's nothing to migrate here, only to keep.
-- **Custom pre-build steps.** LED's own `doc/package.json` `build` script ran
-  `generate:enclosure-viewer` (a project-specific 3D enclosure preview, unrelated to component
-  evidence) before the component generator. The packaged root `build` script is exactly
-  `zudo-circuit-doc models && zudo-circuit-doc generate && pnpm --dir doc build`
-  (see [Reference → The generated project → Root scripts](../reference/generated-project.mdx#root-scripts))
-  — there's no hook for a project-specific pre-build step, so add it directly to the root
-  `package.json` `scripts.build` entry, e.g.
-  `"build": "node enclosure-viewer/build.mjs && zudo-circuit-doc models && zudo-circuit-doc generate && pnpm --dir doc build"`.
-  Root scripts are project-owned precisely so this kind of edit is expected — see
-  [Concepts → Ownership and upgrades](../concepts/ownership-and-upgrades.mdx#who-owns-what).
+- **Deploy configuration.** The initializer and runtime do not configure deployment. Keep or write
+  your host's deployment workflow so it publishes the built `doc/dist/` output.
+- **Custom pre-build steps.** The generated root `build` script runs the runtime's model and page
+  generation followed by the site build. Add any project-specific preparation to the root
+  `package.json` `scripts.build` entry before those commands, for example:
+  `"build": "node tools/prepare-docs.mjs && zudo-circuit-doc models && zudo-circuit-doc generate && pnpm --dir doc build"`.
+  Root scripts are project-owned; see [Concepts → Ownership and upgrades](../concepts/ownership-and-upgrades.mdx#who-owns-what).

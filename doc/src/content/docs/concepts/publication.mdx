@@ -44,9 +44,8 @@ page even for a fully selected record.
 - `documentSelections` — one document choice per record (`documentKind`: `datasheet`,
   `specification` or `drawing`), decided after inspecting the content.
 - `expect` — a reviewed count lock (`records`, `sources`, `integrationRules`, `packages`), each of
-  which may be `0`. It gates `generate`/`check`/`build`; it is **never serialized into the
-  preflight report**, so the LED regression corpus's goldens stayed byte-identical when this gate
-  was introduced. `cad.enabled` is a separate capability flag — a selected PCB record while CAD is
+  which may be `0`. It gates `generate`/`check`/`build` and is **never serialized into the
+  preflight report**. `cad.enabled` is a separate capability flag — a selected PCB record while CAD is
   disabled is an explicit error, never a silent skip, except the one declared-zero exception
   described in [CAD fidelity](./cad-fidelity.mdx#the-declared-zero-exception).
 
@@ -92,8 +91,7 @@ root always needs either the allowlist entry above or to not be there at all:
 
 `.svg` and `.wrl` are also the preview generator's own output formats, which is why they're on this
 list *and* exempted under `assets/component-previews/**` specifically — anywhere else on the public
-root they're exactly as unreviewed as any other restricted type. Source:
-`packages/circuit-doc/src/scan/public-scope.ts`'s `RESTRICTED_PUBLIC_EXTENSIONS`.
+root they're exactly as unreviewed as any other restricted type.
 
 ## `assetViewerExclude` is not privacy
 
