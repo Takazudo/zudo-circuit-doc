@@ -28,20 +28,51 @@ the template's `^X.Y.Z` range from npm. That version must already be live. A run
 does not require an initializer release; a runtime minor or major release does, because the
 initializer's runtime range must be updated and verified.
 
-The workflows build and check their package, verify a consumer install, and publish with the npm
-`latest` tag. A pushed matching release tag starts its workflow. A manual retry must also name the
-exact release tag because the workflow guard rejects branch refs.
+The workflows build and check their package, verify a consumer install, and **stage** the version
+with `npm stage publish --tag latest --provenance`. A staged version is not live: a maintainer
+approves it with 2FA, which puts it on the npm `latest` tag. A pushed matching release tag starts
+its workflow. A manual retry must also name the exact release tag because the workflow guard
+rejects branch refs.
+
+## First version of a package
+
+npm cannot stage a package name that does not exist yet, and the stage-only token cannot publish
+directly. A package's first version is therefore published once by a maintainer from the exact
+release tag tree:
+
+```sh
+pnpm --filter <package> build
+cd packages/<dir> && pnpm pack --pack-destination <dir>
+npm login --registry=https://registry.npmjs.org/
+npm publish <tarball> --access public --tag latest --otp=<code>
+```
+
+Push the release tag and let its workflow pass every check first; its stage step fails for a new
+package, which is expected. A local publish has no provenance statement.
+
+## Approving a staged release
+
+After the publish workflow succeeds, approve the pending stage with npm 11.15.0 or newer (use
+`npx npm@11.20.0` when the installed npm is older):
+
+```sh
+npx npm@11.20.0 stage list <package>
+npx npm@11.20.0 stage view <stage-id>
+npx npm@11.20.0 stage approve <stage-id> --otp=<code>
+```
+
+`npm stage reject <stage-id>` discards a bad stage. See
+[staged publishing](https://docs.npmjs.com/staged-publishing/).
 
 ## Publish credentials
 
-The repository `NPM_TOKEN` secret is already set (added 2026-09-27). Before a release, confirm that
-the npm granular access token behind it is unexpired and has all of these settings:
+The repository `NPM_TOKEN` secret is a **stage-only** npm granular access token (replaced
+2026-09-27). Before a release, confirm that it is unexpired and has these settings:
 
-- **Read and write** permissions, including direct publishing (not stage-only).
-- Coverage for the `@takazudo` scope and permission to create the currently unclaimed, unscoped
-  `create-zudo-circuit-doc` package. Choose **All packages** or an equivalent selection; selecting
-  only the scope does not cover the unscoped initializer.
-- **Bypass 2FA** enabled.
+- **Read and write (stage only)** permissions. npm rejects a direct `npm publish` with this token.
+- Coverage for the `@takazudo` scope and the unscoped `create-zudo-circuit-doc` package. Choose
+  **All packages** or an equivalent selection; selecting only the scope does not cover the unscoped
+  initializer.
 
 GitHub does not reveal a saved secret's value, so check the token settings and expiry in npm. To
 rotate the token, create a replacement with the same permissions and update the repository secret:
@@ -57,14 +88,14 @@ See [npm access tokens](https://docs.npmjs.com/about-access-tokens/) and
 
 After each package exists on npm, configure a GitHub Actions trusted publisher in that package's npm
 settings. Use owner `Takazudo`, repository `zudo-circuit-doc`, and the matching workflow filename.
-Allow direct publishing explicitly.
+Keep it stage-only so a maintainer still approves each version.
 
 | Package | Workflow filename |
 | --- | --- |
 | `@takazudo/zudo-circuit-doc` | `publish-zudo-circuit-doc.yml` |
 | `create-zudo-circuit-doc` | `publish-create-zudo-circuit-doc.yml` |
 
-Verify an OIDC publish succeeds with the repository's pinned pnpm `11.5.2` before removing the
+Verify that an OIDC-authenticated `npm stage publish` succeeds before removing the
 `NPM_TOKEN` secret and revoking the token. Dry runs cannot verify npm authentication or prove that
 provenance will be issued. npm has scheduled the end of token-based direct publishing for January
 2027, so complete this migration before then. See
@@ -72,7 +103,8 @@ provenance will be issued. npm has scheduled the end of token-based direct publi
 
 ## If a publish workflow fails
 
-Check the exact package version on the public npm registry before retrying or changing a tag:
+A green workflow means the version is staged, not live; approve it as described above. For a failed
+run, check the exact package version on the public npm registry before retrying or changing a tag:
 
 ```sh
 npm view "@takazudo/zudo-circuit-doc@<version>" version --registry=https://registry.npmjs.org/
@@ -107,8 +139,8 @@ Run the non-publishing release check before preparing a release:
 pnpm release:dry-run
 ```
 
-This checks release preparation locally. It does not test GitHub's secret, npm permissions, 2FA
-bypass, Trusted Publishing, or provenance issuance.
+This checks release preparation locally. It does not test GitHub's secret, npm permissions, staging,
+Trusted Publishing, or provenance issuance.
 
 ## Generated template install age
 

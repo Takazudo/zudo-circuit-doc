@@ -64,11 +64,16 @@ jobs:
       - name: Verify with published runtime
         run: pnpm verify:pack --fixture empty --published-runtime
 
-      # NPM_TOKEN is the temporary publish credential. After the first
-      # publish, configure npm Trusted Publishing for this workflow; OIDC
-      # permissions and provenance are already enabled. See
-      # dev-docs/publishing.md.
-      - name: Publish package
+      # npm staged publishing: NPM_TOKEN is a stage-only token, so this job
+      # uploads a pending stage and a maintainer promotes it to `latest` with
+      # `npm stage approve <stage-id> --otp <code>`. Staging needs npm >= 11.15.0
+      # and only works for a package that already exists on npm (the first
+      # version is published directly by a maintainer). See dev-docs/publishing.md.
+      - name: Install npm with staged publishing
+        run: npm install -g npm@11.20.0
+
+      - name: Stage package for approval
+        working-directory: packages/create-zudo-circuit-doc
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm --filter create-zudo-circuit-doc publish --tag latest --access public --no-git-checks --provenance
+        run: npm stage publish --tag latest --access public --provenance

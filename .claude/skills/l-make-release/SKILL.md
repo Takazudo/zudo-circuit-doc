@@ -233,6 +233,17 @@ workflow, push event, exact `BUMP_SHA`, and creation after this tag push;
 first, then follow [Failure recovery](#failure-recovery). Never infer absence
 from a red workflow.
 
+The workflow **stages** the version with a stage-only `NPM_TOKEN`; a green run
+does not mean it is live. Find the stage with `npx npm@11.20.0 stage list
+<pkg>` and ask the owner for a 2FA code, then run `npx npm@11.20.0 stage
+approve <stage-id> --otp=<code>` (the owner may approve it themselves). For a
+package's **first** version npm cannot stage a new name, so the stage step
+fails by design: once every earlier step passed, `pnpm pack` the tagged tree
+and have the owner run `npm publish <tarball> --access public --tag latest
+--otp=<code>` after `npm login` (see the runbook's first-version section).
+Public registry reads can return a cached 404 for a few minutes after a first
+publish; poll before concluding it is absent.
+
 Once the exact version is confirmed live, verify the tag still points to the
 published commit. Reuse an existing `gh release view <tag>` if present.
 Otherwise put the changelog body after YAML frontmatter in a temporary notes
