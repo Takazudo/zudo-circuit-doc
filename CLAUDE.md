@@ -28,6 +28,13 @@ This repo is built by parallel `/x-wt-teams` sub-issues, each of which lists the
 
 Later sub-issues add scripts for the LED fixture, template sync, packed-consumer verification and acceptance scenarios — see the root `package.json` `scripts` table, which is pre-created in full even before every target file exists.
 
+## Releasing
+
+Use `/l-make-release` to prepare a package release and follow the
+[publishing runbook](doc/src/content/docs/release/publishing.mdx). The documentation site deploys
+automatically from `main` to [zudo-circuit-doc.zudolab.dev](https://zudo-circuit-doc.zudolab.dev);
+see [site deployment](doc/src/content/docs/release/site-deploy.mdx).
+
 ## Heavy runs
 
 Heavy or port-based commands (full monorepo build, packed-consumer verify, browser smoke, Docker KiCad previews) go through the shared queue/memory gate:
