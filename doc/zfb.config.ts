@@ -4,11 +4,25 @@ import { zudoDoc } from "@takazudo/zudo-doc/config";
 export default defineConfig(
   zudoDoc({
     siteName: "zudo-circuit-doc",
+    siteUrl: "https://zudo-circuit-doc.zudolab.dev",
+    sitemap: true,
     themePacks: ["default"],
     llmsTxt: true,
     cjkFriendly: true,
     dynamicPageTransition: true,
     docHistory: true,
+    changelogs: [
+      {
+        sourceDir: "src/content/docs/changelog/zudo-circuit-doc",
+        outputFile: "../packages/circuit-doc/CHANGELOG.md",
+        packageName: "@takazudo/zudo-circuit-doc",
+      },
+      {
+        sourceDir: "src/content/docs/changelog/create-zudo-circuit-doc",
+        outputFile: "../packages/create-zudo-circuit-doc/CHANGELOG.md",
+        packageName: "create-zudo-circuit-doc",
+      },
+    ],
     headerNav: [
       {
         label: "Getting Started",
@@ -39,6 +53,11 @@ export default defineConfig(
         label: "Release",
         path: "/docs/release",
         categoryMatch: "release",
+      },
+      {
+        label: "Changelog",
+        path: "/docs/changelog",
+        categoryMatch: "changelog",
       },
     ],
     headerRightItems: [

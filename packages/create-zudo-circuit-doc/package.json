@@ -28,6 +28,7 @@
     "templates",
     "README.md",
     "LICENSE",
+    "CHANGELOG.md",
     "!dist/**/*.test.*"
   ],
   "scripts": {
