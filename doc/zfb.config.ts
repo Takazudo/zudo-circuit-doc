@@ -52,7 +52,7 @@ export default defineConfig(
       },
       {
         label: "Claude Skills",
-        path: "/docs/claude-skills",
+        path: "/docs/claude",
         categoryMatch: "claude",
       },
       {
