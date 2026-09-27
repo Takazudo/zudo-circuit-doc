@@ -1,8 +1,6 @@
----
-title: Architecture Decisions
-description: ADR-001 through ADR-020 for the Circuit Doc v0.1 epic, with rationale, rejected alternatives and owning issues.
-sidebar_position: 2
----
+# Architecture Decisions
+
+ADR-001 through ADR-020 for the Circuit Doc v0.1 epic, with rationale, rejected alternatives and owning issues.
 
 If an implementing issue needs to deviate from the decision recorded here, it updates this
 page in the same PR — this record follows the code, it does not trail it.
@@ -27,7 +25,7 @@ are workspace members that use `workspace:*`.
 
 **Rejected alternative:** A zudo-sg-style out-of-workspace `file:.tarball` fixture. It makes
 in-repo iteration slow; the packed consumer outside the monorepo (see the
-[extraction baseline's empty-consumer test](./extraction-baseline.mdx#planned-empty-consumer-test))
+[extraction baseline's empty-consumer test](./extraction-baseline.md#planned-empty-consumer-test))
 is the portability proof instead.
 
 **Consequences / PR-time review target:** The workspace globs and unique package names.
@@ -59,7 +57,7 @@ staging, swallows install failures, and skips nested `pnpm-workspace.yaml`.
 **Context:** LED (zfb 2.20.2), zudo-sg (zfb 2.20.3) and zudo-doc HEAD (zfb 2.21.0) all pin
 slightly different dependency families, and the validator's declared `>=3.12` Python floor was
 only ever a CI-parity pin (the measured floor is 3.9, see the
-[extraction baseline](./extraction-baseline.mdx#toolchain)).
+[extraction baseline](./extraction-baseline.md#toolchain)).
 
 **Decision:** The version family is exact-pinned: `@takazudo/zudo-doc` 5.27.0,
 `@takazudo/zfb`/`zfb-runtime`/`zfb-md-wasm` 2.21.0, pnpm 11.5.2 (via `packageManager` and
@@ -173,7 +171,7 @@ validate, as upstream does. There is no weaker TS re-implementation.
 **Context:** `validate.py:563-566` (`fact_blocks_domain`) currently blocks a NOT APPLICABLE fact
 that sits on an unavailable source, contradicting the frozen `contract.md:9` prose and the
 schema's own comment. This is confirmed and reproduced — see the
-[extraction baseline's findings table](./extraction-baseline.mdx#pre-existing-findings). Fixing
+[extraction baseline's findings table](./extraction-baseline.md#pre-existing-findings). Fixing
 it is measured corpus-neutral: no LED coverage entry references a NOT APPLICABLE fact on an
 unavailable source.
 
@@ -205,7 +203,7 @@ corpus-neutral (measured).
 
 **Context:** LED's inventory logic hard-codes LCSC as the identity key and silently falls back
 to three hardcoded board specs (`validate.py:192-198`, the `specs or (...)` bug — see the
-[extraction baseline](./extraction-baseline.mdx#pre-existing-findings)) even when the caller
+[extraction baseline](./extraction-baseline.md#pre-existing-findings)) even when the caller
 passes no specs at all. A generic project has neither LCSC parts nor a generator spec by
 default.
 
@@ -389,7 +387,7 @@ generator-owned `assets/component-previews/**` and entries in `circuit/publicati
 
 **Context:** `--online` currently fails deterministically on this corpus because every
 AVAILABLE VOLATILE-HTML source hits the HASH-LOCKED requirement (see the
-[extraction baseline's findings table](./extraction-baseline.mdx#pre-existing-findings)).
+[extraction baseline's findings table](./extraction-baseline.md#pre-existing-findings)).
 
 **Decision:** `circuit.config.ts` also declares `validation.pythonMinVersion`, which defaults to
 `3.10`. The validator never runs online during builds; `--online` and `--refresh-source` are

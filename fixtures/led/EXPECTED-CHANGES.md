@@ -15,7 +15,7 @@ override for any of them.
 
 ## Why
 
-[ADR-011](/design/decisions/#adr-011-neutral-generated-page-marker) bumped the
+[ADR-011](../../dev-docs/decisions.md#adr-011-neutral-generated-page-marker) bumped the
 core `VIEW_MODEL_VERSION` from `1` to `2` (landed in
 [#18](https://github.com/Takazudo/zudo-circuit-doc/issues/18), before any
 example or fixture output was committed, so no committed preflight went

@@ -1,8 +1,6 @@
----
-title: Publishing
-description: Release policy, npm publishing steps, credentials, and recovery guidance.
-sidebar_position: 5
----
+# Publishing
+
+Release policy, npm publishing steps, credentials, and recovery guidance.
 
 Use `/l-make-release` to prepare a package release. This runbook records the release rules, owner
 actions, and recovery steps. A matching GitHub Actions workflow publishes each package from its

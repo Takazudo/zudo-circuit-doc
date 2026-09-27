@@ -2,9 +2,9 @@
 // `pnpm test:scenarios` (#32): runs every automated acceptance-scenario check
 // in one place, in a sensible order — unit -> integration -> packed consumer
 // (opt-in via --with-pack, because it needs the LED fixture materialized and
-// drives full packed-tarball builds) — and prints one table mapping each of
-// the epic's 31 scenario IDs (design/07-validation-acceptance.md) to its
-// result and evidence. See doc/src/content/docs/release/scenario-matrix.mdx
+// drives full packed-tarball builds) — and prints one table mapping the
+// epic's 31 scenario IDs from the validation plan preserved in git history
+// to their results and evidence. See dev-docs/scenario-matrix.md
 // for the full narrative matrix this table summarizes.
 //
 // This script does not reimplement any check: it runs the existing test
@@ -120,7 +120,7 @@ const registry = [
   { id: "OUT-01", type: "automated unit", evidence: 'test/core/emit.test.ts, "OUT-01 ..."', status: tsUnit.ok ? "PASS" : "FAIL" },
   { id: "OUT-02", type: "automated unit", evidence: 'test/core/emit.test.ts, "OUT-02 ..."', status: tsUnit.ok ? "PASS" : "FAIL" },
   { id: "OUT-03", type: "automated unit", evidence: 'test/core/emit.test.ts, "OUT-03 ..."', status: tsUnit.ok ? "PASS" : "FAIL" },
-  { id: "AGENT-01", type: "agent-run", evidence: "agent run (a Claude session hands off to a fresh agent session over committed evidence alone): Claude Code variant run, Continue PASS / Query FAIL, Codex variant not run; recorded in doc/src/content/docs/release/agent-01-transcript-summary.mdx; structural scaffold only here (verify-pack.mjs --fixture empty, scenario \"AGENT-VARIANTS\")", status: "NOT PASSED (agent run; see summary)" },
+  { id: "AGENT-01", type: "agent-run", evidence: "agent run (a Claude session hands off to a fresh agent session over committed evidence alone): Claude Code variant run, Continue PASS / Query FAIL, Codex variant not run; structural scaffold only here (verify-pack.mjs --fixture empty, scenario \"AGENT-VARIANTS\")", status: "NOT PASSED (agent run)" },
   { id: "CHANGE-01", type: "automated integration", evidence: "scripts/scenarios/change-01.mjs (a-d); (c) reuses scripts/check-cad-freshness.mjs unchanged", status: change01.ok ? "PASS" : "FAIL" },
   { id: "BENCH-01", type: "manual", evidence: "not run: requires physical hardware; Workflow F (circuit/WORKFLOW.md) and circuit/templates/project-docs/verification/bring-up.mdx reviewed", status: "NOT RUN (manual)" },
 ];

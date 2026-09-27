@@ -1,8 +1,6 @@
----
-title: Extraction Baseline (M0)
-description: Pins, toolchain, re-run checks and the import inventory this project extracts from zudo-led-lamp.
-sidebar_position: 1
----
+# Extraction Baseline (M0)
+
+Pins, toolchain, re-run checks and the import inventory this project extracts from zudo-led-lamp.
 
 ## What this page is
 
@@ -40,7 +38,7 @@ Measured in this task's environment:
 | --- | --- |
 | Node.js | 24.13.1 |
 | pnpm (via corepack) | 11.5.2 |
-| Python 3 | 3.12.3 (declared floor: 3.10, see [ADR-003](./decisions.mdx#adr-003-—-version-family)) |
+| Python 3 | 3.12.3 (declared floor: 3.10, see [ADR-003](./decisions.md#adr-003-—-version-family)) |
 | Docker | present (`/usr/bin/docker`) |
 | google-chrome | present (`/usr/bin/google-chrome`) |
 
@@ -48,7 +46,7 @@ Measured in this task's environment:
 
 The exact-pinned dependency set (`@takazudo/zudo-doc` 5.27.0, the `zfb`/`zfb-runtime`/`zfb-md-wasm`
 family 2.21.0, pnpm 11.5.2, Node >=22.18.0, Python >=3.10 stdlib-only) is
-[ADR-003](./decisions.mdx#adr-003-—-version-family).
+[ADR-003](./decisions.md#adr-003-—-version-family).
 
 ## LED checks re-run now
 
@@ -86,12 +84,12 @@ test, per the epic's "Extract before redesign" rule.
 
 | Finding | Location | Resolved by |
 | --- | --- | --- |
-| `fact_blocks_domain` blocks NOT APPLICABLE facts sitting on unavailable sources, contradicting `contract.md:9` | `validate.py:563-566` | [#6](https://github.com/Takazudo/zudo-circuit-doc/issues/6) — see [ADR-008](./decisions.mdx#adr-008-—-not-applicable-never-blocks) |
-| `resolve_identities` rejects a same-MPN match before manufacturer narrowing runs | `validate.py:317` (narrowing logic at `:374-381`) | [#6](https://github.com/Takazudo/zudo-circuit-doc/issues/6) — see [ADR-009](./decisions.mdx#adr-009-—-resolver-manufacturer-narrowing-before-rejection) |
-| `--online` can never pass on this corpus: every AVAILABLE VOLATILE-HTML source hits the HASH-LOCKED requirement and fails deterministically | `validate.py:1092` (6 VOLATILE-HTML sources in the corpus) | [#12](https://github.com/Takazudo/zudo-circuit-doc/issues/12) — see [ADR-019](./decisions.mdx#adr-019-—-validator-online-behavior-stays-explicit-and-skips-volatile-html) |
+| `fact_blocks_domain` blocks NOT APPLICABLE facts sitting on unavailable sources, contradicting `contract.md:9` | `validate.py:563-566` | [#6](https://github.com/Takazudo/zudo-circuit-doc/issues/6) — see [ADR-008](./decisions.md#adr-008-—-not-applicable-never-blocks) |
+| `resolve_identities` rejects a same-MPN match before manufacturer narrowing runs | `validate.py:317` (narrowing logic at `:374-381`) | [#6](https://github.com/Takazudo/zudo-circuit-doc/issues/6) — see [ADR-009](./decisions.md#adr-009-—-resolver-manufacturer-narrowing-before-rejection) |
+| `--online` can never pass on this corpus: every AVAILABLE VOLATILE-HTML source hits the HASH-LOCKED requirement and fails deterministically | `validate.py:1092` (6 VOLATILE-HTML sources in the corpus) | [#12](https://github.com/Takazudo/zudo-circuit-doc/issues/12) — see [ADR-019](./decisions.md#adr-019-—-validator-online-behavior-stays-explicit-and-skips-volatile-html) |
 | `expected_mpn`'s C144397 special case is dead code — no generator spec has contained C144397 since upstream commit `d892e13` | `validate.py:226-228` | [#17](https://github.com/Takazudo/zudo-circuit-doc/issues/17) |
 | Emit ownership gap: a marker-less target is silently overwritten, and `prune()` runs only after all writes, so a failed run leaves partial writes | `emit.ts:104-124` (reproduced in `planning/prototypes/emit-gap.ts`) | [#10](https://github.com/Takazudo/zudo-circuit-doc/issues/10) |
-| `generator_inventory`'s `specs or (...)` fallback silently substitutes the three hardcoded LED board specs, even when passed `()` or `[]` | `validate.py:192-198` | [#17](https://github.com/Takazudo/zudo-circuit-doc/issues/17) — see [ADR-010](./decisions.mdx#adr-010-—-two-inventory-profiles) |
+| `generator_inventory`'s `specs or (...)` fallback silently substitutes the three hardcoded LED board specs, even when passed `()` or `[]` | `validate.py:192-198` | [#17](https://github.com/Takazudo/zudo-circuit-doc/issues/17) — see [ADR-010](./decisions.md#adr-010-—-two-inventory-profiles) |
 | Stale doc claim: "online mode mutates retained evidence" — it does not (`store_and_verify` never mutates) | `validate.ts:15`, `ARCHITECTURE.md:198` | [#16](https://github.com/Takazudo/zudo-circuit-doc/issues/16) |
 | Stale doc claim: "rules.json is not covered by validate.py" — `validate_integration_artifacts` (`validate.py:903-940`) does cover it | `evidence.ts:248`, `integration.test.ts:297` | [#11](https://github.com/Takazudo/zudo-circuit-doc/issues/11) |
 
@@ -132,7 +130,7 @@ commit, its destination in this repository, and the sub-issue that lands it.
 | `core/model-descriptor.ts`, `core/reference-descriptor.ts` | `packages/circuit-doc/src/descriptors/**` (`./descriptors` export) | [#13](https://github.com/Takazudo/zudo-circuit-doc/issues/13) |
 | `ui/{evidence-anchor,evidence-details,evidence-fact,evidence-table,component-references,footprint-preview,package-model-viewer}.tsx` + new `mdx-extras.ts` | `packages/circuit-doc/src/ui/**`, `packages/circuit-doc/src/mdx-extras.ts` | [#13](https://github.com/Takazudo/zudo-circuit-doc/issues/13) |
 | `src/component-preview/footprint-preview-island.tsx`, `src/component-model-viewer/{package-model-viewer-island,viewer-runtime,viewer-state}.tsx` | `packages/circuit-doc/src/islands/**` (`./islands` seed export) | [#13](https://github.com/Takazudo/zudo-circuit-doc/issues/13) |
-| `doc/src/styles/global.css:30-535` (`.zld-*` rules) | `packages/circuit-doc/styles.css` (`.zcd-*`, see [ADR-015](./decisions.mdx#adr-015-—-css-prefix-zld--→-zcd)) | [#13](https://github.com/Takazudo/zudo-circuit-doc/issues/13) |
+| `doc/src/styles/global.css:30-535` (`.zld-*` rules) | `packages/circuit-doc/styles.css` (`.zcd-*`, see [ADR-015](./decisions.md#adr-015-—-css-prefix-zld--→-zcd)) | [#13](https://github.com/Takazudo/zudo-circuit-doc/issues/13) |
 | `doc/component-docs/adapters/circuit/references.ts` (VRML/WRL validation), `model-assets.ts` (WRL publication) | `packages/circuit-doc/src/cad/**` | [#15](https://github.com/Takazudo/zudo-circuit-doc/issues/15) |
 | `component-docs/scripts/check-built-component-references.mjs` | `packages/circuit-doc/src/cli/check-built.ts` | [#19](https://github.com/Takazudo/zudo-circuit-doc/issues/19) |
 | `component-docs/scripts/model-viewer-browser-smoke.mjs` | `packages/circuit-doc/src/browser-smoke/**` (`check-browser` CLI command) | [#27](https://github.com/Takazudo/zudo-circuit-doc/issues/27) |
