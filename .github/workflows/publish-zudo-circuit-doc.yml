@@ -1,0 +1,85 @@
+# Publish @takazudo/zudo-circuit-doc to npm from its stable vX.Y.Z tag.
+#
+# The tag guard also runs for workflow_dispatch so a manual retry cannot
+# publish from an arbitrary branch or from the initializer's tag namespace.
+
+name: Publish zudo-circuit-doc to npm
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+concurrency:
+  group: publish-zudo-circuit-doc
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: Build, verify, and publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      # The shared setup action installs Node for builds. Setup Node again
+      # with npm registry configuration so NODE_AUTH_TOKEN is available to
+      # pnpm publish.
+      - name: Setup Node.js for npm publish
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+
+      - name: Guard stable runtime release tag
+        run: node scripts/lib/release-guard.mjs runtime
+
+      - name: Build
+        run: pnpm build
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Check initializer template
+        run: pnpm check:template
+
+      - name: Check runtime package shape
+        run: pnpm --filter @takazudo/zudo-circuit-doc check:shape
+
+      - name: Build documentation and check generated changelogs
+        run: |
+          pnpm doc:build
+          git diff --exit-code -- packages/circuit-doc/CHANGELOG.md packages/create-zudo-circuit-doc/CHANGELOG.md
+
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Verify empty consumer
+        run: pnpm verify:pack --fixture empty
+
+      - name: Verify minimal consumer
+        run: pnpm verify:pack --fixture minimal
+
+      # NPM_TOKEN is the temporary publish credential. After the first
+      # publish, configure npm Trusted Publishing for this workflow; OIDC
+      # permissions and provenance are already enabled. See
+      # doc/src/content/docs/release/publishing.mdx.
+      - name: Publish package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm --filter @takazudo/zudo-circuit-doc publish --tag latest --access public --no-git-checks --provenance
