@@ -1,14 +1,10 @@
 ---
 title: Create a project
-description: Create a circuit documentation project from npm, or use local tarballs before the first release.
+description: Create a circuit documentation project from npm, or from local tarballs of unreleased changes.
 sidebar_position: 3
 ---
 
-> **Before the initializer's first npm release:** `@takazudo/zudo-circuit-doc` 0.1.0 is published
-> on npm, but `create-zudo-circuit-doc` is not published yet. Use
-> [the from-source route](#before-the-first-npm-release) below for now.
-
-Once both packages are available on npm, create a project with:
+Create a project with:
 
 ```sh
 pnpm create zudo-circuit-doc my-circuit
@@ -23,9 +19,9 @@ Continue with [the first run](./first-run.mdx) and [the first task](./first-task
 For names, agent choices, and other options, see the
 [initializer CLI reference](../reference/create-cli.mdx).
 
-## Before the first npm release
+## From source
 
-You can build and pack both packages from a checkout of
+To try changes that are not on npm yet, build and pack both packages from a checkout of
 [Takazudo/zudo-circuit-doc](https://github.com/Takazudo/zudo-circuit-doc). Run these commands
 from the repository root:
 
