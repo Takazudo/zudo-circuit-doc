@@ -12,14 +12,14 @@ const WORKFLOWS = [
     file: ".github/workflows/publish-zudo-circuit-doc.yml",
     tag: "v*.*.*",
     guard: "runtime",
-    selector: "@takazudo/zudo-circuit-doc",
+    packageDir: "packages/circuit-doc",
     fixture: "pnpm verify:pack --fixture empty",
   },
   {
     file: ".github/workflows/publish-create-zudo-circuit-doc.yml",
     tag: "create-zudo-circuit-doc-v*.*.*",
     guard: "initializer",
-    selector: "create-zudo-circuit-doc",
+    packageDir: "packages/create-zudo-circuit-doc",
     fixture: "pnpm verify:pack --fixture empty --published-runtime",
   },
 ];
@@ -42,7 +42,9 @@ describe("npm publish workflows", () => {
       assert.match(source, /permissions:\s*\n\s*contents:\s*read\s*\n\s*id-token:\s*write/u);
       assert.match(source, /--provenance/u);
       assert.match(source, /NODE_AUTH_TOKEN:\s*\$\{\{\s*secrets\.NPM_TOKEN\s*\}\}/u);
-      assert.match(source, new RegExp(`pnpm --filter ${escapeRegExp(workflow.selector)} publish`, "u"));
+      assert.match(source, new RegExp(`working-directory: ${escapeRegExp(workflow.packageDir)}\\s*\\n`, "u"));
+      assert.match(source, /npm stage publish --tag latest --access public --provenance/u);
+      assert.doesNotMatch(source, /pnpm [^\n]*\bpublish\b/u);
       assert.ok(source.includes(workflow.fixture), `missing verification command: ${workflow.fixture}`);
       assert.match(source, /git diff --exit-code -- packages\/circuit-doc\/CHANGELOG\.md packages\/create-zudo-circuit-doc\/CHANGELOG\.md/u);
       assert.match(source, /dev-docs\/publishing\.md/u);
