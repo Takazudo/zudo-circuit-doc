@@ -1,0 +1,26 @@
+---
+title: Current limitations
+description: Features outside the current zudo-circuit-doc release and package licensing.
+sidebar_position: 7
+---
+
+The current release focuses on circuit documentation, component evidence, and CAD previews.
+These limits matter when planning a project:
+
+- **No update or migrate command.** The initializer creates a project once; you own its authored
+  files afterward. See [Ownership and upgrades](../concepts/ownership-and-upgrades.mdx).
+- **No manufacturing export profile.** It does not produce Gerbers, pick-and-place files, or a
+  fabrication order package.
+- **Limited supplier acquisition helpers.** The optional `easyeda2kicad` tool can help import
+  EasyEDA/LCSC CAD assets. There is no built-in integration for other distributor APIs.
+- **No STEP viewer or general CAD converter.** The site previews WRL models. A matching STEP and
+  WRL pair from one tagged KiCad library release is the supported path for CAD evidence; see
+  [CAD fidelity](../concepts/cad-fidelity.mdx).
+- **No cross-vendor alias routing.** A same-named part from another manufacturer needs its exact
+  manufacturer-qualified identity; a shared-name shortcut cannot choose between them.
+- **No `.agents/skills` mirror for Codex.** Agent resources remain under `.claude/skills/`.
+  Codex uses `AGENTS.md` to reach the shared `circuit/WORKFLOW.md` instructions.
+
+## License
+
+Both `create-zudo-circuit-doc` and `@takazudo/zudo-circuit-doc` are licensed under MIT.
