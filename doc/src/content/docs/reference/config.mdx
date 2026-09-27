@@ -16,9 +16,9 @@ export default {
 } satisfies CircuitConfig;
 ```
 
-The type-only import is erased by type stripping, so the file loads even in places where the
-package itself isn't resolvable yet — a fresh scaffold before `pnpm install`, a fixture, a temp
-directory. `defineCircuitConfig()` also exists as an optional identity helper for the same shape.
+The type-only import is erased by type stripping, so the file loads in a fresh scaffold before
+`pnpm install`. `defineCircuitConfig()` also exists as an optional identity helper for the same
+shape.
 
 **Every path field is relative to this file's own directory**, and every path is rejected if it's
 absolute, uses backslashes, or escapes the directory with `..`. The loader resolves all of them to
@@ -38,7 +38,7 @@ one place (the CLI/adapter), never confused inside the schema check itself.
 | `publication` | Yes | — | See below |
 | `cad` | Yes | — | `{ enabled: false, libraryName? }` or the full enabled shape — see below |
 | `validation` | No | `{}` | See below |
-| `scan` | No | `undefined` (no overrides) | `ScanPolicyConfig` overrides, passed verbatim to the scan policy owner |
+| `scan` | No | `undefined` (no overrides) | `ScanPolicyConfig` overrides for scan thresholds and expected counts |
 | `browserSmoke` | No | `undefined` | `{ representatives: [...] }` |
 
 ## `docs`
@@ -51,8 +51,8 @@ one place (the CLI/adapter), never confused inside the schema check itself.
 | `publicRoot` | Yes | — | zudo-doc's `public/` directory; previews go under `<publicRoot>/assets/component-previews/{footprints,models}` |
 | `dist` | Yes | — | The built-site directory `check-built`/`scan`/`check-browser` read by default |
 | `agentResources` | No | `true` | Generated pages link `/docs/claude/` and `/docs/claude-skills/<owner>/` (needs zudo-doc's `claudeResources`) |
-| `generatedMarker` | No | the neutral marker | A custom generated-page marker string (single line). The LED regression fixture sets its legacy marker here so its goldens stay byte-identical |
-| `generatedNotice` | No | `true`, unless `generatedMarker` is a legacy marker and this is unset (then `false`) | Whether generated pages carry the generated-page notice paragraph. Set it explicitly to decouple the notice from the marker, e.g. a custom marker with no notice, or the legacy marker with a notice |
+| `generatedMarker` | No | the neutral marker | A custom generated-page marker string (single line) |
+| `generatedNotice` | No | `true`, unless `generatedMarker` is a legacy marker and this is unset (then `false`) | Whether generated pages carry the generated-page notice paragraph. Set it explicitly to decouple the notice from the marker, e.g. a custom marker with no notice, or a legacy marker with a notice |
 | `integrationGloss` | No | `null` | An optional JSON file `{ domain: text }` |
 
 ## `evidence`
@@ -115,9 +115,9 @@ Discriminated on `enabled`:
 | `previewRenderer` | Yes | — | `{ image, version, platform, layers[], theme, options[] }` — the pinned KiCad container and render settings |
 | `limits` | No | see below | Partial override of the byte-size limits |
 
-A project doesn't need to invent its own `previewRenderer`: the package exports the exact settings
-the LED regression corpus renders against as `DEFAULT_PREVIEW_RENDERER`, so most projects can spread
-or reference it verbatim rather than re-typing the pinned image digest:
+A project doesn't need to invent its own `previewRenderer`: the package exports
+`DEFAULT_PREVIEW_RENDERER`, which most projects can reuse rather than re-typing the pinned image
+digest:
 
 ```ts
 import type { CircuitConfig } from "@takazudo/zudo-circuit-doc/config";
@@ -157,8 +157,7 @@ manifest is missing; run \`pnpm previews:generate\``. STEP files are optional co
 authoring — see [Concepts → CAD fidelity](../concepts/cad-fidelity.mdx) for what's actually required
 (WRL) versus optional (STEP).
 
-Reference-limit defaults (from upstream zudo-led-lamp `REFERENCE_LIMITS`), overridable per key under
-`cad.limits`:
+These reference limits can be overridden per key under `cad.limits`:
 
 | Limit | Default |
 | --- | --- |
@@ -179,20 +178,20 @@ Reference-limit defaults (from upstream zudo-led-lamp `REFERENCE_LIMITS`), overr
 `minimumOwnedCanaries`, `minimumOwnedFiles`, `minimumSiteCanaries`, `minimumSiteFiles`,
 `expectedWithheld` (all non-negative integers), and `positiveControlRecord` (a slug, or `null` to
 pick one deterministically). Omitting `scan` entirely means "derive a proportional policy from the
-resolved config" — a project supplies nothing and gets a generic, proportional policy rather than
-upstream's LED-specific fixed floors.
+resolved config" — a project supplies nothing and gets a proportional policy based on its own
+configuration.
 
 ## `browserSmoke`
 
 `{ representatives: [{ kind, path, slug, identity, availability? }, ...] }`. `path` must be a site
-route starting with `/`. Example, from the LED regression fixture:
+route starting with `/`. For example:
 
 ```json
 {
   "representatives": [
-    { "kind": "passive", "path": "/docs/components/records/c22807/", "slug": "c22807", "identity": "C22807" },
-    { "kind": "IC", "path": "/docs/components/records/al8860mp-13/", "slug": "al8860mp-13", "identity": "AL8860MP-13" },
-    { "kind": "connector", "path": "/docs/components/records/type-c-31-m-17/", "slug": "type-c-31-m-17", "identity": "TYPE-C-31-M-17" }
+    { "kind": "passive", "path": "/docs/components/records/resistor-10k/", "slug": "resistor-10k", "identity": "RES-10K-0603" },
+    { "kind": "IC", "path": "/docs/components/records/example-regulator/", "slug": "example-regulator", "identity": "EXAMPLE-REGULATOR" },
+    { "kind": "connector", "path": "/docs/components/records/example-header/", "slug": "example-header", "identity": "EXAMPLE-HEADER-2X3" }
   ]
 }
 ```

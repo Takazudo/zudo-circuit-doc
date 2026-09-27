@@ -5,10 +5,9 @@ sidebar_position: 2
 ---
 
 Component evidence is stored as one owner bundle per exact component, at
-`.claude/skills/component-<suffix>/`, following the frozen **component-spec contract, version 1**
-— extracted from zudo-led-lamp and shipped with the package as
-`node_modules/@takazudo/zudo-circuit-doc/contract/contract.md`. This page summarizes it; the
-shipped file is the source of truth.
+`.claude/skills/component-<suffix>/`, following the **component-spec contract, version 1**. The
+package ships the full contract at
+`node_modules/@takazudo/zudo-circuit-doc/contract/contract.md`; this page summarizes it.
 
 ## Files of a v1 owner bundle
 
@@ -47,7 +46,7 @@ Only six verdicts are valid, spelled exactly:
 | `BLOCKER - deterministic spec violation` | A supported, deterministic violation |
 | `NEEDS BENCH` | Requires measurement or physical verification |
 | `UNSOURCED` | Required support is not retained |
-| `NOT APPLICABLE` | The claim or domain does not apply, with a reason; it never blocks a domain (ADR-008) |
+| `NOT APPLICABLE` | The claim or domain does not apply, with a reason; it never blocks a domain |
 
 These verdicts are never collapsed into a single pass/fail field, in the data or in a report.
 

@@ -21,8 +21,8 @@ A familiar-looking shape is not proof of the exact variant. Every acquired asset
 SHA-256 and the fidelity class with its reasoning — see the generated project's
 `circuit/templates/cad-asset-receipt.md` for the full field list.
 
-`example-minimal-circuit`, this repository's real portability fixture, onboards a Texas Instruments
-TMP1075DR through the generic inventory profile using a `family` footprint: the KiCad
+For example, a project using the generic inventory profile could publish a Texas Instruments
+TMP1075DR with a `family` footprint: the KiCad
 `SOIC-8_3.9x4.9mm_P1.27mm` footprint fits the package outline, but its pads differ from TI's own
 D0008A land-pattern recommendation. The fact record and a "shared footprint package" page notice
 say so explicitly — a passing footprint/pin check never upgrades that to `exact-vendor`.
@@ -46,8 +46,7 @@ physical seating. Workflow D's checklist (symbol pins vs. footprint pads vs. the
 checks only confirm that what's committed matches what the CLI would regenerate from the same
 inputs.
 
-The viewer stays **WRL-only** by design: no STEP-to-WRL conversion is part of this project (a
-general CAD-format converter is explicitly out of scope for the epic). Where an official KiCad
+The viewer stays **WRL-only**: STEP-to-WRL conversion is not provided. Where an official KiCad
 footprint's matched STEP+WRL pair only exists in an older tagged library release than the footprint
 itself, a project may pin from that older release, or record the WRL as unavailable — either way, in
 the receipt.

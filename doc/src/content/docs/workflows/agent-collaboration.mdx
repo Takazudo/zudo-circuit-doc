@@ -34,19 +34,8 @@ because both tools are assumed to be in use.
 
 ## Why this makes continuation possible
 
-Because both entry points converge on the same file, evidence contract and command set, an agent
-picking up a task never has to reconcile "the Claude way" against "the Codex way" — there isn't a
-second way. A task Claude Code starts (a new owner bundle, an updated selection, a regenerated
-preflight report) is durable project state the moment it's committed: sources, facts, coverage and
-the publication lock in `circuit/publication/selection.json`, not anything held in either tool's own
-memory. Codex resuming the same project reads the identical `WORKFLOW.md`, the identical
-`.claude/skills/` evidence, and the identical `pnpm circuit:check` output — including the same
-`SCOPE:` and `SKIP:` lines — that Claude Code would have seen.
-
-This project's acceptance scenario AGENT-01 is defined around exactly that handoff: one agent
-completes a bounded task, and a second, different agent continues from the committed evidence and
-the next-actions handoff alone, with no shared conversation history and no separate, divergent
-database to keep in sync. The v0.1 run used a fresh Claude Code process as the second agent, because
-the Codex CLI had hit its usage limit, so the cross-tool handoff to Codex is still unexercised. The
-transcript summary remains in git history. A successful structural scaffold alone does not count as
-the agent handoff passing.
+Because both entry points converge on the same workflow, evidence contract and command set, either
+agent can continue from the project's committed files. Sources, facts, coverage and the publication
+lock in `circuit/publication/selection.json` are durable project state; a later task can read the
+same `WORKFLOW.md`, `.claude/skills/` evidence and `pnpm circuit:check` output without relying on the
+previous agent's conversation.

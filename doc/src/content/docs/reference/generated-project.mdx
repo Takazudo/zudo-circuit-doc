@@ -11,7 +11,7 @@ This is the exhaustive version of [Getting Started → What you get](../getting-
 | File | Purpose |
 | --- | --- |
 | `package.json` | `private: true`, `"type": "module"`, `packageManager` pinned to `pnpm@11.5.2` |
-| `pnpm-workspace.yaml` | `packages: [doc]`, `minimumReleaseAge: 0`, `allowBuilds.esbuild`, any required `trustPolicyExclude` — no `.npmrc` files exist, because `pnpm pack` drops them and pnpm only reads them at the workspace root |
+| `pnpm-workspace.yaml` | `packages: [doc]`, `minimumReleaseAge: 0`, `allowBuilds.esbuild`, and any required `trustPolicyExclude` setting |
 | `circuit.config.ts` | See [Reference → circuit.config.ts](./config.mdx) |
 | `README.md` | Commands, the first circuit task, tool requirements |
 | `CLAUDE.md`, `AGENTS.md` | Thin pointers to `circuit/WORKFLOW.md`, written per `--agent` |
@@ -70,9 +70,3 @@ deploy configuration of any kind.
 | `pnpm circuit:doctor` | `zudo-circuit-doc doctor` |
 | `pnpm check:site` | `zudo-circuit-doc check-built && zudo-circuit-doc scan && pnpm --dir doc check:links -- --strict-anchors --strict-broken` |
 | `pnpm previews:generate` | `zudo-circuit-doc footprints generate` (optional; needs Docker) |
-
-`doc/scripts/check-links.js` is vendored byte-identical from the pinned `create-zudo-doc` scaffold —
-`check:site` runs it through `pnpm --dir doc check:links` (rather than pointing `node` at its path
-from the project root) specifically so the vendored file's own `process.cwd()`-relative behavior
-stays unmodified. See [Concepts → Ownership and upgrades](../concepts/ownership-and-upgrades.mdx)
-for how this file is kept in sync with upstream.
