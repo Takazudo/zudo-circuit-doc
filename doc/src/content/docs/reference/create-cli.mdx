@@ -1,0 +1,35 @@
+---
+title: Create CLI
+description: Usage, defaults, and flags for the create-zudo-circuit-doc initializer.
+sidebar_position: 1.5
+---
+
+Use `create-zudo-circuit-doc` to scaffold a project. Once published on npm, the short form is
+`pnpm create zudo-circuit-doc my-circuit`. See [Create a project](../getting-started/create-a-project.mdx)
+for the current availability notice and a from-source route.
+
+```text
+create-zudo-circuit-doc [destination] [--name <npm-name>] [--title <site title>]
+                         [--library <kicad-lib-name>] [--agent claude|codex|both|none]
+                         [--yes] [--install|--no-install] [--git|--no-git]
+                         [--runtime-spec <spec>] [--help] [--version]
+```
+
+If you omit `destination` on an interactive terminal, the initializer prompts for it. In a
+non-interactive shell, supply a destination.
+
+| Flag | Default | Effect |
+| --- | --- | --- |
+| `--name <npm-name>` | Destination basename | Sets the generated project and package name. |
+| `--title <site title>` | Title-cased name | Sets the site title. |
+| `--library <lib-name>` | Name | Sets the KiCad library name in `circuit.config.ts`, used when CAD is enabled. |
+| `--agent claude\|codex\|both\|none` | `both` | Writes `CLAUDE.md`, `AGENTS.md`, both, or neither as pointers to `circuit/WORKFLOW.md`. |
+| `--yes`, `-y` | Off | Skips the destination prompt; a missing destination is an error. |
+| `--install` / `--no-install` | Install on | Runs or skips `pnpm install` after scaffolding. |
+| `--git` / `--no-git` | Git on | Runs or skips `git init` and an initial commit. |
+| `--runtime-spec <spec>` | Template dependency spec | Writes a semver range, dist-tag, or absolute-path `file:` spec for `@takazudo/zudo-circuit-doc` in both the root and `doc/package.json`. Relative `file:` paths are rejected. |
+| `--help`, `-h` | — | Prints usage and options. |
+| `--version`, `-v` | — | Prints the initializer version. |
+
+With `--no-install`, run `pnpm install` in the generated directory before using project commands.
+The initializer reports the applied runtime spec in its next steps when you pass `--runtime-spec`.

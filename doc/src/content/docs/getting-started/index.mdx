@@ -1,38 +1,39 @@
 ---
 title: Getting Started
-description: What zudo-circuit-doc is, how it relates to zudo-doc and zudo-sg, and how to try it before it is published on npm.
+description: Create a circuit documentation project, check your setup, and begin your first task.
 sidebar_position: 1
 ---
 
-`zudo-circuit-doc` is a circuit-development project initializer built on
-[zudo-doc](https://github.com/zudolab/zudo-doc). It follows the same initializer/runtime split as
-[zudo-sg](https://github.com/Takazudo/zudo-sg):
+`zudo-circuit-doc` helps you build a circuit project whose decisions, component evidence, and
+open questions stay visible in its documentation. It has two parts: `create-zudo-circuit-doc`
+creates a project, and `@takazudo/zudo-circuit-doc` supplies its commands, evidence checks, and
+component pages. The generated documentation site runs on [zudo-doc](https://github.com/zudolab/zudo-doc).
 
-- **`create-zudo-circuit-doc`** — an initializer that generates a new project.
-- **`@takazudo/zudo-circuit-doc`** — the runtime package a generated project depends on: the CLI,
-  the MDX renderer and preview islands, and the canonical Python evidence validator.
+It is for people developing circuits with an agent, or maintaining the resulting evidence
+themselves. A new project gives you a project brief, an agent workflow, an initially empty
+component catalog, and commands to validate evidence and regenerate the site. You can start
+documenting an idea before choosing a component or creating any CAD files.
 
-Both packages sit on top of zudo-doc the same way zudo-sg does: the generated project is an
-ordinary zudo-doc site (`doc/`), with `@takazudo/zudo-circuit-doc` adding one more kind of
-content — component evidence — on top of zudo-doc's authored documentation. If you already know
-zudo-doc or zudo-sg, the generated project's `doc/` directory, `zfb.config.ts` and header
-navigation will look familiar; what's new is the `circuit/` directory and the `.claude/skills/`
-evidence bundles described in [Concepts](../concepts/).
+## Start in three steps
 
-A generated project opens as useful documentation before it has any component, board, KiCad file
-or firmware. It carries one canonical agent workflow, so a short request such as "download this
-datasheet", "get the 3D model" or "check this spec" becomes durable, honest project knowledge:
-exact identity, retained evidence, regenerated documentation and a truthful statement of what is
-still unknown.
+1. [Create a project](./create-a-project.mdx): run `pnpm create zudo-circuit-doc my-circuit`
+   when the packages are available on npm. Until then, that page has a working tarball route.
+2. In the new directory, run `pnpm circuit:doctor`, then `pnpm dev` to open its site.
+   [The first run](./first-run.mdx) explains the output.
+3. [Begin your first task](./first-task.mdx): write the project brief, then add a component
+   when you know its exact part number.
 
-## In this section
+Check [Requirements](./requirements.mdx) before creating a project. [What you get](./generated-project.mdx)
+shows the generated files, and [Current limitations](./limitations.mdx) describes features that
+are not included.
 
-- [Requirements](./requirements.mdx) — what has to be on your machine, and what is optional.
-- [Create a project](./create-a-project.mdx) — the tarball-based trial, since neither package is
-  published on npm yet.
-- [The first run](./first-run.mdx) — `pnpm circuit:doctor` and `pnpm dev`.
-- [The first task](./first-task.mdx) — the project brief (Workflow A), then the first component
-  (Workflow B).
-- [What you get](./generated-project.mdx) — the generated-project layout, at a glance.
+## What this site covers
 
-For the exhaustive file-by-file reference, see [Reference → The generated project](../reference/generated-project.mdx).
+This site documents the initializer and runtime software. **Getting Started** takes you from
+installation to the first task. **Concepts** explains the evidence, publication, CAD, and file
+ownership rules. **Workflows** describes the tasks an agent can carry out in a generated project.
+**Reference** lists commands, configuration, schemas, and generated files. **Claude Skills** exposes
+the workflow resources used by agents. **Changelog** records package changes.
+
+Your generated project's `doc/` directory is a separate site for *your circuit*. Its authored
+project pages and generated component pages are the output of the work described here.

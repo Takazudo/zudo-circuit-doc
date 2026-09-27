@@ -4,7 +4,9 @@ description: What has to be installed to work on a generated zudo-circuit-doc pr
 sidebar_position: 2
 ---
 
-A generated project only *requires* a small toolchain. Everything else — Docker, Chrome, a
+A generated project only *requires* a small toolchain. Install Node.js **22.18.0 or newer**,
+Python **3.10 or newer** (standard library only), and pnpm through Corepack before creating
+one. Everything else — Docker, Chrome, a
 package manager for CAD imports — is needed for one specific optional capability, and its absence
 never breaks the documentation build.
 
@@ -13,9 +15,8 @@ never breaks the documentation build.
 | Tool | Version | Used for |
 | --- | --- | --- |
 | [Node.js](https://nodejs.org/) | ≥22.18.0 | Everything: the CLI, the doc-site build, native TypeScript type stripping for `circuit.config.ts` |
-| [pnpm](https://pnpm.io/) | 11 (via [Corepack](https://nodejs.org/api/corepack.html)) | Install and every project script (`pnpm install`, `pnpm dev`, …) |
+| [pnpm](https://pnpm.io/) | 11.5.2 (via [Corepack](https://nodejs.org/api/corepack.html)) | Install and every project script (`pnpm install`, `pnpm dev`, …) |
 | [Python](https://www.python.org/) | ≥3.10, standard library only | The canonical evidence validator (`pnpm circuit:check`) |
-| [git](https://git-scm.com/) | any recent version | Doc history, review diffs; `pnpm circuit:doctor` reports it as informational, not a hard requirement |
 
 Node's native TypeScript type stripping is why `circuit.config.ts` loads with no build step, and
 why the runtime package ships compiled JavaScript instead of `.ts` sources (type stripping only
@@ -29,6 +30,7 @@ reports each one as present or missing without failing the run.
 
 | Tool | Needed for | If missing |
 | --- | --- | --- |
+| [git](https://git-scm.com/) | The initializer's default initial commit and documentation history | Pass `--no-git` when creating a project; `pnpm circuit:doctor` reports Git as informational |
 | Docker + the pinned KiCad container image | `zudo-circuit-doc footprints generate` (rendering footprint preview SVGs) | Exit `4` ("not run"); `footprints check` and everything else still works |
 | Chrome (or `CHROME_BIN`) | `zudo-circuit-doc check-browser` (browser smoke of the built site) | Exit `4` ("not run") |
 | Network access | Acquiring datasheets/CAD assets, and `validate --online` / `--refresh-source` | Those specific agent operations fail; the documentation build itself never goes online |
@@ -38,5 +40,5 @@ See [Reference → Capability & tool matrix](../reference/capability-matrix.mdx)
 information broken down by every CLI command, and [Getting Started → The first run](./first-run.mdx)
 for what `pnpm circuit:doctor` actually prints.
 
-No credentials are required for anything in this list, and no deploy target is configured by the
-initializer — see [Release](../release/) for what that means for a generated project.
+No credentials are required for anything in this list, and the initializer does not configure a
+deploy target.
