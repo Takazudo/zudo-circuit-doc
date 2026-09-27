@@ -22,7 +22,17 @@ const PKG_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const LIB = join(PKG_ROOT, "lib");
 const manifest = JSON.parse(readFileSync(join(PKG_ROOT, "package.json"), "utf8"));
 
-const REQUIRED_FILES = ["bin", "lib", "python", "templates", "contract", "styles.css", "README.md", "LICENSE"];
+const REQUIRED_FILES = [
+  "bin",
+  "lib",
+  "python",
+  "templates",
+  "contract",
+  "styles.css",
+  "README.md",
+  "LICENSE",
+  "CHANGELOG.md",
+];
 const REQUIRED_PATHS = ["styles.css", "lib/islands.d.ts"];
 // Island roots are the modules wrapped in `<Island>`; helpers the roots import
 // (viewer-runtime, viewer-state) are plain modules and carry no directive.
