@@ -7,6 +7,7 @@ from pathlib import Path
 
 from ..errors import load, require, required_keys
 from ..facts import fact_primary_trusted
+from .candidates import validate_candidates as validate_candidate_inventory
 from ..sources import ID
 
 INVENTORY_KEYS = ("schema_version", "generator_specs", "assertions", "exclusions", "lines")
@@ -52,6 +53,10 @@ class InventoryProvider:
 
     def validate(self, inventory, aggregate, config):
         raise NotImplementedError
+
+    def validate_candidates(self, candidates, inventory):
+        """Validate candidate identities against the provider's fitted inventory lines."""
+        validate_candidate_inventory(candidates, inventory["lines"])
 
     def extra_pin_asset_checks(self, provider_result, aggregate):
         """Provider-specific pin-asset checks, run after the generic ones when CAD is enabled."""

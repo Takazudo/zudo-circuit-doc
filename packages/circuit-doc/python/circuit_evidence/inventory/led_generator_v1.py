@@ -317,6 +317,17 @@ class LedGeneratorProvider(InventoryProvider):
             scope += "; fit=placement"
         return ProviderResult(lines=lines, placements=bound, scope_lines=[scope])
 
+    def validate_candidates(self, candidates, inventory):
+        """Candidates must not identify a component already placed by generator specs."""
+        super().validate_candidates(candidates, inventory)
+        grouped, _excluded, _boards = self.generated()
+        for candidate in candidates:
+            key = candidate["lcsc"] or "external:" + candidate["mpn"]
+            require(
+                key not in grouped,
+                f"{candidate['candidate_id']}: candidate is placed by generator specs; it is fitted, not a candidate",
+            )
+
     def extra_pin_asset_checks(self, provider_result, aggregate):
         """Each pin map's symbol and footprint equal the generator's for its line."""
         grouped = self.generated()[0]

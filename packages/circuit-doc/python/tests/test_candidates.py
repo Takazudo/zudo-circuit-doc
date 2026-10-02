@@ -10,7 +10,8 @@ from unittest.mock import patch
 from generic_project import bundle_for, line, make_project, run_cli, schema, write_bundle, write_json
 from circuit_evidence.aggregate import partition_aggregate, validate_owner_bundles
 from circuit_evidence.errors import ContractError
-from circuit_evidence.inventory import load_candidates, validate_candidates
+from circuit_evidence.inventory import load_candidates, provider_for, validate_candidates
+from circuit_evidence.inventory.led_generator_v1 import LedGeneratorProvider
 from circuit_evidence.orchestrator import validate, validate_config
 
 
@@ -69,6 +70,96 @@ class CandidateTests(unittest.TestCase):
     def test_candidate_only_owner_passes_with_no_fitted_lines(self):
         config = self.project(candidate_only=True)
         self.assertEqual(validate(config).lines, 0)
+
+    def test_candidates_are_excluded_from_cad_and_scope_counts_candidate_owners(self):
+        second = candidate(candidate_id="cand-c", owner_skill="component-candidates", mpn="ALT-300", lcsc="C300", package="ALT-PKG")
+        shared_bundle = combined(self.fitted, self.alternative)
+        candidate_only_bundle = candidate_bundle(second, "c")
+        cad_dir = self.root / "cad"
+        footprints = cad_dir / "footprints"
+        footprints.mkdir(parents=True)
+        symbol_library = cad_dir / "project.kicad_sym"
+        symbol_library.write_text(
+            '(kicad_symbol_lib (symbol "FIT-100" (symbol "FIT-100_1_1" '
+            '(pin passive line (at 0 0 0) (length 2.54) (name "IN") (number "1")))))\n',
+            encoding="utf-8",
+        )
+        (footprints / "PKG.kicad_mod").write_text('(footprint "PKG" (pad "1" smd rect))\n', encoding="utf-8")
+        config = make_project(
+            self.root,
+            [self.line],
+            bundles={"component-a": shared_bundle, "component-candidates": candidate_only_bundle},
+            cad={
+                "enabled": True,
+                "symbolLibraries": [str(symbol_library)],
+                "footprintDirs": [str(footprints)],
+                "requirePinEqualsPad": True,
+            },
+        )
+        config["inventory"]["candidatesPath"] = str(write_json(
+            self.root / "candidates.json", {"schema_version": 1, "candidates": [self.entry, second]},
+        ))
+
+        report = validate(config)
+        self.assertEqual(report.lines, 1)
+        self.assertEqual(report.pass_line(), "PASS: component-spec contract; 1 lines; offline=True; refreshed=none")
+        self.assertIn(
+            "SCOPE: candidates: 2 audited candidate records in 2 owners "
+            "(excluded from placements, CAD binding, routing and publication)",
+            report.prefixed_lines(),
+        )
+        result = run_cli("--config", "-", config=config)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("PASS: component-spec contract; 1 lines;", result.stdout)
+        self.assertIn("SCOPE: candidates: 2 audited candidate records in 2 owners", result.stdout)
+
+    def test_integration_rules_reject_candidate_record_or_fact_references(self):
+        rule_template = {
+            "rule_id": "rule-candidate", "domain": "candidate-check", "record_ids": [], "fact_ids": [],
+            "conditions": "under the stated conditions", "verdict": schema()["verdicts"][0],
+            "refusal": "refuse an unsupported conclusion",
+        }
+        for record_ids, fact_ids in ((["rec-b"], ["fact-a-pin"]), (["rec-a"], ["fact-b-pin"])):
+            with self.subTest(record_ids=record_ids, fact_ids=fact_ids):
+                config = self.project()
+                rule = {**rule_template, "record_ids": record_ids, "fact_ids": fact_ids}
+                write_json(config["integration"]["rulesPath"], {"schema_version": 1, "rules": [rule]})
+                with self.assertRaisesRegex(ContractError, "integration rule references an audited candidate record"):
+                    validate(config)
+
+    def test_manual_provider_candidate_mutation_checks_fitted_identity(self):
+        provider = provider_for({"kind": "manual"})
+        colliding = candidate(mpn=self.line["mpn"], manufacturer=self.line["manufacturer"])
+        with self.assertRaisesRegex(ContractError, "duplicate \\(manufacturer, mpn\\) identity"):
+            provider.validate_candidates([colliding], {"lines": [self.line]})
+
+    def test_led_generator_provider_rejects_candidates_placed_by_lcsc_or_external_key(self):
+        specs = (
+            (
+                "placed_lcsc.py",
+                "PROJECT_NAME = 'main-board'\n"
+                "COMPONENTS = {'D1': ('ALT-200_C200', 'ALT-200', 'C200', 'lib:PKG', False, (0, 0))}\n"
+                "NETS = {}\n",
+                candidate(candidate_id="cand-lcsc", mpn="ALT-200", lcsc="C200"),
+            ),
+            (
+                "placed_external.py",
+                "PROJECT_NAME = 'main-board'\n"
+                "COMPONENTS = {'J1': ('ALT-EXT', 'ALT-EXT', '', '', False, (0, 0))}\n"
+                "EXTERNAL_COMPONENTS = {'J1': {'mpn': 'ALT-EXT', 'manufacturer': 'External Maker', "
+                "'package': 'CONNECTOR', 'supplier': 'Test Supplier', 'order_code': 'O-1', "
+                "'datasheet': 'https://example.test/ds'}}\n"
+                "NETS = {}\n",
+                candidate(candidate_id="cand-external", mpn="ALT-EXT", manufacturer="External Maker", lcsc="", package="CONNECTOR"),
+            ),
+        )
+        for filename, source, entry in specs:
+            with self.subTest(filename=filename):
+                spec = self.root / filename
+                spec.write_text(source, encoding="utf-8")
+                provider = LedGeneratorProvider({"kind": "led-generator-v1", "specs": [{"path": str(spec)}]})
+                with self.assertRaisesRegex(ContractError, "candidate is placed by generator specs; it is fitted, not a candidate"):
+                    provider.validate_candidates([entry], {"lines": [self.line]})
 
     def test_candidate_owner_separate_from_fitted_owner(self):
         self.entry["owner_skill"] = "component-alternatives"
