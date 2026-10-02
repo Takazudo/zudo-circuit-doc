@@ -44,6 +44,6 @@ Agent-facing commands (new component bundles, online source refresh) are listed 
 | Network | No | Downloading sources and assets only; the build is offline |
 | easyeda2kicad | No | Importing CAD assets for LCSC-listed parts |
 
-## Package status
+## Package versions
 
-`@takazudo/zudo-circuit-doc` and `create-zudo-circuit-doc` are **not yet published on npm**. Until a release is published, install them from packed tarballs built in the zudo-circuit-doc repository.
+Both `@takazudo/zudo-circuit-doc` and `create-zudo-circuit-doc` are published on npm. This project depends on `@takazudo/zudo-circuit-doc` through the version range in `package.json`. To upgrade, raise that range and run `pnpm install`.

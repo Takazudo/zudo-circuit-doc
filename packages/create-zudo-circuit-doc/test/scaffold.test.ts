@@ -30,6 +30,7 @@ test("composeProject copies the template and substitutes every placeholder, with
 
   const readme = fs.readFileSync(path.join(destinationPath, "README.md"), "utf8");
   assert.doesNotMatch(readme, /__PROJECT_NAME__|__SITE_TITLE__|__LIBRARY_NAME__/);
+  assert.doesNotMatch(readme, /not\s+yet published/i);
 
   // No leftover staging directory next to the destination.
   const siblingEntries = fs.readdirSync(parent);

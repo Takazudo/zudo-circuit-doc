@@ -229,6 +229,21 @@ describe("the stylesheet declares what the components emit", () => {
     );
   });
 
+  it("contains the model viewer while keeping its complete caption wrappable", () => {
+    const rule = (selector: string) => {
+      const escaped = selector.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+      return new RegExp(`^${escaped}\\s*\\{([^}]*)\\}`, "mu").exec(stylesheet)?.[1] ?? "";
+    };
+    const viewer = rule(".zcd-model-viewer");
+    assert.match(viewer, /grid-template-columns:\s*minmax\(0, 1fr\)/u);
+    assert.match(viewer, /min-width:\s*0/u);
+    assert.match(rule(".zcd-model-viewer > *"), /min-width:\s*0/u);
+    const caption = rule(".zcd-model-viewer__caption");
+    assert.match(caption, /overflow-wrap:\s*anywhere/u);
+    assert.doesNotMatch(caption, /text-overflow|nowrap|overflow:\s*hidden|display:\s*none/iu);
+    assert.match(rule(".zcd-model-viewer__viewport"), /box-sizing:\s*border-box/u);
+  });
+
   it("keeps enlarge dialogs viewport-bound, scroll-contained, and keyboard visible", () => {
     assert.match(stylesheet, /\.zcd-preview-dialog\s*\{[^}]*height:[^;}]*100dvh/u);
     assert.match(stylesheet, /\.zcd-preview-dialog\s*\{[^}]*max-width:[^;}]*100vw/u);
