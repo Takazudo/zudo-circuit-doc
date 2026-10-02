@@ -159,7 +159,7 @@ def validate(config, *, online=False, refresh_source_ids=(), opener=urllib.reque
     run_seeded_fixtures(schema, template_dir, selftest_dir=selftest_dir, extra_cases=extra_cases, extra_bases=extra_bases)
 
     # 4. local bundles + placeholder leak
-    context.inventory = load_inventory(config["inventory"]["path"])
+    context.inventory = load_inventory(config["inventory"]["path"], placement_fit=context.provider.placement_fit)
     context.lines = context.inventory["lines"]
     vendor_qualifiers = config["routing"]["vendorQualifiers"]
     if vendor_qualifiers is not None:

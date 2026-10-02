@@ -11,6 +11,7 @@ from ..sources import ID
 
 INVENTORY_KEYS = ("schema_version", "generator_specs", "assertions", "exclusions", "lines")
 ASSERTION_KEYS = ("orderable_lines", "fitted_lines", "dnp_or_hand_fit_lines")
+PLACEMENT_ASSERTION_KEYS = ("fitted_placements", "dnp_placements")
 LINE_KEYS = ("line_id", "mpn", "manufacturer", "lcsc", "package", "dnp", "owner_skill", "identity_state", "source_state", "function", "placements")
 IDENTITY_STATES = ("VERIFIED", "UNRESOLVED")
 SOURCE_STATES = ("AVAILABLE", "SOURCE UNAVAILABLE")
@@ -22,7 +23,7 @@ PARITY_KEYS = ("mpn", "manufacturer", "lcsc", "package")
 class ProviderResult:
     """What an inventory provider hands the rest of the run.
 
-    ``placements`` is a flat list of ``{line_id, board, refdes}``; ``scope_lines`` and
+    ``placements`` is a flat list of ``{line_id, board, refdes, dnp}``; ``scope_lines`` and
     ``warnings`` are printed without their ``SCOPE:`` / ``WARN:`` prefix.
     """
 
@@ -36,6 +37,7 @@ class InventoryProvider:
     """Base for ``inventory.provider.kind`` implementations; ``options`` is that config object."""
 
     kind = ""
+    placement_fit = False
 
     def __init__(self, options):
         self.options = options
@@ -55,52 +57,77 @@ class InventoryProvider:
         """Provider-specific pin-asset checks, run after the generic ones when CAD is enabled."""
 
 
-def load_inventory(path):
+def load_inventory(path, *, placement_fit=False):
     path = Path(path)
     require(path.is_file(), f"inventory: configured file is missing: {path}")
     data = load(path)
-    validate_inventory_shape(data)
+    validate_inventory_shape(data, placement_fit=placement_fit)
     return data
 
 
-def validate_inventory_shape(data):
+def validate_inventory_shape(data, *, placement_fit=False):
     require(isinstance(data, dict), "inventory: top level must be an object")
     required_keys(data, INVENTORY_KEYS, "inventory")
     assertions = data["assertions"]
     require(isinstance(assertions, dict), "inventory assertions: must be an object")
     required_keys(assertions, ASSERTION_KEYS, "inventory assertions")
-    require(all(isinstance(assertions[key], int) and not isinstance(assertions[key], bool) and assertions[key] >= 0 for key in ASSERTION_KEYS), "inventory assertions: counts must be non-negative integers")
+    count_keys = ASSERTION_KEYS + tuple(key for key in PLACEMENT_ASSERTION_KEYS if key in assertions)
+    require(all(isinstance(assertions[key], int) and not isinstance(assertions[key], bool) and assertions[key] >= 0 for key in count_keys), "inventory assertions: counts must be non-negative integers")
     for key in ("generator_specs", "exclusions", "lines"):
         require(isinstance(data[key], list), f"inventory: {key} must be a list")
     for line in data["lines"]:
-        validate_line_shape(line)
+        validate_line_shape(line, placement_fit=placement_fit)
     line_ids = [line["line_id"] for line in data["lines"]]
     require(len(set(line_ids)) == len(line_ids), "inventory: duplicate line_id ownership")
 
 
-def validate_line_shape(line):
+def validate_line_shape(line, *, placement_fit=False):
     require(isinstance(line, dict), "inventory line: must be an object")
     context = line.get("line_id", "line") if isinstance(line.get("line_id"), str) else "line"
-    required_keys(line, LINE_KEYS, context)
+    required_keys(line, tuple(key for key in LINE_KEYS if key != "dnp") if placement_fit else LINE_KEYS, context)
     require(all(isinstance(line[key], str) and line[key].strip() for key in ("line_id", "mpn", "manufacturer", "package", "owner_skill", "function")), f"{context}: blank identity field")
     require(ID.fullmatch(line["line_id"]), f"{line['line_id']}: invalid line ID")
     require(isinstance(line["lcsc"], str), f"{line['line_id']}: lcsc must be a string")
-    require(isinstance(line["dnp"], bool), f"{line['line_id']}: dnp must be a boolean")
+    if "dnp" in line:
+        require(isinstance(line["dnp"], bool), f"{line['line_id']}: dnp must be a boolean")
     require(line["source_state"] in SOURCE_STATES, f"{line['line_id']}: source availability state")
     require(line["identity_state"] in IDENTITY_STATES, f"{line['line_id']}: identity state")
     require(line.get("mounting", "pcb") in MOUNTINGS, f"{line['line_id']}: unknown mounting")
     require(isinstance(line["placements"], list), f"{line['line_id']}: placements must be a list")
+    if not line["placements"]:
+        required_keys(line, ("dnp",), context)
     for placement in line["placements"]:
         require(isinstance(placement, dict), f"{line['line_id']}: placement must be an object")
-        required_keys(placement, ("board", "refdes"), f"{line['line_id']} placement")
+        required_keys(placement, ("board", "refdes", "dnp") if placement_fit else ("board", "refdes"), f"{line['line_id']} placement")
         require(all(isinstance(placement[key], str) and placement[key].strip() for key in ("board", "refdes")), f"{line['line_id']}: blank placement board/refdes")
+        if "dnp" in placement:
+            require(isinstance(placement["dnp"], bool), f"{line['line_id']}: placement dnp must be a boolean")
+            require("dnp" not in line or placement["dnp"] == line["dnp"], f"{line['line_id']}: conflicting line/placement dnp")
 
 
-def validate_counts(data):
+def effective_fit(line, placement):
+    """The placement's DNP bit, falling back to its line's declaration."""
+    return placement["dnp"] if "dnp" in placement else line["dnp"]
+
+
+def line_fit(line):
+    """All effective placement DNP bits, or the unplaced line's declared bit."""
+    return [effective_fit(line, item) for item in line["placements"]] or [line["dnp"]]
+
+
+def validate_counts(data, *, placement_fit=False):
     lines, assertions = data["lines"], data["assertions"]
     require(len(lines) == assertions["orderable_lines"], "inventory: orderable line count differs from reviewed assertion")
-    require(sum(not line["dnp"] for line in lines) == assertions["fitted_lines"], "inventory: fitted line count differs from reviewed assertion")
-    require(sum(line["dnp"] for line in lines) == assertions["dnp_or_hand_fit_lines"], "inventory: DNP/hand-fit line count differs from reviewed assertion")
+    fitted_lines = sum(any(not bit for bit in line_fit(line)) for line in lines) if placement_fit else sum(not line["dnp"] for line in lines)
+    dnp_lines = sum(any(line_fit(line)) for line in lines) if placement_fit else sum(line["dnp"] for line in lines)
+    require(fitted_lines == assertions["fitted_lines"], "inventory: fitted line count differs from reviewed assertion")
+    require(dnp_lines == assertions["dnp_or_hand_fit_lines"], "inventory: DNP/hand-fit line count differs from reviewed assertion")
+    for key, dnp in (("fitted_placements", False), ("dnp_placements", True)):
+        if key in assertions:
+            count = assertions[key]
+            require(isinstance(count, int) and not isinstance(count, bool) and count >= 0, "inventory assertions: counts must be non-negative integers")
+            actual = sum(effective_fit(line, item) == dnp for line in lines for item in line["placements"])
+            require(actual == count, f"inventory: {key} count differs from reviewed assertion")
 
 
 def validate_owner_parity(lines, aggregate):
@@ -114,7 +141,7 @@ def validate_owner_parity(lines, aggregate):
 
 
 def placements(lines):
-    return [{"line_id": line["line_id"], "board": item["board"], "refdes": item["refdes"]} for line in lines for item in line["placements"]]
+    return [{"line_id": line["line_id"], "board": item["board"], "refdes": item["refdes"], "dnp": effective_fit(line, item)} for line in lines for item in line["placements"]]
 
 
 def placement_boards(lines):
