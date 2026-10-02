@@ -43,7 +43,8 @@
 
 - **`bundles.requireSkillMd`:** when `true`, `SKILL.md` must exist under `auditSkillDir` and `integrationSkillDir` (when they are set), and its frontmatter `name` must equal the directory name. When `false`, the frontmatter is checked only if the file exists. Owner bundles always require `SKILL.md`, because `schema.json` `required_skill_files` lists it.
 - **`inventory.provider`:** `kind` selects the implementation in `circuit_evidence/inventory/registry.py`. `manual` (generic-v1, ADR-010) takes no other options, and it requires `generator_specs: []`.
-  `led-generator-v1` takes `specs: [{path, board?}]` (absolute paths; `[]` means no generator). Board names come from each spec's `PROJECT_NAME` unless `board` overrides it, and the inventory's `generator_specs` must equal the spec paths relative to `projectRoot`.
+  `led-generator-v1` takes `specs: [{path, board?}]` (absolute paths; `[]` means no generator). Board names come from each spec's `PROJECT_NAME` unless `board` overrides it. Optional `fit` is `line` (the default) or `placement`; placement mode reads each placement's `dnp` bit. Optional `mpnFromValueLcsc` is a reviewed list of unique `C` plus digits LCSC numbers. For each listed LCSC, the generator `value` is the expected inventory MPN and must be nonblank; each listed LCSC must occur as a non-external generator entry.
+  The inventory's ordered `generator_specs` may keep the legacy form of relative path strings, or use `{board, spec}` objects with nonblank strings. The object form must exactly match the configured board/path pairs in order, and board names must be unique. Both forms require generator parity.
 - **`routing.directRouting`:**
   - When configured, the file must hold exactly one `{line_id, negative}` case per inventory line.
   - When `null`, the positive direct-routing queries still run for every line.

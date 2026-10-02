@@ -15,6 +15,18 @@ from ..errors import ContractError, require, required_keys
 from .common import InventoryProvider, ProviderResult, effective_fit, line_fit, placements, validate_counts, validate_owner_parity
 
 SPEC_OPTION_KEYS = {"path", "board"}
+MPN_FROM_VALUE_LCSC_PATTERN = r"C[0-9]+"
+
+
+def _mpn_from_value_lcsc(value):
+    """Validate and normalize the finite list of LCSC numbers using generator values as MPNs."""
+    require(isinstance(value, (list, tuple)), "inventory provider led-generator-v1: mpnFromValueLcsc must be a list")
+    seen = set()
+    for lcsc in value:
+        require(isinstance(lcsc, str) and re.fullmatch(MPN_FROM_VALUE_LCSC_PATTERN, lcsc), "inventory provider led-generator-v1: mpnFromValueLcsc entries must match ^C[0-9]+$")
+        require(lcsc not in seen, f"inventory provider led-generator-v1: duplicate mpnFromValueLcsc entry {lcsc}")
+        seen.add(lcsc)
+    return tuple(value)
 
 
 class ComponentDsl:
@@ -135,13 +147,15 @@ def parse_components(path):
     return ComponentDsl(Path(path)).parse()
 
 
-def generator_inventory(specs):
+def generator_inventory(specs, mpn_from_value=()):
     """Group every spec's components by inventory key.
 
     ``specs`` is ``[{path, board?}]``; ``[]`` means no generator. Returns
     ``(grouped, excluded, boards)`` where ``boards`` lists each spec's board name in order.
     """
+    mpn_from_value = _mpn_from_value_lcsc(mpn_from_value)
     grouped, excluded, boards = {}, [], []
+    generator_lcscs = set()
     for spec in specs:
         dsl = ComponentDsl(Path(spec["path"]))
         components = dsl.parse()
@@ -162,18 +176,24 @@ def generator_inventory(specs):
                 excluded.append((board, refdes))
                 continue
             else:
-                key, mpn, package = lcsc, expected_mpn(symbol), footprint.split(":", 1)[-1]
+                generator_lcscs.add(lcsc)
+                key, mpn, package = lcsc, expected_mpn(symbol, value, lcsc, mpn_from_value), footprint.split(":", 1)[-1]
             entry = grouped.setdefault(key, {"mpn": mpn, "package": package, "symbols": set(), "placements": []})
             require(entry["mpn"] == mpn and entry["package"] == package, f"generator LCSC {lcsc}: conflicting identity")
             if external is not None:
                 entry["external"] = external
             entry["symbols"].add(symbol)
             entry["placements"].append({"board": board, "refdes": refdes, "dnp": bool(dnp)})
+    for lcsc in mpn_from_value:
+        require(lcsc in generator_lcscs, f"mpnFromValueLcsc: {lcsc} is not a generator LCSC")
     return grouped, excluded, boards
 
 
-def expected_mpn(symbol):
-    """schgen library symbols may carry an ``_C<lcsc>`` suffix that is not part of the MPN."""
+def expected_mpn(symbol, value=None, lcsc=None, mpn_from_value=()):
+    """Use a reviewed generator value when opted in, otherwise strip a symbol's ``_C<lcsc>`` suffix."""
+    if lcsc in mpn_from_value:
+        require(isinstance(value, str) and value.strip(), f"generator LCSC {lcsc}: MPN from value must be a nonblank string")
+        return value
     return re.sub(r"_C\d+$", "", symbol)
 
 
@@ -216,16 +236,37 @@ def _spec_options(specs):
     return [dict(spec) for spec in specs]
 
 
+def _inventory_generator_specs(generator_specs):
+    """Normalize the inventory's legacy paths or explicit ordered board/path pairs."""
+    require(isinstance(generator_specs, list), "inventory: generator_specs must be a list")
+    if all(isinstance(spec, str) for spec in generator_specs):
+        return "paths", [(None, spec) for spec in generator_specs]
+    if all(isinstance(spec, dict) for spec in generator_specs):
+        normalized = []
+        for spec in generator_specs:
+            require(set(spec) == {"board", "spec"}, f"inventory: generator_specs object needs exactly board and spec, got {spec!r}")
+            require(all(isinstance(spec[key], str) and spec[key].strip() for key in ("board", "spec")), "inventory: generator_specs board and spec must be nonblank strings")
+            normalized.append((spec["board"], spec["spec"]))
+        require(len({board for board, _spec in normalized}) == len(normalized), "inventory: generator_specs declared board names must be unique")
+        return "board-specs", normalized
+    if any(isinstance(spec, str) for spec in generator_specs) and any(isinstance(spec, dict) for spec in generator_specs):
+        raise ContractError("inventory: generator_specs cannot mix strings and {board, spec} objects")
+    raise ContractError("inventory: generator_specs must contain only paths or {board, spec} objects")
+
+
 class LedGeneratorProvider(InventoryProvider):
     kind = "led-generator-v1"
 
     def __init__(self, options):
         super().__init__(options)
-        unexpected = set(options) - {"kind", "specs", "fit"}
+        unexpected = set(options) - {"kind", "specs", "fit", "mpnFromValueLcsc"}
         require(not unexpected, f"inventory provider led-generator-v1: unexpected options {sorted(unexpected)}")
         fit = options.get("fit", "line")
         require(fit in ("line", "placement"), "inventory provider led-generator-v1: fit must be 'line' or 'placement'")
         self.placement_fit = fit == "placement"
+        mpn_from_value_lcsc = options.get("mpnFromValueLcsc", [])
+        require(isinstance(mpn_from_value_lcsc, list), "inventory provider led-generator-v1: mpnFromValueLcsc must be a list")
+        self.mpn_from_value_lcsc = _mpn_from_value_lcsc(mpn_from_value_lcsc)
         require("specs" in options, "inventory provider led-generator-v1: specs option is required")
         self.specs = _spec_options(options["specs"])
         self._generated = None
@@ -233,7 +274,7 @@ class LedGeneratorProvider(InventoryProvider):
     def generated(self):
         """``(grouped, excluded, boards)`` from the configured specs, parsed once per run."""
         if self._generated is None:
-            self._generated = generator_inventory(self.specs)
+            self._generated = generator_inventory(self.specs, self.mpn_from_value_lcsc)
         return self._generated
 
     def board_names(self, inventory):
@@ -250,9 +291,16 @@ class LedGeneratorProvider(InventoryProvider):
 
     def validate_inventory(self, inventory, config):
         """The inventory-only part: spec-path consistency plus full generator parity."""
-        configured = self.relative_spec_paths(config["projectRoot"])
-        require(inventory["generator_specs"] == configured, f"inventory: generator_specs {inventory['generator_specs']} differ from the configured specs {configured}")
-        grouped, excluded, _boards = self.generated()
+        form, declared = _inventory_generator_specs(inventory["generator_specs"])
+        configured_paths = self.relative_spec_paths(config["projectRoot"])
+        if form == "paths":
+            declared_paths = [spec for _board, spec in declared]
+            require(declared_paths == configured_paths, f"inventory: generator_specs {inventory['generator_specs']} differ from the configured specs {configured_paths}")
+            grouped, excluded, _boards = self.generated()
+        else:
+            grouped, excluded, boards = self.generated()
+            configured = list(zip(boards, configured_paths))
+            require(declared == configured, f"inventory: generator_specs {declared} differ from configured (board, spec) pairs {configured}")
         validate_generator_parity(inventory, grouped, excluded, placement_fit=self.placement_fit)
 
     def validate(self, inventory, aggregate, config):
