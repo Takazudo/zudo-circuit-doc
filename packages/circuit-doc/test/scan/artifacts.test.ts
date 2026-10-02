@@ -21,10 +21,12 @@ import { join } from "node:path";
 import { after, before, describe, it } from "node:test";
 
 import { ComponentDocsError } from "../../src/core/errors.ts";
-import { harvestCanaries } from "../../src/core/scan.ts";
+import { harvestCanaries, type ScanTarget } from "../../src/core/scan.ts";
 import { safeText } from "../../src/core/text.ts";
 import { VIEW_MODEL_VERSION, type PublicViewModel } from "../../src/core/view-model.ts";
-import { runArtifactScan } from "../../src/scan/artifacts.ts";
+import { authoredContentTargets, runArtifactScan } from "../../src/scan/artifacts.ts";
+import { sha256 } from "../../src/footprint-previews/hash.ts";
+import { derivePublicCanonicalHashes } from "../../src/scan/public-canonical.ts";
 import { buildScanPolicy } from "../../src/scan/policy.ts";
 import { fixtureModel } from "../fixtures/view-model-fixtures.ts";
 import { recordDistHtmlPath, writeSyntheticProject } from "./dist-fixture.ts";
@@ -83,6 +85,59 @@ function rejectsWith(promise: Promise<unknown>, code: string, messagePattern?: R
   });
 }
 
+describe("authoredContentTargets", () => {
+  const contentRoot = join(tmpdir(), "target-helper", "docs", "src/content/docs");
+  const target = (label: string): ScanTarget => ({ label, text: label });
+
+  it("excludes a nested generated root and keeps authored content", () => {
+    const targets = [
+      target("content/components/records/x/index.mdx"),
+      target("content/guide/intro.mdx"),
+    ];
+
+    assert.deepEqual(
+      authoredContentTargets(targets, {
+        contentRoot,
+        generatedRoot: join(contentRoot, "components"),
+      }),
+      [target("content/guide/intro.mdx")],
+    );
+  });
+
+  it("keeps every target when the generated root is outside content", () => {
+    const targets = [target("content/components/records/x/index.mdx"), target("content/guide/intro.mdx")];
+
+    assert.deepEqual(
+      authoredContentTargets(targets, {
+        contentRoot,
+        generatedRoot: join(tmpdir(), "target-helper", "generated"),
+      }),
+      targets,
+    );
+  });
+
+  it("drops every target when the generated root equals content", () => {
+    const targets = [target("content/components/records/x/index.mdx"), target("content/guide/intro.mdx")];
+
+    assert.deepEqual(authoredContentTargets(targets, { contentRoot, generatedRoot: contentRoot }), []);
+  });
+
+  it("does not exclude a sibling whose label only shares a prefix", () => {
+    const targets = [
+      target("content/components/records/x/index.mdx"),
+      target("content/components-extra/a.mdx"),
+    ];
+
+    assert.deepEqual(
+      authoredContentTargets(targets, {
+        contentRoot,
+        generatedRoot: join(contentRoot, "components"),
+      }),
+      [target("content/components-extra/a.mdx")],
+    );
+  });
+});
+
 describe("a correctly built dist tree passes", () => {
   it("reports both tiers clean and the built pages/searchable counts", async () => {
     const model = fixtureModel();
@@ -90,6 +145,7 @@ describe("a correctly built dist tree passes", () => {
     const canaries = ownerSkillCanaryFor("CANARY-OWNER-SKILL-NOT-PUBLISHED-VALUE-0001");
 
     const report = await runArtifactScan({
+      publicCanonicalHashes: [],
       policy: policy(),
       paths: project,
       docsRoot: project.docsRoot,
@@ -107,6 +163,34 @@ describe("a correctly built dist tree passes", () => {
     );
     assert.ok(!report.lines.some((line) => line.startsWith("SKIP:")));
   });
+
+  it("counts authored pages outside nested generatedContent as withheld from SITE", async () => {
+    const model = fixtureModel();
+    const root = join(scratch, "withheld-authored-content");
+    const contentRoot = join(root, "doc", "src/content/docs");
+    const project = await writeSyntheticProject(root, model, {
+      generatedRoot: join(contentRoot, "components"),
+    });
+    const value = "CANARY-AUTHORED-GUIDE-WITHHELD-FROM-SITE-0001";
+    const siteValue = "CANARY-REMAINS-IN-SITE-SCAN-0002";
+    await mkdir(join(contentRoot, "guide"), { recursive: true });
+    await writeFile(join(contentRoot, "guide", "intro.mdx"), value);
+
+    const report = await runArtifactScan({
+      publicCanonicalHashes: [],
+      policy: policy(),
+      paths: project,
+      docsRoot: project.docsRoot,
+      canaries: [...canaryFor(value), ...canaryFor(siteValue)],
+      model,
+      agentSkillRoot: null,
+    });
+
+    // This confirms the authored corpus is read; helper unit cases separately
+    // prove that the generated subtree itself is excluded.
+    const withheldLine = report.lines.find((line) => line.includes("canary/canaries withheld"));
+    assert.equal(withheldLine?.trim(), "1 canary/canaries withheld (published by another content source)");
+  });
 });
 
 describe("adversarial: a canary leak fails closed", () => {
@@ -119,7 +203,7 @@ describe("adversarial: a canary leak fails closed", () => {
     await appendFile(recordDistHtmlPath(project, slug), leak);
 
     await rejectsWith(
-      runArtifactScan({ policy: policy(), paths: project, docsRoot: project.docsRoot, canaries, model, agentSkillRoot: null }),
+      runArtifactScan({ publicCanonicalHashes: [], policy: policy(), paths: project, docsRoot: project.docsRoot, canaries, model, agentSkillRoot: null }),
       "PUBLICATION_POLICY",
       /denied value/u,
     );
@@ -141,7 +225,7 @@ describe("adversarial: a canary leak fails closed", () => {
     );
 
     await rejectsWith(
-      runArtifactScan({ policy: policy(), paths: project, docsRoot: project.docsRoot, canaries, model, agentSkillRoot: null }),
+      runArtifactScan({ publicCanonicalHashes: [], policy: policy(), paths: project, docsRoot: project.docsRoot, canaries, model, agentSkillRoot: null }),
       "PUBLICATION_POLICY",
       /denied value/u,
     );
@@ -155,7 +239,7 @@ describe("adversarial: a canary leak fails closed", () => {
     await appendFile(join(project.distRoot, "llms.txt"), `\n${leak}`);
 
     await rejectsWith(
-      runArtifactScan({ policy: policy(), paths: project, docsRoot: project.docsRoot, canaries, model, agentSkillRoot: null }),
+      runArtifactScan({ publicCanonicalHashes: [], policy: policy(), paths: project, docsRoot: project.docsRoot, canaries, model, agentSkillRoot: null }),
       "PUBLICATION_POLICY",
       /denied value/u,
     );
@@ -173,6 +257,7 @@ describe("adversarial: a denied owner-skill canary leak fails closed", () => {
 
     await rejectsWith(
       runArtifactScan({
+        publicCanonicalHashes: [],
         policy: policy(),
         paths: project,
         docsRoot: project.docsRoot,
@@ -199,6 +284,7 @@ describe("adversarial: a denied owner-skill canary leak fails closed", () => {
 
     await rejectsWith(
       runArtifactScan({
+        publicCanonicalHashes: [],
         policy: policy(),
         paths: project,
         docsRoot: project.docsRoot,
@@ -221,6 +307,7 @@ describe("adversarial: a denied owner-skill canary leak fails closed", () => {
 
       await rejectsWith(
         runArtifactScan({
+          publicCanonicalHashes: [],
           policy: policy(),
           paths: project,
           docsRoot: project.docsRoot,
@@ -243,7 +330,7 @@ describe("adversarial: a credential pattern fails closed", () => {
     await appendFile(join(project.distRoot, "llms.txt"), "\nAKIA1234567890ABCDEF leaked");
 
     await rejectsWith(
-      runArtifactScan({ policy: policy(), paths: project, docsRoot: project.docsRoot, canaries, model, agentSkillRoot: null }),
+      runArtifactScan({ publicCanonicalHashes: [], policy: policy(), paths: project, docsRoot: project.docsRoot, canaries, model, agentSkillRoot: null }),
       "PUBLICATION_POLICY",
       /credential/u,
     );
@@ -261,7 +348,7 @@ describe("adversarial: a vacuous scan with records present fails closed", () => 
     await mkdir(project.generatedRoot, { recursive: true });
 
     await rejectsWith(
-      runArtifactScan({ policy: policy(), paths: project, docsRoot: project.docsRoot, canaries, model, agentSkillRoot: null }),
+      runArtifactScan({ publicCanonicalHashes: [], policy: policy(), paths: project, docsRoot: project.docsRoot, canaries, model, agentSkillRoot: null }),
       "PUBLICATION_POLICY",
       /produced no content/u,
     );
@@ -273,6 +360,7 @@ describe("declared-empty mode (0 published records)", () => {
     const project = await writeSyntheticProject(join(scratch, "declared-empty"), EMPTY_MODEL);
 
     const report = await runArtifactScan({
+      publicCanonicalHashes: [],
       policy: policy(),
       paths: project,
       docsRoot: project.docsRoot,
@@ -295,6 +383,7 @@ describe("declared-empty mode (0 published records)", () => {
 
     await rejectsWith(
       runArtifactScan({
+        publicCanonicalHashes: [],
         policy: policy(),
         paths: project,
         docsRoot: project.docsRoot,
@@ -314,6 +403,7 @@ describe("declared-empty mode (0 published records)", () => {
 
     await rejectsWith(
       runArtifactScan({
+        publicCanonicalHashes: [],
         policy: policy(),
         paths: project,
         docsRoot: project.docsRoot,
@@ -335,6 +425,7 @@ describe("a missing dist is a hard failure, never a silent skip", () => {
 
     await rejectsWith(
       runArtifactScan({
+        publicCanonicalHashes: [],
         policy: policy(),
         paths: project,
         docsRoot: project.docsRoot,
@@ -345,5 +436,101 @@ describe("a missing dist is a hard failure, never a silent skip", () => {
       "ADAPTER_CONTRACT",
       /dist is empty/u,
     );
+  });
+});
+
+
+describe("SITE-only declared public canonical hashes", () => {
+  async function canonicalProject(label: string) {
+    const root = join(scratch, `canonical-${label}`);
+    const model = fixtureModel();
+    const preview = model.packagePreviews[0]!;
+    const project = await writeSyntheticProject(root, model);
+    const paths = {
+      ...project,
+      projectRoot: root,
+      footprintLibraryRoot: join(root, "footprints"),
+      footprintPreviewRoot: join(project.docsRoot, "public/assets/component-previews/footprints"),
+    };
+    const bytes = `(footprint "${preview.footprintName}")\n`;
+    const digest = sha256(bytes);
+    await mkdir(paths.footprintLibraryRoot, { recursive: true });
+    await writeFile(join(paths.footprintLibraryRoot, `${preview.footprintName}.kicad_mod`), bytes);
+    const builtPreviewRoot = join(paths.distRoot, "assets/component-previews/footprints");
+    await mkdir(builtPreviewRoot, { recursive: true });
+    await writeFile(join(builtPreviewRoot, "manifest.json"), JSON.stringify({
+      formatVersion: 1,
+      packages: [{ footprintName: preview.footprintName, footprintPath: preview.footprintPath, canonicalInputSha256: digest }],
+    }));
+    const publicCanonicalHashes = await derivePublicCanonicalHashes({
+      declared: [preview.footprintName], model, paths,
+    });
+    const canaries = [
+      ...harvestCanaries([{ sha256: digest }], { deniedKeys: ["sha256"] }),
+      // Retain a denied value after subtraction so the normal non-vacuity
+      // floor stays active in these published-record fixtures.
+      ...canaryFor("UNRELATED-CANARY-REMAINS-DENIED-0001"),
+    ];
+    const input = { policy: policy(), paths, docsRoot: paths.docsRoot, model, canaries, publicCanonicalHashes, agentSkillRoot: null };
+    return { input, digest };
+  }
+
+  it("fails SITE for a canonical digest in the public built manifest when undeclared", async () => {
+    const { input } = await canonicalProject("undeclared");
+    await rejectsWith(runArtifactScan({ ...input, publicCanonicalHashes: [] }), "PUBLICATION_POLICY", /denied value/u);
+  });
+
+  it("passes SITE when declared and reports one separately withheld hash", async () => {
+    const { input } = await canonicalProject("declared");
+    const report = await runArtifactScan(input);
+    assert.ok(report.lines.some((line) => line.trim() === "1 canary/canaries withheld as declared public canonical footprint hashes"));
+    assert.ok(report.lines.some((line) => line.trim() === "0 canary/canaries withheld (published by another content source)"));
+    assert.ok(report.lines.some((line) => /OWNED tier\s+2 canaries/u.test(line)));
+    assert.ok(report.lines.some((line) => /SITE tier\s+1 canaries/u.test(line)));
+  });
+
+  it("still fails OWNED when the declared digest appears in a built component page", async () => {
+    const { input, digest } = await canonicalProject("owned-leak");
+    await appendFile(recordDistHtmlPath(input.paths, input.model.records[0]!.identity.slug), digest);
+    await rejectsWith(runArtifactScan(input), "PUBLICATION_POLICY", /denied value/u);
+  });
+
+  for (const key of ["evidence_extract", "identity_extract_sha256"]) {
+    it(`still fails SITE for an equal digest reached through ${key}`, async () => {
+      const { input, digest } = await canonicalProject(key);
+      const otherKeyCanaries = harvestCanaries([{ [key]: digest }], { deniedKeys: [key] });
+      assert.equal(otherKeyCanaries.length, 1);
+      await rejectsWith(runArtifactScan({ ...input, canaries: otherKeyCanaries }), "PUBLICATION_POLICY", /denied value/u);
+    });
+  }
+
+  it("still fails SITE when the digest is harvested through sha256 before evidence_extract", async () => {
+    const { input, digest } = await canonicalProject("same-value-two-keys");
+    const canaries = harvestCanaries([{ sha256: digest, evidence_extract: digest }], { deniedKeys: ["sha256", "evidence_extract"] });
+    assert.equal(canaries.length, 2);
+    await rejectsWith(runArtifactScan({ ...input, canaries }), "PUBLICATION_POLICY", /denied value/u);
+  });
+
+  it("still fails SITE for a different sha256 value", async () => {
+    const { input } = await canonicalProject("different-digest");
+    const different = sha256("unpublished private evidence");
+    await writeFile(join(input.paths.distRoot, "leak.txt"), different);
+    const canaries = [...input.canaries, ...harvestCanaries([{ sha256: different }], { deniedKeys: ["sha256"] })];
+    assert.equal(canaries.length, 3);
+    await rejectsWith(runArtifactScan({ ...input, canaries }), "PUBLICATION_POLICY", /denied value/u);
+  });
+
+  it("counts a digest already in authored content only toward expectedWithheld", async () => {
+    const { input, digest } = await canonicalProject("authored-digest");
+    await writeFile(join(input.paths.docsRoot, "src/content/docs/guide.mdx"), digest);
+    const report = await runArtifactScan({ ...input, policy: { ...input.policy, expectedWithheld: 1 } });
+    assert.ok(report.lines.some((line) => line.trim() === "1 canary/canaries withheld (published by another content source)"));
+    assert.ok(report.lines.some((line) => line.trim() === "0 canary/canaries withheld as declared public canonical footprint hashes"));
+  });
+
+  it("does not count a newly exempt hash toward expectedWithheld", async () => {
+    const { input } = await canonicalProject("expected-withheld");
+    await runArtifactScan({ ...input, policy: { ...input.policy, expectedWithheld: 0 } });
+    await rejectsWith(runArtifactScan({ ...input, policy: { ...input.policy, expectedWithheld: 1 } }), "PUBLICATION_POLICY", /number of canaries withheld/u);
   });
 });

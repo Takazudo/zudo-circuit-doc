@@ -169,6 +169,8 @@ export type ScanPolicyConfig = {
   readonly expectedWithheld?: number;
   /** Positive-control record slug; `null` picks one deterministically. */
   readonly positiveControlRecord?: string | null;
+  /** Footprint names reviewed as publicly published canonical CAD; these are names, never hashes or paths. */
+  readonly publicCanonicalFootprints?: readonly string[];
 };
 
 export type BrowserSmokeRepresentativeConfig = {

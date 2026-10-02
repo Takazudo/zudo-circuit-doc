@@ -254,6 +254,29 @@ const mpnFromValueLcsc: Check = (value, path, issues) => {
   });
 };
 
+const publicCanonicalFootprintName: Check = (value, path, issues) => {
+  const issueCount = issues.length;
+  segment(value, path, issues);
+  if (issues.length !== issueCount || typeof value !== "string") return;
+  if (/^[0-9a-f]{64}$/iu.test(value)) {
+    issues.push({ path, message: "must be a footprint name, not a 64-character hexadecimal hash" });
+  }
+};
+
+const publicCanonicalFootprints: Check = (value, path, issues) => {
+  array(publicCanonicalFootprintName)(value, path, issues);
+  if (!Array.isArray(value)) return;
+  const seen = new Set<string>();
+  value.forEach((entry, index) => {
+    if (typeof entry !== "string") return;
+    if (seen.has(entry)) {
+      issues.push({ path: `${path}[${index}]`, message: "must not contain duplicates" });
+    } else {
+      seen.add(entry);
+    }
+  });
+};
+
 const LED_GENERATOR_PROVIDER_SHAPE: Shape = {
   kind: required(() => {}),
   specs: required(
@@ -361,6 +384,7 @@ const SCAN_SHAPE: Shape = {
   minimumSiteFiles: optional(nonNegativeInteger),
   expectedWithheld: optional(nonNegativeInteger),
   positiveControlRecord: optional(nullable(text)),
+  publicCanonicalFootprints: optional(publicCanonicalFootprints),
 };
 
 const BROWSER_SMOKE_SHAPE: Shape = {

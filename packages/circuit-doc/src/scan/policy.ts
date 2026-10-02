@@ -51,6 +51,8 @@ export type ScanPolicy = {
   readonly expectedWithheld: number | null;
   /** A record slug, or `"auto"` to pick one deterministically (see `pickPositiveControlRecord`). */
   readonly positiveControlRecord: string | "auto";
+  /** Footprint names declared as publicly published canonical CAD. */
+  readonly publicCanonicalFootprints: readonly string[];
   /** Route fragments the `--agent-skill` corpus must contain; empty when `docs.agentResources` is off. */
   readonly requiredAgentRoutes: readonly string[];
   /** Dist-relative labels of the section pages the projection always emits, even at zero records. */
@@ -93,6 +95,7 @@ export function buildScanPolicy(
     minimumSiteFiles: config?.minimumSiteFiles ?? null,
     expectedWithheld: config?.expectedWithheld ?? null,
     positiveControlRecord: config?.positiveControlRecord ?? "auto",
+    publicCanonicalFootprints: config?.publicCanonicalFootprints ?? [],
     requiredAgentRoutes: options.agentResources ? requiredAgentRoutes() : [],
     sectionPages: sectionPages(),
     artifacts: DEFAULT_SCAN_ARTIFACT_NAMES,
