@@ -20,6 +20,7 @@
   },
   "inventory": {
     "path": "/abs/project/.claude/skills/component-spec-audit/references/inventory.json",
+    "candidatesPath": null,                      // or an absolute candidate inventory path
     "provider": { "kind": "manual" }             // or { "kind": "<registered>", ...provider options }
   },
   "routing": {
@@ -42,6 +43,7 @@
 ## Key notes
 
 - **`bundles.requireSkillMd`:** when `true`, `SKILL.md` must exist under `auditSkillDir` and `integrationSkillDir` (when they are set), and its frontmatter `name` must equal the directory name. When `false`, the frontmatter is checked only if the file exists. Owner bundles always require `SKILL.md`, because `schema.json` `required_skill_files` lists it.
+- **`inventory.candidatesPath`:** required, nullable path to the audited candidate inventory described below. `null` means no candidates; a configured file must exist. Candidate owners participate in exact owner-directory and record parity, including owners with no fitted inventory lines. Candidates have no placements and do not contribute to inventory assertions or the reported line count.
 - **`inventory.provider`:** `kind` selects the implementation in `circuit_evidence/inventory/registry.py`. `manual` (generic-v1, ADR-010) takes no other options, and it requires `generator_specs: []`.
   `led-generator-v1` takes `specs: [{path, board?}]` (absolute paths; `[]` means no generator). Board names come from each spec's `PROJECT_NAME` unless `board` overrides it. Optional `fit` is `line` (the default) or `placement`; placement mode reads each placement's `dnp` bit. Optional `mpnFromValueLcsc` is a reviewed list of unique `C` plus digits LCSC numbers. For each listed LCSC, the generator `value` is the expected inventory MPN and must be nonblank; each listed LCSC must occur as a non-external generator entry.
   The inventory's ordered `generator_specs` may keep the legacy form of relative path strings, or use `{board, spec}` objects with nonblank strings. The object form must exactly match the configured board/path pairs in order, and board names must be unique. Both forms require generator parity.
@@ -73,6 +75,52 @@
 - **`output.json`:** same as `--json`: one JSON object `{status, scope, skip, warn, lines, offline, refreshed, message?}` on stdout.
 
 The seeded self-test and `contract/schema.json` are package data, located next to the Python package. They are not configured here.
+
+## Candidate inventory
+
+An optional candidate file declares alternatives independently of the fitted inventory:
+
+```json
+{
+  "schema_version": 1,
+  "candidates": [
+    {
+      "candidate_id": "candidate-regulator-b",
+      "owner_skill": "component-regulators",
+      "mpn": "REG-B",
+      "manufacturer": "Parts Manufacturer",
+      "lcsc": "",
+      "package": "SOT-23-5",
+      "function": "voltage regulator",
+      "replaces_line_ids": ["line-regulator-a"]
+    }
+  ]
+}
+```
+
+Every entry requires `candidate_id`, `owner_skill`, `mpn`, `manufacturer`, `lcsc`,
+`package`, and `function`. They must be nonblank strings, except `lcsc` may be empty.
+Candidate IDs use the same ID syntax as inventory lines. `replaces_line_ids` is
+optional; when present it must be a list of existing inventory line IDs. Extra
+keys are allowed, but `placements` is forbidden even when empty or null. Candidates
+do not use line DNP or placement-fit semantics.
+
+Candidate IDs must be unique and cannot equal any inventory `line_id`. A candidate's
+casefolded `(manufacturer, mpn)` pair or nonempty `lcsc` cannot already belong to
+an inventory line or another candidate.
+
+An owner manifest record has exactly one identity: a string `line_id` with
+`candidate_id` absent or null, or explicit `line_id: null` with a `candidate_id`
+assigned to that owner. Each assigned inventory line and candidate needs exactly
+one record. Both record types must exactly match their declaration's `mpn`,
+`manufacturer`, `lcsc`, and `package`.
+
+The validated aggregate retains every record for policy and source checks. Its
+fitted and candidate partitions retain the same entity keys: each entity follows
+its owning record, and each interaction follows its records. Interactions
+(including their cited facts), fact `depends_on` links, and subordinate parent
+links must stay entirely within one partition. A crossing reference fails; it is
+never silently removed.
 
 ## Check order and output
 

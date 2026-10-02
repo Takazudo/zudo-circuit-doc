@@ -14,7 +14,7 @@ import {
 // requires (RESOLVED_CONFIG.md); a drift here breaks the transport silently.
 const CONFIG_SECTIONS: Readonly<Record<string, readonly string[]>> = {
   bundles: ["root", "ownerPrefix", "reservedDirs", "auditSkillDir", "requireSkillMd"],
-  inventory: ["path", "provider"],
+  inventory: ["path", "provider", "candidatesPath"],
   routing: ["directRouting", "vendorQualifiers"],
   template: ["dir", "name"],
   cad: ["enabled", "symbolLibraries", "footprintDirs", "requirePinEqualsPad"],
@@ -130,9 +130,22 @@ describe("buildResolvedValidatorConfig", () => {
     assert.deepEqual(resolved.bundles.reservedDirs, input.bundles.reservedDirs);
     assert.equal(resolved.bundles.auditSkillDir, input.bundles.auditSkillDir);
     assert.equal(resolved.inventory.path, input.inventory.path);
+    assert.equal(resolved.inventory.candidatesPath, null);
     assert.deepEqual(resolved.inventory.provider, input.inventory.provider);
     assert.equal(resolved.routing.directRouting, null);
     assert.equal(resolved.integration.integrationSkillDir, input.integration.integrationSkillDir);
     assert.equal(resolved.policy.path, null);
+  });
+
+  it("passes through an optional candidate inventory path", () => {
+    const resolved = buildResolvedValidatorConfig(
+      minimalInput({
+        inventory: {
+          ...minimalInput().inventory,
+          candidatesPath: "/abs/project/candidates.json",
+        },
+      }),
+    );
+    assert.equal(resolved.inventory.candidatesPath, "/abs/project/candidates.json");
   });
 });

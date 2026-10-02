@@ -66,16 +66,22 @@ def validate_calculation(item, rule, facts):
         require(math.isclose(arithmetic(item["expression"], fact_values), item[item["result_key"]], rel_tol=1e-12, abs_tol=1e-12), f"{item['calculation_id']}: result is stale")
 
 
-def validate_rules(rules, aggregate, schema):
+def validate_rules(rules, aggregate, schema, *, candidate_record_ids=(), candidate_fact_ids=()):
     """An empty rule list is valid; so is a list without an evidence-chain rule."""
     facts = {fact["fact_id"]: fact for fact in aggregate["facts"]}
     fact_owners = {fact["fact_id"]: fact["record_id"] for fact in aggregate["facts"]}
     records = {record["record_id"] for record in aggregate["records"]}
+    candidate_record_ids = set(candidate_record_ids)
+    candidate_fact_ids = set(candidate_fact_ids)
     for rule in rules:
         require(isinstance(rule, dict), "integration rule: must be an object")
         required_keys(rule, RULE_KEYS, rule.get("rule_id", "integration rule"))
     require(len({rule["rule_id"] for rule in rules}) == len(rules), "integration rules: duplicate rule ID")
     for rule in rules:
+        require(
+            not (set(rule["record_ids"]) & candidate_record_ids or set(rule["fact_ids"]) & candidate_fact_ids),
+            "integration rule references an audited candidate record",
+        )
         require(set(rule["record_ids"]) <= records and set(rule["fact_ids"]) <= set(facts), f"{rule['rule_id']}: unknown record/fact ID")
         require({fact_owners[fact_id] for fact_id in rule["fact_ids"]} <= set(rule["record_ids"]), f"{rule['rule_id']}: fact owner missing from record_ids")
         require(rule["record_ids"] and rule["fact_ids"] and rule["conditions"].strip() and rule["refusal"].strip(), f"{rule['rule_id']}: incomplete conditioned refusal")

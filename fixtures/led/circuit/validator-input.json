@@ -13,6 +13,7 @@
     "requireSkillMd": true
   },
   "inventory": {
+    "candidatesPath": null,
     "path": "upstream/.claude/skills/component-spec-audit/references/inventory.json",
     "provider": {
       "kind": "led-generator-v1",
