@@ -27,6 +27,17 @@ Audited candidates and their owned sources stay outside the publication projecti
 record or source IDs are rejected if added to `selection.json`, and candidates are never published
 or counted in its selected record/source totals.
 
+## The built-site scan
+
+`zudo-circuit-doc scan` checks artifacts the package owns against the full denied-value canary set
+in its OWNED tier. Its SITE tier checks the built site (and an optional docs-to-agent mirror) after
+subtracting canaries already present in the host's authored documentation. Generated component
+pages under the configured `docs.generatedContent` are never part of that authored subtraction
+corpus. After that subtraction, `scan.publicCanonicalFootprints` provides the only additional SITE
+exemption: an exact match for a denied `sha256` value backed by a public footprint manifest. OWNED
+keeps the full canary set. See [the `scan` config](../reference/config.mdx#scan-overrides-only) for
+the footprint and built-manifest provenance checks.
+
 ## The selection lock
 
 `circuit/publication/selection.json` is the reviewed publication lock:

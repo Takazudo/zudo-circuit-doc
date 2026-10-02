@@ -38,7 +38,7 @@ one place (the CLI/adapter), never confused inside the schema check itself.
 | `publication` | Yes | — | See below |
 | `cad` | Yes | — | `{ enabled: false, libraryName? }` or the full enabled shape — see below |
 | `validation` | No | `{}` | See below |
-| `scan` | No | `undefined` (no overrides) | `ScanPolicyConfig` overrides for scan thresholds and expected counts |
+| `scan` | No | `undefined` (no overrides) | `ScanPolicyConfig` overrides for scan thresholds, expected counts, and declared public canonical footprints |
 | `browserSmoke` | No | `undefined` | `{ representatives: [...] }` |
 
 ## `docs`
@@ -204,6 +204,35 @@ These reference limits can be overridden per key under `cad.limits`:
 pick one deterministically). Omitting `scan` entirely means "derive a proportional policy from the
 resolved config" — a project supplies nothing and gets a proportional policy based on its own
 configuration.
+
+`publicCanonicalFootprints` is an optional list of footprint filename stems, such as `"R0603"`.
+Use it when a published package's canonical KiCad footprint is cited as an evidence source and its
+`sha256` field is denied by the publication matrix. These are names, not paths or hash strings:
+
+```ts
+scan: {
+  publicCanonicalFootprints: ["R0603"],
+},
+```
+
+Each name must identify exactly one package in the validated public model. For every declared name,
+`scan` reads the corresponding regular, non-symlink `.kicad_mod` file contained by both the project
+root and `cad.footprintLibraryRoot`, then derives SHA-256 from those bytes. It reads the **built**
+public manifest, `assets/component-previews/footprints/manifest.json` under the configured
+`docs.dist` directory. The package entry must publish the same footprint name and `footprintPath`,
+and its `canonicalInputSha256` must equal the derived digest. The configured `docs.dist` matters:
+the source preview manifest is not proof of what the scanned site actually publishes. A missing or
+malformed built manifest, an unknown or ambiguous package, a missing or unsafe footprint file, or a
+path or digest mismatch fails closed.
+
+The exemption applies only in the SITE tier, after authored documentation has been subtracted, and
+only to a denied canary from the exact `sha256` field whose value exactly equals the derived digest.
+It does not match a prefix, a different hash field, or another evidence value containing the same
+text. OWNED always scans the full canary set, so the declaration cannot hide a leak in artifacts the
+package owns. Keep `cad.footprintMasterRoot` and `cad.footprintLibraryRoot` byte-identical as
+required by the footprint preview contract. When an evidence source cites the master copy, a
+divergent library copy derives a different digest, so that source canary receives no SITE
+subtraction; preview generation and checking also reject the divergent copies.
 
 ## `browserSmoke`
 
