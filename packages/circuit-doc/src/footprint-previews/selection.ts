@@ -16,7 +16,31 @@
 import { fail } from "../core/errors.ts";
 import type { InstanceSelection } from "../core/publication.ts";
 import type { EvidenceIndex } from "../provider/v1/evidence.ts";
-import type { FootprintSelection } from "./manifest.ts";
+import type { FootprintPreviewSelection, FootprintSelection } from "./manifest.ts";
+
+export type FootprintPreviewSelectionOptions = {
+  readonly publishMembership: boolean;
+};
+
+/** Return only the selection fields that belong in the public manifest. */
+export function footprintPreviewSelection(
+  selection: FootprintSelection,
+  options: FootprintPreviewSelectionOptions,
+): FootprintPreviewSelection {
+  if (!options.publishMembership) {
+    return {
+      packageId: selection.packageId,
+      footprintName: selection.footprintName,
+      footprintPath: selection.footprintPath,
+    };
+  }
+  return {
+    packageId: selection.packageId,
+    footprintName: selection.footprintName,
+    footprintPath: selection.footprintPath,
+    recordIds: selection.recordIds,
+  };
+}
 
 export function footprintSelectionsFromIndex(
   index: EvidenceIndex,

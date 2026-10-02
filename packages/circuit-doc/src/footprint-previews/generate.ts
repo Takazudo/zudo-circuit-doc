@@ -22,6 +22,7 @@ import { assertOwnedPreviewRoot } from "./guard.ts";
 import { aggregateHash, sha256 } from "./hash.ts";
 import { PREVIEW_FORMAT_VERSION, type FootprintPreviewEntry, type FootprintPreviewManifest, type FootprintSelection } from "./manifest.ts";
 import { assertFootprintLibraryParity } from "./parity.ts";
+import { footprintPreviewSelection } from "./selection.ts";
 import { normalizeSvg } from "./svg.ts";
 
 /** Temp directory prefix for the working library/export trees (spec item 4). */
@@ -35,6 +36,8 @@ export type GenerateFootprintPreviewsOptions = {
   readonly previewRoot: string;
   /** Required when `selections.length > 0`; unused (and may be omitted) for the zero-package state. */
   readonly renderer?: PreviewRendererConfig;
+  /** Defaults to true for existing callers; false removes package membership from the public manifest. */
+  readonly publishMembership?: boolean;
   readonly runDocker?: DockerRunner;
 };
 
@@ -42,6 +45,7 @@ export async function generateFootprintPreviews(
   options: GenerateFootprintPreviewsOptions,
 ): Promise<FootprintPreviewManifest> {
   const { selections, footprintMasterRoot, footprintLibraryRoot, previewRoot } = options;
+  const publishMembership = options.publishMembership ?? true;
   await assertFootprintLibraryParity(footprintMasterRoot, footprintLibraryRoot);
 
   if (selections.length === 0) {
@@ -108,7 +112,7 @@ export async function generateFootprintPreviews(
       const normalized = normalizeSvg(await readFile(join(exportRoot, filename), "utf8"));
       outputs.set(filename, normalized);
       entries.push({
-        ...selection,
+        ...footprintPreviewSelection(selection, { publishMembership }),
         assetPath: `/assets/component-previews/footprints/${filename}`,
         canonicalInputSha256: canonicalBefore.get(selection.footprintName) as string,
         generatedOutputSha256: sha256(normalized),

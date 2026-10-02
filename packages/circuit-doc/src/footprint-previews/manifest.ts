@@ -18,7 +18,12 @@ export type FootprintSelection = {
   readonly recordIds: readonly string[];
 };
 
-export type FootprintPreviewEntry = FootprintSelection & {
+/** Public selection fields serialized to the manifest. Package membership is policy controlled. */
+export type FootprintPreviewSelection = Pick<FootprintSelection, "packageId" | "footprintName" | "footprintPath"> & {
+  readonly recordIds?: readonly string[];
+};
+
+export type FootprintPreviewEntry = FootprintPreviewSelection & {
   readonly assetPath: string;
   readonly canonicalInputSha256: string;
   readonly generatedOutputSha256: string;
