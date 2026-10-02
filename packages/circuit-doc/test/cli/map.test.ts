@@ -35,6 +35,18 @@ async function fixture(edit: (config: Record<string, any>) => void = () => {}) {
   return { root, resolved: resolveCircuitConfig(config as CircuitConfig, root) };
 }
 
+async function fixtureWithMatrix(
+  field: keyof typeof CIRCUIT_PUBLICATION_MATRIX,
+  agentResources = true,
+) {
+  const { root, resolved } = await fixture((config) => {
+    config.publication.matrix = "matrix.json";
+    config.docs.agentResources = agentResources;
+  });
+  await writeJson(join(root, "matrix.json"), { ...CIRCUIT_PUBLICATION_MATRIX, [field]: "DENY" });
+  return { root, resolved };
+}
+
 async function rejectsAdapter(promise: Promise<unknown>, pattern: RegExp): Promise<ComponentDocsError> {
   try {
     await promise;
@@ -129,6 +141,31 @@ describe("mapCircuitConfig", () => {
       config.publication.matrix = "component-evidence-v1";
     });
     assert.equal((await mapCircuitConfig(resolved)).matrixSource, "preset:component-evidence-v1");
+  });
+
+  for (const field of ["record.ownerSkill", "integration.ownerSkill"] as const) {
+    it(`rejects ${field} DENY while the agent-resource mirror is enabled`, async () => {
+      const { resolved } = await fixtureWithMatrix(field);
+      const error = await rejectsAdapter(mapCircuitConfig(resolved), /owner-skill DENY cannot hold/u);
+      assert.deepEqual(error.detail.fields, [field]);
+      assert.match(error.message, /\/docs\/claude-skills\/<owner>\//u);
+      assert.match(error.message, /owner-skill inventory/u);
+      assert.match(error.message, /set docs\.agentResources: false or publish the denied field/u);
+    });
+  }
+
+  it("allows owner-skill DENY when agent-resource mirroring is disabled", async () => {
+    const { resolved } = await fixtureWithMatrix("record.ownerSkill", false);
+    const mapping = await mapCircuitConfig(resolved);
+    assert.equal(mapping.matrix["record.ownerSkill"], "DENY");
+    assert.equal(mapping.render.agentResources, false);
+  });
+
+  it("allows reference package recordIds DENY while agent-resource mirroring is enabled", async () => {
+    const { resolved } = await fixtureWithMatrix("reference.package.recordIds");
+    const mapping = await mapCircuitConfig(resolved);
+    assert.equal(mapping.matrix["reference.package.recordIds"], "DENY");
+    assert.equal(mapping.render.agentResources, true);
   });
 
   it("an incomplete matrix override lists every undecided key", async () => {
