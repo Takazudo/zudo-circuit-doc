@@ -42,6 +42,13 @@ describe("valid configs", () => {
     assert.deepEqual(collectCircuitConfigIssues(config), []);
   });
 
+  test("scan.publicCanonicalFootprints accepts unique footprint names", () => {
+    const config = mutable(DEFAULT_PROJECT_CONFIG);
+    config.scan = {};
+    config.scan.publicCanonicalFootprints = ["LED_0603", "QFN-32"];
+    assert.deepEqual(collectCircuitConfigIssues(config), []);
+  });
+
   test("root may be the config directory itself", () => {
     assert.deepEqual(collectCircuitConfigIssues({ ...DEFAULT_PROJECT_CONFIG, root: "." }), []);
     assert.deepEqual(collectCircuitConfigIssues({ ...DEFAULT_PROJECT_CONFIG, root: "./data/../data" }), []);
@@ -126,6 +133,29 @@ describe("error classes, every error reported", () => {
       "browserSmoke.representatives[0].path",
       "browserSmoke.representatives[1]",
     ]);
+  });
+
+  test("scan.publicCanonicalFootprints rejects paths, unsafe names, hashes and duplicates", () => {
+    const config = mutable(DEFAULT_PROJECT_CONFIG);
+    config.scan = {};
+    config.scan.publicCanonicalFootprints = [
+      "nested/footprint",
+      "..",
+      "",
+      "a".repeat(64),
+      "LED_0603",
+      "LED_0603",
+    ];
+    const issues = collectCircuitConfigIssues(config);
+    assert.deepEqual(paths(issues), [
+      "scan.publicCanonicalFootprints[0]",
+      "scan.publicCanonicalFootprints[1]",
+      "scan.publicCanonicalFootprints[2]",
+      "scan.publicCanonicalFootprints[3]",
+      "scan.publicCanonicalFootprints[5]",
+    ]);
+    assert.match(issueFor(issues, "scan.publicCanonicalFootprints[3]").message, /not a 64-character hexadecimal hash/u);
+    assert.match(issueFor(issues, "scan.publicCanonicalFootprints[5]").message, /duplicates/u);
   });
 
   test("pythonMinVersion below the 3.10 floor is rejected", () => {

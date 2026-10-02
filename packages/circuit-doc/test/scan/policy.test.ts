@@ -19,6 +19,7 @@ describe("buildScanPolicy", () => {
         minimumSiteFiles: 150,
         expectedWithheld: 6,
         positiveControlRecord: "al8860mp-13",
+        publicCanonicalFootprints: ["LED_0603", "QFN-32"],
       },
       { agentResources: true },
     );
@@ -28,6 +29,7 @@ describe("buildScanPolicy", () => {
     assert.equal(policy.minimumSiteFiles, 150);
     assert.equal(policy.expectedWithheld, 6);
     assert.equal(policy.positiveControlRecord, "al8860mp-13");
+    assert.deepEqual(policy.publicCanonicalFootprints, ["LED_0603", "QFN-32"]);
   });
 
   it("defaults to null overrides and \"auto\" when scan config is absent", () => {
@@ -38,6 +40,7 @@ describe("buildScanPolicy", () => {
     assert.equal(policy.minimumSiteFiles, null);
     assert.equal(policy.expectedWithheld, null);
     assert.equal(policy.positiveControlRecord, "auto");
+    assert.deepEqual(policy.publicCanonicalFootprints, []);
   });
 
   it("derives required agent routes from core/site.ts, empty when agentResources is off", () => {
