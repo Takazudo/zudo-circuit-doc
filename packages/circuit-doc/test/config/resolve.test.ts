@@ -56,6 +56,29 @@ describe("resolveCircuitConfig", () => {
     assert.equal(resolved.browserSmoke?.representatives.length, 1);
   });
 
+  test("resolves optional LED generator options and only configured board names", () => {
+    const config = mutable(LED_STYLE_CONFIG);
+    config.inventoryProvider = {
+      kind: "led-generator-v1",
+      specs: [
+        { path: "upstream/scripts/schgen/board_p_spec.py", board: "power" },
+        { path: "upstream/scripts/schgen/board_l_spec.py" },
+      ],
+      fit: "placement",
+      mpnFromValueLcsc: ["C144397"],
+    };
+    const resolved = resolveCircuitConfig(config as typeof LED_STYLE_CONFIG, DIR);
+    assert.deepEqual(resolved.inventoryProvider, {
+      kind: "led-generator-v1",
+      specs: [
+        { path: join(DIR, "upstream/scripts/schgen/board_p_spec.py"), board: "power" },
+        { path: join(DIR, "upstream/scripts/schgen/board_l_spec.py") },
+      ],
+      fit: "placement",
+      mpnFromValueLcsc: ["C144397"],
+    });
+  });
+
   test("an explicit footprintPathBase and partial limits override the defaults", () => {
     const config = mutable(LED_STYLE_CONFIG);
     config.cad.footprintPathBase = ".";

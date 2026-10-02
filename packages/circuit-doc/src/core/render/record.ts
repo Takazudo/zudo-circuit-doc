@@ -80,6 +80,8 @@ import {
   factValue,
   factValueEntries,
   fitLabel,
+  fitRollupLabel,
+  hasMixedFit,
   generatedNotice,
   glossFor,
   integrationRoute,
@@ -329,7 +331,7 @@ function identitySection(record: PublicRecord): RootContent[] {
       ...(aliases.length === 0 ? [] : [metadataRow("Also known as", termList(aliases))]),
       ...(ownerSkill === null ? [] : [metadataRow("Owner skill", [code(ownerSkill)])]),
     ]),
-    paragraph(field("Fit", [text(fitLabel(identity.dnp))])),
+    paragraph(field("Fit", [text(fitRollupLabel(identity))])),
     paragraph(field("Identity state", [text(identity.identityState)])),
     paragraph(field("Source state", [text(identity.sourceState)])),
     paragraph(field("Coverage", [text(openDomainSummary(record.coverage))])),
@@ -338,6 +340,7 @@ function identitySection(record: PublicRecord): RootContent[] {
 
 function placementSection(record: PublicRecord): RootContent[] {
   const { placements } = record.identity;
+  const mixed = hasMixedFit(record.identity);
   if (placements.length === 0) {
     return [
       heading(2, literal("Placements")),
@@ -356,8 +359,12 @@ function placementSection(record: PublicRecord): RootContent[] {
       ),
     ]),
     table(
-      [literal("Board"), literal("Reference designator")],
-      placements.map((placement) => [[text(placement.board)], [code(placement.refdes)]]),
+      [literal("Board"), literal("Reference designator"), ...(mixed ? [literal("Fit")] : [])],
+      placements.map((placement) => [
+        [text(placement.board)],
+        [code(placement.refdes)],
+        ...(mixed ? [[text(fitLabel(placement.dnp))]] : []),
+      ]),
     ),
   ];
 }

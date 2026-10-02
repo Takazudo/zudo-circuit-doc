@@ -45,6 +45,7 @@ import type {
   PublicInteraction,
   PublicPlacement,
   PublicRecord,
+  PublicRecordIdentity,
   PublicViewModel,
 } from "../view-model.ts";
 
@@ -258,6 +259,18 @@ export function factReference(
  */
 export function fitLabel(dnp: boolean): SafeText {
   return dnp ? literal("DNP or hand-fit") : literal("Fitted");
+}
+
+/** Whether placement fit differs within this orderable line. */
+export function hasMixedFit(identity: PublicRecordIdentity): boolean {
+  return identity.placements.some((p) => p.dnp) && identity.placements.some((p) => !p.dnp);
+}
+
+/** Preserve the uniform label and explicitly describe a mixed placement line. */
+export function fitRollupLabel(identity: PublicRecordIdentity): SafeText {
+  return hasMixedFit(identity)
+    ? literal("Mixed: fitted and DNP or hand-fit by placement")
+    : fitLabel(identity.dnp);
 }
 
 /**

@@ -159,6 +159,41 @@ describe("error classes, every error reported", () => {
     ]);
   });
 
+  test("led-generator-v1 accepts placement fit, reviewed LCSC exceptions and board names", () => {
+    const config = mutable(DEFAULT_PROJECT_CONFIG);
+    config.inventoryProvider = {
+      kind: "led-generator-v1",
+      specs: [{ path: "scripts/schgen/main.py", board: "main" }],
+      fit: "placement",
+      mpnFromValueLcsc: ["C144397", "C123"],
+    };
+    assert.deepEqual(collectCircuitConfigIssues(config), []);
+  });
+
+  test("led-generator-v1 rejects invalid options and unknown spec keys", () => {
+    const config = mutable(DEFAULT_PROJECT_CONFIG);
+    config.inventoryProvider = {
+      kind: "led-generator-v1",
+      specs: [{ path: "spec.py", board: " " }],
+      fit: "mixed",
+      mpnFromValueLcsc: ["c123", "C123", "C123"],
+    };
+    config.inventoryProvider.specs[0].extra = true;
+    const issues = collectCircuitConfigIssues(config);
+    assert.deepEqual(paths(issues).sort(), [
+      "inventoryProvider.fit",
+      "inventoryProvider.mpnFromValueLcsc[0]",
+      "inventoryProvider.mpnFromValueLcsc[2]",
+      "inventoryProvider.specs[0].board",
+      "inventoryProvider.specs[0].extra",
+    ]);
+    assert.match(issueFor(issues, "inventoryProvider.fit").message, /line, placement/u);
+    assert.match(issueFor(issues, "inventoryProvider.mpnFromValueLcsc[0]").message, /C\[0-9\]\+/u);
+    assert.match(issueFor(issues, "inventoryProvider.mpnFromValueLcsc[2]").message, /duplicates/u);
+    assert.match(issueFor(issues, "inventoryProvider.specs[0].board").message, /non-empty string/u);
+    assert.match(issueFor(issues, "inventoryProvider.specs[0].extra").message, /^unknown key/u);
+  });
+
   test("the manual provider takes no other keys", () => {
     const config = mutable(DEFAULT_PROJECT_CONFIG);
     config.inventoryProvider = { kind: "manual", specs: [] };

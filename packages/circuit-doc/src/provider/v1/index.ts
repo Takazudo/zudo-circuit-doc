@@ -58,6 +58,7 @@ import type { CircuitProjectPaths } from "./paths.ts";
 import { projectIntegrationRules } from "./integration.ts";
 import {
   indexEvidence,
+  placementFits,
   readBundle,
   readIntegrationRules,
   readInventory,
@@ -342,6 +343,7 @@ function buildIdentity(
   policy: PublicationPolicy,
 ): PublicRecordIdentity {
   const { record, line } = entry;
+  const fits = placementFits(line);
   const slug = slugByRecordId.get(record.record_id);
   if (slug === undefined) {
     fail("IDENTITY_COLLISION", `no slug for record ${record.record_id}`, {
@@ -402,12 +404,13 @@ function buildIdentity(
       "record.sourceState",
       safeText(line.source_state, { field: "source_state" }),
     ),
-    dnp: policy.publishRequired("record.dnp", line.dnp),
+    dnp: policy.publishRequired("record.dnp", fits.length === 0 ? line.dnp! : fits.every((p) => p.dnp)),
     placements: policy.publishRequired(
       "record.placements",
-      line.placements.map((placement) => ({
+      fits.map((placement) => ({
         board: safeText(placement.board, { field: "placement.board" }),
         refdes: safeText(placement.refdes, { field: "placement.refdes" }),
+        dnp: placement.dnp,
       })),
     ),
   };

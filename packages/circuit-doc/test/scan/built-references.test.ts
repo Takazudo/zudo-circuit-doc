@@ -72,7 +72,7 @@ const ONE_RECORD_MODEL: PublicViewModel = {
         identityState: t("VERIFIED"),
         sourceState: t("AVAILABLE"),
         dnp: false,
-        placements: [{ board: t("board-l"), refdes: t("U1") }],
+        placements: [{ board: t("board-l"), refdes: t("U1"), dnp: false }],
       },
       aliases: { mpn: [], lcsc: [], manufacturer: [], function: [] },
       sources: [],

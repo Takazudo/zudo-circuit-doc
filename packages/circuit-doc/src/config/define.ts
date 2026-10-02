@@ -90,11 +90,17 @@ export type ManualInventoryProviderConfig = {
 
 export type LedGeneratorSpecConfig = {
   readonly path: ConfigPath;
+  /** Expected board name; defaults to the spec's PROJECT_NAME. */
+  readonly board?: string;
 };
 
 export type LedGeneratorInventoryProviderConfig = {
   readonly kind: "led-generator-v1";
   readonly specs: readonly LedGeneratorSpecConfig[];
+  /** How generated fit state is represented. Defaults to line-level fit. */
+  readonly fit?: "line" | "placement";
+  /** Reviewed generator LCSC codes whose MPN is taken from the generated value. */
+  readonly mpnFromValueLcsc?: readonly string[];
 };
 
 export type InventoryProviderConfig = ManualInventoryProviderConfig | LedGeneratorInventoryProviderConfig;

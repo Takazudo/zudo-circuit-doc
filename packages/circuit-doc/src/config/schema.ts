@@ -109,6 +109,14 @@ function literal(expected: number): Check {
   };
 }
 
+function oneOf(values: readonly string[]): Check {
+  return (value, path, issues) => {
+    if (typeof value !== "string" || !values.includes(value)) {
+      issues.push({ path, message: `must be one of: ${values.join(", ")} (got ${describe(value)})` });
+    }
+  };
+}
+
 const text: Check = (value, path, issues) => {
   if (typeof value !== "string" || value.trim() === "") {
     issues.push({ path, message: `must be a non-empty string (got ${describe(value)})` });
@@ -225,9 +233,39 @@ const MANUAL_PROVIDER_SHAPE: Shape = {
   kind: required(() => {}),
 };
 
+const lcscCode: Check = (value, path, issues) => {
+  if (typeof value !== "string" || !/^C[0-9]+$/u.test(value)) {
+    issues.push({ path, message: `must be an LCSC C-number matching ^C[0-9]+$ (got ${describe(value)})` });
+  }
+};
+
+const mpnFromValueLcsc: Check = (value, path, issues) => {
+  array(lcscCode)(value, path, issues);
+  if (!Array.isArray(value)) return;
+  const seen = new Set<string>();
+  value.forEach((entry, index) => {
+    if (typeof entry !== "string") return;
+    if (seen.has(entry)) {
+      issues.push({ path: `${path}[${index}]`, message: "must not contain duplicates" });
+    } else {
+      seen.add(entry);
+    }
+  });
+};
+
 const LED_GENERATOR_PROVIDER_SHAPE: Shape = {
   kind: required(() => {}),
-  specs: required(array(object({ path: required(configPath) }), { nonEmpty: true })),
+  specs: required(
+    array(
+      object({
+        path: required(configPath),
+        board: optional(text),
+      }),
+      { nonEmpty: true },
+    ),
+  ),
+  fit: optional(oneOf(["line", "placement"])),
+  mpnFromValueLcsc: optional(mpnFromValueLcsc),
 };
 
 const inventoryProvider: Check = (value, path, issues) => {
