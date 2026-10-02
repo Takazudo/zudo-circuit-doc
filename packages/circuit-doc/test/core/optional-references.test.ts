@@ -16,7 +16,7 @@ test('generic label retains source authority and cannot permit unsafe URL or arb
  const descriptor=createComponentReferencesDescriptor(input);
  assert.deepEqual(decodeComponentReferencesDescriptor(encodeComponentReferencesDescriptor(descriptor)),descriptor);
  assert.equal(descriptor.modelDescriptor,null);
- for(const value of [{...descriptor,document:{...descriptor.document,url:'javascript:alert(1)'}},{...descriptor,document:{...descriptor.document,label:'Manufacturer qualified'}}]) assert.throws(()=>encodeComponentReferencesDescriptor(value));
+ for(const value of [{...descriptor,document:{...descriptor.document,url:'javascript:alert(1)'}},{...descriptor,document:{...descriptor.document,label:'Manufacturer qualified'}}]) assert.throws(()=>encodeComponentReferencesDescriptor(value as typeof descriptor));
  assert.throws(()=>encodeComponentReferencesDescriptor({...descriptor,modelDescriptor:undefined} as unknown as typeof descriptor));
 });
 const ui = await bundleForSsr<typeof import('../../src/ui/index.ts')>('src/ui/index.ts');

@@ -64,12 +64,12 @@ describe("reviewed document shortcuts", () => {
     assert.equal(new Set(project.selection.documentSelections.map((entry) => entry.recordId)).size, 35);
     assert.equal(model.records.length, 35);
     for (const record of model.records) {
-      assert.match(record.reference.document.url, /^https?:\/\//u);
-      assert.ok(["Datasheet PDF", "Specification PDF", "Mechanical drawing PDF"].includes(record.reference.document.label));
-      assert.equal(record.reference.document.sourceId.length > 0, true);
-      assert.equal(record.reference.document.documentTitle.length > 0, true);
-      assert.equal(record.reference.document.authorityClass.length > 0, true);
-      assert.equal(record.reference.document.availability.length > 0, true);
+      assert.match(record.reference.document!.url, /^https?:\/\//u);
+      assert.ok(["Datasheet PDF", "Specification PDF", "Mechanical drawing PDF"].includes(record.reference.document!.label));
+      assert.equal(record.reference.document!.sourceId.length > 0, true);
+      assert.equal(record.reference.document!.documentTitle.length > 0, true);
+      assert.equal(record.reference.document!.authorityClass.length > 0, true);
+      assert.equal(record.reference.document!.availability.length > 0, true);
     }
   });
 
@@ -91,29 +91,29 @@ describe("reviewed document shortcuts", () => {
   it("does not infer kind from suffix or source order", () => {
     const queryDownload = model.records.find((record) => record.identity.recordId === "rec-c13585");
     assert.ok(queryDownload);
-    assert.equal(queryDownload.reference.document.documentKind, "specification");
-    assert.match(queryDownload.reference.document.url, /download\.do\?/u);
+    assert.equal(queryDownload.reference.document!.documentKind, "specification");
+    assert.match(queryDownload.reference.document!.url, /download\.do\?/u);
     const drawing = model.records.find((record) => record.identity.recordId === "rec-c492404");
-    assert.equal(drawing?.reference.document.label, "Mechanical drawing PDF");
+    assert.equal(drawing?.reference.document!.label, "Mechanical drawing PDF");
   });
 
   it("uses the public exact-part PDF for TYPE-C instead of the referer-gated manufacturer asset", () => {
     const typeC = model.records.find((record) => record.identity.recordId === "rec-type-c-31-m-17");
-    assert.equal(typeC?.reference.document.sourceId, "src-type-c-c283540");
-    assert.equal(typeC?.reference.document.documentKind, "drawing");
-    assert.equal(typeC?.reference.document.label, "Mechanical drawing PDF");
+    assert.equal(typeC?.reference.document!.sourceId, "src-type-c-c283540");
+    assert.equal(typeC?.reference.document!.documentKind, "drawing");
+    assert.equal(typeC?.reference.document!.label, "Mechanical drawing PDF");
     assert.equal(
-      typeC?.reference.document.url,
+      typeC?.reference.document!.url,
       "https://datasheet.lcsc.com/datasheet/pdf/26d9c5bff410f020782d77a1fd4062b2.pdf?productCode=C283540",
     );
-    assert.doesNotMatch(typeC?.reference.document.url ?? "", /thefastfile\.com/u);
+    assert.doesNotMatch(typeC?.reference.document!.url ?? "", /thefastfile\.com/u);
   });
 
   it("retains STM32's audited availability without inventing an exception label", () => {
     const stm = model.records.find((record) => record.identity.recordId === "rec-c529334");
-    assert.equal(stm?.reference.document.sourceId, "src-c529334-ds");
-    assert.equal(stm?.reference.document.availability, "SOURCE UNAVAILABLE");
-    assert.equal(stm?.reference.document.label, "Datasheet PDF");
+    assert.equal(stm?.reference.document!.sourceId, "src-c529334-ds");
+    assert.equal(stm?.reference.document!.availability, "SOURCE UNAVAILABLE");
+    assert.equal(stm?.reference.document!.label, "Datasheet PDF");
   });
 });
 

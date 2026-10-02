@@ -521,6 +521,41 @@ describe("repeated projection is byte-stable", () => {
   });
 });
 
+describe("reviewed unavailable document", () => {
+  const reason = "Distributor listing only; manufacturer document unavailable.";
+  function projectException(matrix = FIXTURE_MATRIX) {
+    const index = indexEvidence(fixtureInventory(), [fixtureBundle()], fixtureIntegrationRules());
+    const references = index.references;
+    assert.ok(references);
+    const documentsByRecordId = new Map(references.documentsByRecordId);
+    documentsByRecordId.delete("rec-handfit");
+    const selection: InstanceSelection = {
+      ...FIXTURE_SELECTION,
+      documentSelections: FIXTURE_SELECTION.documentSelections.filter((entry) => entry.recordId !== "rec-handfit"),
+      documentExceptions: [{ recordId: "rec-handfit", reason }],
+    };
+    const exceptionIndex = {
+      ...index,
+      references: { ...references, documentsByRecordId, documentExceptionsByRecordId: new Map([["rec-handfit", reason]]) },
+    };
+    return projectIndex(exceptionIndex, new PublicationPolicy(matrix, selection));
+  }
+
+  it("publishes the reason while retaining the footprint and model", () => {
+    const record = recordOf(projectException(), "handfit");
+    assert.deepEqual(record.sources.map((source) => source.authorityClass), ["DISTRIBUTOR_IDENTITY"]);
+    assert.equal(record.reference.document, null);
+    assert.equal(record.reference.documentUnavailableReason, reason);
+    assert.ok(record.reference.footprint);
+    assert.ok(record.reference.footprint.modelPath);
+  });
+
+  it("requires publication of the reviewed reason", () => {
+    assert.throws(() => projectException({ ...FIXTURE_MATRIX, "reference.document.availability": "DENY" }),
+      (error: unknown) => error instanceof ComponentDocsError && error.code === "PUBLICATION_POLICY");
+  });
+});
+
 describe("PCB record without a published package (ADR-012 declared zero)", () => {
   function projectWithout(options: { declared: boolean; lcsc?: string }): PublicViewModel {
     const inventory = fixtureInventory();

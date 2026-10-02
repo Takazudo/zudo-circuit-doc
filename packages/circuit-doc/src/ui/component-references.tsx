@@ -20,12 +20,14 @@ export function ComponentReferences({ descriptor: encoded }: ComponentReferences
       <div className="zcd-component-references__document">
         <div>
           <p className="zcd-component-references__document-label">{document.label}</p>
-          <p className="zcd-component-references__document-title"><a href={document.url}>{document.title}</a></p>
+          {"reason" in document
+            ? <p className="zcd-component-references__document-title" data-document-unavailable="true">{document.reason}</p>
+            : <p className="zcd-component-references__document-title"><a href={document.url}>{document.title}</a></p>}
         </div>
-        <dl className="zcd-component-references__metadata">
+        {"reason" in document ? null : <dl className="zcd-component-references__metadata">
           <div><dt>Authority</dt><dd>{document.authority}</dd></div>
           <div><dt>Availability</dt><dd>{document.availability}</dd></div>
-        </dl>
+        </dl>}
       </div>
       <div className="zcd-component-references__previews">
         <article className="zcd-component-references__preview">

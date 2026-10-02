@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { ALLOWED_COMPONENT_ATTRIBUTES } from "../../src/core/mdx.ts";
-import { decodeComponentReferencesDescriptor } from "../../src/core/reference-descriptor.ts";
+import { decodeComponentReferencesDescriptor, DOCUMENT_UNAVAILABLE_LABEL } from "../../src/core/reference-descriptor.ts";
 import { CATALOG_INDEX_ANCHOR, renderCatalog } from "../../src/core/render/catalog.ts";
 import { renderRecord, renderRecordsIndex } from "../../src/core/render/record.ts";
 import { buildRecordIndex } from "../../src/core/render/shared.ts";
@@ -132,6 +132,24 @@ describe("catalog", () => {
 });
 
 describe("record page — structure", () => {
+  it("renders an unavailable reason without a document link, with evidence intact", () => {
+    const record = recordOf(model, FIXTURE_IDS.driverRecord);
+    const reason = safeText("Distributor listing only.", { field: "reason" });
+    for (const footprint of [record.reference.footprint, null]) {
+      const unavailable: PublicRecord = { ...record, reference: { ...record.reference, document: null, documentUnavailableReason: reason, footprint } };
+      const page = renderRecord(unavailable, buildRecordIndex(model)).contents;
+      assert.match(page, /Selected document:\*\* Document unavailable/u);
+      assert.match(page, /\*\*Reason:\*\* Distributor listing only\./u);
+      assert.doesNotMatch(page, /https:\/\/example\.invalid\/reference\.pdf/u);
+      assert.match(page, /^## Sources$/mu);
+      assert.match(page, /<EvidenceAnchor id=/u);
+      if (footprint !== null) {
+        const encoded = /<ComponentReferences descriptor="([0-9a-f]+)"/u.exec(page)?.[1];
+        assert.ok(encoded);
+        assert.deepEqual(decodeComponentReferencesDescriptor(encoded).document, { label: DOCUMENT_UNAVAILABLE_LABEL, reason });
+      }
+    }
+  });
   it("renders one reviewed component-reference descriptor for every record, before evidence tables", () => {
     for (const record of model.records) {
       const page = pageFor(model, record.identity.recordId);
@@ -146,6 +164,8 @@ describe("record page — structure", () => {
       const encoded = descriptors[0]?.[1];
       assert.ok(encoded);
       const reference = decodeComponentReferencesDescriptor(encoded);
+      assert.ok(record.reference.document);
+      assert.ok("title" in reference.document);
       assert.equal(reference.document.label, record.reference.document.label);
       assert.equal(reference.document.title, record.reference.document.documentTitle);
       assert.equal(reference.document.authority, record.reference.document.authorityClass);
@@ -163,6 +183,7 @@ describe("record page — structure", () => {
 
   it("passes the reviewed PDF label through without deriving it from document kind", () => {
     const record = recordOf(model, FIXTURE_IDS.driverRecord);
+    assert.ok(record.reference.document);
     const altered = {
       ...record,
       reference: {
