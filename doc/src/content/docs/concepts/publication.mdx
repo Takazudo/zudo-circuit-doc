@@ -114,3 +114,24 @@ does not remove it from the built output, and does not exempt it from the public
 A file under `doc/public/` is public the moment it is built, whether or not the asset viewer lists
 it. If a file should not be public, it should not be under `publicRoot` at all — or it needs a
 genuine entry (with a genuine reason) in `assets.json`, not an exclusion flag.
+
+## Denying owner skills and package membership
+
+A custom publication matrix may DENY `record.ownerSkill` or `integration.ownerSkill` only when
+`docs.agentResources` is `false`. With agent resources enabled, the config loader rejects those
+decisions because generated output publishes the owner-skill inventory and
+`/docs/claude-skills/<owner>/` routes. Remove `claudeResources` from the doc host's `zfb.config.ts`
+as well, so the host does not publish those bundle routes independently of generated component
+pages. Remove any navigation link to those routes too; a stale `/docs/claude` link makes the doc
+host's strict link check fail after `claudeResources` is removed.
+
+When owner skills are denied, generated component pages omit the **Owner skill** row and any
+`/docs/claude-skills/` link. Where an owner would otherwise be identified, the page says: “No owning
+bundle is identified in the published model.” The `zudo-circuit-doc scan` command treats denied
+owner names as canaries, including component bundle names found under `owner_skill` or its manifest
+alias `skill`, and the integration owner name supplied by config.
+
+The `reference.package.recordIds` decision is independent of `docs.agentResources`: it can be DENY
+while agent resources remain enabled. DENY removes `recordIds` from the public footprint-preview
+manifest. The `component-evidence-v1` package preset keeps `record.ownerSkill`,
+`integration.ownerSkill` and `reference.package.recordIds` at PUBLISH.

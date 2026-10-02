@@ -314,12 +314,12 @@ function projectRecordReference(
 }
 
 function projectPackage(entry: CircuitPackageReference, policy: PublicationPolicy): PublicPackagePreview {
+  const recordIds = entry.recordIds.map((recordId) =>
+    safeText(recordId, { field: `${entry.packageId}.recordId` }),
+  );
   return {
     ...projectFootprint(entry, policy),
-    recordIds: policy.publishRequired(
-      "reference.package.recordIds",
-      entry.recordIds.map((recordId) => safeText(recordId, { field: `${entry.packageId}.recordId` })),
-    ),
+    recordIds: policy.publish("reference.package.recordIds", recordIds) ?? null,
   };
 }
 
@@ -376,10 +376,7 @@ function buildIdentity(
         : safeText(parentRecordId, { field: "parent_record_id" }),
     parentSlug,
     lineId: policy.publishRequired("record.lineId", safeText(line.line_id, { field: "line_id" })),
-    ownerSkill: policy.publishRequired(
-      "record.ownerSkill",
-      safeText(line.owner_skill, { field: "owner_skill" }),
-    ),
+    ownerSkill: policy.publish("record.ownerSkill", safeText(line.owner_skill, { field: "owner_skill" })) ?? null,
     mpn: policy.publishRequired("record.mpn", safeText(line.mpn, { field: "mpn" })),
     manufacturer: policy.publishRequired(
       "record.manufacturer",

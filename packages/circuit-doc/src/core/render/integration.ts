@@ -602,7 +602,11 @@ function agentResourceSection(
   rules: readonly PublicIntegrationRule[],
   options: RenderOptions,
 ): RootContent[] {
-  const owners = presentTerms(rules.map((rule) => rule.ownerSkill));
+  const owners = presentTerms(
+    rules
+      .map((rule) => rule.ownerSkill)
+      .filter((ownerSkill): ownerSkill is SafeText => ownerSkill !== null),
+  );
 
   return [
     heading(2, literal("Raw agent resource")),

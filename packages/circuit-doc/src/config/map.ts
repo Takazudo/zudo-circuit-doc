@@ -142,6 +142,17 @@ export async function mapCircuitConfig(config: ResolvedCircuitConfig): Promise<C
     readGloss(config),
   ]);
 
+  const deniedOwnerSkillFields = (["record.ownerSkill", "integration.ownerSkill"] as const).filter(
+    (field) => matrix.value[field] === "DENY",
+  );
+  if (config.docs.agentResources && deniedOwnerSkillFields.length > 0) {
+    fail(
+      "ADAPTER_CONTRACT",
+      "docs.agentResources: true publishes /docs/claude-skills/<owner>/ and the owner-skill inventory, so owner-skill DENY cannot hold; set docs.agentResources: false or publish the denied field",
+      { fields: deniedOwnerSkillFields, matrixSource: matrix.source },
+    );
+  }
+
   const generatedMarker = config.docs.generatedMarker ?? undefined;
   const render: PipelineRenderOptions = {
     agentResources: config.docs.agentResources,

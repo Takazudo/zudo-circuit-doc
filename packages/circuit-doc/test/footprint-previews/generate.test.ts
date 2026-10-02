@@ -53,6 +53,42 @@ describe("generateFootprintPreviews", () => {
     }
   });
 
+  it("omits denied package membership without changing aggregate hashes", async () => {
+    const { paths, selections } = await buildFootprintFixture(join(scratch, "denied-membership"));
+    const defaults = await generateFootprintPreviews({
+      selections,
+      footprintMasterRoot: paths.footprintMasterRoot,
+      footprintLibraryRoot: paths.footprintLibraryRoot,
+      previewRoot: paths.footprintPreviewRoot,
+      renderer: FIXTURE_RENDERER,
+      runDocker: fakeDockerRunner(FIXTURE_RENDERER.version),
+    });
+    assert.ok(Object.hasOwn(defaults.packages[0]!, "recordIds"));
+
+    const denied = await generateFootprintPreviews({
+      selections,
+      footprintMasterRoot: paths.footprintMasterRoot,
+      footprintLibraryRoot: paths.footprintLibraryRoot,
+      previewRoot: paths.footprintPreviewRoot,
+      renderer: FIXTURE_RENDERER,
+      publishMembership: false,
+      runDocker: fakeDockerRunner(FIXTURE_RENDERER.version),
+    });
+
+    assert.equal(denied.canonicalInputSha256, defaults.canonicalInputSha256);
+    assert.equal(denied.generatedOutputSha256, defaults.generatedOutputSha256);
+    assert.deepEqual(
+      denied.packages.map(({ canonicalInputSha256, generatedOutputSha256 }) => ({ canonicalInputSha256, generatedOutputSha256 })),
+      defaults.packages.map(({ canonicalInputSha256, generatedOutputSha256 }) => ({ canonicalInputSha256, generatedOutputSha256 })),
+    );
+    assert.ok(denied.packages.every((entry) => !Object.hasOwn(entry, "recordIds")));
+
+    const written = JSON.parse(await readFile(join(paths.footprintPreviewRoot, "manifest.json"), "utf8")) as {
+      packages: Array<Record<string, unknown>>;
+    };
+    assert.ok(written.packages.every((entry) => !Object.hasOwn(entry, "recordIds")));
+  });
+
   it("never invokes Docker for the zero-package state, and still writes the empty manifest", async () => {
     const { paths, selections } = await buildFootprintFixture(join(scratch, "zero-state"), {
       contents: {
