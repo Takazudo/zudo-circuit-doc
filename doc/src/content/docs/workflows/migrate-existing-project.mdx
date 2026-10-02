@@ -36,8 +36,12 @@ The fixture's JSON shape stays the same.
 
 If the existing inventory comes from board-generator scripts, set
 `inventoryProvider.kind` to `"led-generator-v1"` and list those scripts in
-`inventoryProvider.specs`. The inventory JSON's `generator_specs` field must match the configured
-paths exactly.
+`inventoryProvider.specs`. Add `board` to a spec when config should declare its expected board
+name instead of reading it from the generator's `PROJECT_NAME`. The inventory JSON's
+`generator_specs` field must match the configured declarations: a path for a spec without an
+explicit board, or a normalized `{ board, spec }` entry for a board-scoped spec. See
+[Concepts → Inventory profiles](../concepts/inventory-profiles.mdx) for placement fit, the reviewed
+`mpnFromValueLcsc` list, and the parity checks these options retain.
 
 Otherwise, use the generic `{ kind: "manual" }` profile. Under this profile, the inventory JSON's
 `generator_specs` field must be `[]` — not omitted or filled with stale paths from a generator that

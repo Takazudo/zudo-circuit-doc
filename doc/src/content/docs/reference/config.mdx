@@ -34,7 +34,7 @@ one place (the CLI/adapter), never confused inside the schema check itself.
 | `project` | Yes | — | `{ name, title }`, both non-empty strings |
 | `docs` | Yes | — | See below |
 | `evidence` | Yes | — | See below |
-| `inventoryProvider` | Yes | — | `{ kind: "manual" }` or `{ kind: "led-generator-v1", specs: [...] }` — see [Concepts → Inventory profiles](../concepts/inventory-profiles.mdx) |
+| `inventoryProvider` | Yes | — | `{ kind: "manual" }` or `{ kind: "led-generator-v1", specs, fit?, mpnFromValueLcsc? }` — see [Concepts → Inventory profiles](../concepts/inventory-profiles.mdx) |
 | `publication` | Yes | — | See below |
 | `cad` | Yes | — | `{ enabled: false, libraryName? }` or the full enabled shape — see below |
 | `validation` | No | `{}` | See below |
@@ -76,11 +76,34 @@ one place (the CLI/adapter), never confused inside the schema check itself.
 ```ts
 { kind: "manual" }
 // or
-{ kind: "led-generator-v1", specs: [{ path: "scripts/schgen/board_p_spec.py" }, ...] }
+{
+  kind: "led-generator-v1",
+  specs: [
+    { path: "scripts/schgen/board_p_spec.py" },
+    { path: "scripts/schgen/board_l_spec.py", board: "logic" },
+  ],
+  fit: "placement",
+  mpnFromValueLcsc: ["C144397"],
+}
 ```
 
 `kind` must be one of the two registered values; `led-generator-v1`'s `specs` array must be
-non-empty. See [Concepts → Inventory profiles](../concepts/inventory-profiles.mdx).
+non-empty. Each spec path is relative to this config file. Its optional nonblank `board` overrides
+the board name read from that generator's `PROJECT_NAME`.
+
+`fit` is optional and defaults to `"line"`, preserving the existing line-level `dnp` behavior.
+Set it to `"placement"` when each generated placement carries its own `dnp`. In placement mode,
+a line with both fitted and DNP placements contributes to both fitted and DNP line totals; line mode
+keeps its existing one-state-per-line counts. If a line and one of its placements both declare
+`dnp`, their values must agree.
+
+`mpnFromValueLcsc` is an optional finite list of reviewed LCSC C-numbers (for example
+`["C144397"]`). Each value must match `^C[0-9]+$`, be unique, and identify an LCSC code present
+in the generator output; only those listed codes take the generated component `value` as the MPN.
+No provider option skips generator symbol/footprint parity checks.
+
+See [Concepts → Inventory profiles](../concepts/inventory-profiles.mdx) for how these options affect
+inventory declarations and checks.
 
 ## `publication`
 

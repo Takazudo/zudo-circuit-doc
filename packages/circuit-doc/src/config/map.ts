@@ -233,7 +233,17 @@ export function validatorInputFor(config: ResolvedCircuitConfig): ValidatorInput
       provider:
         config.inventoryProvider.kind === "manual"
           ? { kind: "manual" }
-          : { kind: "led-generator-v1", specs: config.inventoryProvider.specs.map((spec) => ({ path: spec.path })) },
+          : {
+              kind: "led-generator-v1",
+              specs: config.inventoryProvider.specs.map((spec) => ({
+                path: spec.path,
+                ...(spec.board === undefined ? {} : { board: spec.board }),
+              })),
+              ...(config.inventoryProvider.fit === undefined ? {} : { fit: config.inventoryProvider.fit }),
+              ...(config.inventoryProvider.mpnFromValueLcsc === undefined
+                ? {}
+                : { mpnFromValueLcsc: [...config.inventoryProvider.mpnFromValueLcsc] }),
+            },
     },
     routing: { directRouting: evidence.directRouting, vendorQualifiers: evidence.vendorQualifiers },
     cad: config.cad.enabled

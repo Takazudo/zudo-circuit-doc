@@ -41,8 +41,19 @@ inventoryProvider: { kind: "led-generator-v1", specs: [{ path: "scripts/schgen/b
 ```
 
 - Specs come **explicitly from config** — there is no implicit fallback to a hard-coded board list.
-- Board names come from each spec's `PROJECT_NAME`.
-- `inventory.json`'s `generator_specs` must equal the configured spec paths, exactly.
+- Board names come from each spec's `PROJECT_NAME`; an optional nonblank `board` on a spec
+  overrides that name.
+- `inventory.json`'s `generator_specs` must match the configured specs. A spec without an explicit
+  board is represented by its path; a board-scoped spec may use the normalized
+  `{ board, spec }` form, with its path relative to the project root.
+- `fit` defaults to `"line"`, which keeps the existing line-level `dnp` behavior. Use
+  `"placement"` when each placement has its own `dnp`. A line with a mix of fitted and DNP
+  placements contributes to both fitted and DNP line totals. When a line and its placement both
+  declare `dnp`, their values must agree.
+- `mpnFromValueLcsc` is an optional finite reviewed list of generator LCSC codes. Each entry must
+  be a unique `C` number matching `^C[0-9]+$` and must occur in the generator output; only those
+  codes take their MPN from the generated `value`.
+- These options do not skip generator parity: the generator's symbol/footprint checks still run.
 
 Choose this profile when your project already has a generator script that provides board names,
 components and placements. Otherwise, use the manual profile.
