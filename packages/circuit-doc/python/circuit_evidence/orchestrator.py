@@ -183,7 +183,14 @@ def validate(config, *, online=False, refresh_source_ids=(), opener=urllib.reque
 
     # 5. inventory provider
     context.provider_result = context.provider.validate(context.inventory, context.fitted_aggregate, config)
+    context.provider.validate_candidates(context.candidates, context.inventory)
     report.scope.extend(context.provider_result.scope_lines)
+    if context.candidates:
+        candidate_owners = {candidate["owner_skill"] for candidate in context.candidates}
+        report.scope.append(
+            f"candidates: {len(context.candidates)} audited candidate records in {len(candidate_owners)} owners "
+            "(excluded from placements, CAD binding, routing and publication)"
+        )
     report.warn.extend(context.provider_result.warnings)
     report.lines = len(context.provider_result.lines)
 
@@ -196,7 +203,7 @@ def validate(config, *, online=False, refresh_source_ids=(), opener=urllib.reque
     validate_routing(context.provider_result.lines, fixtures, context.routing)
 
     # 7. CAD pin assets
-    skipped = cad_checks.validate_pin_assets(context.aggregate, context.provider_result.lines, config["cad"], provider=context.provider, provider_result=context.provider_result)
+    skipped = cad_checks.validate_pin_assets(context.fitted_aggregate, context.provider_result.lines, config["cad"], provider=context.provider, provider_result=context.provider_result)
     if skipped:
         report.skip.append(skipped)
 
@@ -204,11 +211,19 @@ def validate(config, *, online=False, refresh_source_ids=(), opener=urllib.reque
     context.rules = []
     if integration_cfg["rulesPath"] is not None:
         context.rules = load_rules(integration_cfg["rulesPath"])
-        validate_rules(context.rules, context.aggregate, schema)
+        candidate_record_ids = {record["record_id"] for record in context.candidate_aggregate["records"]}
+        candidate_fact_ids = {fact["fact_id"] for fact in context.candidate_aggregate["facts"]}
+        validate_rules(
+            context.rules,
+            context.fitted_aggregate,
+            schema,
+            candidate_record_ids=candidate_record_ids,
+            candidate_fact_ids=candidate_fact_ids,
+        )
     if integration_cfg["forwardTests"] is not None:
         skill_dir = integration_cfg["integrationSkillDir"]
         skill_name = Path(skill_dir).name if skill_dir is not None else DEFAULT_INTEGRATION_SKILL
-        forward = check_forward_tests(integration_cfg["forwardTests"], rules=context.rules, aggregate=context.aggregate, lines=context.provider_result.lines, routing=context.routing, skill_name=skill_name)
+        forward = check_forward_tests(integration_cfg["forwardTests"], rules=context.rules, aggregate=context.fitted_aggregate, lines=context.provider_result.lines, routing=context.routing, skill_name=skill_name)
         if forward.cases == 0:
             report.skip.append(f"forward tests: 0 cases ({forward.negative_routes} negative routes checked)")
 
