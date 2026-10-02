@@ -125,7 +125,7 @@ describe("KiCad preview manifest", () => {
     );
     assert.equal(model.packagePreviews.length, 25);
     assert.equal(new Set(model.packagePreviews.map((entry) => entry.packageId)).size, 25);
-    assert.equal(model.packagePreviews.flatMap((entry) => entry.recordIds).length, 35);
+    assert.equal(model.packagePreviews.flatMap((entry) => entry.recordIds ?? []).length, 35);
   });
 
   it("preserves non-zero Z rotations from the footprint", () => {

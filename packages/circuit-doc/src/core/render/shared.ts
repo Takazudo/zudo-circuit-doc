@@ -629,12 +629,9 @@ export function presentTerms(values: readonly SafeText[]): SafeText[] {
  * was written behind is gone, and dropping the field is now a compile error here
  * rather than a page that silently degrades to a plausible-but-wrong link.
  *
- * The nullable return and the callers' absent-owner branches are kept: every
- * record in THIS provider has an owning bundle, but the fallback is the correct
- * behaviour for one that does not, and it is deliberately never a stand-in link.
- * Pointing the reciprocal link at the agent-resource index would look like the
- * owning bundle and lead somewhere else, and a wrong link is worse than a stated
- * absence.
+ * The owner may be null when the publication matrix denies it. Callers omit the
+ * owner label and reciprocal link in that case; the resource index is not a
+ * stand-in because it would look like the record's owning bundle.
  */
 export function ownerSkillOf(record: PublicRecord): SafeText | null {
   return record.identity.ownerSkill;
@@ -666,8 +663,8 @@ export type RenderOptions = {
   /**
    * `false` suppresses every `/docs/claude*` link this section would emit —
    * the landing hub link, the integration page's owning-bundle links and each
-   * record's own. The owning bundle is still NAMED in every case; only the
-   * link is withheld, for a project that has not published that route.
+   * record's own. A known owner is still named; only the link is withheld when
+   * a project has not published that route.
    */
   readonly agentResources: boolean;
   /** Cross-component rule domain -> plain-language gloss. Package default: `{}`. */

@@ -392,7 +392,7 @@ export function buildPositiveControls(record: PublicRecord): readonly Control[] 
     control("identity: manufacturer", record.identity.manufacturer),
     control("identity: package", record.identity.packageName),
     control("identity: function", record.identity.function),
-    control("identity: owner skill", record.identity.ownerSkill),
+    control("identity: owner skill", record.identity.ownerSkill ?? ""),
   ];
 
   const factWithUnit = record.facts.find((fact) => fact.unit !== "" && fact.conditions !== "");
