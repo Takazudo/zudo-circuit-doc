@@ -221,18 +221,27 @@
 
 .zcd-model-viewer {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--spacing-vsp-xs);
+  min-width: 0;
+  box-sizing: border-box;
   padding: var(--spacing-hsp-lg);
   border: 1px solid var(--color-muted);
   background: var(--color-surface);
 }
 
+.zcd-model-viewer > * {
+  min-width: 0;
+}
+
 .zcd-model-viewer__caption {
   color: var(--color-fg);
+  overflow-wrap: anywhere;
 }
 
 .zcd-model-viewer__viewport {
   width: 100%;
+  box-sizing: border-box;
   aspect-ratio: 16 / 9;
   min-height: 12rem;
   overflow: hidden;
