@@ -1,0 +1,1256 @@
+diff --git a/doc/src/content/docs/changelog/create-zudo-circuit-doc/0.1.1.mdx b/doc/src/content/docs/changelog/create-zudo-circuit-doc/0.1.1.mdx
+new file mode 100644
+index 0000000..2262690
+--- /dev/null
++++ b/doc/src/content/docs/changelog/create-zudo-circuit-doc/0.1.1.mdx
+@@ -0,0 +1,14 @@
++---
++title: 0.1.1
++description: Create projects using the 0.2 runtime source and optional-model contract.
++sidebar_position: 2
++pagination_next: null
++---
++
++Released: 2026-10-02
++
++## Changes
++
++- Generated projects select `@takazudo/zudo-circuit-doc` through the `^0.2.0`
++  caret range, including explicit generic-source documents and unavailable-model
++  publication. The runtime must be published before this initializer release.
+diff --git a/doc/src/content/docs/changelog/zudo-circuit-doc/0.2.0.mdx b/doc/src/content/docs/changelog/zudo-circuit-doc/0.2.0.mdx
+new file mode 100644
+index 0000000..afd7012
+--- /dev/null
++++ b/doc/src/content/docs/changelog/zudo-circuit-doc/0.2.0.mdx
+@@ -0,0 +1,35 @@
++---
++title: 0.2.0
++description: Publish generic source records and footprints without declared 3D models.
++sidebar_position: 2
++pagination_next: null
++---
++
++Released: 2026-10-02
++
++## Breaking Changes
++
++- Package references and component descriptors now represent an absent 3D model
++  with explicit null model-path, transform and descriptor fields. TypeScript
++  consumers must check for null before reading model paths or transforms.
++- Document-kind consumers must handle the new `source-record` variant.
++
++## Features
++
++- Select a reviewed non-PDF source under the label **Source record**, preserving
++  its title, authority and availability without calling it a datasheet.
++- Publish a mapped footprint when it contains no model declaration. The page
++  retains its footprint preview and states that 3D geometry and physical fit
++  remain unverified; it creates no model viewer, download or request.
++
++## Bug Fixes
++
++- Keep declared missing, malformed, duplicate or unsafe model references fatal,
++  including declarations with whitespace before the model token. Accept legacy
++  KiCad module roots and read transforms only from the actual model declaration.
++- Include footprint-only pages in browser checks, retain a model-bearing
++  representative when available, and report skipped model interactions honestly.
++
++Existing source, footprint, pin-map and declared-model checks remain in force.
++These publication options do not establish component applicability or physical
++qualification.
+diff --git a/doc/src/content/docs/concepts/cad-fidelity.mdx b/doc/src/content/docs/concepts/cad-fidelity.mdx
+index 0016d33..a6d9ff2 100644
+--- a/doc/src/content/docs/concepts/cad-fidelity.mdx
++++ b/doc/src/content/docs/concepts/cad-fidelity.mdx
+@@ -51,10 +51,15 @@ footprint's matched STEP+WRL pair only exists in an older tagged library release
+ itself, a project may pin from that older release, or record the WRL as unavailable — either way, in
+ the receipt.
+ 
+-## STEP is optional; WRL is required
++## Absent models are explicit; declared WRL references remain required
+ 
+-Generation needs a **WRL** model for every published package — that's what the 3D viewer renders,
+-and it's checked and projected. A **STEP** file, if a project keeps one for CAD-authoring or
++A mapped footprint with no model declaration may be published. Its page retains the footprint
++preview and explicitly states that no 3D model is declared and geometry/physical fit remain
++unverified. No model viewer, request or export is created. Footprint and pin-map checks still run.
++A declared model must be a valid contained **WRL**; missing, malformed, duplicate or unsafe
++references fail rather than becoming an unavailable-model state. STEP-to-WRL conversion is not
++introduced. Nullable model paths/transforms/descriptors require corresponding checks in typed
++consumers. A **STEP** file, if a project keeps one for CAD-authoring or
+ mechanical-review purposes outside this site, is never required and its absence is silent: no
+ warning, no check failure. The one rule that does apply when a STEP file is present or declared is
+ that it must share the WRL's basename, and its path must still pass the same containment checks as
+diff --git a/doc/src/content/docs/concepts/publication.mdx b/doc/src/content/docs/concepts/publication.mdx
+index 07c8dae..0213fe0 100644
+--- a/doc/src/content/docs/concepts/publication.mdx
++++ b/doc/src/content/docs/concepts/publication.mdx
+@@ -42,7 +42,9 @@ page even for a fully selected record.
+ - `linkableSourceIds` — selecting a source publishes its metadata; an outbound link is published
+   only for source IDs also listed here.
+ - `documentSelections` — one document choice per record (`documentKind`: `datasheet`,
+-  `specification` or `drawing`), decided after inspecting the content.
++  `specification`, `drawing` or `source-record`), decided after inspecting the content.
++  The first three labels explicitly describe PDFs. `source-record` displays **Source record**
++  for a reviewed non-PDF source; it does not promote source authority or exact-part applicability.
+ - `expect` — a reviewed count lock (`records`, `sources`, `integrationRules`, `packages`), each of
+   which may be `0`. It gates `generate`/`check`/`build` and is **never serialized into the
+   preflight report**. `cad.enabled` is a separate capability flag — a selected PCB record while CAD is
+diff --git a/doc/src/content/docs/reference/cli.mdx b/doc/src/content/docs/reference/cli.mdx
+index ee51724..d598d8f 100644
+--- a/doc/src/content/docs/reference/cli.mdx
++++ b/doc/src/content/docs/reference/cli.mdx
+@@ -224,10 +224,10 @@ The Chrome-found path then has three outcomes:
+   INFO: using derived representatives: /docs/components/records/al8860mp-13/ (AL8860MP-13), /docs/components/records/c22807/ (C22807)
+   ```
+ - **Records are published, but none qualifies** (no component-references section with a reviewed
+-  PDF, footprint and WRL model): exits `4` with
++  document/source record and footprint, with a valid WRL if declared): exits `4` with
+   ```
+   not run: 2 record(s) are published but none qualifies for a default browser smoke (a
+-  component-references section with a reviewed PDF, footprint and WRL model); set
++  component-references section with a reviewed document/source record and footprint, with a valid WRL if declared); set
+   browserSmoke.representatives in circuit.config.ts
+   ```
+   A missing or invalid preflight report while deriving is a usage error (exit `2`), not exit `4`.
+diff --git a/doc/src/content/docs/reference/config.mdx b/doc/src/content/docs/reference/config.mdx
+index 128be82..6e48ca0 100644
+--- a/doc/src/content/docs/reference/config.mdx
++++ b/doc/src/content/docs/reference/config.mdx
+@@ -197,7 +197,7 @@ route starting with `/`. For example:
+ ```
+ 
+ `representatives` is what [`check-browser`](./cli.mdx#check-browser) exercises: the first entry
+-whose built page publishes a component-references section is the deep-interaction page (dialogs,
++whose built page publishes a component-references section with a model is the deep-interaction page (dialogs,
+ SPA navigation, forced failures); every entry with references is checked at every viewport/theme.
+ 
+ **Leaving `browserSmoke` unset is a supported default, not an oversight.** With no config value and
+@@ -206,11 +206,13 @@ no `--representatives` flag, `check-browser` derives up to 3 representatives its
+ 1. Read the preflight report's published record slugs, sorted.
+ 2. For each slug (site not yet built), a record qualifies when its generated page
+    (`<generatedContent>/records/<slug>/index.mdx`) has a `ComponentReferences` descriptor that
+-   decodes to a reviewed PDF label, an `http(s)` URL, a non-empty authority, a footprint and a WRL
+-   model, followed by at least one `<EvidenceFact>` and a `## Sources` heading.
++   decodes to a reviewed document/source-record label, an `http(s)` URL, a non-empty authority,
++   a footprint and either an explicit null model or a valid WRL descriptor, followed by at least one `<EvidenceFact>` and a `## Sources` heading.
+ 3. If the site is already built, a qualifying record must also have its built page carry the
+-   `zcd-component-references` marker, with the footprint SVG and model WRL present in `docs.dist`.
+-4. The first 3 qualifying slugs (in sorted order) become derived representatives:
++   `zcd-component-references` marker, with the footprint SVG and any declared model WRL present in `docs.dist`.
++4. The first 3 qualifying slugs (in sorted order) become derived representatives. If all three
++   are footprint-only and a later model-bearing page qualifies, it replaces the final slot so
++   model interaction checks are not silently lost. The representative shape is:
+    `{ kind: "derived <slug>", identity: <page title, i.e. the MPN>, path: "/docs/components/records/<slug>/" }`.
+ 
+ Zero published records is a legitimate "declared-zero project" and still exits `0` (nothing to
+diff --git a/doc/src/content/docs/reference/schemas.mdx b/doc/src/content/docs/reference/schemas.mdx
+index e049173..e383d4b 100644
+--- a/doc/src/content/docs/reference/schemas.mdx
++++ b/doc/src/content/docs/reference/schemas.mdx
+@@ -25,7 +25,7 @@ sidebar_position: 5
+ | `recordIds` | `string[]` | Record IDs cleared for publication (the INSTANCE gate) |
+ | `sourceIds` | `string[]` | Source IDs cleared for publication |
+ | `linkableSourceIds` | `string[]` | Subset of `sourceIds` whose outbound URL is also published |
+-| `documentSelections` | `array` | One entry per published record choosing its primary document, `documentKind`: `datasheet` \| `specification` \| `drawing` |
++| `documentSelections` | `array` | One entry per published record choosing its primary document, `documentKind`: `datasheet` \| `specification` \| `drawing` \| `source-record` |
+ | `expect.records` / `expect.sources` / `expect.integrationRules` / `expect.packages` | `number` | Reviewed counts, `0` allowed for every one |
+ | `comment` | `string` (optional) | The only extra key the schema allows beyond the above |
+ 
+diff --git a/examples/empty/circuit/WORKFLOW.md b/examples/empty/circuit/WORKFLOW.md
+index dfdd434..13a50cc 100644
+--- a/examples/empty/circuit/WORKFLOW.md
++++ b/examples/empty/circuit/WORKFLOW.md
+@@ -328,9 +328,10 @@ A preview is a rendering result. **A preview is not dimensional proof**, and a f
+ 
+ ## Publication policy
+ 
+-Adding evidence does not publish it. `circuit/publication/selection.json` lists exactly which record IDs, source IDs and linkable source IDs are published, one document selection per record (`documentKind` is `datasheet`, `specification` or `drawing`, chosen after inspecting the content), and the `expect` counts (`records`, `sources`, `integrationRules`, `packages`) that lock the published set. Zero is allowed.
++Adding evidence does not publish it. `circuit/publication/selection.json` lists exactly which record IDs, source IDs and linkable source IDs are published, one document selection per record (`documentKind` is `datasheet`, `specification`, `drawing` or `source-record`, chosen after inspecting the content), and the `expect` counts (`records`, `sources`, `integrationRules`, `packages`) that lock the published set. Zero is allowed.
+ 
+ - Selection and assets-allowlist edits happen **in the same task** as the evidence change and show up as a reviewable diff. No per-part conversational permission prompt is needed; the diff is the review.
++- Use `source-record` for a reviewed non-PDF source; its label is **Source record**, not a datasheet. Preserve the actual source title, authority and unresolved exact-part applicability. A mapped footprint with no model declaration may publish with an explicit unavailable-model notice; declared broken model references still fail. Missing geometry is never physical qualification.
+ - Selecting a source publishes its metadata; an outbound link is published only for IDs in `linkableSourceIds`.
+ - Raw sources and CAD files stay outside `doc/public/`. A file placed there deliberately must be listed in `circuit/publication/assets.json` with a reason; the publication scan fails otherwise. Generated previews under `doc/public/assets/component-previews/` are the only exception.
+ 
+diff --git a/examples/empty/circuit/checks/README.md b/examples/empty/circuit/checks/README.md
+index 3fc10f2..4db7894 100644
+--- a/examples/empty/circuit/checks/README.md
++++ b/examples/empty/circuit/checks/README.md
+@@ -19,7 +19,7 @@ What each project check establishes, and what it does not. Report a check's actu
+ 
+ 1. `--representatives <json>` on the command line.
+ 2. `browserSmoke.representatives` in `circuit.config.ts`, used exactly as configured — even an explicit empty list.
+-3. Otherwise, up to 3 representatives **derived** from the preflight report: published record slugs, sorted, filtered to the ones whose generated page has a decodable component-references section (a reviewed PDF, a footprint and a WRL model), and, once the site is built, whose built output carries the matching marker and assets. A derived run prints `INFO: using derived representatives: ...`.
++3. Otherwise, up to 3 representatives **derived** from the preflight report: published record slugs, sorted, filtered to the ones whose generated page has a decodable component-references section (a reviewed document/source record, a footprint, and a valid WRL when one is declared), and, once the site is built, whose built output carries the matching marker and assets. When the first three qualifying pages are footprint-only, the final slot is reserved for the first later model-bearing page if one exists. Missing model interaction gates are reported NOT RUN. A derived run prints `INFO: using derived representatives: ...`.
+ 
+ A declared-zero project (nothing published) is a `SKIP`, not a failure. If records are published but derivation finds none that qualifies, the command exits `4` rather than silently checking nothing — set `browserSmoke.representatives` in `circuit.config.ts` to name pages explicitly.
+ 
+diff --git a/examples/minimal/circuit/WORKFLOW.md b/examples/minimal/circuit/WORKFLOW.md
+index dfdd434..13a50cc 100644
+--- a/examples/minimal/circuit/WORKFLOW.md
++++ b/examples/minimal/circuit/WORKFLOW.md
+@@ -328,9 +328,10 @@ A preview is a rendering result. **A preview is not dimensional proof**, and a f
+ 
+ ## Publication policy
+ 
+-Adding evidence does not publish it. `circuit/publication/selection.json` lists exactly which record IDs, source IDs and linkable source IDs are published, one document selection per record (`documentKind` is `datasheet`, `specification` or `drawing`, chosen after inspecting the content), and the `expect` counts (`records`, `sources`, `integrationRules`, `packages`) that lock the published set. Zero is allowed.
++Adding evidence does not publish it. `circuit/publication/selection.json` lists exactly which record IDs, source IDs and linkable source IDs are published, one document selection per record (`documentKind` is `datasheet`, `specification`, `drawing` or `source-record`, chosen after inspecting the content), and the `expect` counts (`records`, `sources`, `integrationRules`, `packages`) that lock the published set. Zero is allowed.
+ 
+ - Selection and assets-allowlist edits happen **in the same task** as the evidence change and show up as a reviewable diff. No per-part conversational permission prompt is needed; the diff is the review.
++- Use `source-record` for a reviewed non-PDF source; its label is **Source record**, not a datasheet. Preserve the actual source title, authority and unresolved exact-part applicability. A mapped footprint with no model declaration may publish with an explicit unavailable-model notice; declared broken model references still fail. Missing geometry is never physical qualification.
+ - Selecting a source publishes its metadata; an outbound link is published only for IDs in `linkableSourceIds`.
+ - Raw sources and CAD files stay outside `doc/public/`. A file placed there deliberately must be listed in `circuit/publication/assets.json` with a reason; the publication scan fails otherwise. Generated previews under `doc/public/assets/component-previews/` are the only exception.
+ 
+diff --git a/examples/minimal/circuit/checks/README.md b/examples/minimal/circuit/checks/README.md
+index 3fc10f2..4db7894 100644
+--- a/examples/minimal/circuit/checks/README.md
++++ b/examples/minimal/circuit/checks/README.md
+@@ -19,7 +19,7 @@ What each project check establishes, and what it does not. Report a check's actu
+ 
+ 1. `--representatives <json>` on the command line.
+ 2. `browserSmoke.representatives` in `circuit.config.ts`, used exactly as configured — even an explicit empty list.
+-3. Otherwise, up to 3 representatives **derived** from the preflight report: published record slugs, sorted, filtered to the ones whose generated page has a decodable component-references section (a reviewed PDF, a footprint and a WRL model), and, once the site is built, whose built output carries the matching marker and assets. A derived run prints `INFO: using derived representatives: ...`.
++3. Otherwise, up to 3 representatives **derived** from the preflight report: published record slugs, sorted, filtered to the ones whose generated page has a decodable component-references section (a reviewed document/source record, a footprint, and a valid WRL when one is declared), and, once the site is built, whose built output carries the matching marker and assets. When the first three qualifying pages are footprint-only, the final slot is reserved for the first later model-bearing page if one exists. Missing model interaction gates are reported NOT RUN. A derived run prints `INFO: using derived representatives: ...`.
+ 
+ A declared-zero project (nothing published) is a `SKIP`, not a failure. If records are published but derivation finds none that qualifies, the command exits `4` rather than silently checking nothing — set `browserSmoke.representatives` in `circuit.config.ts` to name pages explicitly.
+ 
+diff --git a/packages/circuit-doc/CHANGELOG.md b/packages/circuit-doc/CHANGELOG.md
+index ffb8a8f..30fda4a 100644
+--- a/packages/circuit-doc/CHANGELOG.md
++++ b/packages/circuit-doc/CHANGELOG.md
+@@ -4,6 +4,35 @@ All notable changes to `@takazudo/zudo-circuit-doc` are documented in this file.
+ 
+ The format is based on Keep a Changelog, and release notes are generated from the changelog MDX pages.
+ 
++## [0.2.0] - 2026-10-02
++
++## Breaking Changes
++
++- Package references and component descriptors now represent an absent 3D model
++  with explicit null model-path, transform and descriptor fields. TypeScript
++  consumers must check for null before reading model paths or transforms.
++- Document-kind consumers must handle the new `source-record` variant.
++
++## Features
++
++- Select a reviewed non-PDF source under the label **Source record**, preserving
++  its title, authority and availability without calling it a datasheet.
++- Publish a mapped footprint when it contains no model declaration. The page
++  retains its footprint preview and states that 3D geometry and physical fit
++  remain unverified; it creates no model viewer, download or request.
++
++## Bug Fixes
++
++- Keep declared missing, malformed, duplicate or unsafe model references fatal,
++  including declarations with whitespace before the model token. Accept legacy
++  KiCad module roots and read transforms only from the actual model declaration.
++- Include footprint-only pages in browser checks, retain a model-bearing
++  representative when available, and report skipped model interactions honestly.
++
++Existing source, footprint, pin-map and declared-model checks remain in force.
++These publication options do not establish component applicability or physical
++qualification.
++
+ ## [0.1.0] - 2026-09-27
+ 
+ Initial release of `@takazudo/zudo-circuit-doc`, the runtime for evidence-first circuit-development
+diff --git a/packages/circuit-doc/package.json b/packages/circuit-doc/package.json
+index 8046be3..2e2c738 100644
+--- a/packages/circuit-doc/package.json
++++ b/packages/circuit-doc/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "@takazudo/zudo-circuit-doc",
+-  "version": "0.1.0",
++  "version": "0.2.0",
+   "type": "module",
+   "license": "MIT",
+   "description": "Circuit-development component-evidence engine, built on zudo-doc.",
+diff --git a/packages/circuit-doc/src/browser-smoke/checks/reference-page.ts b/packages/circuit-doc/src/browser-smoke/checks/reference-page.ts
+index 9aa2c55..1f5011f 100644
+--- a/packages/circuit-doc/src/browser-smoke/checks/reference-page.ts
++++ b/packages/circuit-doc/src/browser-smoke/checks/reference-page.ts
+@@ -13,7 +13,7 @@ import { evaluate, waitFor, type CdpClient } from "../cdp.ts";
+ import type { Representative } from "../types.ts";
+ import { revealReadyViewer } from "./interactions.ts";
+ 
+-const ALLOWED_PDF_LABELS = ["Datasheet PDF", "Specification PDF", "Mechanical drawing PDF"];
++const ALLOWED_DOCUMENT_LABELS = ["Datasheet PDF", "Specification PDF", "Mechanical drawing PDF", "Source record"];
+ 
+ export type ReferencePageReport = { readonly themeSignature: string };
+ 
+@@ -30,6 +30,7 @@ export async function inspectReferencePage(
+     cdp,
+     `document.querySelector('.zcd-component-references__footprint img')?.complete && document.querySelector('.zcd-component-references__footprint img')?.naturalWidth > 0`,
+   );
++  if (await evaluate(cdp, `document.querySelector('[data-model-unavailable="true"]') !== null`)) return inspectFootprintOnly(cdp, representative, width, theme, shellAssertions);
+   await revealReadyViewer(cdp);
+   const report = (await evaluate(
+     cdp,
+@@ -148,8 +149,8 @@ export async function inspectReferencePage(
+ 
+   assertEqual(report.viewport.inner, width, `${representative.kind} ${width}/${theme} viewport width`);
+   assertEqual(report.viewport.scroll <= report.viewport.client + 1, true, `${representative.kind} ${width}/${theme} page overflow`);
+-  assertEqual(ALLOWED_PDF_LABELS.includes(report.documentLabel), true, `${representative.kind} PDF label`);
+-  assertEqual(/^https?:\/\//u.test(report.documentHref), true, `${representative.kind} PDF destination`);
++  assertEqual(ALLOWED_DOCUMENT_LABELS.includes(report.documentLabel), true, `${representative.kind} document label`);
++  assertEqual(/^https?:\/\//u.test(report.documentHref), true, `${representative.kind} document destination`);
+   assertEqual((report.authority?.length ?? 0) > 0, true, `${representative.kind} document authority retained`);
+   if (representative.availability !== undefined) {
+     assertEqual(report.availability, representative.availability, `${representative.kind} availability`);
+@@ -287,3 +288,40 @@ async function inspectNativeShell(cdp: CdpClient, representative: Representative
+     await waitFor(cdp, `document.querySelector('header button[aria-label="Open sidebar"]')?.getAttribute('aria-expanded') === 'false'`);
+   }
+ }
++
++// Footprint-only pages remain in responsive/theme inspection. Model interaction
++// checks select a different representative rather than inventing a ready viewer.
++async function inspectFootprintOnly(cdp: CdpClient, representative: Representative, width: number, theme: string, shellAssertions: boolean): Promise<ReferencePageReport> {
++    const report = await evaluate(cdp, `(() => {
++      const section = document.querySelector('.zcd-component-references');
++      const notice = section.querySelector('[data-model-unavailable="true"]');
++      const image = section.querySelector('.zcd-component-references__footprint img');
++      const style = getComputedStyle(section);
++      const label = section.querySelector('.zcd-component-references__document-label');
++      const link = section.querySelector('.zcd-component-references__document-title a');
++      const heading = [...document.querySelectorAll('h2')].find(h => h.textContent.trim() === 'Documents and package');
++      const authority = [...section.querySelectorAll('dt')].find(n => n.textContent.trim() === 'Authority')?.nextElementSibling?.textContent.trim();
++      return {
++        width: innerWidth, overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
++        notice: notice?.textContent, noticeVisible: notice !== null && getComputedStyle(notice).display !== 'none',
++        models: section.querySelectorAll('[data-model-url], [data-component-model-viewer-root], [data-component-preview-enlarge="model"]').length,
++        footprintLoaded: image?.complete && image.naturalWidth > 0,
++        label: label?.textContent.trim(), href: link?.href, authority,
++        theme: document.documentElement.dataset.theme, headingId: heading?.id,
++        themeSignature: [getComputedStyle(document.body).color, getComputedStyle(document.body).backgroundColor, style.color, style.backgroundColor].join('|')
++      };
++    })()`) as {width:number; overflow:boolean; notice:string; noticeVisible:boolean; models:number; footprintLoaded:boolean; label:string; href:string; authority:string; theme:string; headingId:string; themeSignature:string};
++    assertEqual(report.width, width, 'footprint-only viewport');
++    assertEqual(report.overflow, false, 'footprint-only no overflow');
++    assertEqual(report.notice, 'No 3D model is declared by this footprint; geometry and physical fit remain unverified.', 'honest unavailable notice');
++    assertEqual(report.noticeVisible, true, 'unavailable notice visible');
++    assertEqual(report.models, 0, 'no invented model viewer or controls');
++    assertEqual(report.footprintLoaded, true, 'footprint preview loaded');
++    assertEqual(ALLOWED_DOCUMENT_LABELS.includes(report.label), true, 'reviewed document label');
++    assertEqual(/^https?:\/\//u.test(report.href), true, 'document URL');
++    assertEqual((report.authority?.length ?? 0) > 0, true, 'source authority retained');
++    assertEqual(report.theme, theme, 'theme retained');
++    assertEqual((report.headingId?.length ?? 0) > 0, true, 'reference heading retained');
++    if (shellAssertions) await inspectNativeShell(cdp, representative, width, report.headingId);
++    return {themeSignature: report.themeSignature};
++}
+diff --git a/packages/circuit-doc/src/browser-smoke/derive-representatives.ts b/packages/circuit-doc/src/browser-smoke/derive-representatives.ts
+index 6c0790f..bffd48b 100644
+--- a/packages/circuit-doc/src/browser-smoke/derive-representatives.ts
++++ b/packages/circuit-doc/src/browser-smoke/derive-representatives.ts
+@@ -8,8 +8,8 @@
+  * the frontmatter `title` is the record's MPN (its identity), and the
+  * `ComponentReferences` descriptor carries the document, footprint and model
+  * that `checks/reference-page.ts` asserts on. A record qualifies only when its
+- * descriptor decodes (reviewed PDF label, http(s) URL, non-empty authority,
+- * footprint, WRL model) and the page keeps Sources plus at least one evidence
++ * descriptor decodes (reviewed document label, http(s) URL, non-empty authority,
++ * footprint, optional declared WRL model) and the page keeps Sources plus at least one evidence
+  * fact after the references section. When the site is already built, the
+  * built page must carry the references section and the footprint/model assets
+  * must exist.
+@@ -68,7 +68,7 @@ export async function readPublishedSlugs(preflightFile: string): Promise<readonl
+   return slugs as string[];
+ }
+ 
+-async function qualify(slug: string, options: DeriveOptions, distBuilt: boolean): Promise<Representative | undefined> {
++async function qualify(slug: string, options: DeriveOptions, distBuilt: boolean): Promise<{ representative: Representative; hasModel: boolean } | undefined> {
+   const markdown = await readFile(join(options.generatedRoot, "records", slug, "index.mdx"), "utf8").catch(() => null);
+   if (markdown === null) return undefined;
+ 
+@@ -81,7 +81,7 @@ async function qualify(slug: string, options: DeriveOptions, distBuilt: boolean)
+     identity = JSON.parse(titleLiteral);
+     const descriptor = decodeComponentReferencesDescriptor(descriptorMatch[1] as string);
+     if (descriptor.document.authority.trim() === "") return undefined;
+-    assets = [descriptor.footprint.assetUrl, decodeModelDescriptor(descriptor.modelDescriptor).modelUrl];
++    assets = [descriptor.footprint.assetUrl, ...(descriptor.modelDescriptor === null ? [] : [decodeModelDescriptor(descriptor.modelDescriptor).modelUrl])];
+   } catch {
+     return undefined;
+   }
+@@ -102,13 +102,14 @@ async function qualify(slug: string, options: DeriveOptions, distBuilt: boolean)
+       if (!(await exists(join(options.distRoot, asset)))) return undefined;
+     }
+   }
+-  return representative;
++  return { representative, hasModel: assets.length > 1 };
+ }
+ 
+ /**
+  * Deterministic: records are considered in sorted slug order (slugs are the
+  * record IDs' public form) and the first {@link MAX_DERIVED_REPRESENTATIVES}
+- * that qualify are taken. Each gets a unique `kind`, because `run.ts` keys the
++ * that qualify are taken, reserving the final slot for the first later model
++ * when all initial slots are footprint-only. Each gets a unique `kind`, because `run.ts` keys the
+  * light/dark comparison by `${width}:${kind}`.
+  */
+ export async function deriveRepresentatives(options: DeriveOptions): Promise<DerivedRepresentatives> {
+@@ -119,11 +120,19 @@ export async function deriveRepresentatives(options: DeriveOptions): Promise<Der
+   // means the built-output checks cannot run yet.
+   const distBuilt = await exists(join(options.distRoot, "index.html"));
+   const representatives: Representative[] = [];
++  let hasModel = false;
+   for (const slug of slugs) {
+     const representative = await qualify(slug, options, distBuilt);
+     if (representative === undefined) continue;
+-    representatives.push(representative);
+-    if (representatives.length === MAX_DERIVED_REPRESENTATIVES) break;
++    if (representatives.length < MAX_DERIVED_REPRESENTATIVES) {
++      representatives.push(representative.representative);
++    } else if (representative.hasModel) {
++      // Keep at least one actual model for the deep-interaction pass when one
++      // exists; leading footprint-only records must not silently suppress it.
++      representatives[MAX_DERIVED_REPRESENTATIVES - 1] = representative.representative;
++    }
++    hasModel ||= representative.hasModel;
++    if (representatives.length === MAX_DERIVED_REPRESENTATIVES && hasModel) break;
+   }
+   return representatives.length === 0
+     ? { outcome: "none-qualify", publishedRecords: slugs.length }
+diff --git a/packages/circuit-doc/src/browser-smoke/representatives.ts b/packages/circuit-doc/src/browser-smoke/representatives.ts
+index c3c6a5a..7210057 100644
+--- a/packages/circuit-doc/src/browser-smoke/representatives.ts
++++ b/packages/circuit-doc/src/browser-smoke/representatives.ts
+@@ -3,7 +3,7 @@
+  * own `circuit.config.ts` `browserSmoke.representatives` — never from a
+  * hard-coded LED list (spec item 2). "RECORD" (the page exercised by the
+  * dialog/interaction/SPA/forced-failure checks) is the first representative
+- * whose built page actually publishes a component-references section; "AWAY"
++ * whose built page actually publishes a component-references section with a model; "AWAY"
+  * is always the catalog route.
+  */
+ 
+@@ -106,5 +106,11 @@ export async function resolveRepresentatives(
+   for (const representative of representatives) {
+     if (await hasPublishedReferences(distRoot, representative)) withReferences.push(representative);
+   }
+-  return { all: representatives, withReferences, record: withReferences[0] };
++    let record: Representative | undefined;
++    for (const representative of withReferences) {
++        const relative = representative.path.replace(/^\/+/u, "").replace(/\/+$/u, "");
++        const html = await readFile(join(distRoot, relative, "index.html"), "utf8");
++        if (!html.includes('data-model-unavailable="true"')) { record = representative; break; }
++    }
++    return { all: representatives, withReferences, record };
+ }
+diff --git a/packages/circuit-doc/src/browser-smoke/run.ts b/packages/circuit-doc/src/browser-smoke/run.ts
+index 8118a4a..96fc012 100644
+--- a/packages/circuit-doc/src/browser-smoke/run.ts
++++ b/packages/circuit-doc/src/browser-smoke/run.ts
+@@ -62,9 +62,11 @@ export async function runBrowserSmoke(options: BrowserSmokeOptions): Promise<Bro
+   }
+   if (record === undefined) {
+     lines.push(
+-      resolved.all.length === 0
+-        ? "SKIP: no representative publishes a component-references section (declared-zero project)"
+-        : "SKIP: none of the declared representatives publishes a component-references section",
++      resolved.withReferences.length > 0
++        ? `INFO: ${resolved.withReferences.length} footprint-only representative(s); no published model representative`
++        : resolved.all.length === 0
++          ? "SKIP: no representative publishes a component-references section (declared-zero project)"
++          : "SKIP: none of the declared representatives publishes a component-references section",
+     );
+   }
+ 
+@@ -74,6 +76,7 @@ export async function runBrowserSmoke(options: BrowserSmokeOptions): Promise<Bro
+     const cdp = session.cdp;
+     try {
+       let inspected = 0;
++      let referenceInspections = 0;
+       const lightThemeSignatures = new Map<string, string>();
+       for (const width of VIEWPORTS) {
+         for (const theme of THEMES) {
+@@ -82,6 +85,7 @@ export async function runBrowserSmoke(options: BrowserSmokeOptions): Promise<Bro
+             await navigate(cdp, site.origin, representative.path);
+             await setDocumentTheme(cdp, theme);
+             if (withReferences.has(representative.slug)) {
++              referenceInspections += 1;
+               const report = await inspectReferencePage(cdp, representative, width, theme, options.shellAssertions);
+               const signatureKey = `${width}:${representative.kind}`;
+               if (theme === "light") lightThemeSignatures.set(signatureKey, report.themeSignature);
+@@ -106,9 +110,7 @@ export async function runBrowserSmoke(options: BrowserSmokeOptions): Promise<Bro
+ 
+       await checkViewerFreeCatalog(cdp, site.origin, options.awayRoute);
+ 
+-      lines.push(
+-        `component reference browser smoke passed: ${inspected} responsive/theme cases, paired references, media-only dialogs, interactions, focus, on-demand idle, SPA cleanup, fallbacks, no-JS, viewer-free catalog`,
+-      );
++      lines.push(referenceSmokeSummary(inspected, referenceInspections, record !== undefined));
+       return { lines };
+     } catch (error) {
+       const diagnostics = await evaluate(
+@@ -205,3 +207,11 @@ async function runRecordChecks(
+   // guaranteed to have one, unlike an arbitrary "first representative".
+   await checkNoJsFallback(cdp, origin, recordPath);
+ }
++
++/** Only name gates that actually ran; footprint-only pages have no model gates. */
++export function referenceSmokeSummary(navigated: number, referenceInspections: number, hasModel: boolean): string {
++  const common = `component reference browser smoke passed: ${navigated} viewport/theme navigations, ${referenceInspections} component-reference inspections, viewer-free catalog`;
++  return hasModel
++    ? `${common}; model-bearing representative: dialogs, interactions, focus, on-demand idle, SPA cleanup, fallbacks and no-JS passed`
++    : `${common}; model dialogs/interactions, focus, idle, SPA, fallbacks and no-JS NOT RUN (no published model representative)`;
++}
+diff --git a/packages/circuit-doc/src/cli/commands/check-browser.ts b/packages/circuit-doc/src/cli/commands/check-browser.ts
+index 8818a71..3cc7ced 100644
+--- a/packages/circuit-doc/src/cli/commands/check-browser.ts
++++ b/packages/circuit-doc/src/cli/commands/check-browser.ts
+@@ -86,7 +86,7 @@ async function run(context: CommandContext): Promise<number> {
+       if (derived.outcome === "none-qualify") {
+         io.stderr.write(
+           `not run: ${derived.publishedRecords} record(s) are published but none qualifies for a default browser smoke ` +
+-            "(a component-references section with a reviewed PDF, footprint and WRL model); " +
++            "(a component-references section with a reviewed document/source record and footprint, with a valid WRL if declared); " +
+             "set browserSmoke.representatives in circuit.config.ts\n",
+         );
+         return EXIT.NOT_RUN;
+diff --git a/packages/circuit-doc/src/config/map.ts b/packages/circuit-doc/src/config/map.ts
+index b900178..0604f44 100644
+--- a/packages/circuit-doc/src/config/map.ts
++++ b/packages/circuit-doc/src/config/map.ts
+@@ -33,7 +33,7 @@ import type { ResolvedCircuitConfig } from "./resolve.ts";
+ export const SELECTION_SCHEMA_VERSION = 1;
+ export const ASSETS_SCHEMA_VERSION = 1;
+ 
+-const DOCUMENT_KINDS = ["datasheet", "specification", "drawing"] as const;
++const DOCUMENT_KINDS = ["datasheet", "specification", "drawing", "source-record"] as const;
+ 
+ /** One entry of `publication.assets` (ADR-018's deliberate-publication allowlist). */
+ export type PublicationAsset = {
+diff --git a/packages/circuit-doc/src/core/publication.ts b/packages/circuit-doc/src/core/publication.ts
+index e7fd9a0..e1a63e9 100644
+--- a/packages/circuit-doc/src/core/publication.ts
++++ b/packages/circuit-doc/src/core/publication.ts
+@@ -163,14 +163,14 @@ export type InstanceSelection = {
+    */
+   readonly linkableSourceIds: readonly string[];
+   /**
+-   * One reviewed PDF-representing source for every selected record. This is an
++   * One reviewed document/source record for every selected record. This is an
+    * audit decision, not a URL heuristic or a request to perform network I/O at
+    * generation time.
+    */
+   readonly documentSelections: readonly {
+     readonly recordId: string;
+     readonly sourceId: string;
+-    readonly documentKind: "datasheet" | "specification" | "drawing";
++    readonly documentKind: "datasheet" | "specification" | "drawing" | "source-record";
+   }[];
+   /** Asserted corpus counts; a mismatch means the selection went stale. */
+   readonly expect: {
+@@ -287,7 +287,7 @@ export class PublicationPolicy {
+           sourceId: document.sourceId,
+         });
+       }
+-      if (!["datasheet", "specification", "drawing"].includes(document.documentKind)) {
++      if (!["datasheet", "specification", "drawing", "source-record"].includes(document.documentKind)) {
+         fail("PUBLICATION_POLICY", `document source ${document.sourceId} has an invalid kind`, {
+           recordId: document.recordId,
+           sourceId: document.sourceId,
+diff --git a/packages/circuit-doc/src/core/reference-descriptor.ts b/packages/circuit-doc/src/core/reference-descriptor.ts
+index a55155a..601b527 100644
+--- a/packages/circuit-doc/src/core/reference-descriptor.ts
++++ b/packages/circuit-doc/src/core/reference-descriptor.ts
+@@ -17,11 +17,11 @@ export type ComponentReferencesDescriptor = {
+     readonly assetUrl: string;
+   };
+   /** Kept encoded so the same validated descriptor reaches the client island. */
+-  readonly modelDescriptor: string;
++  readonly modelDescriptor: string | null;
+ };
+ 
+ const HEX = /^(?:[0-9a-f]{2})+$/u;
+-const DOCUMENT_LABELS = new Set(["Datasheet PDF", "Specification PDF", "Mechanical drawing PDF"]);
++const DOCUMENT_LABELS = new Set(["Datasheet PDF", "Specification PDF", "Mechanical drawing PDF", "Source record"]);
+ const SAFE_FOOTPRINT_NAME = /^[A-Za-z0-9][A-Za-z0-9 ._+(),/-]*$/u;
+ // `FOOTPRINT_ASSET_BASE` (from `./site.ts`) has no regex metacharacters, so it
+ // is safe to splice straight into the pattern — the accepted URL set is
+@@ -58,13 +58,13 @@ export function decodeComponentReferencesDescriptor(encoded: string): ComponentR
+ export function createComponentReferencesDescriptor(input: {
+   readonly document: ComponentReferencesDescriptor["document"];
+   readonly footprintName: string;
+-  readonly model: ModelViewerDescriptor;
++  readonly model: ModelViewerDescriptor | null;
+ }): ComponentReferencesDescriptor {
+   return {
+     version: 1,
+     document: input.document,
+     footprint: { name: input.footprintName, assetUrl: footprintAssetUrl(input.footprintName) },
+-    modelDescriptor: encodeModelDescriptor(input.model),
++    modelDescriptor: input.model === null ? null : encodeModelDescriptor(input.model),
+   };
+ }
+ 
+@@ -76,8 +76,8 @@ export function assertComponentReferencesDescriptor(value: unknown): asserts val
+   }
+   assertDocument(descriptor.document);
+   assertFootprint(descriptor.footprint);
+-  if (typeof descriptor.modelDescriptor !== "string") throw new Error("Component references model descriptor is invalid");
+-  decodeModelDescriptor(descriptor.modelDescriptor);
++  if (descriptor.modelDescriptor !== null && typeof descriptor.modelDescriptor !== "string") throw new Error("Component references model descriptor is invalid");
++  if (descriptor.modelDescriptor !== null) decodeModelDescriptor(descriptor.modelDescriptor);
+ }
+ 
+ function assertDocument(value: unknown): asserts value is ComponentReferencesDescriptor["document"] {
+@@ -132,3 +132,5 @@ function isSafeHttpUrl(value: string): boolean {
+ function isDisplayText(value: string): boolean {
+   return value.length > 0 && value.length <= 1000 && !/[\p{Cc}\p{Cf}]/u.test(value);
+ }
++
++export const MODEL_UNAVAILABLE_TEXT = "No 3D model is declared by this footprint; geometry and physical fit remain unverified.";
+diff --git a/packages/circuit-doc/src/core/render/record.ts b/packages/circuit-doc/src/core/render/record.ts
+index 29cd7d4..c96150e 100644
+--- a/packages/circuit-doc/src/core/render/record.ts
++++ b/packages/circuit-doc/src/core/render/record.ts
+@@ -193,8 +193,9 @@ function componentReferencesSection(record: PublicRecord): RootContent[] {
+       paragraph([text(literal(PACKAGELESS_REFERENCE_TEXT[record.reference.mounting]))]),
+     ];
+   }
+-  const modelName = String(footprint.modelPath).split("/").at(-1);
++  const modelName = footprint.modelPath === null ? null : String(footprint.modelPath).split("/").at(-1);
+   if (modelName === undefined) throw new Error("Published model path has no basename");
++  if (footprint.modelPath !== null && (footprint.offset === null || footprint.rotation === null || footprint.scale === null)) throw new Error("Declared model placement is incomplete");
+   const descriptor = encodeComponentReferencesDescriptor(createComponentReferencesDescriptor({
+     document: {
+       label: document.label,
+@@ -204,14 +205,14 @@ function componentReferencesSection(record: PublicRecord): RootContent[] {
+       url: document.url,
+     },
+     footprintName: footprint.footprintName,
+-    model: {
++    model: modelName === null ? null : {
+       version: 1,
+       packageId: footprint.packageId,
+       packageLabel: footprint.footprintName,
+       modelUrl: `${MODEL_ASSET_BASE}${modelName}`,
+-      offset: footprint.offset,
+-      rotation: footprint.rotation,
+-      scale: footprint.scale,
++      offset: footprint.offset!,
++      rotation: footprint.rotation!,
++      scale: footprint.scale!,
+     },
+   }));
+   return [
+diff --git a/packages/circuit-doc/src/core/view-model.ts b/packages/circuit-doc/src/core/view-model.ts
+index 4fad6a0..7af3799 100644
+--- a/packages/circuit-doc/src/core/view-model.ts
++++ b/packages/circuit-doc/src/core/view-model.ts
+@@ -219,14 +219,14 @@ export type PublicPinMap = {
+   readonly pins: readonly PublicPin[];
+ };
+ 
+-export type PublicDocumentKind = "datasheet" | "specification" | "drawing";
++export type PublicDocumentKind = "datasheet" | "specification" | "drawing" | "source-record";
+ 
+ /** The one reviewed, PDF-representing shortcut for a record. */
+ export type PublicDocumentReference = {
+   readonly sourceId: SafeText;
+   /** The source's own title, preserved rather than replaced by UI wording. */
+   readonly documentTitle: SafeText;
+-  /** Exactly one of Datasheet PDF / Specification PDF / Mechanical drawing PDF. */
++  /** One reviewed label: Datasheet PDF / Specification PDF / Mechanical drawing PDF / Source record. */
+   readonly label: SafeText;
+   readonly authorityClass: SafeText;
+   readonly url: SafeUrl;
+@@ -245,10 +245,10 @@ export type PublicFootprintReference = {
+   readonly packageId: SafeText;
+   readonly footprintName: SafeText;
+   readonly footprintPath: SafeText;
+-  readonly modelPath: SafeText;
+-  readonly offset: PublicTransform3d;
+-  readonly rotation: PublicTransform3d;
+-  readonly scale: PublicTransform3d;
++  readonly modelPath: SafeText | null;
++  readonly offset: PublicTransform3d | null;
++  readonly rotation: PublicTransform3d | null;
++  readonly scale: PublicTransform3d | null;
+ };
+ 
+ export type PublicRecordReference = {
+diff --git a/packages/circuit-doc/src/provider/v1/index.ts b/packages/circuit-doc/src/provider/v1/index.ts
+index d2ef357..cdb0ac2 100644
+--- a/packages/circuit-doc/src/provider/v1/index.ts
++++ b/packages/circuit-doc/src/provider/v1/index.ts
+@@ -281,12 +281,13 @@ function projectRecordReference(
+   policy.publishRequired("asset.datasheetPdf", true);
+   if (footprint !== undefined) {
+     policy.publishRequired("asset.footprintPreview", true);
+-    policy.publishRequired("asset.modelPreview", true);
++    if (footprint.modelPath !== null) policy.publishRequired("asset.modelPreview", true);
+   }
+   const labels = {
+     datasheet: "Datasheet PDF",
+     specification: "Specification PDF",
+     drawing: "Mechanical drawing PDF",
++      "source-record": "Source record",
+   } as const;
+   return {
+     document: {
+@@ -319,7 +320,7 @@ function projectFootprint(entry: CircuitPackageReference, policy: PublicationPol
+     packageId: policy.publishRequired("reference.footprint.packageId", safeText(entry.packageId, { field: `${at}.packageId` })),
+     footprintName: policy.publishRequired("reference.footprint.name", safeText(entry.footprintName, { field: `${at}.footprintName` })),
+     footprintPath: policy.publishRequired("reference.footprint.path", safeText(entry.footprintPath, { field: `${at}.footprintPath` })),
+-    modelPath: policy.publishRequired("reference.model.path", safeText(entry.modelPath, { field: `${at}.modelPath` })),
++    modelPath: policy.publishRequired("reference.model.path", entry.modelPath === null ? null : safeText(entry.modelPath, { field: `${at}.modelPath` })),
+     offset: policy.publishRequired("reference.model.offset", entry.offset),
+     rotation: policy.publishRequired("reference.model.rotation", entry.rotation),
+     scale: policy.publishRequired("reference.model.scale", entry.scale),
+diff --git a/packages/circuit-doc/src/provider/v1/model-assets.ts b/packages/circuit-doc/src/provider/v1/model-assets.ts
+index 2da6aa8..016c28c 100644
+--- a/packages/circuit-doc/src/provider/v1/model-assets.ts
++++ b/packages/circuit-doc/src/provider/v1/model-assets.ts
+@@ -74,6 +74,7 @@ export async function buildModelAssetPlan(
+   const names = new Set<string>();
+   const entries: ModelAssetPlanEntry[] = [];
+   for (const descriptor of packages) {
++    if (descriptor.modelPath === null) continue;
+     const name = basename(descriptor.modelPath);
+     assertSafePreviewAssetName(name, descriptor.recordIds[0] ?? descriptor.packageId);
+     if (extname(name).toLowerCase() !== ".wrl" || names.has(name)) {
+diff --git a/packages/circuit-doc/src/provider/v1/references.ts b/packages/circuit-doc/src/provider/v1/references.ts
+index 31345eb..d5d16f9 100644
+--- a/packages/circuit-doc/src/provider/v1/references.ts
++++ b/packages/circuit-doc/src/provider/v1/references.ts
+@@ -30,17 +30,17 @@ export type Transform3d = { readonly x: number; readonly y: number; readonly z:
+ export type CircuitDocumentReference = {
+   readonly recordId: string;
+   readonly source: ProviderSource;
+-  readonly documentKind: "datasheet" | "specification" | "drawing";
++  readonly documentKind: "datasheet" | "specification" | "drawing" | "source-record";
+ };
+ 
+ export type CircuitPackageReference = {
+   readonly packageId: string;
+   readonly footprintName: string;
+   readonly footprintPath: string;
+-  readonly modelPath: string;
+-  readonly offset: Transform3d;
+-  readonly rotation: Transform3d;
+-  readonly scale: Transform3d;
++  readonly modelPath: string | null;
++  readonly offset: Transform3d | null;
++  readonly rotation: Transform3d | null;
++  readonly scale: Transform3d | null;
+   readonly recordIds: readonly string[];
+ };
+ 
+@@ -161,7 +161,7 @@ export async function readCircuitReferenceContract(
+         modelLocatorPrefix,
+         limits,
+       );
+-      aggregateModelBytes += await fileSize(
++      if (packageReference.modelPath !== null) aggregateModelBytes += await fileSize(
+         join(canonicalPathBase, packageReference.modelPath),
+         "model",
+         recordId,
+@@ -236,6 +236,28 @@ function canonicalFootprint(entry: IndexedRecord): string {
+   return name;
+ }
+ 
++function modelClauses(text: string, recordId: string, footprintName: string): RegExpExecArray[] {
++    if (!/^\s*\((?:footprint|module)\b/u.test(text)) fail("ADAPTER_CONTRACT", "not a footprint", { recordId });
++    const blocks: string[] = []; let depth = 0, start = -1, quoted = false, escaped = false, rootSeen = false;
++    for (let i = 0; i < text.length; i++) {
++        const c = text[i]!;
++        if (quoted) { if (escaped) escaped = false; else if (c === "\\") escaped = true; else if (c === '"') quoted = false; continue; }
++        if (depth === 0 && !/\s/u.test(c) && c !== '(') fail("ADAPTER_CONTRACT", "text outside footprint root", { recordId });
++        if (c === '"') { quoted = true; continue; }
++        if (c === '(') { if (depth === 0) { if (rootSeen) fail("ADAPTER_CONTRACT", "multiple footprint roots", { recordId }); rootSeen = true; } if (depth === 1) start = i; depth++; }
++        if (c === ')') { depth--; if (depth < 0) fail("ADAPTER_CONTRACT", "unbalanced footprint", { recordId });
++            if (depth === 1 && start >= 0) { const block = text.slice(start, i + 1); if (/^\(\s*model(?:\s|\))/u.test(block)) blocks.push(block); start = -1; } }
++    }
++    if (quoted || depth !== 0) fail("ADAPTER_CONTRACT", "unbalanced footprint", { recordId });
++    return blocks.map(block => {
++        const match = /^\(\s*model\s+("(?:\\.|[^"\\])*")/u.exec(block);
++        if (match === null) fail("ADAPTER_CONTRACT", "malformed declared model", { recordId, footprint: footprintName });
++        match[1] = JSON.parse(match[1]!);
++        match[0] = block; // Preserve the complete declaration for scoped transform parsing.
++        return match;
++    });
++}
++
+ async function readPackage(
+   footprintName: string,
+   recordId: string,
+@@ -255,7 +277,8 @@ async function readPackage(
+   const footprintStat = await lstat(footprintFile);
+   assertReferenceSize("footprint", footprintStat.size, recordId, limits);
+   const footprint = await readFile(footprintFile, "utf8");
+-  const models = [...footprint.matchAll(/\(model\s+"([^"]+)"/gu)];
++  const models = modelClauses(footprint, recordId, footprintName);
++  if (models.length === 0) return { packageId: footprintName, footprintName, footprintPath: relative(canonicalPathBase, footprintFile).split(sep).join("/"), modelPath: null, offset: null, rotation: null, scale: null, recordIds: [] };
+   if (models.length !== 1) {
+     fail("ADAPTER_CONTRACT", "footprint must reference exactly one model", {
+       recordId,
+@@ -264,6 +287,7 @@ async function readPackage(
+     });
+   }
+   const modelLocator = models[0]?.[1] ?? "";
++  const modelText = models[0]![0];
+   if (!modelLocator.startsWith(modelLocatorPrefix)) {
+     fail("PATH_CONTAINMENT", "footprint model is not a safe local WRL", {
+       recordId,
+@@ -304,9 +328,9 @@ async function readPackage(
+     // Published and hashed into committed manifests, so always POSIX separators.
+     footprintPath: relative(canonicalPathBase, footprintFile).split(sep).join("/"),
+     modelPath: relative(canonicalPathBase, modelFile).split(sep).join("/"),
+-    offset: transform(footprint, "offset", recordId, footprintName),
+-    rotation: transform(footprint, "rotate", recordId, footprintName),
+-    scale: transform(footprint, "scale", recordId, footprintName),
++    offset: transform(modelText, "offset", recordId, footprintName),
++    rotation: transform(modelText, "rotate", recordId, footprintName),
++    scale: transform(modelText, "scale", recordId, footprintName),
+     recordIds: [],
+   };
+ }
+diff --git a/packages/circuit-doc/src/scan/built-references.ts b/packages/circuit-doc/src/scan/built-references.ts
+index a3248c2..ad89edd 100644
+--- a/packages/circuit-doc/src/scan/built-references.ts
++++ b/packages/circuit-doc/src/scan/built-references.ts
+@@ -1,3 +1,4 @@
++import { MODEL_UNAVAILABLE_TEXT } from "../core/reference-descriptor.ts";
+ /**
+  * The built-output reference checker (port of upstream
+  * `check-built-component-references.mjs`; see
+@@ -6,7 +7,7 @@
+  *
+  * Every structural assertion the upstream script made about a record page
+  * (exactly one "Component references" section, rendered before the evidence
+- * tables, one selected PDF label, one document link, one footprint preview
++ * tables, one selected document label, one document link, one footprint preview
+  * image with its inert no-JS starting state, one selected model, two enlarge
+  * controls, two closed dialog shells with media-specific accessible names and
+  * no visible title, a retained Sources section) is kept verbatim — only the
+@@ -35,9 +36,9 @@ import type { PublicRecord, PublicViewModel } from "../core/view-model.ts";
+ /**
+  * Mirrors the `labels` map `provider/v1/index.ts` `projectRecordReference`
+  * assigns per `documentKind` — kept in sync by hand, the same way upstream's
+- * `ALLOWED_PDF_LABELS` tracked its own adapter's three literal strings.
++ * `ALLOWED_DOCUMENT_LABELS` tracked its own adapter's three literal strings.
+  */
+-const ALLOWED_PDF_LABELS = new Set(["Datasheet PDF", "Specification PDF", "Mechanical drawing PDF"]);
++const ALLOWED_DOCUMENT_LABELS = new Set(["Datasheet PDF", "Specification PDF", "Mechanical drawing PDF", "Source record"]);
+ 
+ const FOOTPRINT_SRC_PATTERN = new RegExp(
+   `^${escapeRegExp(FOOTPRINT_ASSET_BASE)}[A-Za-z0-9._+-]+\\.svg$`,
+@@ -66,6 +67,7 @@ export async function checkBuiltReferences(input: BuiltReferencesInput): Promise
+ 
+   const expectedRecords = model.records.length;
+   const expectedPackages = model.packagePreviews.length;
++  const expectedModels = model.packagePreviews.filter(p => p.modelPath !== null).length;
+ 
+   const recordDirectories = await listRecordDirectories(recordsRoot);
+   if (recordDirectories.length !== expectedRecords) {
+@@ -101,7 +103,7 @@ export async function checkBuiltReferences(input: BuiltReferencesInput): Promise
+       checkPackagelessRecordPage(slug, html, record);
+       continue;
+     }
+-    checkRecordPage(slug, html, referencedFootprints, referencedModels);
++    checkRecordPage(slug, html, referencedFootprints, referencedModels, record?.reference.footprint?.modelPath !== null);
+   }
+ 
+   if (!setsEqual(referencedFootprints, manifest.names)) {
+@@ -110,9 +112,9 @@ export async function checkBuiltReferences(input: BuiltReferencesInput): Promise
+       actual: [...referencedFootprints].sort(byCodeUnit),
+     });
+   }
+-  if (referencedModels.size !== expectedPackages) {
++  if (referencedModels.size !== expectedModels) {
+     fail("PUBLICATION_POLICY", "record pages must deduplicate to exactly the selected package models", {
+-      expected: expectedPackages,
++      expected: expectedModels,
+       actual: referencedModels.size,
+     });
+   }
+@@ -265,11 +267,12 @@ function checkPackagelessRecordPage(slug: string, html: string, record: PublicRe
+ 
+ // --- per-record structural assertions (kept verbatim from upstream) --------
+ 
+-function checkRecordPage(
++export function checkRecordPage(
+   slug: string,
+   html: string,
+   referencedFootprints: Set<string>,
+   referencedModels: Set<string>,
++  hasModel = true,
+ ): void {
+   const sections = extractReferenceSections(html);
+   if (sections.length !== 1) {
+@@ -288,10 +291,10 @@ function checkRecordPage(
+       /<p\b[^>]*class=(?:"zcd-component-references__document-label"|zcd-component-references__document-label)[^>]*>([^<]+)<\/p>/gu,
+     ),
+   ];
+-  if (labels.length !== 1) fail("PUBLICATION_POLICY", `${slug} must render one selected PDF label`, { slug });
++  if (labels.length !== 1) fail("PUBLICATION_POLICY", `${slug} must render one selected document label`, { slug });
+   const label = decodeHtml(labels[0]?.[1] ?? "");
+-  if (!ALLOWED_PDF_LABELS.has(label)) {
+-    fail("PUBLICATION_POLICY", `${slug} has an unreviewed PDF label`, { slug, label });
++  if (!ALLOWED_DOCUMENT_LABELS.has(label)) {
++    fail("PUBLICATION_POLICY", `${slug} has an unreviewed document label`, { slug, label });
+   }
+ 
+   const documents = [
+@@ -324,6 +327,18 @@ function checkRecordPage(
+     fail("PUBLICATION_POLICY", `${slug} must retain the direct footprint link without JavaScript`, { slug });
+   }
+ 
++    if (!hasModel) {
++        if (!section.includes(MODEL_UNAVAILABLE_TEXT) || !/data-model-unavailable/u.test(section))
++            fail("PUBLICATION_POLICY", `${slug} must explicitly state model unavailability`, {slug});
++        if (/data-model-url|PackageModelViewerIsland|data-component-model-viewer-root/u.test(section))
++            fail("PUBLICATION_POLICY", `${slug} must not invent a model viewer`, {slug});
++        for (const attribute of ["data-component-preview-enlarge", "data-component-preview-dialog"]) {
++            const tags = section.match(new RegExp(`<[^>]+\\b${attribute}=[^>]*>`, "gu")) ?? [];
++            if (tags.length !== 1 || readAttribute(tags[0], attribute, slug) !== "footprint")
++                fail("PUBLICATION_POLICY", `${slug} must retain only the footprint control and dialog`, {slug});
++        }
++        return;
++    }
+   const modelTags = section.match(/<[^>]+\bdata-model-url=(?:"[^"]+"|'[^']+'|[^\s>]+)[^>]*>/gu) ?? [];
+   const modelPaths = modelTags.map((tag) => decodeHtml(readAttribute(tag, "data-model-url", slug)));
+   if (modelPaths.length !== 1) fail("PUBLICATION_POLICY", `${slug} must render one selected package model`, { slug });
+diff --git a/packages/circuit-doc/src/ui/component-references.tsx b/packages/circuit-doc/src/ui/component-references.tsx
+index b4bf8e2..3040e0a 100644
+--- a/packages/circuit-doc/src/ui/component-references.tsx
++++ b/packages/circuit-doc/src/ui/component-references.tsx
+@@ -1,7 +1,7 @@
+ /** @jsxRuntime automatic */
+ /** @jsxImportSource preact */
+ 
+-import { decodeComponentReferencesDescriptor } from "../core/reference-descriptor.ts";
++import { decodeComponentReferencesDescriptor, MODEL_UNAVAILABLE_TEXT } from "../core/reference-descriptor.ts";
+ import { FootprintPreview } from "./footprint-preview.tsx";
+ import { PackageModelViewer } from "./package-model-viewer.tsx";
+ 
+@@ -10,7 +10,7 @@ export type ComponentReferencesProps = { readonly descriptor: string };
+ /**
+  * The compact, server-rendered reference shortcut for a component detail page.
+  * Its source data is an encoded, validated descriptor rather than prose parsed
+- * from the MDX file, keeping PDF labels and asset paths faithful to the model.
++ * from the MDX file, keeping document labels and asset paths faithful to the model.
+  */
+ export function ComponentReferences({ descriptor: encoded }: ComponentReferencesProps) {
+   const descriptor = decodeComponentReferencesDescriptor(encoded);
+@@ -34,7 +34,9 @@ export function ComponentReferences({ descriptor: encoded }: ComponentReferences
+         </article>
+         <article className="zcd-component-references__preview zcd-component-references__model-card">
+           <h3 className="zcd-component-references__card-heading">Package model</h3>
+-          <PackageModelViewer descriptor={descriptor.modelDescriptor} />
++          {descriptor.modelDescriptor === null
++            ? <p data-model-unavailable="true">{MODEL_UNAVAILABLE_TEXT}</p>
++            : <PackageModelViewer descriptor={descriptor.modelDescriptor} />}
+         </article>
+       </div>
+     </section>
+diff --git a/packages/circuit-doc/test-led/references.test.ts b/packages/circuit-doc/test-led/references.test.ts
+index 21338ce..a5dd0b2 100644
+--- a/packages/circuit-doc/test-led/references.test.ts
++++ b/packages/circuit-doc/test-led/references.test.ts
+@@ -120,7 +120,7 @@ describe("reviewed document shortcuts", () => {
+ describe("KiCad preview manifest", () => {
+   it("maps every record to one descriptor and collapses it to exactly 25 packages", () => {
+     assert.equal(
+-      model.records.filter((record) => record.reference.footprint?.modelPath.endsWith(".wrl")).length,
++      model.records.filter((record) => record.reference.footprint?.modelPath?.endsWith(".wrl")).length,
+       35,
+     );
+     assert.equal(model.packagePreviews.length, 25);
+@@ -131,7 +131,7 @@ describe("KiCad preview manifest", () => {
+   it("preserves non-zero Z rotations from the footprint", () => {
+     const fnr = model.packagePreviews.find((entry) => entry.footprintName === "IND-SMD_L4.0-W4.0_FNR40XXS");
+     const r0603 = model.packagePreviews.find((entry) => entry.footprintName === "R0603");
+-    assert.equal(fnr?.rotation.z, 90);
+-    assert.equal(r0603?.rotation.z, 270);
++    assert.equal(fnr?.rotation?.z, 90);
++    assert.equal(r0603?.rotation?.z, 270);
+   });
+ });
+diff --git a/packages/circuit-doc/test/browser-smoke/optional-model.test.ts b/packages/circuit-doc/test/browser-smoke/optional-model.test.ts
+new file mode 100644
+index 0000000..b49f3e9
+--- /dev/null
++++ b/packages/circuit-doc/test/browser-smoke/optional-model.test.ts
+@@ -0,0 +1,46 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {mkdtemp, mkdir, writeFile, rm} from 'node:fs/promises';
++import {tmpdir} from 'node:os';
++import {join} from 'node:path';
++import {resolveRepresentatives} from '../../src/browser-smoke/representatives.ts';
++import {deriveRepresentatives} from '../../src/browser-smoke/derive-representatives.ts';
++import {inspectReferencePage} from '../../src/browser-smoke/checks/reference-page.ts';
++import type {CdpClient} from '../../src/browser-smoke/cdp.ts';
++import {MODEL_UNAVAILABLE_TEXT, createComponentReferencesDescriptor, encodeComponentReferencesDescriptor} from '../../src/core/reference-descriptor.ts';
++import {writePreflight, writeRecordPage} from './derived-fixture.ts';
++test('footprint-only pages remain checked but cannot be the model-interaction representative',async t=>{
++ const root=await mkdtemp(join(tmpdir(),'optional-reps-'));t.after(()=>rm(root,{recursive:true,force:true}));
++ for(const [slug,content] of [['absent','<section class="zcd-component-references"><p data-model-unavailable="true"></p></section>'],['present','<section class="zcd-component-references"></section>']] as const){await mkdir(join(root,slug));await writeFile(join(root,slug,'index.html'),content);}
++ const reps=['absent','present'].map(slug=>({kind:slug,path:`/${slug}/`,slug,identity:slug}));const result=await resolveRepresentatives(root,reps);
++ assert.deepEqual(result.withReferences,reps);assert.equal(result.record,reps[1]);assert.equal((await resolveRepresentatives(root,reps.slice(0,1))).record,undefined);
++});
++test('default derivation includes a no-model descriptor',async t=>{
++ const root=await mkdtemp(join(tmpdir(),'optional-derive-'));t.after(()=>rm(root,{recursive:true,force:true}));
++ const paths={preflightFile:join(root,'preflight.json'),generatedRoot:join(root,'generated'),distRoot:join(root,'unbuilt')};
++ await writePreflight(paths.preflightFile,['part']);
++ const descriptor=encodeComponentReferencesDescriptor(createComponentReferencesDescriptor({document:{label:'Source record',title:'Evidence',authority:'PROJECT_GENERATOR',availability:'AVAILABLE',url:'https://example.org/evidence.json'},footprintName:'PART',model:null}));
++ await writeRecordPage(paths.generatedRoot,'part',{identity:'PART',descriptor});
++ const result=await deriveRepresentatives(paths);assert.equal(result.outcome,'derived');if(result.outcome==='derived')assert.equal(result.representatives[0]?.slug,'part');
++});
++test('no-model browser path checks the notice and rejects an invented viewer without waiting for one',async()=>{
++ const report={width:390,overflow:false,notice:MODEL_UNAVAILABLE_TEXT,noticeVisible:true,models:0,footprintLoaded:true,label:'Source record',href:'https://example.org/source.json',authority:'PROJECT_GENERATOR',theme:'dark',headingId:'documents',themeSignature:'dark'};
++ const cdp:CdpClient={close(){},send:async(method,params)=>{assert.equal(method,'Runtime.evaluate');const expression=String(params?.expression);assert.ok(!expression.includes('data-model-viewer-status'));return {result:{value:expression.includes('noticeVisible:')?report:true}};}};
++ const rep={kind:'optional',path:'/optional/',slug:'optional',identity:'OPTIONAL'};
++ assert.deepEqual(await inspectReferencePage(cdp,rep,390,'dark',false),{themeSignature:'dark'});report.models=1;await assert.rejects(inspectReferencePage(cdp,rep,390,'dark',false),/no invented model/);
++});
++test('leading no-model records cannot suppress a later model interaction representative',async t=>{
++ const root=await mkdtemp(join(tmpdir(),'optional-derive-model-'));t.after(()=>rm(root,{recursive:true,force:true}));
++ const paths={preflightFile:join(root,'preflight.json'),generatedRoot:join(root,'generated'),distRoot:join(root,'unbuilt')};
++ await writePreflight(paths.preflightFile,['a','b','c','d']);
++ const descriptor=encodeComponentReferencesDescriptor(createComponentReferencesDescriptor({document:{label:'Source record',title:'Evidence',authority:'PROJECT_GENERATOR',availability:'AVAILABLE',url:'https://example.org/evidence.json'},footprintName:'PART',model:null}));
++ for(const slug of ['a','b','c'])await writeRecordPage(paths.generatedRoot,slug,{identity:slug,descriptor});
++ await writeRecordPage(paths.generatedRoot,'d',{identity:'MODEL'});
++ const result=await deriveRepresentatives(paths);assert.equal(result.outcome,'derived');if(result.outcome==='derived')assert.deepEqual(result.representatives.map(r=>r.slug),['a','b','d']);
++});
++
++const {referenceSmokeSummary} = await import('../../src/browser-smoke/run.ts');
++test('browser summary never promotes skipped model gates to PASS',()=>{
++ const missing=referenceSmokeSummary(8,8,false);assert.match(missing,/8 component-reference inspections/);assert.match(missing,/no-JS NOT RUN/);assert.doesNotMatch(missing,/no-JS passed/);
++ const present=referenceSmokeSummary(16,16,true);assert.match(present,/no-JS passed/);assert.doesNotMatch(present,/NOT RUN/);
++});
+diff --git a/packages/circuit-doc/test/core/optional-references.test.ts b/packages/circuit-doc/test/core/optional-references.test.ts
+new file mode 100644
+index 0000000..87fa6bf
+--- /dev/null
++++ b/packages/circuit-doc/test/core/optional-references.test.ts
+@@ -0,0 +1,31 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {PublicationPolicy, FIELD_KEYS, type InstanceSelection, type PublicationMatrix} from '../../src/core/publication.ts';
++import {createComponentReferencesDescriptor, encodeComponentReferencesDescriptor, decodeComponentReferencesDescriptor, MODEL_UNAVAILABLE_TEXT} from '../../src/core/reference-descriptor.ts';
++import {checkRecordPage} from '../../src/scan/built-references.ts';
++import {bundleForSsr} from '../ui/bundle.ts';
++const policy = Object.fromEntries(FIELD_KEYS.map(key => [key, 'PUBLISH'])) as PublicationMatrix;
++const selection = (kind: InstanceSelection['documentSelections'][number]['documentKind'] = 'source-record'): InstanceSelection => ({recordIds:['record'], sourceIds:['source'], linkableSourceIds:['source'], documentSelections:[{recordId:'record',sourceId:'source',documentKind:kind}], expect:{records:1,sources:1,integrationRules:0,packages:1}});
++const input = {document:{label:'Source record',title:'Project source; exact manufacturer datasheet unavailable',authority:'PROJECT_GENERATOR',availability:'AVAILABLE',url:'https://example.org/evidence.json'},footprintName:'PKG-FIXTURE',model:null};
++test('source-record and old PDF kinds require explicit selected linkable source',()=>{
++ for(const kind of ['source-record','datasheet','specification','drawing'] as const) assert.doesNotThrow(()=>new PublicationPolicy(policy,selection(kind)));
++ assert.throws(()=>new PublicationPolicy(policy,{...selection(),documentSelections:[]}));
++ assert.throws(()=>new PublicationPolicy(policy,{...selection(),linkableSourceIds:[]}));
++});
++test('generic label retains source authority and cannot permit unsafe URL or arbitrary label',()=>{
++ const descriptor=createComponentReferencesDescriptor(input);
++ assert.deepEqual(decodeComponentReferencesDescriptor(encodeComponentReferencesDescriptor(descriptor)),descriptor);
++ assert.equal(descriptor.modelDescriptor,null);
++ for(const value of [{...descriptor,document:{...descriptor.document,url:'javascript:alert(1)'}},{...descriptor,document:{...descriptor.document,label:'Manufacturer qualified'}}]) assert.throws(()=>encodeComponentReferencesDescriptor(value));
++ assert.throws(()=>encodeComponentReferencesDescriptor({...descriptor,modelDescriptor:undefined} as unknown as typeof descriptor));
++});
++const ui = await bundleForSsr<typeof import('../../src/ui/index.ts')>('src/ui/index.ts');
++function html() {return ui.renderToString(ui.h(ui.ComponentReferences,{descriptor:encodeComponentReferencesDescriptor(createComponentReferencesDescriptor(input))}))+'<div class="zcd-evidence-table"></div>';}
++test('SSR and built checker keep footprint and visible absent-model statement without a viewer',()=>{
++ const page=html();assert.ok(page.includes(MODEL_UNAVAILABLE_TEXT));assert.doesNotMatch(page,/data-model-url/);
++ const footprints=new Set<string>(),models=new Set<string>();checkRecordPage('part',page,footprints,models,false);
++ assert.deepEqual([...footprints],['PKG-FIXTURE.svg']);assert.equal(models.size,0);
++});
++test('absent-model built checker rejects missing notice, invented viewer and missing footprint',()=>{
++ for(const page of [html().replace(MODEL_UNAVAILABLE_TEXT,'Qualified'),html().replace('data-model-unavailable','data-model-url'),html().replace(/<img\b[^>]*>/u,'')]) assert.throws(()=>checkRecordPage('part',page,new Set(),new Set(),false));
++});
+diff --git a/packages/circuit-doc/test/provider/model-assets.test.ts b/packages/circuit-doc/test/provider/model-assets.test.ts
+index e2a9af8..b936579 100644
+--- a/packages/circuit-doc/test/provider/model-assets.test.ts
++++ b/packages/circuit-doc/test/provider/model-assets.test.ts
+@@ -53,6 +53,13 @@ function options(paths: CircuitProjectPaths, selection = FIXTURE_SELECTION): Mod
+ }
+ 
+ describe("buildModelAssetPlan / publishModelAssets", () => {
++  it("omits truly absent models from export while keeping the package count lock", async () => {
++    const paths = await writeFixtureProject(join(scratch, "optional-model"));
++    const names = (await readdir(paths.footprintLibraryRoot)).filter(name => name.endsWith('.kicad_mod'));
++    for (const name of names) await writeFile(join(paths.footprintLibraryRoot, name), `(footprint "${name.slice(0, -10)}")`);
++    assert.equal(names.length, FIXTURE_PACKAGE_COUNT);
++    assert.deepEqual(await buildModelAssetPlan(options(paths)), []);
++  });
+   it("refuses to plan anything when the canonical validator did not pass", async () => {
+     const paths = await writeFixtureProject(join(scratch, "unvalidated"));
+     await rejectsWith(
+diff --git a/packages/circuit-doc/test/provider/references.test.ts b/packages/circuit-doc/test/provider/references.test.ts
+index 7c71646..4964df4 100644
+--- a/packages/circuit-doc/test/provider/references.test.ts
++++ b/packages/circuit-doc/test/provider/references.test.ts
+@@ -640,3 +640,52 @@ async function rejectsWith(run: Promise<unknown>, code: ErrorCode, message: RegE
+     return true;
+   });
+ }
++
++describe("a footprint without a declared model", () => {
++  async function readCase(name: string, text: string, omitFootprint = false, ambiguous = false) {
++    const roots = await makeRoots(`optional-${name}`);
++    if (!omitFootprint) await writeFile(join(roots.footprintLibraryRoot, 'PKG-A.kicad_mod'), text);
++    const {line, record: rec, route: rt, pinMap: pm} = pcbFixture('rec-pcb', 'line-pcb', 'PKG-A');
++    const maps = ambiguous ? [pm, pinMap('second', 'rec-pcb', 'OTHER')] : [pm];
++    const index = indexEvidence(inventoryOf([line]), [bundleOf([rec], [rt], maps)], []);
++    return readCircuitReferenceContract(index, selectionFor(['rec-pcb'], 1), roots, {modelLocatorPrefix: MODEL_PREFIX});
++  }
++  it('retains a mandatory footprint and explicit null model/placement', async () => {
++    const result = await readCase('absent', '(footprint "PKG-A" (descr "quoted (model fake) is not a declaration"))');
++    assert.equal(result.packages.length, 1);
++    const part = result.packages[0]!;
++    assert.equal(part.footprintPath, 'footprints/pretty/PKG-A.kicad_mod');
++    assert.equal(part.modelPath, null); assert.equal(part.offset, null); assert.equal(part.rotation, null); assert.equal(part.scale, null);
++  });
++  it('preserves legacy KiCad module roots', async () => {
++    const result = await readCase('legacy', '(module PKG-A (layer F.Cu))');
++    assert.equal(result.packages[0]?.modelPath, null);
++  });
++  it('cannot borrow missing model transforms from unrelated footprint siblings', async () => {
++    const roots = await makeRoots('optional-scoped-transform');
++    await writeGoodPackage(roots, 'PKG-A');
++    await writeFile(join(roots.footprintLibraryRoot, 'PKG-A.kicad_mod'), `(footprint "PKG-A" (offset (xyz 1 2 3)) (rotate (xyz 0 0 0)) (scale (xyz 1 1 1)) (model "${MODEL_PREFIX}PKG-A.wrl"))`);
++    const {line, record: rec, route: rt, pinMap: pm} = pcbFixture('rec-pcb', 'line-pcb', 'PKG-A');
++    const index = indexEvidence(inventoryOf([line]), [bundleOf([rec], [rt], [pm])], []);
++    await assert.rejects(readCircuitReferenceContract(index, selectionFor(['rec-pcb'], 1), roots, {modelLocatorPrefix: MODEL_PREFIX}), /offset/);
++  });
++  it('does not hide spaced or newline model heads as absence', async () => {
++    for (const [name, head] of [['space', '( model'], ['newline', '(\n model']] as const) {
++      await assert.rejects(readCase(name, `(footprint "PKG-A" ${head} "${MODEL_PREFIX}missing.wrl" (offset (xyz 0 0 0)) (rotate (xyz 0 0 0)) (scale (xyz 1 1 1))))`));
++      await assert.rejects(readCase(`${name}-malformed`, `(footprint "PKG-A" ${head}))`), /malformed declared model/);
++    }
++  });
++  it('rejects malformed declared models rather than treating them as absent', async () => {
++    await assert.rejects(readCase('malformed', '(footprint "PKG-A" (model))'), /malformed declared model/);
++  });
++  it('rejects a second root rather than hiding its model declaration', async () => {
++    await assert.rejects(readCase('roots', '(footprint "PKG-A") (model "missing.wrl")'), /multiple footprint roots/);
++  });
++  it('rejects duplicate declarations', async () => {
++    await assert.rejects(readCase('duplicate', '(footprint "PKG-A" (model "a.wrl") (model "b.wrl"))'), /exactly one model/);
++  });
++  it('still requires the mapped footprint file and a unique pin-map footprint', async () => {
++    await assert.rejects(readCase('missing-footprint', '', true));
++    await assert.rejects(readCase('ambiguous', '(footprint "PKG-A")', false, true), /exactly one footprint/);
++  });
++});
+diff --git a/packages/circuit-doc/test/scan/built-references.test.ts b/packages/circuit-doc/test/scan/built-references.test.ts
+index ab3a144..d707a6c 100644
+--- a/packages/circuit-doc/test/scan/built-references.test.ts
++++ b/packages/circuit-doc/test/scan/built-references.test.ts
+@@ -250,11 +250,11 @@ describe("each structural removal fails", () => {
+     await rejectsWith(checkBuiltReferences({ distRoot, model: ONE_RECORD_MODEL }), "PUBLICATION_POLICY", /exactly one/u);
+   });
+ 
+-  it("fails on an unreviewed PDF label", async () => {
++  it("fails on an unreviewed document label", async () => {
+     const distRoot = await scaffoldDist("bad-label", {
+       recordHtml: assembleHtml({ label: `<p class="zcd-component-references__document-label">Random PDF</p>` }),
+     });
+-    await rejectsWith(checkBuiltReferences({ distRoot, model: ONE_RECORD_MODEL }), "PUBLICATION_POLICY", /unreviewed PDF label/u);
++    await rejectsWith(checkBuiltReferences({ distRoot, model: ONE_RECORD_MODEL }), "PUBLICATION_POLICY", /unreviewed document label/u);
+   });
+ 
+   it("fails when the direct no-JS SVG link is dropped", async () => {
+diff --git a/packages/create-zudo-circuit-doc/CHANGELOG.md b/packages/create-zudo-circuit-doc/CHANGELOG.md
+index 07456c3..4c4b493 100644
+--- a/packages/create-zudo-circuit-doc/CHANGELOG.md
++++ b/packages/create-zudo-circuit-doc/CHANGELOG.md
+@@ -4,6 +4,14 @@ All notable changes to `create-zudo-circuit-doc` are documented in this file.
+ 
+ The format is based on Keep a Changelog, and release notes are generated from the changelog MDX pages.
+ 
++## [0.1.1] - 2026-10-02
++
++## Changes
++
++- Generated projects select `@takazudo/zudo-circuit-doc` through the `^0.2.0`
++  caret range, including explicit generic-source documents and unavailable-model
++  publication. The runtime must be published before this initializer release.
++
+ ## [0.1.0] - 2026-09-27
+ 
+ Initial release of `create-zudo-circuit-doc`, an initializer that creates a ready-to-use
+diff --git a/packages/create-zudo-circuit-doc/package.json b/packages/create-zudo-circuit-doc/package.json
+index b14743c..579843a 100644
+--- a/packages/create-zudo-circuit-doc/package.json
++++ b/packages/create-zudo-circuit-doc/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "create-zudo-circuit-doc",
+-  "version": "0.1.0",
++  "version": "0.1.1",
+   "type": "module",
+   "license": "MIT",
+   "description": "Create a new zudo-circuit-doc project.",
+@@ -12,7 +12,13 @@
+   "bugs": {
+     "url": "https://github.com/Takazudo/zudo-circuit-doc/issues"
+   },
+-  "keywords": ["create", "scaffold", "circuit", "zudo-circuit-doc", "cli"],
++  "keywords": [
++    "create",
++    "scaffold",
++    "circuit",
++    "zudo-circuit-doc",
++    "cli"
++  ],
+   "engines": {
+     "node": ">=22.18.0"
+   },
+diff --git a/packages/create-zudo-circuit-doc/templates/default/circuit/WORKFLOW.md b/packages/create-zudo-circuit-doc/templates/default/circuit/WORKFLOW.md
+index dfdd434..13a50cc 100644
+--- a/packages/create-zudo-circuit-doc/templates/default/circuit/WORKFLOW.md
++++ b/packages/create-zudo-circuit-doc/templates/default/circuit/WORKFLOW.md
+@@ -328,9 +328,10 @@ A preview is a rendering result. **A preview is not dimensional proof**, and a f
+ 
+ ## Publication policy
+ 
+-Adding evidence does not publish it. `circuit/publication/selection.json` lists exactly which record IDs, source IDs and linkable source IDs are published, one document selection per record (`documentKind` is `datasheet`, `specification` or `drawing`, chosen after inspecting the content), and the `expect` counts (`records`, `sources`, `integrationRules`, `packages`) that lock the published set. Zero is allowed.
++Adding evidence does not publish it. `circuit/publication/selection.json` lists exactly which record IDs, source IDs and linkable source IDs are published, one document selection per record (`documentKind` is `datasheet`, `specification`, `drawing` or `source-record`, chosen after inspecting the content), and the `expect` counts (`records`, `sources`, `integrationRules`, `packages`) that lock the published set. Zero is allowed.
+ 
+ - Selection and assets-allowlist edits happen **in the same task** as the evidence change and show up as a reviewable diff. No per-part conversational permission prompt is needed; the diff is the review.
++- Use `source-record` for a reviewed non-PDF source; its label is **Source record**, not a datasheet. Preserve the actual source title, authority and unresolved exact-part applicability. A mapped footprint with no model declaration may publish with an explicit unavailable-model notice; declared broken model references still fail. Missing geometry is never physical qualification.
+ - Selecting a source publishes its metadata; an outbound link is published only for IDs in `linkableSourceIds`.
+ - Raw sources and CAD files stay outside `doc/public/`. A file placed there deliberately must be listed in `circuit/publication/assets.json` with a reason; the publication scan fails otherwise. Generated previews under `doc/public/assets/component-previews/` are the only exception.
+ 
+diff --git a/packages/create-zudo-circuit-doc/templates/default/circuit/checks/README.md b/packages/create-zudo-circuit-doc/templates/default/circuit/checks/README.md
+index 3fc10f2..4db7894 100644
+--- a/packages/create-zudo-circuit-doc/templates/default/circuit/checks/README.md
++++ b/packages/create-zudo-circuit-doc/templates/default/circuit/checks/README.md
+@@ -19,7 +19,7 @@ What each project check establishes, and what it does not. Report a check's actu
+ 
+ 1. `--representatives <json>` on the command line.
+ 2. `browserSmoke.representatives` in `circuit.config.ts`, used exactly as configured — even an explicit empty list.
+-3. Otherwise, up to 3 representatives **derived** from the preflight report: published record slugs, sorted, filtered to the ones whose generated page has a decodable component-references section (a reviewed PDF, a footprint and a WRL model), and, once the site is built, whose built output carries the matching marker and assets. A derived run prints `INFO: using derived representatives: ...`.
++3. Otherwise, up to 3 representatives **derived** from the preflight report: published record slugs, sorted, filtered to the ones whose generated page has a decodable component-references section (a reviewed document/source record, a footprint, and a valid WRL when one is declared), and, once the site is built, whose built output carries the matching marker and assets. When the first three qualifying pages are footprint-only, the final slot is reserved for the first later model-bearing page if one exists. Missing model interaction gates are reported NOT RUN. A derived run prints `INFO: using derived representatives: ...`.
+ 
+ A declared-zero project (nothing published) is a `SKIP`, not a failure. If records are published but derivation finds none that qualifies, the command exits `4` rather than silently checking nothing — set `browserSmoke.representatives` in `circuit.config.ts` to name pages explicitly.
+ 
+diff --git a/packages/create-zudo-circuit-doc/templates/default/doc/package.json b/packages/create-zudo-circuit-doc/templates/default/doc/package.json
+index b53bc86..180aec8 100644
+--- a/packages/create-zudo-circuit-doc/templates/default/doc/package.json
++++ b/packages/create-zudo-circuit-doc/templates/default/doc/package.json
+@@ -24,7 +24,7 @@
+     "@takazudo/zfb-md-wasm": "2.21.0",
+     "@takazudo/zudo-doc": "5.27.0",
+     "@takazudo/zudo-doc-history-server": "5.27.0",
+-    "@takazudo/zudo-circuit-doc": "^0.1.0",
++    "@takazudo/zudo-circuit-doc": "^0.2.0",
+     "zod": "^4.3.6",
+     "preact": "^10.29.1",
+     "preact-render-to-string": "^6.6.6",
+diff --git a/packages/create-zudo-circuit-doc/templates/default/package.json b/packages/create-zudo-circuit-doc/templates/default/package.json
+index 2309e60..cff730d 100644
+--- a/packages/create-zudo-circuit-doc/templates/default/package.json
++++ b/packages/create-zudo-circuit-doc/templates/default/package.json
+@@ -18,6 +18,6 @@
+     "previews:generate": "zudo-circuit-doc footprints generate"
+   },
+   "devDependencies": {
+-    "@takazudo/zudo-circuit-doc": "^0.1.0"
++    "@takazudo/zudo-circuit-doc": "^0.2.0"
+   }
+ }
