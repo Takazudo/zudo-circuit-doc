@@ -64,7 +64,10 @@ async function run(context: CommandContext): Promise<number> {
     const policy = new PublicationPolicy(project.matrix, project.selection);
     const model = projectIndex(index, policy, { integrationOwnerSkill: project.integrationOwnerSkill });
 
-    const canaries = await readCanaries(project.paths);
+    const canaries = await readCanaries(project.paths, {
+      matrix: project.matrix,
+      integrationOwnerSkill: project.integrationOwnerSkill,
+    });
     const scanPolicy = buildScanPolicy(project.config.scan, {
       agentResources: project.config.docs.agentResources,
     });

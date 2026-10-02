@@ -70,6 +70,10 @@ function canaryFor(value: string) {
   return harvestCanaries([{ evidence_extract: value }], { deniedKeys: ["evidence_extract"] });
 }
 
+function ownerSkillCanaryFor(value: string) {
+  return harvestCanaries([{ owner_skill: value }, { skill: value }], { deniedKeys: ["owner_skill", "skill"] });
+}
+
 function rejectsWith(promise: Promise<unknown>, code: string, messagePattern?: RegExp): Promise<void> {
   return assert.rejects(promise, (error: unknown) => {
     assert.ok(error instanceof ComponentDocsError, `expected a ComponentDocsError, got ${String(error)}`);
@@ -83,7 +87,7 @@ describe("a correctly built dist tree passes", () => {
   it("reports both tiers clean and the built pages/searchable counts", async () => {
     const model = fixtureModel();
     const project = await writeSyntheticProject(join(scratch, "happy"), model);
-    const canaries = canaryFor("CANARY-NOT-PUBLISHED-ANYWHERE-VALUE-0001");
+    const canaries = ownerSkillCanaryFor("CANARY-OWNER-SKILL-NOT-PUBLISHED-VALUE-0001");
 
     const report = await runArtifactScan({
       policy: policy(),
@@ -156,6 +160,79 @@ describe("adversarial: a canary leak fails closed", () => {
       /denied value/u,
     );
   });
+});
+
+describe("adversarial: a denied owner-skill canary leak fails closed", () => {
+  it("fails when a denied owner skill leaks into a built record page", async () => {
+    const model = fixtureModel();
+    const project = await writeSyntheticProject(join(scratch, "owner-skill-leak-html"), model);
+    const leak = "CANARY-OWNER-SKILL-LEAKED-INTO-HTML-0002";
+    const canaries = ownerSkillCanaryFor(leak);
+    const slug = model.records[0]?.identity.slug as string;
+    await appendFile(recordDistHtmlPath(project, slug), leak);
+
+    await rejectsWith(
+      runArtifactScan({
+        policy: policy(),
+        paths: project,
+        docsRoot: project.docsRoot,
+        canaries,
+        model,
+        agentSkillRoot: null,
+      }),
+      "PUBLICATION_POLICY",
+      /denied value/u,
+    );
+  });
+
+  it("fails when a denied owner skill leaks into search-index.json", async () => {
+    const model = fixtureModel();
+    const project = await writeSyntheticProject(join(scratch, "owner-skill-leak-search"), model);
+    const leak = "CANARY-OWNER-SKILL-LEAKED-INTO-SEARCH-0003";
+    const canaries = ownerSkillCanaryFor(leak);
+    const searchIndexPath = join(project.distRoot, "search-index.json");
+    const entries = JSON.parse(await readFile(searchIndexPath, "utf8")) as readonly unknown[];
+    await writeFile(
+      searchIndexPath,
+      JSON.stringify([...entries, { url: "/docs/components/records/leaked", description: leak }]),
+    );
+
+    await rejectsWith(
+      runArtifactScan({
+        policy: policy(),
+        paths: project,
+        docsRoot: project.docsRoot,
+        canaries,
+        model,
+        agentSkillRoot: null,
+      }),
+      "PUBLICATION_POLICY",
+      /denied value/u,
+    );
+  });
+
+  for (const filename of ["llms.txt", "llms-full.txt"] as const) {
+    it(`fails when a denied owner skill leaks into ${filename}`, async () => {
+      const model = fixtureModel();
+      const project = await writeSyntheticProject(join(scratch, `owner-skill-leak-${filename}`), model);
+      const leak = `CANARY-OWNER-SKILL-LEAKED-INTO-${filename.toUpperCase().replaceAll(".", "-")}-0004`;
+      const canaries = ownerSkillCanaryFor(leak);
+      await appendFile(join(project.distRoot, filename), `\n${leak}`);
+
+      await rejectsWith(
+        runArtifactScan({
+          policy: policy(),
+          paths: project,
+          docsRoot: project.docsRoot,
+          canaries,
+          model,
+          agentSkillRoot: null,
+        }),
+        "PUBLICATION_POLICY",
+        /denied value/u,
+      );
+    });
+  }
 });
 
 describe("adversarial: a credential pattern fails closed", () => {

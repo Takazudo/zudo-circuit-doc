@@ -18,6 +18,7 @@ import { join } from "node:path";
 import { readdir } from "node:fs/promises";
 
 import { harvestCanaries, type Canary } from "../../core/scan.ts";
+import type { PublicationMatrix } from "../../core/publication.ts";
 import { BUNDLE_FILES, type CircuitProjectPaths } from "./paths.ts";
 import { readContainedJson } from "./read.ts";
 
@@ -75,9 +76,28 @@ async function listBundleDirectories(bundlesRoot: string): Promise<readonly stri
  */
 export async function readCanaries(
   paths: Pick<CircuitProjectPaths, "bundlesRoot" | "inventoryFile" | "integrationRulesFile">,
+  options: { readonly matrix: PublicationMatrix; readonly integrationOwnerSkill: string },
 ): Promise<readonly Canary[]> {
   const { bundlesRoot } = paths;
   const documents: unknown[] = [];
+  const deniedKeys = new Set(DENIED_PROVIDER_KEYS);
+
+  if (options.matrix["record.ownerSkill"] === "DENY") {
+    // `skill` is the bundle manifest alias of `owner_skill`. A grep across
+    // examples/ and fixtures/led/upstream found it on harvested component
+    // manifests; remaining matches are audit-template and integration-run
+    // references outside the paths this provider harvests.
+    deniedKeys.add("owner_skill");
+    deniedKeys.add("skill");
+  }
+
+  if (options.matrix["integration.ownerSkill"] === "DENY") {
+    // The integration owner comes from config, not from a harvested JSON file.
+    documents.push({ integration_owner_skill: options.integrationOwnerSkill });
+    deniedKeys.add("integration_owner_skill");
+  }
+
+  // `reference.package.recordIds` needs no canary: those IDs are published via `record.recordId`.
 
   for (const bundle of await listBundleDirectories(bundlesRoot)) {
     for (const file of BUNDLE_FILES) {
@@ -96,5 +116,5 @@ export async function readCanaries(
     documents.push(await readContainedJson(bundlesRoot, path));
   }
 
-  return harvestCanaries(documents, { deniedKeys: DENIED_PROVIDER_KEYS });
+  return harvestCanaries(documents, { deniedKeys: [...deniedKeys] });
 }
