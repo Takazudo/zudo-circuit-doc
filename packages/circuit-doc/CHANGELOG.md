@@ -4,6 +4,33 @@ All notable changes to `@takazudo/zudo-circuit-doc` are documented in this file.
 
 The format is based on Keep a Changelog, and release notes are generated from the changelog MDX pages.
 
+## [0.2.0] - 2026-10-02
+
+Version 0.2.0 widens exported reference and descriptor types for optional documents and 3D models.
+Projects using those types may need to handle `null` values. The reviewed document-kind union also
+adds `source-record`.
+
+## Features
+
+- Publish a selected record with an explicit reviewed `documentExceptions` reason when no public
+  document exists. A footprint with no declared model is published as footprint-only; a declared
+  but broken asset still fails validation.
+- Allow custom publication matrices to deny owner-skill fields and package membership while keeping
+  the default preset output unchanged.
+- Add opt-in per-placement fit, board-scoped generator specs, and a finite reviewed list for deriving
+  generator MPNs from values.
+- Validate audited replacement candidates in owner bundles while excluding them from fitted
+  placements, CAD binding, and public selection. Cross-partition references fail.
+- Add explicitly declared, provenance-checked canonical footprint hash exemptions for SITE scans.
+  OWNED scans retain the full canary set.
+
+## Bug Fixes
+
+- Keep headless Chrome foregrounded during browser smoke checks and contain long model captions on
+  narrow screens.
+- Exclude generated component pages from the authored-content subtraction corpus using the
+  configured generated-content path.
+
 ## [0.1.0] - 2026-09-27
 
 Initial release of `@takazudo/zudo-circuit-doc`, the runtime for evidence-first circuit-development

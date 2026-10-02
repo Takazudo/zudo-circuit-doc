@@ -24,7 +24,7 @@
     "@takazudo/zfb-md-wasm": "2.21.0",
     "@takazudo/zudo-doc": "5.27.0",
     "@takazudo/zudo-doc-history-server": "5.27.0",
-    "@takazudo/zudo-circuit-doc": "^0.1.0",
+    "@takazudo/zudo-circuit-doc": "^0.2.0",
     "zod": "^4.3.6",
     "preact": "^10.29.1",
     "preact-render-to-string": "^6.6.6",
