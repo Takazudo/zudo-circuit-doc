@@ -29,7 +29,7 @@ after(async () => {
 });
 
 /** Build a fixture and immediately generate its committed previews, as a real project would have. */
-async function generated(name: string): Promise<FootprintFixture> {
+async function generated(name: string, publishMembership = true): Promise<FootprintFixture> {
   const fixture = await buildFootprintFixture(join(scratch, name));
   await generateFootprintPreviews({
     selections: fixture.selections,
@@ -37,18 +37,20 @@ async function generated(name: string): Promise<FootprintFixture> {
     footprintLibraryRoot: fixture.paths.footprintLibraryRoot,
     previewRoot: fixture.paths.footprintPreviewRoot,
     renderer: FIXTURE_RENDERER,
+    publishMembership,
     runDocker: fakeDockerRunner(FIXTURE_RENDERER.version),
   });
   return fixture;
 }
 
-function optionsFor(fixture: FootprintFixture): CheckFootprintPreviewsOptions {
+function optionsFor(fixture: FootprintFixture, publishMembership = true): CheckFootprintPreviewsOptions {
   return {
     selections: fixture.selections,
     footprintMasterRoot: fixture.paths.footprintMasterRoot,
     footprintLibraryRoot: fixture.paths.footprintLibraryRoot,
     previewRoot: fixture.paths.footprintPreviewRoot,
     renderer: FIXTURE_RENDERER,
+    publishMembership,
   };
 }
 
@@ -126,6 +128,21 @@ describe("checkFootprintPreviews", () => {
       "ADAPTER_CONTRACT",
       /stale package selection/u,
     );
+  });
+
+  it("accepts denied membership and rejects a manifest that retains recordIds", async () => {
+    const fixture = await generated("denied-membership", false);
+    const checkOptions = optionsFor(fixture, false);
+    const manifestPath = join(fixture.paths.footprintPreviewRoot, "manifest.json");
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+      packages: Array<Record<string, unknown>>;
+    };
+    assert.ok(manifest.packages.every((entry) => !Object.hasOwn(entry, "recordIds")));
+    await assert.doesNotReject(checkFootprintPreviews(checkOptions));
+
+    manifest.packages[0]!.recordIds = fixture.selections[0]!.recordIds;
+    await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+    await rejectsWith(checkFootprintPreviews(checkOptions), "ADAPTER_CONTRACT", /stale package selection/u);
   });
 
   describe("zero-selection semantics", () => {

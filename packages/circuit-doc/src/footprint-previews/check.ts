@@ -15,8 +15,9 @@ import { PROJECT_COMMANDS } from "../cli/project.ts";
 import type { PreviewRendererConfig } from "../config/define.ts";
 import { fail } from "../core/errors.ts";
 import { aggregateHash, sha256 } from "./hash.ts";
-import { PREVIEW_FORMAT_VERSION, type FootprintPreviewManifest, type FootprintSelection } from "./manifest.ts";
+import { PREVIEW_FORMAT_VERSION, type FootprintPreviewManifest, type FootprintPreviewSelection, type FootprintSelection } from "./manifest.ts";
 import { assertFootprintLibraryParity } from "./parity.ts";
+import { footprintPreviewSelection } from "./selection.ts";
 import { validateSvg } from "./svg.ts";
 
 export type CheckFootprintPreviewsOptions = {
@@ -26,10 +27,13 @@ export type CheckFootprintPreviewsOptions = {
   readonly previewRoot: string;
   /** Required when `selections.length > 0`; unused (and may be omitted) for the zero-package state. */
   readonly renderer?: PreviewRendererConfig;
+  /** Defaults to true for existing callers; false requires membership to be absent from the manifest. */
+  readonly publishMembership?: boolean;
 };
 
 export async function checkFootprintPreviews(options: CheckFootprintPreviewsOptions): Promise<void> {
   const { selections, footprintMasterRoot, footprintLibraryRoot, previewRoot, renderer } = options;
+  const publishMembership = options.publishMembership ?? true;
   await assertFootprintLibraryParity(footprintMasterRoot, footprintLibraryRoot);
 
   const rootStat = await lstat(previewRoot).catch((error: NodeJS.ErrnoException) => {
@@ -87,7 +91,10 @@ export async function checkFootprintPreviews(options: CheckFootprintPreviewsOpti
   for (let index = 0; index < selections.length; index += 1) {
     const selection = selections[index] as FootprintSelection;
     const entry = manifest.packages[index];
-    if (entry === undefined || JSON.stringify(pickSelection(entry)) !== JSON.stringify(selection)) {
+    if (
+      entry === undefined ||
+      JSON.stringify(pickSelection(entry)) !== JSON.stringify(footprintPreviewSelection(selection, { publishMembership }))
+    ) {
       fail("ADAPTER_CONTRACT", `stale package selection at index ${index}`, { index });
     }
     const expectedAssetPath = `/assets/component-previews/footprints/${selection.footprintName}.svg`;
@@ -131,6 +138,11 @@ function assertExactFiles(expected: ReadonlySet<string>, actual: readonly string
   for (const filename of expected) if (!actual.includes(filename)) fail("ADAPTER_CONTRACT", `missing footprint preview output: ${filename}`);
 }
 
-function pickSelection(entry: FootprintPreviewManifest["packages"][number]): FootprintSelection {
-  return { packageId: entry.packageId, footprintName: entry.footprintName, footprintPath: entry.footprintPath, recordIds: entry.recordIds };
+function pickSelection(entry: FootprintPreviewManifest["packages"][number]): FootprintPreviewSelection {
+  const selection: FootprintPreviewSelection = {
+    packageId: entry.packageId,
+    footprintName: entry.footprintName,
+    footprintPath: entry.footprintPath,
+  };
+  return Object.hasOwn(entry, "recordIds") ? { ...selection, recordIds: entry.recordIds } : selection;
 }
