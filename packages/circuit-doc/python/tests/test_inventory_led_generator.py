@@ -72,6 +72,29 @@ class LedGeneratorTests(unittest.TestCase):
         data["assertions"].update(dnp_or_hand_fit_lines=1, fitted_placements=1, dnp_placements=1)
         return data, {"kind": "led-generator-v1", "specs": specs, "fit": "placement"}
 
+    def connector_specs(self):
+        value = "B6B-XH-A(LF)(SN)"
+        specs = []
+        declarations = []
+        placements = []
+        for board, dnp in (("a", True), ("b", False)):
+            path = self.spec(f"{board}_connector_spec.py", (
+                f"PROJECT_NAME = {board!r}\n"
+                f"COMPONENTS = {{'J1': ('B6B-XH-A', {value!r}, 'C144397', 'lib:XH-A', {dnp!r}, (0, 0))}}\n"
+                "NETS = {}\n"
+            ))
+            specs.append({"path": str(path)})
+            declarations.append({"board": board, "spec": path.name})
+            placements.append({"board": board, "refdes": "J1", "dnp": dnp})
+        part = line("line-c144397", value, "JST", lcsc="C144397", owner="component-xh-a", package="XH-A",
+                    function="wire-to-board connector", placements=placements)
+        data = inventory([part])
+        del part["dnp"]
+        data["generator_specs"] = declarations
+        data["assertions"].update(dnp_or_hand_fit_lines=1, fitted_placements=1, dnp_placements=1)
+        options = {"kind": "led-generator-v1", "specs": specs, "fit": "placement", "mpnFromValueLcsc": ["C144397"]}
+        return data, options, part
+
     def test_mixed_fit_requires_placement_mode_and_preserves_every_bit(self):
         data, options = self.mixed_inventory()
         path = write_json(self.root / "inventory.json", data)
@@ -220,6 +243,81 @@ class LedGeneratorTests(unittest.TestCase):
         self.assertFalse(provider_for({"kind": "manual"}).placement_fit)
         with self.assertRaisesRegex(ContractError, "unexpected options"):
             provider_for({"kind": "manual", "fit": "placement"})
+
+    def test_mpn_from_value_lcsc_reproduces_connector_identity(self):
+        value = "B6B-XH-A(LF)(SN)"
+        path = self.spec("connector_spec.py", (
+            "PROJECT_NAME = 'connector-board'\n"
+            f"COMPONENTS = {{'J1': ('B6B-XH-A', {value!r}, 'C144397', 'lib:XH-A', False, (0, 0))}}\n"
+            "NETS = {}\n"
+        ))
+        data = inventory([line("line-c144397", value, "JST", lcsc="C144397", owner="component-xh-a", package="XH-A",
+                               function="wire-to-board connector", placements=[{"board": "connector-board", "refdes": "J1"}])])
+        data["generator_specs"] = ["connector_spec.py"]
+        default = provider_for({"kind": "led-generator-v1", "specs": [{"path": str(path)}]})
+        with self.assertRaisesRegex(ContractError, "wrong MPN against generator"):
+            default.validate(data, EMPTY_AGGREGATE, self.config())
+
+        provider = provider_for({"kind": "led-generator-v1", "specs": [{"path": str(path)}], "mpnFromValueLcsc": ["C144397"]})
+        provider.validate(data, EMPTY_AGGREGATE, self.config())
+        self.assertEqual(expected_mpn("B6B-XH-A", value, "C144397", ("C144397",)), value)
+
+    def test_mpn_from_value_lcsc_rejects_stale_malformed_and_blank_values(self):
+        path = self.spec("connector_spec.py", (
+            "PROJECT_NAME = 'connector-board'\n"
+            "COMPONENTS = {'J1': ('B6B-XH-A', 'B6B-XH-A(LF)(SN)', 'C144397', 'lib:XH-A', False, (0, 0))}\n"
+            "NETS = {}\n"
+        ))
+        stale = provider_for({"kind": "led-generator-v1", "specs": [{"path": str(path)}], "mpnFromValueLcsc": ["C12345"]})
+        with self.assertRaisesRegex(ContractError, "mpnFromValueLcsc: C12345 is not a generator LCSC"):
+            stale.generated()
+
+        for value in ("CABC", "c123", 144397, ("C144397",)):
+            with self.subTest(value=value), self.assertRaisesRegex(ContractError, "mpnFromValueLcsc"):
+                provider_for({"kind": "led-generator-v1", "specs": [], "mpnFromValueLcsc": value})
+        with self.assertRaisesRegex(ContractError, "duplicate mpnFromValueLcsc entry C144397"):
+            provider_for({"kind": "led-generator-v1", "specs": [], "mpnFromValueLcsc": ["C144397", "C144397"]})
+
+        blank = self.spec("blank_value_spec.py", (
+            "PROJECT_NAME = 'connector-board'\n"
+            "COMPONENTS = {'J1': ('B6B-XH-A', '  ', 'C144397', 'lib:XH-A', False, (0, 0))}\n"
+            "NETS = {}\n"
+        ))
+        provider = provider_for({"kind": "led-generator-v1", "specs": [{"path": str(blank)}], "mpnFromValueLcsc": ["C144397"]})
+        with self.assertRaisesRegex(ContractError, "MPN from value must be a nonblank string"):
+            provider.generated()
+
+    def test_generator_specs_accept_ordered_board_spec_declarations(self):
+        data, options = self.mixed_inventory()
+        declarations = [
+            {"board": "a", "spec": "a_spec.py"},
+            {"board": "b", "spec": "b_spec.py"},
+        ]
+        data["generator_specs"] = declarations
+        provider = provider_for(options)
+        provider.validate(data, EMPTY_AGGREGATE, self.config())
+
+        invalid_declarations = (
+            ([{"board": "wrong", "spec": "a_spec.py"}, declarations[1]], "differ from configured"),
+            (list(reversed(declarations)), "differ from configured"),
+            ([declarations[0], "b_spec.py"], "cannot mix strings and"),
+            ([{**declarations[0], "extra": True}, declarations[1]], "exactly board and spec"),
+            ([{"board": " ", "spec": "a_spec.py"}, declarations[1]], "board and spec must be nonblank strings"),
+            ([{"board": "a", "spec": " "}, declarations[1]], "board and spec must be nonblank strings"),
+            ([declarations[0], {"board": "a", "spec": "b_spec.py"}], "board names must be unique"),
+        )
+        for specs, message in invalid_declarations:
+            with self.subTest(specs=specs), self.assertRaisesRegex(ContractError, message):
+                provider.validate({**data, "generator_specs": specs}, EMPTY_AGGREGATE, self.config())
+
+    def test_generator_specs_board_spec_form_passes_a_full_two_board_run(self):
+        data, options, part = self.connector_specs()
+        config = make_project(self.root, [{**part, "dnp": False}])
+        write_json(config["inventory"]["path"], data)
+        config["inventory"]["provider"] = options
+        report = validate(config)
+        self.assertEqual(report.lines, 1)
+        self.assertTrue(any("fit=placement" in scope for scope in report.scope))
 
     def test_external_placement_mode_requires_every_placement_fitted(self):
         path = self.spec("external.py", (
