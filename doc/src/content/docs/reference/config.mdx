@@ -50,7 +50,7 @@ one place (the CLI/adapter), never confused inside the schema check itself.
 | `preflight` | Yes | — | Where `generate` writes the preflight report JSON |
 | `publicRoot` | Yes | — | zudo-doc's `public/` directory; previews go under `<publicRoot>/assets/component-previews/{footprints,models}` |
 | `dist` | Yes | — | The built-site directory `check-built`/`scan`/`check-browser` read by default |
-| `agentResources` | No | `true` | Generated pages link `/docs/claude/` and `/docs/claude-skills/<owner>/` (needs zudo-doc's `claudeResources`) |
+| `agentResources` | No | `true` | Generated pages link `/docs/claude/` and `/docs/claude-skills/<owner>/` (needs zudo-doc's `claudeResources`); owner-skill DENY requires this flag off and the host's `claudeResources` removed — see [Denying owner skills and package membership](../concepts/publication.mdx#denying-owner-skills-and-package-membership) |
 | `generatedMarker` | No | the neutral marker | A custom generated-page marker string (single line) |
 | `generatedNotice` | No | `true`, unless `generatedMarker` is a legacy marker and this is unset (then `false`) | Whether generated pages carry the generated-page notice paragraph. Set it explicitly to decouple the notice from the marker, e.g. a custom marker with no notice, or a legacy marker with a notice |
 | `integrationGloss` | No | `null` | An optional JSON file `{ domain: text }` |
@@ -88,7 +88,7 @@ non-empty. See [Concepts → Inventory profiles](../concepts/inventory-profiles.
 | --- | --- | --- | --- |
 | `selection` | Yes | — | Path to `selection.json` — see [Publication schemas](./schemas.mdx#selection-json) |
 | `assets` | Yes | — | Path to `assets.json` — see [Publication schemas](./schemas.mdx#assets-json) |
-| `matrix` | No | package preset `component-evidence-v1` | Path to a custom `FieldKey → PUBLISH \| DENY` matrix JSON |
+| `matrix` | No | package preset `component-evidence-v1` | Path to a custom `FieldKey → PUBLISH \| DENY` matrix JSON; see [Denying owner skills and package membership](../concepts/publication.mdx#denying-owner-skills-and-package-membership) for owner-skill prerequisites and package-membership behavior |
 
 ## `cad`
 
