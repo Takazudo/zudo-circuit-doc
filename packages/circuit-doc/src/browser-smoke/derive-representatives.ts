@@ -8,9 +8,10 @@
  * the frontmatter `title` is the record's MPN (its identity), and the
  * `ComponentReferences` descriptor carries the document, footprint and model
  * that `checks/reference-page.ts` asserts on. A record qualifies only when its
- * descriptor decodes (reviewed document label, http(s) URL, non-empty authority,
- * footprint, optional declared WRL model) and the page keeps Sources plus at least one evidence
- * fact after the references section. When the site is already built, the
+ * descriptor decodes to either a selected document (reviewed label, http(s)
+ * URL, non-empty authority) or a reviewed unavailable-document reason, plus a
+ * footprint and optional declared WRL model. The page keeps Sources plus at
+ * least one evidence fact after the references section. When the site is already built, the
  * built page must carry the references section and the footprint/model assets
  * must exist.
  */

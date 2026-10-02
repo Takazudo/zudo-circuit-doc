@@ -7,10 +7,11 @@ import { MODEL_UNAVAILABLE_TEXT } from "../core/reference-descriptor.ts";
  *
  * Every structural assertion the upstream script made about a record page
  * (exactly one "Component references" section, rendered before the evidence
- * tables, one selected document label, one document link, one footprint preview
- * image with its inert no-JS starting state, one selected model, two enlarge
- * controls, two closed dialog shells with media-specific accessible names and
- * no visible title, a retained Sources section) is kept verbatim — only the
+ * tables, one selected or unavailable document label, the matching document
+ * state, one footprint preview image with its inert no-JS starting state, one
+ * selected model, two enlarge controls, two closed dialog shells with
+ * media-specific accessible names and no visible title, a retained Sources
+ * section) is kept verbatim — only the
  * expected COUNTS (upstream hard-coded 35 records / 25 packages) become
  * parameters, read from the selection lock via the projected view model
  * instead.
@@ -29,6 +30,7 @@ import { basename, extname, join, relative, sep } from "node:path";
 import { PROJECT_COMMANDS } from "../cli/project.ts";
 import { fail } from "../core/errors.ts";
 import { byCodeUnit } from "../core/ids.ts";
+import { DOCUMENT_UNAVAILABLE_LABEL } from "../core/reference-descriptor.ts";
 import { CATALOG_ROUTE, FOOTPRINT_ASSET_BASE, MODEL_ASSET_BASE, RECORDS_ROUTE } from "../core/site.ts";
 import { PACKAGELESS_REFERENCE_TEXT } from "../core/render/record.ts";
 import type { PublicRecord, PublicViewModel } from "../core/view-model.ts";
@@ -103,7 +105,14 @@ export async function checkBuiltReferences(input: BuiltReferencesInput): Promise
       checkPackagelessRecordPage(slug, html, record);
       continue;
     }
-    checkRecordPage(slug, html, referencedFootprints, referencedModels, record?.reference.footprint?.modelPath !== null);
+    checkRecordPage(
+      slug,
+      html,
+      referencedFootprints,
+      referencedModels,
+      record?.reference.footprint?.modelPath !== null,
+      record,
+    );
   }
 
   if (!setsEqual(referencedFootprints, manifest.names)) {
@@ -243,9 +252,9 @@ async function listFiles(root: string, current: string = root): Promise<string[]
 // --- package-less record pages (external part, or CAD off with expect.packages 0) --
 
 /**
- * A record with no published package renders no viewer: it must still link its
- * selected document, say plainly why no footprint or model is shown, and
- * reference no preview asset.
+ * A record with no published package renders no viewer: it must still show its
+ * selected document link or reviewed unavailable reason, say plainly why no
+ * footprint or model is shown, and reference no preview asset.
  */
 function checkPackagelessRecordPage(slug: string, html: string, record: PublicRecord): void {
   if (extractReferenceSections(html).length !== 0) {
@@ -255,9 +264,26 @@ function checkPackagelessRecordPage(slug: string, html: string, record: PublicRe
   if (!html.includes(`>${statement}</p>`)) {
     fail("PUBLICATION_POLICY", `${slug} must state why no footprint or 3D model is published`, { slug });
   }
-  const documentUrl = record.reference.document?.url;
+  const document = record.reference.document;
+  const documentUrl = document?.url;
   const hrefs = [...html.matchAll(/<a\b[^>]*\bhref=[^>]*>/gu)].map((match) => decodeHtml(readAttribute(match[0], "href", slug)));
-  if (documentUrl !== undefined && !hrefs.includes(String(documentUrl))) {
+  if (document === null) {
+    const reason = record.reference.documentUnavailableReason;
+    if (reason === null) {
+      fail("PUBLICATION_POLICY", `${slug} has no expected document-unavailability reason`, { slug });
+    }
+    const paragraphs = extractParagraphs(html);
+    const selectedDocuments = paragraphs.filter((paragraph) => paragraph.text === `Selected document: ${DOCUMENT_UNAVAILABLE_LABEL}`);
+    if (selectedDocuments.length !== 1 || /<a\b/u.test(selectedDocuments[0]?.markup ?? "")) {
+      fail("PUBLICATION_POLICY", `${slug} must state that the selected document is unavailable without linking a document`, { slug });
+    }
+    if (paragraphs.filter((paragraph) => paragraph.text === `Reason: ${String(reason)}`).length !== 1) {
+      fail("PUBLICATION_POLICY", `${slug} must state the expected document-unavailability reason`, {
+        slug,
+        reason: String(reason),
+      });
+    }
+  } else if (documentUrl !== undefined && !hrefs.includes(String(documentUrl))) {
     fail("PUBLICATION_POLICY", `${slug} must link its selected document`, { slug, url: documentUrl });
   }
   if (html.includes(FOOTPRINT_ASSET_BASE) || html.includes(MODEL_ASSET_BASE)) {
@@ -273,6 +299,7 @@ export function checkRecordPage(
   referencedFootprints: Set<string>,
   referencedModels: Set<string>,
   hasModel = true,
+  record?: PublicRecord,
 ): void {
   const sections = extractReferenceSections(html);
   if (sections.length !== 1) {
@@ -293,19 +320,58 @@ export function checkRecordPage(
   ];
   if (labels.length !== 1) fail("PUBLICATION_POLICY", `${slug} must render one selected document label`, { slug });
   const label = decodeHtml(labels[0]?.[1] ?? "");
-  if (!ALLOWED_DOCUMENT_LABELS.has(label)) {
+  const documentUnavailable = record?.reference.document === null;
+  const allowedLabels = documentUnavailable
+    ? new Set([...ALLOWED_DOCUMENT_LABELS, DOCUMENT_UNAVAILABLE_LABEL])
+    : ALLOWED_DOCUMENT_LABELS;
+  if (!allowedLabels.has(label)) {
     fail("PUBLICATION_POLICY", `${slug} has an unreviewed document label`, { slug, label });
   }
 
+  const documentTitleParagraphs = [
+    ...section.matchAll(
+      /<p\b[^>]*class=(?:"zcd-component-references__document-title"|zcd-component-references__document-title)[^>]*>[\s\S]*?<\/p>/gu,
+    ),
+  ].map((match) => match[0]);
+  const unavailableMarkers = [...section.matchAll(/\bdata-document-unavailable=(?:"true"|true)(?=\s|>)/gu)];
   const documents = [
     ...section.matchAll(
       /<p\b[^>]*class=(?:"zcd-component-references__document-title"|zcd-component-references__document-title)[^>]*>\s*(<a\b[^>]*>)/gu,
     ),
   ];
-  if (documents.length !== 1) fail("PUBLICATION_POLICY", `${slug} must render one selected document destination`, { slug });
-  const documentUrl = new URL(decodeHtml(readAttribute(documents[0]?.[1] ?? "", "href", slug)));
-  if (documentUrl.protocol !== "https:" && documentUrl.protocol !== "http:") {
-    fail("PUBLICATION_POLICY", `${slug} document URL must be HTTP(S)`, { slug, url: documentUrl.href });
+  if (documentUnavailable) {
+    const reason = record?.reference.documentUnavailableReason;
+    if (reason === null || reason === undefined) {
+      fail("PUBLICATION_POLICY", `${slug} has no expected document-unavailability reason`, { slug });
+    }
+    const markedParagraphs = documentTitleParagraphs.filter((paragraph) => /\bdata-document-unavailable=(?:"true"|true)(?=\s|>)/u.test(paragraph));
+    const markedParagraph = markedParagraphs[0];
+    const markedContent = markedParagraph === undefined ? undefined : /^<p\b[^>]*>([\s\S]*?)<\/p>$/u.exec(markedParagraph)?.[1];
+    const renderedReason = markedContent?.replace(/<[^>]*>/gu, "").trim();
+    if (
+      label !== DOCUMENT_UNAVAILABLE_LABEL ||
+      unavailableMarkers.length !== 1 ||
+      documentTitleParagraphs.length !== 1 ||
+      markedParagraphs.length !== 1 ||
+      decodeHtml(renderedReason ?? "") !== String(reason)
+    ) {
+      fail("PUBLICATION_POLICY", `${slug} must render the expected unavailable-document label and reason`, {
+        slug,
+        expectedReason: String(reason),
+      });
+    }
+    if (documents.length !== 0 || markedParagraph?.includes("<a") === true) {
+      fail("PUBLICATION_POLICY", `${slug} must not link a document when the document is unavailable`, { slug });
+    }
+  } else {
+    if (label === DOCUMENT_UNAVAILABLE_LABEL || unavailableMarkers.length !== 0) {
+      fail("PUBLICATION_POLICY", `${slug} may use the unavailable-document label only for an unavailable document`, { slug, label });
+    }
+    if (documents.length !== 1) fail("PUBLICATION_POLICY", `${slug} must render one selected document destination`, { slug });
+    const documentUrl = new URL(decodeHtml(readAttribute(documents[0]?.[1] ?? "", "href", slug)));
+    if (documentUrl.protocol !== "https:" && documentUrl.protocol !== "http:") {
+      fail("PUBLICATION_POLICY", `${slug} document URL must be HTTP(S)`, { slug, url: documentUrl.href });
+    }
   }
 
   const footprintImages = [
@@ -317,6 +383,12 @@ export function checkRecordPage(
     fail("PATH_CONTAINMENT", `${slug} footprint preview image has an unsafe src`, { slug, src: footprintPath });
   }
   referencedFootprints.add(basename(footprintPath));
+  if (documentUnavailable) {
+    const links = [...section.matchAll(/<a\b[^>]*>/gu)].map((match) => decodeHtml(readAttribute(match[0], "href", slug)));
+    if (links.some((href) => href !== footprintPath)) {
+      fail("PUBLICATION_POLICY", `${slug} must not link a document when the document is unavailable`, { slug });
+    }
+  }
   if (!/data-footprint-preview-state=(?:"no-js"|no-js)(?:\s|>)/u.test(section)) {
     fail("PUBLICATION_POLICY", `${slug} footprint enhancement must start inert`, { slug });
   }
@@ -429,7 +501,21 @@ function setsEqual<T>(left: ReadonlySet<T>, right: ReadonlySet<T>): boolean {
 }
 
 function decodeHtml(value: string): string {
-  return value.replaceAll("&amp;", "&").replaceAll("&quot;", '"').replaceAll("&#39;", "'");
+  const entities: Readonly<Record<string, string>> = {
+    "&amp;": "&",
+    "&quot;": '"',
+    "&#39;": "'",
+    "&lt;": "<",
+    "&gt;": ">",
+  };
+  return value.replace(/&(amp|quot|#39|lt|gt);/gu, (entity) => entities[entity] ?? entity);
+}
+
+function extractParagraphs(html: string): readonly { readonly markup: string; readonly text: string }[] {
+  return [...html.matchAll(/<p\b[^>]*>[\s\S]*?<\/p>/gu)].map((match) => ({
+    markup: match[0],
+    text: decodeHtml(match[0].replace(/<[^>]*>/gu, "")).trim(),
+  }));
 }
 
 function extractReferenceSections(html: string): readonly string[] {

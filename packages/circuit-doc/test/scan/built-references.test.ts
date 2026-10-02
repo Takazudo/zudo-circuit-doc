@@ -20,6 +20,7 @@ import { after, before, describe, it } from "node:test";
 import { anchor, recordSlug } from "../../src/core/ids.ts";
 import { safeText } from "../../src/core/text.ts";
 import { assertSafeUrl } from "../../src/core/url.ts";
+import { DOCUMENT_UNAVAILABLE_LABEL } from "../../src/core/reference-descriptor.ts";
 import { VIEW_MODEL_VERSION, type PublicViewModel } from "../../src/core/view-model.ts";
 import { ComponentDocsError } from "../../src/core/errors.ts";
 import { checkBuiltReferences } from "../../src/scan/built-references.ts";
@@ -28,6 +29,7 @@ const RECORD_ID = "rec-fixture-one";
 const SLUG = recordSlug(RECORD_ID);
 const PACKAGE_ID = "pkg-fixture-one";
 const IDENTITY_NAME = "FIX-ONE";
+const DOCUMENT_UNAVAILABLE_REASON = "Only a distributor listing is available.";
 
 function t(value: string) {
   return safeText(value, { field: "fixture" });
@@ -123,6 +125,40 @@ const ZERO_RECORD_MODEL: PublicViewModel = {
   records: [],
   packagePreviews: [],
 };
+
+function unavailableDocumentModel(hasModel = true): PublicViewModel {
+  const record = ONE_RECORD_MODEL.records[0];
+  const packagePreview = ONE_RECORD_MODEL.packagePreviews[0];
+  assert.ok(record);
+  assert.ok(packagePreview);
+  const footprint = record.reference.footprint;
+  assert.ok(footprint);
+  const selectedFootprint = hasModel
+    ? footprint
+    : { ...footprint, modelPath: null, offset: null, rotation: null, scale: null };
+  return {
+    ...ONE_RECORD_MODEL,
+    records: [
+      {
+        ...record,
+        reference: {
+          ...record.reference,
+          document: null,
+          documentUnavailableReason: t(DOCUMENT_UNAVAILABLE_REASON),
+          footprint: selectedFootprint,
+        },
+      },
+    ],
+    packagePreviews: hasModel ? ONE_RECORD_MODEL.packagePreviews : [{ ...packagePreview, ...selectedFootprint }],
+  };
+}
+
+function unavailableDocumentParts(reason = DOCUMENT_UNAVAILABLE_REASON): Partial<Parts> {
+  return {
+    label: `<p class="zcd-component-references__document-label">${DOCUMENT_UNAVAILABLE_LABEL}</p>`,
+    document: `<p class="zcd-component-references__document-title" data-document-unavailable="true">${reason}</p>`,
+  };
+}
 
 type Parts = {
   readonly label: string;
@@ -242,6 +278,79 @@ describe("a correctly built 1-record dist tree passes", () => {
     const distRoot = await scaffoldDist("happy");
     const report = await checkBuiltReferences({ distRoot, model: ONE_RECORD_MODEL });
     assert.deepEqual(report, { records: 1, footprints: 1, models: 1 });
+  });
+});
+
+describe("records with an unavailable document are checked against their reason", () => {
+  it("accepts an unavailable document alongside a selected model", async () => {
+    const distRoot = await scaffoldDist("unavailable-document-model", {
+      recordHtml: assembleHtml(unavailableDocumentParts()),
+    });
+    const report = await checkBuiltReferences({ distRoot, model: unavailableDocumentModel() });
+    assert.deepEqual(report, { records: 1, footprints: 1, models: 1 });
+  });
+
+  it("accepts an unavailable document alongside a footprint-only package", async () => {
+    const distRoot = await scaffoldDist("unavailable-document-footprint-only", {
+      recordHtml: assembleHtml({
+        ...unavailableDocumentParts(),
+        modelDiv: `<p data-model-unavailable="true">No 3D model is declared by this footprint; geometry and physical fit remain unverified.</p>`,
+        enlargeButtons: `<button data-component-preview-enlarge="footprint" aria-label="Enlarge footprint preview"></button>`,
+        dialogs: `<dialog data-component-preview-dialog="footprint" aria-label="Footprint preview for ${IDENTITY_NAME}"></dialog>`,
+      }),
+      skipModelAsset: true,
+    });
+    const report = await checkBuiltReferences({ distRoot, model: unavailableDocumentModel(false) });
+    assert.deepEqual(report, { records: 1, footprints: 1, models: 0 });
+  });
+
+  it("rejects a missing reason", async () => {
+    const distRoot = await scaffoldDist("unavailable-document-missing-reason", {
+      recordHtml: assembleHtml({ ...unavailableDocumentParts(), document: `<p class="zcd-component-references__document-title" data-document-unavailable="true"></p>` }),
+    });
+    await rejectsWith(
+      checkBuiltReferences({ distRoot, model: unavailableDocumentModel() }),
+      "PUBLICATION_POLICY",
+      /expected unavailable-document label and reason/u,
+    );
+  });
+
+  it("rejects a reason that differs from the projected record", async () => {
+    const distRoot = await scaffoldDist("unavailable-document-wrong-reason", {
+      recordHtml: assembleHtml(unavailableDocumentParts("A different reviewed reason.")),
+    });
+    await rejectsWith(
+      checkBuiltReferences({ distRoot, model: unavailableDocumentModel() }),
+      "PUBLICATION_POLICY",
+      /expected unavailable-document label and reason/u,
+    );
+  });
+
+  it("rejects an invented link in the unavailable document row", async () => {
+    const distRoot = await scaffoldDist("unavailable-document-invented-link", {
+      recordHtml: assembleHtml({
+        ...unavailableDocumentParts(),
+        document: `<p class="zcd-component-references__document-title" data-document-unavailable="true"><a href="https://example.invalid/invented.pdf">${DOCUMENT_UNAVAILABLE_REASON}</a></p>`,
+      }),
+    });
+    await rejectsWith(
+      checkBuiltReferences({ distRoot, model: unavailableDocumentModel() }),
+      "PUBLICATION_POLICY",
+      /must not link a document/u,
+    );
+  });
+
+  it("rejects the unavailable label when a selected document URL is present", async () => {
+    const distRoot = await scaffoldDist("unavailable-label-with-url", {
+      recordHtml: assembleHtml({
+        label: `<p class="zcd-component-references__document-label">${DOCUMENT_UNAVAILABLE_LABEL}</p>`,
+      }),
+    });
+    await rejectsWith(
+      checkBuiltReferences({ distRoot, model: ONE_RECORD_MODEL }),
+      "PUBLICATION_POLICY",
+      /unreviewed document label/u,
+    );
   });
 });
 
@@ -462,6 +571,25 @@ describe("a record without a published package (external, or CAD off with expect
     };
   }
 
+  function packagelessUnavailableModel(): PublicViewModel {
+    const model = packagelessModel("pcb");
+    const record = model.records[0];
+    assert.ok(record);
+    return {
+      ...model,
+      records: [
+        {
+          ...record,
+          reference: {
+            ...record.reference,
+            document: null,
+            documentUnavailableReason: t(DOCUMENT_UNAVAILABLE_REASON),
+          },
+        },
+      ],
+    };
+  }
+
   const PCB_TEXT = "No footprint or 3D model is published for this record: CAD is not enabled for this project.";
 
   function packagelessHtml(statement: string, extra = ""): string {
@@ -489,6 +617,51 @@ describe("a record without a published package (external, or CAD off with expect
     const distRoot = await scaffoldPackageless("packageless-pcb", packagelessHtml(PCB_TEXT));
     const report = await checkBuiltReferences({ distRoot, model: packagelessModel("pcb") });
     assert.deepEqual(report, { records: 1, footprints: 0, models: 0 });
+  });
+
+  it("passes a packageless PCB record with the unavailable-document reason and no document link", async () => {
+    const distRoot = await scaffoldPackageless(
+      "packageless-unavailable-document",
+      [
+        "<html><body>",
+        `<p><strong>Selected document:</strong> ${DOCUMENT_UNAVAILABLE_LABEL}</p>`,
+        `<p><strong>Reason:</strong> ${DOCUMENT_UNAVAILABLE_REASON}</p>`,
+        `<p>${PCB_TEXT}</p>`,
+        "</body></html>",
+      ].join(""),
+    );
+    const report = await checkBuiltReferences({ distRoot, model: packagelessUnavailableModel() });
+    assert.deepEqual(report, { records: 1, footprints: 0, models: 0 });
+  });
+
+  it("rejects a packageless unavailable document with an invented link", async () => {
+    const distRoot = await scaffoldPackageless(
+      "packageless-unavailable-document-link",
+      [
+        "<html><body>",
+        `<p><strong>Selected document:</strong> <a href="https://example.invalid/invented.pdf">${DOCUMENT_UNAVAILABLE_LABEL}</a></p>`,
+        `<p><strong>Reason:</strong> ${DOCUMENT_UNAVAILABLE_REASON}</p>`,
+        `<p>${PCB_TEXT}</p>`,
+        "</body></html>",
+      ].join(""),
+    );
+    await rejectsWith(
+      checkBuiltReferences({ distRoot, model: packagelessUnavailableModel() }),
+      "PUBLICATION_POLICY",
+      /without linking a document/u,
+    );
+  });
+
+  it("rejects a packageless unavailable document without its expected reason", async () => {
+    const distRoot = await scaffoldPackageless(
+      "packageless-unavailable-document-missing-reason",
+      `<html><body><p>Selected document: ${DOCUMENT_UNAVAILABLE_LABEL}</p><p>${PCB_TEXT}</p></body></html>`,
+    );
+    await rejectsWith(
+      checkBuiltReferences({ distRoot, model: packagelessUnavailableModel() }),
+      "PUBLICATION_POLICY",
+      /expected document-unavailability reason/u,
+    );
   });
 
   it("fails a PCB record that uses the external-part wording instead", async () => {
