@@ -23,6 +23,10 @@ matrix denies a handful of fields outright regardless of selection — for examp
 that hashes, raw extract text, reviewer names and search-avoidance prompts never reach a built
 page even for a fully selected record.
 
+Audited candidates and their owned sources stay outside the publication projection: candidate
+record or source IDs are rejected if added to `selection.json`, and candidates are never published
+or counted in its selected record/source totals.
+
 ## The selection lock
 
 `circuit/publication/selection.json` is the reviewed publication lock:

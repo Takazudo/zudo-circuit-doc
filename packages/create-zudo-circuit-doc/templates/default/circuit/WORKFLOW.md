@@ -145,7 +145,7 @@ The validator recomputes the arithmetic. **Arithmetic is not dimensional proof:*
 
 1. Fill the brief in `doc/src/content/docs/project/index.mdx`: intended behavior, interfaces, power source, dimensions, environment, quantity, constraints and unknowns. Keep "Not entered" where the owner has not said.
 2. Draft functional blocks and operating states in `doc/src/content/docs/architecture/overview.mdx`. Name the decisions that constrain component selection. Start from responsibilities, not IC names.
-3. Record candidate components as authored research (copy `circuit/templates/project-docs/research/component-candidate.mdx` into `doc/src/content/docs/research/`). Candidates stay out of the inventory until selected.
+3. Record candidate components as authored research (copy `circuit/templates/project-docs/research/component-candidate.mdx` into `doc/src/content/docs/research/`). Candidates stay out of the fitted inventory until selected. An audited candidate may carry full evidence in an owner bundle through the separate `evidence.candidates` inventory.
 4. Put the most consequential uncertainties and the next bounded task in `doc/src/content/docs/project/next-actions.mdx`.
 5. Add integration rules only when a real interaction exists (see [Integration rules](#integration-rules)).
 6. Run `pnpm circuit:check` and `pnpm check`.
