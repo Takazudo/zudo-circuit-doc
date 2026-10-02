@@ -123,7 +123,7 @@ def make_project(root, lines=(), *, bundles=None, rules=None, forward_tests=None
     return {
         "configVersion": 1, "contractVersion": 1, "projectRoot": str(root),
         "bundles": {"root": str(skills), "ownerPrefix": "component-", "reservedDirs": [AUDIT], "auditSkillDir": str(skills / AUDIT), "requireSkillMd": True},
-        "inventory": {"path": str(inventory_path), "provider": {"kind": "manual"}},
+        "inventory": {"path": str(inventory_path), "candidatesPath": None, "provider": {"kind": "manual"}},
         "routing": {"directRouting": str(routing_path) if routing_path else None, "vendorQualifiers": str(vendor_path) if vendor_path else None},
         "template": {"dir": str(TEMPLATE), "name": "component-example"},
         "cad": cad or {"enabled": False, "symbolLibraries": [], "footprintDirs": [], "requirePinEqualsPad": True},

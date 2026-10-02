@@ -163,14 +163,22 @@ export type InstanceSelection = {
    */
   readonly linkableSourceIds: readonly string[];
   /**
-   * One reviewed PDF-representing source for every selected record. This is an
+   * One reviewed document/source record for every selected record. This is an
    * audit decision, not a URL heuristic or a request to perform network I/O at
    * generation time.
    */
   readonly documentSelections: readonly {
     readonly recordId: string;
     readonly sourceId: string;
-    readonly documentKind: "datasheet" | "specification" | "drawing";
+    readonly documentKind: "datasheet" | "specification" | "drawing" | "source-record";
+  }[];
+  /**
+   * Reviewed audit decisions that no public document exists for these records.
+   * This is explicit evidence, never a URL heuristic; absence means `[]`.
+   */
+  readonly documentExceptions?: readonly {
+    readonly recordId: string;
+    readonly reason: string;
   }[];
   /** Asserted corpus counts; a mismatch means the selection went stale. */
   readonly expect: {
@@ -287,7 +295,7 @@ export class PublicationPolicy {
           sourceId: document.sourceId,
         });
       }
-      if (!["datasheet", "specification", "drawing"].includes(document.documentKind)) {
+      if (!["datasheet", "specification", "drawing", "source-record"].includes(document.documentKind)) {
         fail("PUBLICATION_POLICY", `document source ${document.sourceId} has an invalid kind`, {
           recordId: document.recordId,
           sourceId: document.sourceId,
@@ -300,11 +308,47 @@ export class PublicationPolicy {
       }
       documentRecords.add(document.recordId);
     }
-    const recordsWithoutDocument = selection.recordIds.filter((id) => !documentRecords.has(id));
-    if (recordsWithoutDocument.length > 0 || documentRecords.size !== selection.recordIds.length) {
-      fail("PUBLICATION_POLICY", "every selected record must have exactly one document selection", {
-        recordsWithoutDocument: recordsWithoutDocument.sort(byCodeUnit),
-      });
+    const exceptionRecords = new Set<string>();
+    for (const exception of selection.documentExceptions ?? []) {
+      if (!this.#recordIds.has(exception.recordId)) {
+        fail(
+          "PUBLICATION_POLICY",
+          `document exception for record ${exception.recordId} is outside selected records`,
+          { recordId: exception.recordId },
+        );
+      }
+      if (exceptionRecords.has(exception.recordId)) {
+        fail("PUBLICATION_POLICY", `record ${exception.recordId} has multiple document exceptions`, {
+          recordId: exception.recordId,
+        });
+      }
+      if (documentRecords.has(exception.recordId)) {
+        fail(
+          "PUBLICATION_POLICY",
+          `record ${exception.recordId} has both a document selection and exception`,
+          { recordId: exception.recordId },
+        );
+      }
+      if (
+        typeof exception.reason !== "string" ||
+        exception.reason.trim() === "" ||
+        exception.reason.length > 1000 ||
+        /[\p{Cc}\p{Cf}]/u.test(exception.reason)
+      ) {
+        fail("PUBLICATION_POLICY", `document exception for record ${exception.recordId} has an unsafe reason`, {
+          recordId: exception.recordId,
+        });
+      }
+      exceptionRecords.add(exception.recordId);
+    }
+    const documentCoverage = new Set([...documentRecords, ...exceptionRecords]);
+    const recordsWithoutDocument = selection.recordIds.filter((id) => !documentCoverage.has(id));
+    if (recordsWithoutDocument.length > 0 || documentCoverage.size !== selection.recordIds.length) {
+      fail(
+        "PUBLICATION_POLICY",
+        "every selected record must have exactly one document selection or document exception",
+        { recordsWithoutDocument: recordsWithoutDocument.sort(byCodeUnit) },
+      );
     }
   }
 

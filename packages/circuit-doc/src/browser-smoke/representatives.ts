@@ -3,8 +3,8 @@
  * own `circuit.config.ts` `browserSmoke.representatives` — never from a
  * hard-coded LED list (spec item 2). "RECORD" (the page exercised by the
  * dialog/interaction/SPA/forced-failure checks) is the first representative
- * whose built page actually publishes a component-references section; "AWAY"
- * is always the catalog route.
+ * whose built page publishes a component-references section with a model.
+ * "AWAY" is always the catalog route.
  */
 
 import { readFile } from "node:fs/promises";
@@ -88,7 +88,7 @@ export type ResolvedRepresentatives = {
   readonly all: readonly Representative[];
   /** The subset of `all` whose built page publishes a component-references section, in declared order. */
   readonly withReferences: readonly Representative[];
-  /** RECORD: the first of `withReferences`, or `undefined` when none do (declared-zero project). */
+  /** RECORD: the first of `withReferences` with a model, or `undefined` when none do. */
   readonly record: Representative | undefined;
 };
 
@@ -106,5 +106,14 @@ export async function resolveRepresentatives(
   for (const representative of representatives) {
     if (await hasPublishedReferences(distRoot, representative)) withReferences.push(representative);
   }
-  return { all: representatives, withReferences, record: withReferences[0] };
+  let record: Representative | undefined;
+  for (const representative of withReferences) {
+    const relative = representative.path.replace(/^\/+/u, "").replace(/\/+$/u, "");
+    const html = await readFile(join(distRoot, relative, "index.html"), "utf8");
+    if (!html.includes('data-model-unavailable="true"')) {
+      record = representative;
+      break;
+    }
+  }
+  return { all: representatives, withReferences, record };
 }

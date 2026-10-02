@@ -76,6 +76,8 @@ export type CorpusSummary = {
 export type PublicPlacement = {
   readonly board: SafeText;
   readonly refdes: SafeText;
+  /** Effective fit at this placement: true means DNP or hand-fit. */
+  readonly dnp: boolean;
 };
 
 /** Identity of one orderable line, as published. */
@@ -93,8 +95,9 @@ export type PublicRecordIdentity = {
    * `component-al8860mp-13`. Not derivable from anything else here — 13 owners
    * cover 34 records and one of them owns eleven — and it is what lets a record
    * page link back to its raw agent resource at `/docs/claude-skills/<name>/`.
+   * `null` means the publication matrix denied this field.
    */
-  readonly ownerSkill: SafeText;
+  readonly ownerSkill: SafeText | null;
   readonly mpn: SafeText;
   readonly manufacturer: SafeText;
   readonly lcsc: SafeText;
@@ -103,6 +106,7 @@ export type PublicRecordIdentity = {
   /** Verbatim provider state strings, e.g. `VERIFIED` / `UNRESOLVED`. */
   readonly identityState: SafeText;
   readonly sourceState: SafeText;
+  /** True iff every placement is DNP or hand-fit; line dnp when there are no placements. */
   readonly dnp: boolean;
   readonly placements: readonly PublicPlacement[];
 };
@@ -219,14 +223,14 @@ export type PublicPinMap = {
   readonly pins: readonly PublicPin[];
 };
 
-export type PublicDocumentKind = "datasheet" | "specification" | "drawing";
+export type PublicDocumentKind = "datasheet" | "specification" | "drawing" | "source-record";
 
 /** The one reviewed, PDF-representing shortcut for a record. */
 export type PublicDocumentReference = {
   readonly sourceId: SafeText;
   /** The source's own title, preserved rather than replaced by UI wording. */
   readonly documentTitle: SafeText;
-  /** Exactly one of Datasheet PDF / Specification PDF / Mechanical drawing PDF. */
+  /** One reviewed label: Datasheet PDF / Specification PDF / Mechanical drawing PDF / Source record. */
   readonly label: SafeText;
   readonly authorityClass: SafeText;
   readonly url: SafeUrl;
@@ -245,14 +249,16 @@ export type PublicFootprintReference = {
   readonly packageId: SafeText;
   readonly footprintName: SafeText;
   readonly footprintPath: SafeText;
-  readonly modelPath: SafeText;
-  readonly offset: PublicTransform3d;
-  readonly rotation: PublicTransform3d;
-  readonly scale: PublicTransform3d;
+  readonly modelPath: SafeText | null;
+  readonly offset: PublicTransform3d | null;
+  readonly rotation: PublicTransform3d | null;
+  readonly scale: PublicTransform3d | null;
 };
 
 export type PublicRecordReference = {
-  readonly document: PublicDocumentReference;
+  /** Exactly one of the selected document and reviewed unavailable reason is present. */
+  readonly document: PublicDocumentReference | null;
+  readonly documentUnavailableReason: SafeText | null;
   /**
    * Structural discriminator for rendering `footprint: null`: an `external`
    * part has no PCB footprint at all, a `pcb` part may simply have no package
@@ -266,7 +272,8 @@ export type PublicRecordReference = {
 
 /** The deduplicated renderer input; records retain lookup through packageId. */
 export type PublicPackagePreview = PublicFootprintReference & {
-  readonly recordIds: readonly SafeText[];
+  /** `null` means the publication matrix denied package membership. */
+  readonly recordIds: readonly SafeText[] | null;
 };
 
 /** One published record page's complete data. */
@@ -343,8 +350,9 @@ export type PublicIntegrationRule = {
    * The same role `PublicRecordIdentity.ownerSkill` plays for a record: it is
    * what lets the integration page link back to the raw agent resource it is a
    * projection of, without `core/` knowing any provider's directory names.
+   * `null` means the publication matrix denied this field.
    */
-  readonly ownerSkill: SafeText;
+  readonly ownerSkill: SafeText | null;
   readonly domain: SafeText;
   readonly recordIds: readonly SafeText[];
   readonly factIds: readonly SafeText[];

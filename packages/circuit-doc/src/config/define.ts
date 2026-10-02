@@ -81,6 +81,7 @@ export type EvidenceConfig = {
   readonly directRouting: ConfigPath;
   readonly vendorQualifiers: ConfigPath;
   readonly forwardTests?: ConfigPath | null;
+  readonly candidates?: ConfigPath | null;
   readonly sourceCache: ConfigPath;
 };
 
@@ -90,11 +91,17 @@ export type ManualInventoryProviderConfig = {
 
 export type LedGeneratorSpecConfig = {
   readonly path: ConfigPath;
+  /** Expected board name; defaults to the spec's PROJECT_NAME. */
+  readonly board?: string;
 };
 
 export type LedGeneratorInventoryProviderConfig = {
   readonly kind: "led-generator-v1";
   readonly specs: readonly LedGeneratorSpecConfig[];
+  /** How generated fit state is represented. Defaults to line-level fit. */
+  readonly fit?: "line" | "placement";
+  /** Reviewed generator LCSC codes whose MPN is taken from the generated value. */
+  readonly mpnFromValueLcsc?: readonly string[];
 };
 
 export type InventoryProviderConfig = ManualInventoryProviderConfig | LedGeneratorInventoryProviderConfig;
@@ -162,6 +169,8 @@ export type ScanPolicyConfig = {
   readonly expectedWithheld?: number;
   /** Positive-control record slug; `null` picks one deterministically. */
   readonly positiveControlRecord?: string | null;
+  /** Footprint names reviewed as publicly published canonical CAD; these are names, never hashes or paths. */
+  readonly publicCanonicalFootprints?: readonly string[];
 };
 
 export type BrowserSmokeRepresentativeConfig = {

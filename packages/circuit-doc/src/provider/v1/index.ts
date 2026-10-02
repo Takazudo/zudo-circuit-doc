@@ -58,7 +58,9 @@ import type { CircuitProjectPaths } from "./paths.ts";
 import { projectIntegrationRules } from "./integration.ts";
 import {
   indexEvidence,
+  placementFits,
   readBundle,
+  readCandidateInventory,
   readIntegrationRules,
   readInventory,
   type EvidenceIndex,
@@ -135,12 +137,19 @@ export function createCircuitAdapter(options: CircuitAdapterOptions): ComponentD
 export async function readEvidenceIndex(options: EvidenceIndexOptions): Promise<EvidenceIndex> {
   const { paths, selection, reference } = options;
   const inventory = await readInventory(paths.bundlesRoot, paths.inventoryFile);
-  const ownerSkills = uniqueInOrder(inventory.lines.map((line) => line.owner_skill));
+  const candidates = paths.candidateInventoryFile == null ? undefined
+    : await readCandidateInventory(paths.bundlesRoot, paths.candidateInventoryFile);
+  const ownerSkills = uniqueInOrder([
+    ...inventory.lines.map((line) => line.owner_skill),
+    ...(candidates?.candidates ?? []).map((candidate) => candidate.owner_skill),
+  ]);
   const [bundles, rules] = await Promise.all([
     Promise.all(ownerSkills.map((skill) => readBundle(paths.bundlesRoot, skill))),
     readIntegrationRules(paths.bundlesRoot, paths.integrationRulesFile),
   ]);
-  const index = indexEvidence(inventory, bundles, rules.rules);
+  const index = indexEvidence(inventory, bundles, rules.rules, candidates);
+  assertNoCandidateSelection(index, (id) => selection.recordIds.includes(id), (id) =>
+    selection.sourceIds.includes(id) || selection.linkableSourceIds.includes(id));
   return {
     ...index,
     references: await readCircuitReferenceContract(index, selection, paths, reference),
@@ -158,6 +167,9 @@ export function projectIndex(
   options: ProjectIndexOptions = {},
 ): PublicViewModel {
   const { inventory } = index;
+
+  assertNoCandidateSelection(index, (id) => policy.isRecordSelected(id), (id) =>
+    policy.isSourceSelected(id) || policy.isSourceLinkable(id));
 
   // Fatal when the committed selection names something the provider lost, and
   // when the corpus size moved. Must run before anything is projected.
@@ -264,32 +276,34 @@ function projectRecordReference(
 ): PublicRecordReference {
   const recordId = entry.record.record_id;
   const document = references.documentsByRecordId.get(recordId);
+  const unavailableReason = references.documentExceptionsByRecordId.get(recordId);
   const footprint = references.packageByRecordId.get(recordId);
   const mounting = entry.line.mounting === "external" ? "external" : "pcb";
   const declaredUnpublished = references.unpublishedPackageRecordIds.has(recordId);
-  if (document === undefined || (footprint === undefined && mounting === "pcb" && !declaredUnpublished)) {
+  if ((document === undefined && unavailableReason === undefined) || (footprint === undefined && mounting === "pcb" && !declaredUnpublished)) {
     fail("ADAPTER_CONTRACT", "record has no complete reference descriptor", { recordId });
   }
-  const classified = classifyUrl(document.source.authoritative_url);
-  if (classified.decision === "DENY") {
-    fail("UNSAFE_VALUE", "selected document URL failed classification", {
-      recordId,
-      sourceId: document.source.source_id,
-      reason: classified.reason,
-    });
-  }
-  policy.publishRequired("asset.datasheetPdf", true);
-  if (footprint !== undefined) {
-    policy.publishRequired("asset.footprintPreview", true);
-    policy.publishRequired("asset.modelPreview", true);
-  }
-  const labels = {
-    datasheet: "Datasheet PDF",
-    specification: "Specification PDF",
-    drawing: "Mechanical drawing PDF",
-  } as const;
-  return {
-    document: {
+  let publishedDocument: PublicRecordReference["document"] = null;
+  let documentUnavailableReason: PublicRecordReference["documentUnavailableReason"] = null;
+  if (document === undefined) {
+    documentUnavailableReason = policy.publishRequired("reference.document.availability", safeText(unavailableReason, { field: `${recordId}.reference.documentUnavailableReason` }));
+  } else {
+    const classified = classifyUrl(document.source.authoritative_url);
+    if (classified.decision === "DENY") {
+      fail("UNSAFE_VALUE", "selected document URL failed classification", {
+        recordId,
+        sourceId: document.source.source_id,
+        reason: classified.reason,
+      });
+    }
+    policy.publishRequired("asset.datasheetPdf", true);
+    const labels = {
+      datasheet: "Datasheet PDF",
+      specification: "Specification PDF",
+      drawing: "Mechanical drawing PDF",
+      "source-record": "Source record",
+    } as const;
+    publishedDocument = {
       sourceId: policy.publishRequired("reference.document.sourceId", safeText(document.source.source_id, { field: `${recordId}.reference.sourceId` })),
       documentTitle: policy.publishRequired("reference.document.documentTitle", safeText(document.source.document_title, { field: `${recordId}.reference.documentTitle` })),
       label: policy.publishRequired("reference.document.label", safeText(labels[document.documentKind], { field: `${recordId}.reference.label` })),
@@ -297,19 +311,27 @@ function projectRecordReference(
       url: policy.publishRequired("reference.document.url", classified.url),
       availability: policy.publishRequired("reference.document.availability", safeText(document.source.availability, { field: `${recordId}.reference.availability` })),
       documentKind: policy.publishRequired("reference.document.documentKind", document.documentKind),
-    },
+    };
+  }
+  if (footprint !== undefined) {
+    policy.publishRequired("asset.footprintPreview", true);
+    if (footprint.modelPath !== null) policy.publishRequired("asset.modelPreview", true);
+  }
+  return {
+    document: publishedDocument,
+    documentUnavailableReason,
     mounting,
     footprint: footprint === undefined ? null : projectFootprint(footprint, policy),
   };
 }
 
 function projectPackage(entry: CircuitPackageReference, policy: PublicationPolicy): PublicPackagePreview {
+  const recordIds = entry.recordIds.map((recordId) =>
+    safeText(recordId, { field: `${entry.packageId}.recordId` }),
+  );
   return {
     ...projectFootprint(entry, policy),
-    recordIds: policy.publishRequired(
-      "reference.package.recordIds",
-      entry.recordIds.map((recordId) => safeText(recordId, { field: `${entry.packageId}.recordId` })),
-    ),
+    recordIds: policy.publish("reference.package.recordIds", recordIds) ?? null,
   };
 }
 
@@ -319,7 +341,7 @@ function projectFootprint(entry: CircuitPackageReference, policy: PublicationPol
     packageId: policy.publishRequired("reference.footprint.packageId", safeText(entry.packageId, { field: `${at}.packageId` })),
     footprintName: policy.publishRequired("reference.footprint.name", safeText(entry.footprintName, { field: `${at}.footprintName` })),
     footprintPath: policy.publishRequired("reference.footprint.path", safeText(entry.footprintPath, { field: `${at}.footprintPath` })),
-    modelPath: policy.publishRequired("reference.model.path", safeText(entry.modelPath, { field: `${at}.modelPath` })),
+    modelPath: policy.publishRequired("reference.model.path", entry.modelPath === null ? null : safeText(entry.modelPath, { field: `${at}.modelPath` })),
     offset: policy.publishRequired("reference.model.offset", entry.offset),
     rotation: policy.publishRequired("reference.model.rotation", entry.rotation),
     scale: policy.publishRequired("reference.model.scale", entry.scale),
@@ -332,6 +354,7 @@ function buildIdentity(
   policy: PublicationPolicy,
 ): PublicRecordIdentity {
   const { record, line } = entry;
+  const fits = placementFits(line);
   const slug = slugByRecordId.get(record.record_id);
   if (slug === undefined) {
     fail("IDENTITY_COLLISION", `no slug for record ${record.record_id}`, {
@@ -366,10 +389,7 @@ function buildIdentity(
         : safeText(parentRecordId, { field: "parent_record_id" }),
     parentSlug,
     lineId: policy.publishRequired("record.lineId", safeText(line.line_id, { field: "line_id" })),
-    ownerSkill: policy.publishRequired(
-      "record.ownerSkill",
-      safeText(line.owner_skill, { field: "owner_skill" }),
-    ),
+    ownerSkill: policy.publish("record.ownerSkill", safeText(line.owner_skill, { field: "owner_skill" })) ?? null,
     mpn: policy.publishRequired("record.mpn", safeText(line.mpn, { field: "mpn" })),
     manufacturer: policy.publishRequired(
       "record.manufacturer",
@@ -395,12 +415,13 @@ function buildIdentity(
       "record.sourceState",
       safeText(line.source_state, { field: "source_state" }),
     ),
-    dnp: policy.publishRequired("record.dnp", line.dnp),
+    dnp: policy.publishRequired("record.dnp", fits.length === 0 ? line.dnp! : fits.every((p) => p.dnp)),
     placements: policy.publishRequired(
       "record.placements",
-      line.placements.map((placement) => ({
+      fits.map((placement) => ({
         board: safeText(placement.board, { field: "placement.board" }),
         refdes: safeText(placement.refdes, { field: "placement.refdes" }),
+        dnp: placement.dnp,
       })),
     ),
   };
@@ -726,6 +747,18 @@ function projectPinMap(pinMap: ProviderPinMap, policy: PublicationPolicy): Publi
 }
 
 // --- selection and ordering ------------------------------------------------
+
+function assertNoCandidateSelection(
+  index: EvidenceIndex,
+  recordSelected: (id: string) => boolean,
+  sourceSelected: (id: string) => boolean,
+): void {
+  for (const entry of index.candidates) {
+    if (recordSelected(entry.record.record_id) || entry.sources.some((source) => sourceSelected(source.source_id))) {
+      fail("STALE_SELECTION", "selection names an audited candidate", { recordId: entry.record.record_id });
+    }
+  }
+}
 
 /**
  * Selection has to be closed under the links a published page renders.

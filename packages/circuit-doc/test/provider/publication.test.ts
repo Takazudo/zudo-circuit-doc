@@ -63,6 +63,104 @@ describe("PublicationPolicy gates", () => {
     assert.equal(policy.isRecordSelected("rec-not-listed"), false);
     assert.equal(policy.isSourceSelected("src-not-listed"), false);
   });
+
+  it("accepts a document selection and exception as the complete selected-record partition", () => {
+    const policy = new PublicationPolicy(matrixOf(), {
+      ...selection,
+      recordIds: ["rec-a", "rec-b"],
+      documentExceptions: [{ recordId: "rec-b", reason: "No public document exists." }],
+    });
+    assert.equal(policy.isRecordSelected("rec-b"), true);
+  });
+
+  it("rejects an exception for an unselected record", () => {
+    assert.throws(
+      () =>
+        new PublicationPolicy(matrixOf(), {
+          ...selection,
+          documentExceptions: [{ recordId: "rec-outside", reason: "No public document exists." }],
+        }),
+      (error: unknown) =>
+        error instanceof ComponentDocsError &&
+        error.code === "PUBLICATION_POLICY" &&
+        /document exception for record rec-outside is outside selected records/u.test(error.message),
+    );
+  });
+
+  it("rejects a duplicate document exception", () => {
+    assert.throws(
+      () =>
+        new PublicationPolicy(matrixOf(), {
+          ...selection,
+          documentSelections: [],
+          documentExceptions: [
+            { recordId: "rec-a", reason: "No public document exists." },
+            { recordId: "rec-a", reason: "Reviewed again." },
+          ],
+        }),
+      (error: unknown) =>
+        error instanceof ComponentDocsError &&
+        error.code === "PUBLICATION_POLICY" &&
+        /record rec-a has multiple document exceptions/u.test(error.message),
+    );
+  });
+
+  it("rejects a record present in both document lists", () => {
+    assert.throws(
+      () =>
+        new PublicationPolicy(matrixOf(), {
+          ...selection,
+          documentExceptions: [{ recordId: "rec-a", reason: "No public document exists." }],
+        }),
+      (error: unknown) =>
+        error instanceof ComponentDocsError &&
+        error.code === "PUBLICATION_POLICY" &&
+        /record rec-a has both a document selection and exception/u.test(error.message),
+    );
+  });
+
+  it("rejects whitespace-only and control-character exception reasons", () => {
+    for (const reason of [" \t ", "reason\u0007 unsafe", "reason\u200e unsafe", `a${"a".repeat(1000)}`]) {
+      assert.throws(
+        () =>
+          new PublicationPolicy(matrixOf(), {
+            ...selection,
+            documentSelections: [],
+            documentExceptions: [{ recordId: "rec-a", reason }],
+          }),
+        (error: unknown) =>
+          error instanceof ComponentDocsError &&
+          error.code === "PUBLICATION_POLICY" &&
+          /document exception for record rec-a has an unsafe reason/u.test(error.message),
+      );
+    }
+  });
+
+  it("requires every selected record to have exactly one document selection or exception", () => {
+    assert.throws(
+      () => new PublicationPolicy(matrixOf(), { ...selection, documentSelections: [] }),
+      (error: unknown) =>
+        error instanceof ComponentDocsError &&
+        error.code === "PUBLICATION_POLICY" &&
+        error.message.includes("every selected record must have exactly one document selection or document exception") &&
+        Array.isArray(error.detail.recordsWithoutDocument) &&
+        error.detail.recordsWithoutDocument.includes("rec-a"),
+    );
+  });
+
+  it("keeps an omitted documentExceptions key equivalent to an empty list", () => {
+    const policy = new PublicationPolicy(matrixOf(), selection);
+    assert.equal(policy.isRecordSelected("rec-a"), true);
+  });
+
+  it("accepts a safe exception reason at the 1000-character limit", () => {
+    const policy = new PublicationPolicy(matrixOf(), {
+      ...selection,
+      documentSelections: [],
+      documentExceptions: [{ recordId: "rec-a", reason: "a".repeat(1000) }],
+    });
+    assert.equal(policy.isRecordSelected("rec-a"), true);
+  });
 });
 
 describe("selection freshness", () => {

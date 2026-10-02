@@ -42,6 +42,13 @@ describe("valid configs", () => {
     assert.deepEqual(collectCircuitConfigIssues(config), []);
   });
 
+  test("scan.publicCanonicalFootprints accepts unique footprint names", () => {
+    const config = mutable(DEFAULT_PROJECT_CONFIG);
+    config.scan = {};
+    config.scan.publicCanonicalFootprints = ["LED_0603", "QFN-32"];
+    assert.deepEqual(collectCircuitConfigIssues(config), []);
+  });
+
   test("root may be the config directory itself", () => {
     assert.deepEqual(collectCircuitConfigIssues({ ...DEFAULT_PROJECT_CONFIG, root: "." }), []);
     assert.deepEqual(collectCircuitConfigIssues({ ...DEFAULT_PROJECT_CONFIG, root: "./data/../data" }), []);
@@ -128,6 +135,29 @@ describe("error classes, every error reported", () => {
     ]);
   });
 
+  test("scan.publicCanonicalFootprints rejects paths, unsafe names, hashes and duplicates", () => {
+    const config = mutable(DEFAULT_PROJECT_CONFIG);
+    config.scan = {};
+    config.scan.publicCanonicalFootprints = [
+      "nested/footprint",
+      "..",
+      "",
+      "a".repeat(64),
+      "LED_0603",
+      "LED_0603",
+    ];
+    const issues = collectCircuitConfigIssues(config);
+    assert.deepEqual(paths(issues), [
+      "scan.publicCanonicalFootprints[0]",
+      "scan.publicCanonicalFootprints[1]",
+      "scan.publicCanonicalFootprints[2]",
+      "scan.publicCanonicalFootprints[3]",
+      "scan.publicCanonicalFootprints[5]",
+    ]);
+    assert.match(issueFor(issues, "scan.publicCanonicalFootprints[3]").message, /not a 64-character hexadecimal hash/u);
+    assert.match(issueFor(issues, "scan.publicCanonicalFootprints[5]").message, /duplicates/u);
+  });
+
   test("pythonMinVersion below the 3.10 floor is rejected", () => {
     const config = mutable(DEFAULT_PROJECT_CONFIG);
     config.validation.pythonMinVersion = "3.9";
@@ -157,6 +187,41 @@ describe("error classes, every error reported", () => {
       "inventoryProvider.specs[1].path",
       "inventoryProvider.specs[1].file",
     ]);
+  });
+
+  test("led-generator-v1 accepts placement fit, reviewed LCSC exceptions and board names", () => {
+    const config = mutable(DEFAULT_PROJECT_CONFIG);
+    config.inventoryProvider = {
+      kind: "led-generator-v1",
+      specs: [{ path: "scripts/schgen/main.py", board: "main" }],
+      fit: "placement",
+      mpnFromValueLcsc: ["C144397", "C123"],
+    };
+    assert.deepEqual(collectCircuitConfigIssues(config), []);
+  });
+
+  test("led-generator-v1 rejects invalid options and unknown spec keys", () => {
+    const config = mutable(DEFAULT_PROJECT_CONFIG);
+    config.inventoryProvider = {
+      kind: "led-generator-v1",
+      specs: [{ path: "spec.py", board: " " }],
+      fit: "mixed",
+      mpnFromValueLcsc: ["c123", "C123", "C123"],
+    };
+    config.inventoryProvider.specs[0].extra = true;
+    const issues = collectCircuitConfigIssues(config);
+    assert.deepEqual(paths(issues).sort(), [
+      "inventoryProvider.fit",
+      "inventoryProvider.mpnFromValueLcsc[0]",
+      "inventoryProvider.mpnFromValueLcsc[2]",
+      "inventoryProvider.specs[0].board",
+      "inventoryProvider.specs[0].extra",
+    ]);
+    assert.match(issueFor(issues, "inventoryProvider.fit").message, /line, placement/u);
+    assert.match(issueFor(issues, "inventoryProvider.mpnFromValueLcsc[0]").message, /C\[0-9\]\+/u);
+    assert.match(issueFor(issues, "inventoryProvider.mpnFromValueLcsc[2]").message, /duplicates/u);
+    assert.match(issueFor(issues, "inventoryProvider.specs[0].board").message, /non-empty string/u);
+    assert.match(issueFor(issues, "inventoryProvider.specs[0].extra").message, /^unknown key/u);
   });
 
   test("the manual provider takes no other keys", () => {
@@ -274,5 +339,17 @@ describe("path rules", () => {
       "cad.footprintPathBase",
       "validation.policy",
     ]);
+  });
+
+  test("evidence.candidates is an optional nullable path", () => {
+    const config = mutable(DEFAULT_PROJECT_CONFIG);
+    config.evidence.candidates = null;
+    assert.deepEqual(collectCircuitConfigIssues(config), []);
+
+    config.evidence.candidates = "circuit/candidates.json";
+    assert.deepEqual(collectCircuitConfigIssues(config), []);
+
+    config.evidence.candidates = 42;
+    assert.deepEqual(paths(collectCircuitConfigIssues(config)), ["evidence.candidates"]);
   });
 });

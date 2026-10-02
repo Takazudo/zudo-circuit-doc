@@ -23,6 +23,21 @@ matrix denies a handful of fields outright regardless of selection — for examp
 that hashes, raw extract text, reviewer names and search-avoidance prompts never reach a built
 page even for a fully selected record.
 
+Audited candidates and their owned sources stay outside the publication projection: candidate
+record or source IDs are rejected if added to `selection.json`, and candidates are never published
+or counted in its selected record/source totals.
+
+## The built-site scan
+
+`zudo-circuit-doc scan` checks artifacts the package owns against the full denied-value canary set
+in its OWNED tier. Its SITE tier checks the built site (and an optional docs-to-agent mirror) after
+subtracting canaries already present in the host's authored documentation. Generated component
+pages under the configured `docs.generatedContent` are never part of that authored subtraction
+corpus. After that subtraction, `scan.publicCanonicalFootprints` provides the only additional SITE
+exemption: an exact match for a denied `sha256` value backed by a public footprint manifest. OWNED
+keeps the full canary set. See [the `scan` config](../reference/config.mdx#scan-overrides-only) for
+the footprint and built-manifest provenance checks.
+
 ## The selection lock
 
 `circuit/publication/selection.json` is the reviewed publication lock:
@@ -34,6 +49,7 @@ page even for a fully selected record.
   "sourceIds": [],
   "linkableSourceIds": [],
   "documentSelections": [],
+  "documentExceptions": [],
   "expect": { "records": 0, "sources": 0, "integrationRules": 0, "packages": 0 }
 }
 ```
@@ -41,8 +57,20 @@ page even for a fully selected record.
 - `recordIds` / `sourceIds` — which records and sources clear the INSTANCE gate.
 - `linkableSourceIds` — selecting a source publishes its metadata; an outbound link is published
   only for source IDs also listed here.
-- `documentSelections` — one document choice per record (`documentKind`: `datasheet`,
-  `specification` or `drawing`), decided after inspecting the content.
+- `documentSelections` — reviewed document choices with a `recordId`, `sourceId` and
+  `documentKind` (`datasheet`, `specification`, `drawing` or `source-record`). The first three
+  kinds explicitly describe PDFs. `source-record` displays **Source record** for a reviewed
+  non-PDF source; it does not promote source authority or exact-part applicability.
+- `documentExceptions` — optional `{ recordId, reason }` entries for selected records with no
+  document to publish. The reason is shown as the document's availability on the component page,
+  through the existing publication-matrix key `reference.document.availability`. Write a concise,
+  reviewed reason that says what was checked and what remains unavailable. Do not describe
+  distributor evidence as a manufacturer document or invent a URL. Keep relevant evidence in
+  `sourceIds` so it remains in Sources; add its URL to `linkableSourceIds` only when that outbound
+  link is approved.
+- **Partition rule:** each ID in `recordIds` must appear in exactly one of `documentSelections` or
+  `documentExceptions`. The lists cannot overlap, and together they must cover every selected
+  record. If `documentExceptions` is omitted, it is treated as `[]`.
 - `expect` — a reviewed count lock (`records`, `sources`, `integrationRules`, `packages`), each of
   which may be `0`. It gates `generate`/`check`/`build` and is **never serialized into the
   preflight report**. `cad.enabled` is a separate capability flag — a selected PCB record while CAD is
@@ -101,3 +129,24 @@ does not remove it from the built output, and does not exempt it from the public
 A file under `doc/public/` is public the moment it is built, whether or not the asset viewer lists
 it. If a file should not be public, it should not be under `publicRoot` at all — or it needs a
 genuine entry (with a genuine reason) in `assets.json`, not an exclusion flag.
+
+## Denying owner skills and package membership
+
+A custom publication matrix may DENY `record.ownerSkill` or `integration.ownerSkill` only when
+`docs.agentResources` is `false`. With agent resources enabled, the config loader rejects those
+decisions because generated output publishes the owner-skill inventory and
+`/docs/claude-skills/<owner>/` routes. Remove `claudeResources` from the doc host's `zfb.config.ts`
+as well, so the host does not publish those bundle routes independently of generated component
+pages. Remove any navigation link to those routes too; a stale `/docs/claude` link makes the doc
+host's strict link check fail after `claudeResources` is removed.
+
+When owner skills are denied, generated component pages omit the **Owner skill** row and any
+`/docs/claude-skills/` link. Where an owner would otherwise be identified, the page says: “No owning
+bundle is identified in the published model.” The `zudo-circuit-doc scan` command treats denied
+owner names as canaries, including component bundle names found under `owner_skill` or its manifest
+alias `skill`, and the integration owner name supplied by config.
+
+The `reference.package.recordIds` decision is independent of `docs.agentResources`: it can be DENY
+while agent resources remain enabled. DENY removes `recordIds` from the public footprint-preview
+manifest. The `component-evidence-v1` package preset keeps `record.ownerSkill`,
+`integration.ownerSkill` and `reference.package.recordIds` at PUBLISH.

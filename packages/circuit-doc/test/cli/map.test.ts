@@ -35,6 +35,18 @@ async function fixture(edit: (config: Record<string, any>) => void = () => {}) {
   return { root, resolved: resolveCircuitConfig(config as CircuitConfig, root) };
 }
 
+async function fixtureWithMatrix(
+  field: keyof typeof CIRCUIT_PUBLICATION_MATRIX,
+  agentResources = true,
+) {
+  const { root, resolved } = await fixture((config) => {
+    config.publication.matrix = "matrix.json";
+    config.docs.agentResources = agentResources;
+  });
+  await writeJson(join(root, "matrix.json"), { ...CIRCUIT_PUBLICATION_MATRIX, [field]: "DENY" });
+  return { root, resolved };
+}
+
 async function rejectsAdapter(promise: Promise<unknown>, pattern: RegExp): Promise<ComponentDocsError> {
   try {
     await promise;
@@ -62,6 +74,7 @@ describe("mapCircuitConfig", () => {
       sourceIds: [],
       linkableSourceIds: [],
       documentSelections: [],
+      documentExceptions: [],
       expect: { records: 0, sources: 0, integrationRules: 0, packages: 0 },
     });
     assert.deepEqual(mapping.assets, { schema_version: 1, assets: [] });
@@ -130,6 +143,31 @@ describe("mapCircuitConfig", () => {
     assert.equal((await mapCircuitConfig(resolved)).matrixSource, "preset:component-evidence-v1");
   });
 
+  for (const field of ["record.ownerSkill", "integration.ownerSkill"] as const) {
+    it(`rejects ${field} DENY while the agent-resource mirror is enabled`, async () => {
+      const { resolved } = await fixtureWithMatrix(field);
+      const error = await rejectsAdapter(mapCircuitConfig(resolved), /owner-skill DENY cannot hold/u);
+      assert.deepEqual(error.detail.fields, [field]);
+      assert.match(error.message, /\/docs\/claude-skills\/<owner>\//u);
+      assert.match(error.message, /owner-skill inventory/u);
+      assert.match(error.message, /set docs\.agentResources: false or publish the denied field/u);
+    });
+  }
+
+  it("allows owner-skill DENY when agent-resource mirroring is disabled", async () => {
+    const { resolved } = await fixtureWithMatrix("record.ownerSkill", false);
+    const mapping = await mapCircuitConfig(resolved);
+    assert.equal(mapping.matrix["record.ownerSkill"], "DENY");
+    assert.equal(mapping.render.agentResources, false);
+  });
+
+  it("allows reference package recordIds DENY while agent-resource mirroring is enabled", async () => {
+    const { resolved } = await fixtureWithMatrix("reference.package.recordIds");
+    const mapping = await mapCircuitConfig(resolved);
+    assert.equal(mapping.matrix["reference.package.recordIds"], "DENY");
+    assert.equal(mapping.render.agentResources, true);
+  });
+
   it("an incomplete matrix override lists every undecided key", async () => {
     const { root, resolved } = await fixture((config) => {
       config.publication.matrix = "matrix.json";
@@ -157,6 +195,50 @@ describe("mapCircuitConfig", () => {
     const { root, resolved } = await fixture();
     await writeJson(join(root, SELECTION), { ...EMPTY_SELECTION, expect: { ...EMPTY_SELECTION.expect, packages: 2 } });
     assert.equal((await mapCircuitConfig(resolved)).selection.expect.packages, 2);
+  });
+
+  it("reads a document exception as part of a valid selection partition", async () => {
+    const { root, resolved } = await fixture();
+    await writeJson(join(root, SELECTION), {
+      ...EMPTY_SELECTION,
+      recordIds: ["rec-a", "rec-b"],
+      sourceIds: ["src-a"],
+      linkableSourceIds: ["src-a"],
+      documentSelections: [{ recordId: "rec-a", sourceId: "src-a", documentKind: "datasheet" }],
+      documentExceptions: [{ recordId: "rec-b", reason: "No public document exists." }],
+      expect: { records: 2, sources: 1, integrationRules: 0, packages: 0 },
+    });
+
+    assert.deepEqual((await mapCircuitConfig(resolved)).selection.documentExceptions, [
+      { recordId: "rec-b", reason: "No public document exists." },
+    ]);
+  });
+
+  it("rejects malformed document exception shapes and empty fields", async () => {
+    const { root, resolved } = await fixture();
+    await writeJson(join(root, SELECTION), {
+      ...EMPTY_SELECTION,
+      documentExceptions: [{ recordId: "rec-a", reason: "Not published", sourceId: "src-a" }],
+    });
+    await rejectsAdapter(mapCircuitConfig(resolved), /documentExceptions\[0\]\.sourceId: unknown key/u);
+
+    await writeJson(join(root, SELECTION), {
+      ...EMPTY_SELECTION,
+      documentExceptions: [{ recordId: "rec-a", reason: "" }],
+    });
+    await rejectsAdapter(mapCircuitConfig(resolved), /documentExceptions\[0\]\.reason: must be a non-empty string/u);
+
+    await writeJson(join(root, SELECTION), {
+      ...EMPTY_SELECTION,
+      documentExceptions: [{ recordId: "", reason: "No public document exists." }],
+    });
+    await rejectsAdapter(mapCircuitConfig(resolved), /documentExceptions\[0\]\.recordId: must be a non-empty string/u);
+
+    await writeJson(join(root, SELECTION), { ...EMPTY_SELECTION, documentExceptions: {} });
+    await rejectsAdapter(mapCircuitConfig(resolved), /documentExceptions: must be an array/u);
+
+    await writeJson(join(root, SELECTION), { ...EMPTY_SELECTION, documentExceptions: [null] });
+    await rejectsAdapter(mapCircuitConfig(resolved), /documentExceptions\[0\]: must be an object/u);
   });
 
   it("rejects malformed selection, assets and non-JSON files", async () => {
@@ -228,5 +310,41 @@ describe("mapCircuitConfig: LED-style pieces", async () => {
     });
     assert.equal(input.policy.path, "/fixture/policy.json");
     assert.equal(input.integration.forwardTests, null);
+  });
+
+  it("maps configured generator options and omits options that are unset", () => {
+    const config = mutable(LED_STYLE_CONFIG);
+    config.inventoryProvider = {
+      kind: "led-generator-v1",
+      specs: [
+        { path: "upstream/scripts/schgen/board_p_spec.py", board: "power" },
+        { path: "upstream/scripts/schgen/board_l_spec.py" },
+      ],
+      fit: "placement",
+      mpnFromValueLcsc: ["C144397"],
+    };
+    const input = validatorInputFor(resolveCircuitConfig(config as CircuitConfig, "/fixture"));
+    assert.deepEqual(input.inventory.provider, {
+      kind: "led-generator-v1",
+      specs: [
+        { path: "/fixture/upstream/scripts/schgen/board_p_spec.py", board: "power" },
+        { path: "/fixture/upstream/scripts/schgen/board_l_spec.py" },
+      ],
+      fit: "placement",
+      mpnFromValueLcsc: ["C144397"],
+    });
+
+    config.inventoryProvider.fit = "line";
+    delete config.inventoryProvider.mpnFromValueLcsc;
+    delete config.inventoryProvider.specs[0].board;
+    const fitOnly = validatorInputFor(resolveCircuitConfig(config as CircuitConfig, "/fixture"));
+    assert.deepEqual(fitOnly.inventory.provider, {
+      kind: "led-generator-v1",
+      specs: [
+        { path: "/fixture/upstream/scripts/schgen/board_p_spec.py" },
+        { path: "/fixture/upstream/scripts/schgen/board_l_spec.py" },
+      ],
+      fit: "line",
+    });
   });
 });

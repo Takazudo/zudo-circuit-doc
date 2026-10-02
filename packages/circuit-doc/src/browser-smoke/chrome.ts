@@ -73,6 +73,9 @@ export async function launchChrome(bin: string): Promise<ChromeSession> {
       "--disable-dev-shm-usage",
       "--disable-extensions",
       "--enable-unsafe-swiftshader",
+      "--disable-background-timer-throttling",
+      "--disable-renderer-backgrounding",
+      "--disable-backgrounding-occluded-windows",
       "--remote-debugging-port=0",
       `--user-data-dir=${profile}`,
       "about:blank",
@@ -92,6 +95,8 @@ export async function launchChrome(bin: string): Promise<ChromeSession> {
     if (page?.webSocketDebuggerUrl === undefined) throw new Error("Chrome page target was not available");
     cdp = await connectCdp(page.webSocketDebuggerUrl);
     await cdp.send("Page.enable");
+    // Background rAF/timer throttling in headless made the idle assertion flaky; this matches the legacy zudo-pd harness (#108).
+    await cdp.send("Page.bringToFront");
     await cdp.send("Runtime.enable");
     await cdp.send("Network.enable");
   } catch (error) {

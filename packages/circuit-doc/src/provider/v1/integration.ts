@@ -133,10 +133,7 @@ function projectRule(
       safeText(rule.rule_id, { field: at("rule_id") }),
     ),
     anchor: anchor(rule.rule_id),
-    ownerSkill: policy.publishRequired(
-      "integration.ownerSkill",
-      safeText(ownerSkill, { field: at("owner_skill") }),
-    ),
+    ownerSkill: policy.publish("integration.ownerSkill", safeText(ownerSkill, { field: at("owner_skill") })) ?? null,
     domain: policy.publishRequired(
       "integration.domain",
       safeText(rule.domain, { field: at("domain") }),

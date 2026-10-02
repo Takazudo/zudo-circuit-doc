@@ -94,7 +94,7 @@ type IdentityInput = {
   readonly identityState?: string;
   readonly sourceState?: string;
   readonly dnp?: boolean;
-  readonly ownerSkill?: string;
+  readonly ownerSkill?: string | null;
   readonly placements?: readonly (readonly [board: string, refdes: string])[];
 };
 
@@ -108,7 +108,10 @@ function identity(input: IdentityInput): PublicRecordIdentity {
     parentRecordId: parentRecordId === null ? null : t(parentRecordId),
     parentSlug: parentRecordId === null ? null : recordSlug(parentRecordId),
     lineId: t(input.recordId.replace(/^rec-/u, "line-")),
-    ownerSkill: t(input.ownerSkill ?? "component-fixture-bundle"),
+    ownerSkill:
+      input.ownerSkill === null
+        ? null
+        : t(input.ownerSkill ?? "component-fixture-bundle"),
     mpn: t(input.mpn),
     manufacturer: t(input.manufacturer ?? "Fixture Semiconductor"),
     lcsc: t(input.lcsc ?? "C000001"),
@@ -120,6 +123,7 @@ function identity(input: IdentityInput): PublicRecordIdentity {
     placements: (input.placements ?? [["board-l", "U1"]]).map(([board, refdes]) => ({
       board: t(board),
       refdes: t(refdes),
+      dnp: input.dnp ?? false,
     })),
   };
 }
@@ -205,6 +209,7 @@ function source(input: SourceInput): PublicSource {
 function referenceFor(recordId: string): PublicRecordReference {
   const packageId = `pkg-${recordId.replace(/^rec-/u, "")}`;
   return {
+    documentUnavailableReason: null,
     document: {
       sourceId: t(`src-${recordId.replace(/^rec-/u, "")}-reference`),
       documentTitle: t("Fixture datasheet"),

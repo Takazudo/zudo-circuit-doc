@@ -31,11 +31,11 @@
  * artifacts this feature writes; SITE is the same dist tree (plus an optional
  * `--agent-skill` mirror) against the canaries no OTHER content source already
  * publishes (`subtractPublishedElsewhere` against the project's own authored
- * docs, outside the generated component tree).
+ * docs, excluding the tree configured by `docs.generatedContent`).
  */
 
 import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { isAbsolute, join, relative, sep } from "node:path";
 
 import { fail } from "../core/errors.ts";
 import { byCodeUnit } from "../core/ids.ts";
@@ -54,6 +54,7 @@ import { GENERATED_ROUTE_PREFIX } from "../core/site.ts";
 import type { PublicRecord, PublicViewModel } from "../core/view-model.ts";
 import type { CircuitProjectPaths } from "../provider/v1/paths.ts";
 import type { ScanPolicy } from "./policy.ts";
+import { subtractPublicCanonicalHashes, type PublicCanonicalHash } from "./public-canonical.ts";
 
 export type Control = { readonly label: string; readonly value: string };
 
@@ -66,6 +67,8 @@ export type ArtifactScanInput = {
   readonly docsRoot: string;
   /** From `readCanaries(paths)` — the full denied-value canary set. */
   readonly canaries: readonly Canary[];
+  /** Verified canonical footprint digests; subtracted only from the SITE tier. */
+  readonly publicCanonicalHashes: readonly PublicCanonicalHash[];
   /** Already validated and projected (`readEvidenceIndex` + `projectIndex`). */
   readonly model: PublicViewModel;
   /** `--agent-skill <dir>`, or `null` when not passed. */
@@ -123,6 +126,24 @@ export const CREDENTIAL_PATTERNS: readonly { readonly label: string; readonly pa
 ];
 
 const REPORTED_LIMIT = 20;
+
+/**
+ * Keep generated pages out of the SITE-tier authored-content corpus. Their
+ * labels are relative to `contentRoot`, so derive the label prefix from the
+ * configured generated root rather than from a site route prefix.
+ */
+export function authoredContentTargets(
+  targets: readonly ScanTarget[],
+  roots: { readonly contentRoot: string; readonly generatedRoot: string },
+): readonly ScanTarget[] {
+  const nativeRelativePath = relative(roots.contentRoot, roots.generatedRoot);
+  const rel = nativeRelativePath.split(sep).join("/");
+  if (rel === "") return [];
+  if (rel.startsWith("..") || isAbsolute(nativeRelativePath)) return targets;
+
+  const generatedLabelPrefix = `content/${rel}/`;
+  return targets.filter((target) => !target.label.startsWith(generatedLabelPrefix));
+}
 
 /**
  * `readScanTargets` throws on an absent root; here that is not a usage
@@ -207,11 +228,13 @@ export async function runArtifactScan(input: ArtifactScanInput): Promise<Artifac
   }
 
   // --- SITE tier: canaries no other content source publishes ---------------
-  const contentTargets = (await readScanTargetsOrMissing(join(input.docsRoot, "src/content/docs"), "content")).filter(
-    (target) => !target.label.startsWith(`content${GENERATED_ROUTE_PREFIX}`),
-  );
-  const siteCanaries = subtractPublishedElsewhere(canaries, contentTargets);
-  const withheld = canaries.length - siteCanaries.length;
+  const contentRoot = join(input.docsRoot, "src/content/docs");
+  const contentTargets = authoredContentTargets(await readScanTargetsOrMissing(contentRoot, "content"), {
+    contentRoot,
+    generatedRoot: paths.generatedRoot,
+  });
+  const contentCanaries = subtractPublishedElsewhere(canaries, contentTargets);
+  const withheld = canaries.length - contentCanaries.length;
   if (policy.expectedWithheld !== null && withheld !== policy.expectedWithheld) {
     fail("PUBLICATION_POLICY", "the number of canaries withheld from the SITE tier changed", {
       expected: policy.expectedWithheld,
@@ -219,6 +242,8 @@ export async function runArtifactScan(input: ArtifactScanInput): Promise<Artifac
       why: "another content source started or stopped publishing a denied-only value; review the change, then update scan.expectedWithheld",
     });
   }
+  const publicCanonical = subtractPublicCanonicalHashes(contentCanaries, input.publicCanonicalHashes);
+  const siteCanaries = publicCanonical.kept;
   const siteTargets = [...distTargets, ...agentTargets];
   const siteResult = scanTargets(siteTargets, siteCanaries);
   const siteFloors = deriveFloors(policy, "site", model);
@@ -230,6 +255,7 @@ export async function runArtifactScan(input: ArtifactScanInput): Promise<Artifac
     "",
     `SITE tier              ${siteResult.canaries} canaries x ${siteResult.filesScanned} artifacts, 0 hits`,
     `                       ${withheld} canary/canaries withheld (published by another content source)`,
+    `                       ${publicCanonical.withheld.length} canary/canaries withheld as declared public canonical footprint hashes`,
     `                       ${siteResult.filesSkippedBinary} binary artifact(s) not text-scanned`,
   );
 
@@ -392,7 +418,7 @@ export function buildPositiveControls(record: PublicRecord): readonly Control[] 
     control("identity: manufacturer", record.identity.manufacturer),
     control("identity: package", record.identity.packageName),
     control("identity: function", record.identity.function),
-    control("identity: owner skill", record.identity.ownerSkill),
+    control("identity: owner skill", record.identity.ownerSkill ?? ""),
   ];
 
   const factWithUnit = record.facts.find((fact) => fact.unit !== "" && fact.conditions !== "");

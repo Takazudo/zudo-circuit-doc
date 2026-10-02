@@ -1,0 +1,3 @@
+# #143: retain distinct denied-key origins so an exact sha256 exemption cannot
+# erase the same value harvested through a different denied provider key.
+scan.ts

@@ -62,6 +62,7 @@ export async function checkFootprintsStep(project: LoadedProject, io: CliIo): Pr
       footprintLibraryRoot: project.paths.footprintLibraryRoot,
       previewRoot: project.paths.footprintPreviewRoot,
       renderer: rendererOf(project),
+      publishMembership: project.matrix["reference.package.recordIds"] === "PUBLISH",
     });
     io.stdout.write(
       selections.length === 0
@@ -103,6 +104,7 @@ async function runGenerate(project: LoadedProject, io: CliIo, pull: boolean): Pr
       footprintLibraryRoot: project.paths.footprintLibraryRoot,
       previewRoot: project.paths.footprintPreviewRoot,
       renderer: rendererOf(project),
+      publishMembership: project.matrix["reference.package.recordIds"] === "PUBLISH",
       runDocker,
     });
     io.stdout.write(

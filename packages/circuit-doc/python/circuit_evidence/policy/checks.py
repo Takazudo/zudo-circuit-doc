@@ -249,8 +249,9 @@ def check_seeded_fixtures(check, context):
         changed = copy.deepcopy(context.inventory)
         try:
             set_target(changed, case["target"], case["value"])
-            validate_inventory_shape(changed)
-            context.provider.validate(changed, context.aggregate, context.config)
+            validate_inventory_shape(changed, placement_fit=context.provider.placement_fit)
+            context.provider.validate(changed, context.fitted_aggregate, context.config)
+            context.provider.validate_candidates(context.candidates, changed)
         except (ContractError, StopIteration) as exc:
             require(case["expected_error"].casefold() in str(exc).casefold(), f"{case['name']}: failed for unintended reason: {exc}")
         else:

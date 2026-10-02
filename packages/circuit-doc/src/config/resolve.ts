@@ -20,7 +20,12 @@ import { configPathProblem } from "./schema.ts";
 
 export type ResolvedInventoryProvider =
   | { readonly kind: "manual" }
-  | { readonly kind: "led-generator-v1"; readonly specs: readonly { readonly path: string }[] };
+  | {
+      readonly kind: "led-generator-v1";
+      readonly specs: readonly { readonly path: string; readonly board?: string }[];
+      readonly fit?: "line" | "placement";
+      readonly mpnFromValueLcsc?: readonly string[];
+    };
 
 export type ResolvedCadConfig =
   | { readonly enabled: false; readonly libraryName: string | null }
@@ -67,6 +72,7 @@ export type ResolvedCircuitConfig = {
     readonly directRouting: string;
     readonly vendorQualifiers: string;
     readonly forwardTests: string | null;
+    readonly candidates: string | null;
     readonly sourceCache: string;
   };
   readonly inventoryProvider: ResolvedInventoryProvider;
@@ -129,6 +135,7 @@ export function resolveCircuitConfig(config: CircuitConfig, configDir: string): 
       directRouting: at(evidence.directRouting, "evidence.directRouting"),
       vendorQualifiers: at(evidence.vendorQualifiers, "evidence.vendorQualifiers"),
       forwardTests: atOrNull(evidence.forwardTests, "evidence.forwardTests"),
+      candidates: atOrNull(evidence.candidates, "evidence.candidates"),
       sourceCache: at(evidence.sourceCache, "evidence.sourceCache"),
     },
     inventoryProvider:
@@ -138,7 +145,12 @@ export function resolveCircuitConfig(config: CircuitConfig, configDir: string): 
             kind: "led-generator-v1",
             specs: inventoryProvider.specs.map((spec, index) => ({
               path: at(spec.path, `inventoryProvider.specs[${index}].path`),
+              ...(spec.board === undefined ? {} : { board: spec.board }),
             })),
+            ...(inventoryProvider.fit === undefined ? {} : { fit: inventoryProvider.fit }),
+            ...(inventoryProvider.mpnFromValueLcsc === undefined
+              ? {}
+              : { mpnFromValueLcsc: [...inventoryProvider.mpnFromValueLcsc] }),
           },
     publication: {
       selection: at(publication.selection, "publication.selection"),

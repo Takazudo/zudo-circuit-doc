@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import {
   createComponentReferencesDescriptor,
   encodeComponentReferencesDescriptor,
+  DOCUMENT_UNAVAILABLE_LABEL,
 } from "../../src/core/reference-descriptor.ts";
 import { bundleForSsr } from "./bundle.ts";
 
@@ -50,6 +51,18 @@ describe("evidence primitives SSR", () => {
 });
 
 describe("ComponentReferences SSR markup contract", () => {
+  it("renders an unavailable reason without a document anchor", () => {
+    const encoded = encodeComponentReferencesDescriptor(createComponentReferencesDescriptor({
+      document: { label: DOCUMENT_UNAVAILABLE_LABEL, reason: "Distributor listing only." },
+      footprintName: "PKG-FIXTURE", model: null,
+    }));
+    const markup = renderToString(h(ui.ComponentReferences, { descriptor: encoded }));
+    const documentCard = /<div class="zcd-component-references__document">([\s\S]*?)<\/div><div class="zcd-component-references__previews">/u.exec(markup)?.[1];
+    assert.ok(documentCard);
+    assert.match(documentCard, /Document unavailable/u);
+    assert.match(documentCard, /<p[^>]*data-document-unavailable="true"[^>]*>Distributor listing only\.<\/p>/u);
+    assert.doesNotMatch(documentCard, /<a\b/u);
+  });
   const descriptor = encodeComponentReferencesDescriptor(
     createComponentReferencesDescriptor({
       document: {
@@ -133,5 +146,39 @@ describe("ComponentReferences SSR markup contract", () => {
     for (const name of classes) {
       assert.ok(name.startsWith("zcd-") || name === "z-modal", `unexpected class ${name}`);
     }
+  });
+});
+
+describe("ComponentReferences long package identity", () => {
+  it("server-renders the complete identity in the caption and viewer controls", () => {
+    const name = "SMA_Diodes_SDT5A60SA_C3024223";
+    const descriptor = encodeComponentReferencesDescriptor(
+      createComponentReferencesDescriptor({
+        document: {
+          label: "Specification PDF",
+          title: "Fixture specification",
+          authority: "MANUFACTURER_PRIMARY",
+          availability: "AVAILABLE",
+          url: "https://example.invalid/fixture.pdf",
+        },
+        footprintName: name,
+        model: {
+          version: 1,
+          packageId: name,
+          packageLabel: name,
+          modelUrl: `/assets/component-previews/models/${name}.wrl`,
+          offset: { x: 0, y: 0, z: 0 },
+          rotation: { x: 0, y: 0, z: 0 },
+          scale: { x: 1, y: 1, z: 1 },
+        },
+      }),
+    );
+    const html = renderToString(h(ui.ComponentReferences, { descriptor }));
+    const caption = /<figcaption class="zcd-model-viewer__caption">([^<]*(?:<[^>]+>[^<]*)*)<\/figcaption>/u.exec(html)?.[1];
+    assert.ok(caption, "the model caption is server-rendered");
+    assert.ok(caption.includes(name), "the complete package identity is visible in the caption");
+    assert.doesNotMatch(caption, /\u2026|\.\.\.|\u00ad|<wbr\b/iu);
+    assert.match(html, new RegExp(`aria-label="Interactive 3D view of shared footprint package ${name}"`, "u"));
+    assert.match(html, new RegExp(`aria-label="Enlarge 3D preview for ${name}"`, "u"));
   });
 });

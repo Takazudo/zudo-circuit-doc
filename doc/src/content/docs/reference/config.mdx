@@ -34,11 +34,11 @@ one place (the CLI/adapter), never confused inside the schema check itself.
 | `project` | Yes | — | `{ name, title }`, both non-empty strings |
 | `docs` | Yes | — | See below |
 | `evidence` | Yes | — | See below |
-| `inventoryProvider` | Yes | — | `{ kind: "manual" }` or `{ kind: "led-generator-v1", specs: [...] }` — see [Concepts → Inventory profiles](../concepts/inventory-profiles.mdx) |
+| `inventoryProvider` | Yes | — | `{ kind: "manual" }` or `{ kind: "led-generator-v1", specs, fit?, mpnFromValueLcsc? }` — see [Concepts → Inventory profiles](../concepts/inventory-profiles.mdx) |
 | `publication` | Yes | — | See below |
 | `cad` | Yes | — | `{ enabled: false, libraryName? }` or the full enabled shape — see below |
 | `validation` | No | `{}` | See below |
-| `scan` | No | `undefined` (no overrides) | `ScanPolicyConfig` overrides for scan thresholds and expected counts |
+| `scan` | No | `undefined` (no overrides) | `ScanPolicyConfig` overrides for scan thresholds, expected counts, and declared public canonical footprints |
 | `browserSmoke` | No | `undefined` | `{ representatives: [...] }` |
 
 ## `docs`
@@ -50,7 +50,7 @@ one place (the CLI/adapter), never confused inside the schema check itself.
 | `preflight` | Yes | — | Where `generate` writes the preflight report JSON |
 | `publicRoot` | Yes | — | zudo-doc's `public/` directory; previews go under `<publicRoot>/assets/component-previews/{footprints,models}` |
 | `dist` | Yes | — | The built-site directory `check-built`/`scan`/`check-browser` read by default |
-| `agentResources` | No | `true` | Generated pages link `/docs/claude/` and `/docs/claude-skills/<owner>/` (needs zudo-doc's `claudeResources`) |
+| `agentResources` | No | `true` | Generated pages link `/docs/claude/` and `/docs/claude-skills/<owner>/` (needs zudo-doc's `claudeResources`); owner-skill DENY requires this flag off and the host's `claudeResources` removed — see [Denying owner skills and package membership](../concepts/publication.mdx#denying-owner-skills-and-package-membership) |
 | `generatedMarker` | No | the neutral marker | A custom generated-page marker string (single line) |
 | `generatedNotice` | No | `true`, unless `generatedMarker` is a legacy marker and this is unset (then `false`) | Whether generated pages carry the generated-page notice paragraph. Set it explicitly to decouple the notice from the marker, e.g. a custom marker with no notice, or a legacy marker with a notice |
 | `integrationGloss` | No | `null` | An optional JSON file `{ domain: text }` |
@@ -65,6 +65,7 @@ one place (the CLI/adapter), never confused inside the schema check itself.
 | `auditSkill` | Yes | — | Directory name under `bundlesRoot`, e.g. `component-spec-audit` |
 | `integrationSkill` | Yes | — | Directory name under `bundlesRoot`, e.g. `circuit-spec-integration` |
 | `inventory` | Yes | — | Path to `inventory.json` |
+| `candidates` | No | `null` | Path to the audited candidate inventory JSON, or `null`/omitted; see [Audited replacement candidates](../concepts/inventory-profiles.mdx#audited-replacement-candidates) |
 | `integrationRules` | Yes | — | Path to `rules.json` |
 | `directRouting` | Yes | — | Path to `direct-routing.json` |
 | `vendorQualifiers` | Yes | — | Path to `external-vendor-qualifiers.json` |
@@ -76,11 +77,34 @@ one place (the CLI/adapter), never confused inside the schema check itself.
 ```ts
 { kind: "manual" }
 // or
-{ kind: "led-generator-v1", specs: [{ path: "scripts/schgen/board_p_spec.py" }, ...] }
+{
+  kind: "led-generator-v1",
+  specs: [
+    { path: "scripts/schgen/board_p_spec.py" },
+    { path: "scripts/schgen/board_l_spec.py", board: "logic" },
+  ],
+  fit: "placement",
+  mpnFromValueLcsc: ["C144397"],
+}
 ```
 
 `kind` must be one of the two registered values; `led-generator-v1`'s `specs` array must be
-non-empty. See [Concepts → Inventory profiles](../concepts/inventory-profiles.mdx).
+non-empty. Each spec path is relative to this config file. Its optional nonblank `board` overrides
+the board name read from that generator's `PROJECT_NAME`.
+
+`fit` is optional and defaults to `"line"`, preserving the existing line-level `dnp` behavior.
+Set it to `"placement"` when each generated placement carries its own `dnp`. In placement mode,
+a line with both fitted and DNP placements contributes to both fitted and DNP line totals; line mode
+keeps its existing one-state-per-line counts. If a line and one of its placements both declare
+`dnp`, their values must agree.
+
+`mpnFromValueLcsc` is an optional finite list of reviewed LCSC C-numbers (for example
+`["C144397"]`). Each value must match `^C[0-9]+$`, be unique, and identify an LCSC code present
+in the generator output; only those listed codes take the generated component `value` as the MPN.
+No provider option skips generator symbol/footprint parity checks.
+
+See [Concepts → Inventory profiles](../concepts/inventory-profiles.mdx) for how these options affect
+inventory declarations and checks.
 
 ## `publication`
 
@@ -88,7 +112,7 @@ non-empty. See [Concepts → Inventory profiles](../concepts/inventory-profiles.
 | --- | --- | --- | --- |
 | `selection` | Yes | — | Path to `selection.json` — see [Publication schemas](./schemas.mdx#selection-json) |
 | `assets` | Yes | — | Path to `assets.json` — see [Publication schemas](./schemas.mdx#assets-json) |
-| `matrix` | No | package preset `component-evidence-v1` | Path to a custom `FieldKey → PUBLISH \| DENY` matrix JSON |
+| `matrix` | No | package preset `component-evidence-v1` | Path to a custom `FieldKey → PUBLISH \| DENY` matrix JSON; see [Denying owner skills and package membership](../concepts/publication.mdx#denying-owner-skills-and-package-membership) for owner-skill prerequisites and package-membership behavior |
 
 ## `cad`
 
@@ -181,6 +205,35 @@ pick one deterministically). Omitting `scan` entirely means "derive a proportion
 resolved config" — a project supplies nothing and gets a proportional policy based on its own
 configuration.
 
+`publicCanonicalFootprints` is an optional list of footprint filename stems, such as `"R0603"`.
+Use it when a published package's canonical KiCad footprint is cited as an evidence source and its
+`sha256` field is denied by the publication matrix. These are names, not paths or hash strings:
+
+```ts
+scan: {
+  publicCanonicalFootprints: ["R0603"],
+},
+```
+
+Each name must identify exactly one package in the validated public model. For every declared name,
+`scan` reads the corresponding regular, non-symlink `.kicad_mod` file contained by both the project
+root and `cad.footprintLibraryRoot`, then derives SHA-256 from those bytes. It reads the **built**
+public manifest, `assets/component-previews/footprints/manifest.json` under the configured
+`docs.dist` directory. The package entry must publish the same footprint name and `footprintPath`,
+and its `canonicalInputSha256` must equal the derived digest. The configured `docs.dist` matters:
+the source preview manifest is not proof of what the scanned site actually publishes. A missing or
+malformed built manifest, an unknown or ambiguous package, a missing or unsafe footprint file, or a
+path or digest mismatch fails closed.
+
+The exemption applies only in the SITE tier, after authored documentation has been subtracted, and
+only to a denied canary from the exact `sha256` field whose value exactly equals the derived digest.
+It does not match a prefix, a different hash field, or another evidence value containing the same
+text. OWNED always scans the full canary set, so the declaration cannot hide a leak in artifacts the
+package owns. Keep `cad.footprintMasterRoot` and `cad.footprintLibraryRoot` byte-identical as
+required by the footprint preview contract. When an evidence source cites the master copy, a
+divergent library copy derives a different digest, so that source canary receives no SITE
+subtraction; preview generation and checking also reject the divergent copies.
+
 ## `browserSmoke`
 
 `{ representatives: [{ kind, path, slug, identity, availability? }, ...] }`. `path` must be a site
@@ -197,7 +250,7 @@ route starting with `/`. For example:
 ```
 
 `representatives` is what [`check-browser`](./cli.mdx#check-browser) exercises: the first entry
-whose built page publishes a component-references section is the deep-interaction page (dialogs,
+whose built page publishes a component-references section with a model is the deep-interaction page (dialogs,
 SPA navigation, forced failures); every entry with references is checked at every viewport/theme.
 
 **Leaving `browserSmoke` unset is a supported default, not an oversight.** With no config value and
@@ -206,11 +259,13 @@ no `--representatives` flag, `check-browser` derives up to 3 representatives its
 1. Read the preflight report's published record slugs, sorted.
 2. For each slug (site not yet built), a record qualifies when its generated page
    (`<generatedContent>/records/<slug>/index.mdx`) has a `ComponentReferences` descriptor that
-   decodes to a reviewed PDF label, an `http(s)` URL, a non-empty authority, a footprint and a WRL
-   model, followed by at least one `<EvidenceFact>` and a `## Sources` heading.
+   decodes to a reviewed document/source-record label, an `http(s)` URL, a non-empty authority,
+   a footprint and either an explicit null model or a valid WRL descriptor, followed by at least one `<EvidenceFact>` and a `## Sources` heading.
 3. If the site is already built, a qualifying record must also have its built page carry the
-   `zcd-component-references` marker, with the footprint SVG and model WRL present in `docs.dist`.
-4. The first 3 qualifying slugs (in sorted order) become derived representatives:
+   `zcd-component-references` marker, with the footprint SVG and any declared model WRL present in `docs.dist`.
+4. The first 3 qualifying slugs (in sorted order) become derived representatives. If all three
+   are footprint-only and a later model-bearing page qualifies, it replaces the final slot so
+   model interaction checks are not silently lost. The representative shape is:
    `{ kind: "derived <slug>", identity: <page title, i.e. the MPN>, path: "/docs/components/records/<slug>/" }`.
 
 Zero published records is a legitimate "declared-zero project" and still exits `0` (nothing to

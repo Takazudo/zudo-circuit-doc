@@ -41,11 +41,68 @@ inventoryProvider: { kind: "led-generator-v1", specs: [{ path: "scripts/schgen/b
 ```
 
 - Specs come **explicitly from config** — there is no implicit fallback to a hard-coded board list.
-- Board names come from each spec's `PROJECT_NAME`.
-- `inventory.json`'s `generator_specs` must equal the configured spec paths, exactly.
+- Board names come from each spec's `PROJECT_NAME`; an optional nonblank `board` on a spec
+  overrides that name.
+- `inventory.json`'s `generator_specs` must match the configured specs. A spec without an explicit
+  board is represented by its path; a board-scoped spec may use the normalized
+  `{ board, spec }` form, with its path relative to the project root.
+- `fit` defaults to `"line"`, which keeps the existing line-level `dnp` behavior. Use
+  `"placement"` when each placement has its own `dnp`. A line with a mix of fitted and DNP
+  placements contributes to both fitted and DNP line totals. When a line and its placement both
+  declare `dnp`, their values must agree.
+- `mpnFromValueLcsc` is an optional finite reviewed list of generator LCSC codes. Each entry must
+  be a unique `C` number matching `^C[0-9]+$` and must occur in the generator output; only those
+  codes take their MPN from the generated `value`.
+- These options do not skip generator parity: the generator's symbol/footprint checks still run.
 
 Choose this profile when your project already has a generator script that provides board names,
 components and placements. Otherwise, use the manual profile.
+
+## Audited replacement candidates
+
+Candidates are audited alternatives kept separate from fitted inventory lines. Configure
+`evidence.candidates` with a path to a JSON file shaped like this:
+
+```json
+{
+  "schema_version": 1,
+  "candidates": [
+    {
+      "candidate_id": "candidate-regulator-b",
+      "owner_skill": "component-regulators",
+      "mpn": "REG-B",
+      "manufacturer": "Parts Manufacturer",
+      "lcsc": "",
+      "package": "SOT-23-5",
+      "function": "voltage regulator",
+      "replaces_line_ids": ["line-regulator-a"]
+    }
+  ]
+}
+```
+
+Each entry requires `candidate_id`, `owner_skill`, `mpn`, `manufacturer`, `lcsc`, `package` and
+`function`; values must be nonblank strings except that `lcsc` may be empty. Candidate IDs use the
+inventory line ID syntax and must be unique and distinct from every `line_id`. The case-insensitive
+`(manufacturer, mpn)` pair must be unique across fitted lines and candidates. A non-empty LCSC code
+must also be unique across them. Optional `replaces_line_ids` lists existing inventory lines.
+`placements` is forbidden, including as an empty array; candidates have no fitted or DNP placement
+state.
+
+Each candidate has exactly one record in its declared `owner_skill` bundle. The record identifies
+it with `line_id: null` and its `candidate_id`, and its `mpn`, `manufacturer`, `lcsc` and `package`
+must match the candidate entry. An owner may hold both fitted lines and candidates, or candidates
+alone; candidate-only owner bundles are still discovered and fully validated. Candidate records
+can carry the usual owner-bundle evidence, including a routing entry that is validated against its
+exact identity. They do not enter generated placements or fitted line counts, CAD pin-asset binding,
+fitted line routing or publication.
+
+Candidate evidence forms a separate partition. Validation rejects an interaction that names both
+fitted and candidate records, a calculated fact whose `depends_on` crosses partitions, and a
+subordinate record whose parent is in the other partition. An integration rule also cannot name a
+candidate record or one of its facts. These links are errors rather than references silently
+dropped at publication. Configured project policy checks still cover the full evidence aggregate:
+for example, `pin-locks` still requires locks for candidate pin maps.
 
 ## The shared pin-asset rule
 

@@ -299,16 +299,32 @@ describe("createPythonValidator", () => {
 });
 
 describe("readCanaries", () => {
-  it("harvests denied values from the project's bundles root", async () => {
-    const canaries = await readCanaries(paths);
-    const values = new Set(canaries.map((canary) => canary.value));
-    assert.ok(values.size > 0);
-    for (const value of values) {
-      assert.ok(
-        ALL_CANARY_STRINGS.some((canary) => canary.includes(value) || value.includes(canary)),
-        `${value} is not a fixture canary`,
-      );
-    }
+  it("keeps the preset canary set unchanged and adds owner-skill aliases only for DENY", async () => {
+    const integrationOwnerSkill = "component-integration-fixture";
+    const presetCanaries = await readCanaries(paths, {
+      matrix: CIRCUIT_PUBLICATION_MATRIX,
+      integrationOwnerSkill,
+    });
+    const presetValues = new Set(presetCanaries.map((canary) => canary.value));
+    assert.deepEqual(
+      [...presetValues].sort(),
+      ALL_CANARY_STRINGS.filter((value) => value.length >= 12).sort(),
+    );
+    assert.equal(presetValues.has("component-fixture"), false);
+    assert.equal(presetValues.has(integrationOwnerSkill), false);
+
+    const denyMatrix = {
+      ...CIRCUIT_PUBLICATION_MATRIX,
+      "record.ownerSkill": "DENY",
+      "integration.ownerSkill": "DENY",
+    } as const;
+    const deniedCanaries = await readCanaries(paths, { matrix: denyMatrix, integrationOwnerSkill });
+    const deniedValues = new Set(deniedCanaries.map((canary) => canary.value));
+    assert.ok(deniedValues.has("component-fixture"), "owner names from inventory and manifests are canaries");
+    assert.ok(deniedValues.has(integrationOwnerSkill), "the config-sourced integration owner is a canary");
+    assert.ok(
+      deniedCanaries.find((canary) => canary.value === integrationOwnerSkill)?.path.includes("integration_owner_skill"),
+    );
   });
 });
 

@@ -33,7 +33,7 @@ import type { ResolvedCircuitConfig } from "./resolve.ts";
 export const SELECTION_SCHEMA_VERSION = 1;
 export const ASSETS_SCHEMA_VERSION = 1;
 
-const DOCUMENT_KINDS = ["datasheet", "specification", "drawing"] as const;
+const DOCUMENT_KINDS = ["datasheet", "specification", "drawing", "source-record"] as const;
 
 /** One entry of `publication.assets` (ADR-018's deliberate-publication allowlist). */
 export type PublicationAsset = {
@@ -91,6 +91,7 @@ export function declaredProjectFiles(config: ResolvedCircuitConfig): readonly De
   ];
   const optional: [string, string | null][] = [
     ["evidence.forwardTests", config.evidence.forwardTests],
+    ["evidence.candidates", config.evidence.candidates],
     ["docs.integrationGloss", config.docs.integrationGloss],
     ["validation.policy", config.validation.policy],
     ["publication.matrix", matrixOverridePath(config)],
@@ -142,6 +143,17 @@ export async function mapCircuitConfig(config: ResolvedCircuitConfig): Promise<C
     readGloss(config),
   ]);
 
+  const deniedOwnerSkillFields = (["record.ownerSkill", "integration.ownerSkill"] as const).filter(
+    (field) => matrix.value[field] === "DENY",
+  );
+  if (config.docs.agentResources && deniedOwnerSkillFields.length > 0) {
+    fail(
+      "ADAPTER_CONTRACT",
+      "docs.agentResources: true publishes /docs/claude-skills/<owner>/ and the owner-skill inventory, so owner-skill DENY cannot hold; set docs.agentResources: false or publish the denied field",
+      { fields: deniedOwnerSkillFields, matrixSource: matrix.source },
+    );
+  }
+
   const generatedMarker = config.docs.generatedMarker ?? undefined;
   const render: PipelineRenderOptions = {
     agentResources: config.docs.agentResources,
@@ -190,6 +202,7 @@ export function projectPathsFor(config: ResolvedCircuitConfig): CircuitProjectPa
     projectRoot: config.root,
     bundlesRoot: config.evidence.bundlesRoot,
     inventoryFile: config.evidence.inventory,
+    candidateInventoryFile: config.evidence.candidates,
     integrationRulesFile: config.evidence.integrationRules,
     generatedRoot: config.docs.generatedContent,
     preflightFile: config.docs.preflight,
@@ -219,10 +232,21 @@ export function validatorInputFor(config: ResolvedCircuitConfig): ValidatorInput
     },
     inventory: {
       path: evidence.inventory,
+      candidatesPath: evidence.candidates,
       provider:
         config.inventoryProvider.kind === "manual"
           ? { kind: "manual" }
-          : { kind: "led-generator-v1", specs: config.inventoryProvider.specs.map((spec) => ({ path: spec.path })) },
+          : {
+              kind: "led-generator-v1",
+              specs: config.inventoryProvider.specs.map((spec) => ({
+                path: spec.path,
+                ...(spec.board === undefined ? {} : { board: spec.board }),
+              })),
+              ...(config.inventoryProvider.fit === undefined ? {} : { fit: config.inventoryProvider.fit }),
+              ...(config.inventoryProvider.mpnFromValueLcsc === undefined
+                ? {}
+                : { mpnFromValueLcsc: [...config.inventoryProvider.mpnFromValueLcsc] }),
+            },
     },
     routing: { directRouting: evidence.directRouting, vendorQualifiers: evidence.vendorQualifiers },
     cad: config.cad.enabled
@@ -320,7 +344,7 @@ function count(value: unknown, where: string, problems: string[]): number {
   return value as number;
 }
 
-/** `selection.json`: `{schema_version: 1, recordIds, sourceIds, linkableSourceIds, documentSelections, expect}`. */
+/** `selection.json`: `{schema_version: 1, recordIds, sourceIds, linkableSourceIds, documentSelections, documentExceptions?, expect}`. */
 export async function readSelection(config: ResolvedCircuitConfig): Promise<InstanceSelection> {
   const path = config.publication.selection;
   const data = await readDeclaredJson(config, "publication.selection", path);
@@ -331,7 +355,7 @@ export async function readSelection(config: ResolvedCircuitConfig): Promise<Inst
     data,
     "",
     ["schema_version", "recordIds", "sourceIds", "linkableSourceIds", "documentSelections", "expect"],
-    ["comment"],
+    ["comment", "documentExceptions"],
     problems,
   );
   if ("schema_version" in data && data.schema_version !== SELECTION_SCHEMA_VERSION) {
@@ -371,6 +395,8 @@ export async function readSelection(config: ResolvedCircuitConfig): Promise<Inst
     });
   }
 
+  const documentExceptions = readDocumentExceptions(data.documentExceptions, problems);
+
   let expect: InstanceSelection["expect"] = { records: 0, sources: 0, integrationRules: 0, packages: 0 };
   if (!isPlainObject(data.expect)) {
     if ("expect" in data) problems.push("expect: must be an object");
@@ -385,7 +411,39 @@ export async function readSelection(config: ResolvedCircuitConfig): Promise<Inst
   }
 
   if (problems.length > 0) invalid(config, "publication.selection", path, problems);
-  return { recordIds, sourceIds, linkableSourceIds, documentSelections, expect };
+  return { recordIds, sourceIds, linkableSourceIds, documentSelections, documentExceptions, expect };
+}
+
+function readDocumentExceptions(
+  value: unknown,
+  problems: string[],
+): NonNullable<InstanceSelection["documentExceptions"]>[number][] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) {
+    problems.push("documentExceptions: must be an array");
+    return [];
+  }
+
+  const exceptions: NonNullable<InstanceSelection["documentExceptions"]>[number][] = [];
+  value.forEach((entry: unknown, index) => {
+    const where = `documentExceptions[${index}]`;
+    if (!isPlainObject(entry)) {
+      problems.push(`${where}: must be an object`);
+      return;
+    }
+    checkKeys(entry, `${where}.`, ["recordId", "reason"], [], problems);
+    const { recordId, reason } = entry;
+    if ("recordId" in entry && (typeof recordId !== "string" || recordId === "")) {
+      problems.push(`${where}.recordId: must be a non-empty string`);
+    }
+    if ("reason" in entry && (typeof reason !== "string" || reason === "")) {
+      problems.push(`${where}.reason: must be a non-empty string`);
+    }
+    if (typeof recordId === "string" && recordId !== "" && typeof reason === "string" && reason !== "") {
+      exceptions.push({ recordId, reason });
+    }
+  });
+  return exceptions;
 }
 
 /** `assets.json`: `{schema_version: 1, assets: [{path, reason, source_id?}]}`. */

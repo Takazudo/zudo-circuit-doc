@@ -13,6 +13,7 @@ import { readCanaries } from "../../provider/v1/canaries.ts";
 import { projectIndex, readEvidenceIndex } from "../../provider/v1/index.ts";
 import { runArtifactScan } from "../../scan/artifacts.ts";
 import { buildScanPolicy } from "../../scan/policy.ts";
+import { derivePublicCanonicalHashes } from "../../scan/public-canonical.ts";
 import { checkPublicScope } from "../../scan/public-scope.ts";
 import { EXIT, flagValue, type CommandContext, type CommandMeta, type CommandModule } from "../command.ts";
 import { reportFailure } from "../run.ts";
@@ -64,16 +65,25 @@ async function run(context: CommandContext): Promise<number> {
     const policy = new PublicationPolicy(project.matrix, project.selection);
     const model = projectIndex(index, policy, { integrationOwnerSkill: project.integrationOwnerSkill });
 
-    const canaries = await readCanaries(project.paths);
+    const canaries = await readCanaries(project.paths, {
+      matrix: project.matrix,
+      integrationOwnerSkill: project.integrationOwnerSkill,
+    });
     const scanPolicy = buildScanPolicy(project.config.scan, {
       agentResources: project.config.docs.agentResources,
     });
 
+    const publicCanonicalHashes = await derivePublicCanonicalHashes({
+      declared: scanPolicy.publicCanonicalFootprints,
+      model,
+      paths: project.paths,
+    });
     const report = await runArtifactScan({
       policy: scanPolicy,
       paths: project.paths,
       docsRoot: project.config.docs.root,
       canaries,
+      publicCanonicalHashes,
       model,
       agentSkillRoot,
     });

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { ALLOWED_COMPONENT_ATTRIBUTES } from "../../src/core/mdx.ts";
-import { decodeComponentReferencesDescriptor } from "../../src/core/reference-descriptor.ts";
+import { decodeComponentReferencesDescriptor, DOCUMENT_UNAVAILABLE_LABEL } from "../../src/core/reference-descriptor.ts";
 import { CATALOG_INDEX_ANCHOR, renderCatalog } from "../../src/core/render/catalog.ts";
 import { renderRecord, renderRecordsIndex } from "../../src/core/render/record.ts";
 import { buildRecordIndex } from "../../src/core/render/shared.ts";
@@ -131,7 +131,70 @@ describe("catalog", () => {
   });
 });
 
+describe("mixed placement fit", () => {
+  const driver = recordOf(model, FIXTURE_IDS.driverRecord);
+  const mixed: PublicRecord = {
+    ...driver,
+    identity: {
+      ...driver.identity,
+      dnp: false,
+      placements: driver.identity.placements.map((placement, index) => ({ ...placement, dnp: index === 0 })),
+    },
+  };
+  const mixedModel: PublicViewModel = { ...model, records: [mixed] };
+  const catalog = renderCatalog(mixedModel).contents;
+  const page = renderRecord(mixed, buildRecordIndex(mixedModel)).contents;
+  const label = "Mixed: fitted and DNP or hand-fit by placement";
+
+  it("labels the catalog index, catalog entry and record identity as mixed", () => {
+    assert.match(catalog, new RegExp(`\\| ${label} +\\|`, "u"));
+    assert.ok(catalog.includes(`**Fit:** ${label}`));
+    assert.ok(page.includes(`**Fit:** ${label}`));
+  });
+
+  it("names only the DNP placements in the catalog's additional paragraph", () => {
+    assert.ok(catalog.includes("**Placements:** board-l U2; board-p U7"));
+    assert.equal(catalog.split("\n").find((line) => line.startsWith("**DNP or hand-fit placements:**")),
+      "**DNP or hand-fit placements:** board-l U2");
+  });
+
+  it("gives every placement its exact fit label in a third column", () => {
+    const placements = page.slice(page.indexOf("## Placements"), page.indexOf("## Coverage"));
+    assert.match(placements, /\| Board +\| Reference designator +\| Fit +\|/u);
+    assert.match(placements, /\| board-l +\| `U2` +\| DNP or hand-fit +\|/u);
+    assert.match(placements, /\| board-p +\| `U7` +\| Fitted +\|/u);
+  });
+
+  it("keeps uniform records free of mixed-fit paragraphs and columns", () => {
+    assert.doesNotMatch(catalogPage, /Mixed:|DNP or hand-fit placements/u);
+    for (const record of model.records) {
+      const uniform = pageFor(model, record.identity.recordId);
+      const placements = uniform.slice(uniform.indexOf("## Placements"), uniform.indexOf("## Coverage"));
+      assert.doesNotMatch(placements, /\| Fit +\|/u);
+      assert.ok(uniform.includes(`**Fit:** ${record.identity.dnp ? "DNP or hand-fit" : "Fitted"}`));
+    }
+  });
+});
+
 describe("record page — structure", () => {
+  it("renders an unavailable reason without a document link, with evidence intact", () => {
+    const record = recordOf(model, FIXTURE_IDS.driverRecord);
+    const reason = safeText("Distributor listing only.", { field: "reason" });
+    for (const footprint of [record.reference.footprint, null]) {
+      const unavailable: PublicRecord = { ...record, reference: { ...record.reference, document: null, documentUnavailableReason: reason, footprint } };
+      const page = renderRecord(unavailable, buildRecordIndex(model)).contents;
+      assert.match(page, /Selected document:\*\* Document unavailable/u);
+      assert.match(page, /\*\*Reason:\*\* Distributor listing only\./u);
+      assert.doesNotMatch(page, /https:\/\/example\.invalid\/reference\.pdf/u);
+      assert.match(page, /^## Sources$/mu);
+      assert.match(page, /<EvidenceAnchor id=/u);
+      if (footprint !== null) {
+        const encoded = /<ComponentReferences descriptor="([0-9a-f]+)"/u.exec(page)?.[1];
+        assert.ok(encoded);
+        assert.deepEqual(decodeComponentReferencesDescriptor(encoded).document, { label: DOCUMENT_UNAVAILABLE_LABEL, reason });
+      }
+    }
+  });
   it("renders one reviewed component-reference descriptor for every record, before evidence tables", () => {
     for (const record of model.records) {
       const page = pageFor(model, record.identity.recordId);
@@ -146,6 +209,8 @@ describe("record page — structure", () => {
       const encoded = descriptors[0]?.[1];
       assert.ok(encoded);
       const reference = decodeComponentReferencesDescriptor(encoded);
+      assert.ok(record.reference.document);
+      assert.ok("title" in reference.document);
       assert.equal(reference.document.label, record.reference.document.label);
       assert.equal(reference.document.title, record.reference.document.documentTitle);
       assert.equal(reference.document.authority, record.reference.document.authorityClass);
@@ -163,6 +228,7 @@ describe("record page — structure", () => {
 
   it("passes the reviewed PDF label through without deriving it from document kind", () => {
     const record = recordOf(model, FIXTURE_IDS.driverRecord);
+    assert.ok(record.reference.document);
     const altered = {
       ...record,
       reference: {
