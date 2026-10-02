@@ -13,6 +13,8 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
 import type {
+  CandidateInventory,
+  InventoryCandidate,
   EvidenceIndex,
   Inventory,
   InventoryLine,
@@ -300,6 +302,47 @@ export function fixtureBundle(overrides: Overrides = {}): ProviderBundle {
     routes: overrides.routes ? overrides.routes(routes) : routes,
     interactions: overrides.interactions ? overrides.interactions(interactions) : interactions,
     pinMaps: overrides.pinMaps ? overrides.pinMaps(pinMaps) : pinMaps,
+  };
+}
+
+/** A complete audited candidate, usable in a shared or candidate-only owner. */
+export function fixtureCandidate(
+  id = "alternative",
+  skill = SKILL,
+): { candidate: InventoryCandidate; bundle: ProviderBundle } {
+  const candidate: InventoryCandidate = {
+    candidate_id: `candidate-${id}`,
+    owner_skill: skill,
+    mpn: `CANDIDATE-MPN-${id}`,
+    manufacturer: "Candidate Manufacturer",
+    lcsc: `CANDIDATE-LCSC-${id}`,
+    package: `CANDIDATE-PACKAGE-${id}`,
+  };
+  const recordId = `rec-candidate-${id}`;
+  const sourceId = `src-candidate-${id}`;
+  const factId = `fact-candidate-${id}`;
+  const interactionId = `int-candidate-${id}`;
+  return {
+    candidate,
+    bundle: {
+      skill,
+      records: [{
+        ...candidate, record_id: recordId, line_id: null, kind: "standalone", parent_record_id: null,
+        source_ids: [sourceId], fact_ids: [factId], interaction_ids: [interactionId], open_domains: [],
+      }],
+      sources: [source(sourceId, recordId, { document_title: candidate.mpn })],
+      facts: [fact(factId, recordId, sourceId, { value: 12 })],
+      coverage: [{
+        coverage_id: `cov-candidate-${id}`, record_id: recordId, domain: "ratings",
+        status: "COVERED", reason: factId, fact_ids: [factId], blocking_fact_ids: [],
+      }],
+      routes: [route(`route-candidate-${id}`, recordId, candidate.mpn, candidate.lcsc, candidate.manufacturer)],
+      interactions: [{
+        interaction_id: interactionId, record_ids: [recordId], fact_ids: [factId],
+        conditions: "candidate-only interaction", verdict: "PASS",
+      }],
+      pinMaps: [pinMap(`pinmap-candidate-${id}`, recordId, candidate.mpn, candidate.package, 2)],
+    },
   };
 }
 
@@ -600,6 +643,7 @@ export function onDiskFixtureBundle(): ProviderBundle {
 
 export type FixtureProjectContents = {
   readonly inventory?: unknown;
+  readonly candidates?: CandidateInventory;
   readonly bundles?: readonly ProviderBundle[];
   readonly rules?: unknown;
 };
@@ -613,7 +657,13 @@ export async function writeFixtureProject(
   root: string,
   contents: FixtureProjectContents = {},
 ): Promise<CircuitProjectPaths> {
-  const paths = projectPaths(root, FIXTURE_LAYOUT);
+  const paths = projectPaths(root, {
+    ...FIXTURE_LAYOUT,
+    ...(contents.candidates === undefined ? {} : {
+      candidateInventoryFile: ".claude/skills/component-spec-audit/references/candidates.json",
+    }),
+  });
+  if (paths.candidateInventoryFile != null) await writeJson(paths.candidateInventoryFile, contents.candidates);
   const bundles = contents.bundles ?? [onDiskFixtureBundle()];
 
   await writeJson(paths.inventoryFile, contents.inventory ?? fixtureInventory());

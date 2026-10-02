@@ -94,9 +94,31 @@ export type Inventory = {
   lines: InventoryLine[];
 };
 
+export type InventoryCandidate = {
+  candidate_id: string;
+  owner_skill: string;
+  mpn: string;
+  manufacturer: string;
+  lcsc: string;
+  package: string;
+};
+
+export type CandidateInventory = {
+  schema_version: number;
+  candidates: InventoryCandidate[];
+};
+
+const EMPTY_CANDIDATES: CandidateInventory = { schema_version: PROVIDER_SCHEMA_VERSION, candidates: [] };
+
 export type ProviderRecord = {
   record_id: string;
-  line_id: string;
+  line_id: string | null;
+  candidate_id?: string | null;
+  /** Identity fields are required for candidate parity; fitted identity comes from the line. */
+  mpn?: string;
+  manufacturer?: string;
+  lcsc?: string;
+  package?: string;
   kind: "standalone" | "subordinate";
   parent_record_id: string | null;
   source_ids: string[];
@@ -188,11 +210,10 @@ export type ProviderBundle = {
 };
 
 /** One record with every entity that belongs to it already attached. */
-export type IndexedRecord = {
+type IndexedRecordEntities = {
   /** The owner skill that holds this record's bundle. */
   readonly skill: string;
   readonly record: ProviderRecord;
-  readonly line: InventoryLine;
   /** Manifest order — curated, primary source first. */
   readonly sources: readonly ProviderSource[];
   /** Manifest order. */
@@ -205,6 +226,19 @@ export type IndexedRecord = {
   readonly pinMaps: readonly ProviderPinMap[];
   readonly route: ProviderRoute;
 };
+
+/** A publication record, joined to its generated inventory line. */
+export type IndexedRecord = IndexedRecordEntities & {
+  readonly record: ProviderRecord & { line_id: string };
+  readonly line: InventoryLine;
+};
+
+/** An audited alternative: fully checked, but never part of publication. */
+export type IndexedCandidateRecord = IndexedRecordEntities & {
+  readonly candidate: InventoryCandidate;
+};
+
+type AnyIndexedRecord = IndexedRecord | IndexedCandidateRecord;
 
 export type EvidenceIndex = {
   /** Present only after the adapter has validated the local reference assets. */
@@ -219,12 +253,13 @@ export type EvidenceIndex = {
    * and belongs to none of them.
    */
   readonly integrationRules: readonly ProviderIntegrationRule[];
-  /** Every record the provider has, in bundle order. */
+  /** Fitted-inventory records only, in bundle order (including DNP lines). */
   readonly records: readonly IndexedRecord[];
+  readonly candidates: readonly IndexedCandidateRecord[];
   readonly recordById: ReadonlyMap<string, IndexedRecord>;
   readonly factById: ReadonlyMap<string, ProviderFact>;
   readonly interactionById: ReadonlyMap<string, ProviderInteraction>;
-  /** Corpus totals, counted from what was actually read. */
+  /** Corpus totals for fitted-inventory records and their entities only. */
   readonly totals: {
     readonly sources: number;
     readonly facts: number;
@@ -234,7 +269,7 @@ export type EvidenceIndex = {
     readonly pinMaps: number;
     readonly pins: number;
   };
-  /** Every source ID the provider has, in bundle order. */
+  /** Fitted-inventory source IDs only, in bundle order. */
   readonly sourceIds: readonly string[];
 };
 
@@ -258,6 +293,13 @@ export async function readInventory(bundlesRoot: string, path: string): Promise<
   // The version itself is checked in `indexEvidence`, where it is testable
   // without a filesystem.
   return raw as Inventory;
+}
+
+/** Read candidates under the same containment boundary as the fitted inventory. */
+export async function readCandidateInventory(bundlesRoot: string, path: string): Promise<CandidateInventory> {
+  const raw = await readContainedJson(bundlesRoot, path);
+  expectArray(raw, providerFileLabel(bundlesRoot, path), "candidates");
+  return raw as CandidateInventory;
 }
 
 /** Default label for rules parsed without a file (the v1 layout's location). */
@@ -394,6 +436,7 @@ export function indexEvidence(
   inventory: Inventory,
   bundles: readonly ProviderBundle[],
   integrationRules: readonly ProviderIntegrationRule[],
+  candidateInventory: CandidateInventory = EMPTY_CANDIDATES,
 ): EvidenceIndex {
   if (inventory.schema_version !== PROVIDER_SCHEMA_VERSION) {
     fail("ADAPTER_CONTRACT", "inventory schema_version is not the contract this adapter reads", {
@@ -402,6 +445,11 @@ export function indexEvidence(
     });
   }
 
+  assertSchemaVersion(candidateInventory, "candidate inventory");
+  const candidateById = uniqueById(
+    "candidate", candidateInventory.candidates, (candidate) => candidate.candidate_id, (candidate) => candidate,
+  );
+  const candidateRecordById = new Map<string, string>();
   const lineById = uniqueById(
     "inventory line",
     inventory.lines,
@@ -436,20 +484,42 @@ export function indexEvidence(
   );
 
   const records: IndexedRecord[] = [];
+  const candidates: IndexedCandidateRecord[] = [];
+  const allRecords: AnyIndexedRecord[] = [];
   for (const { skill, value: record } of recordEntries) {
-    const line = lineById.get(record.line_id);
-    if (line === undefined) {
-      fail("ADAPTER_CONTRACT", "record references an unknown inventory line", {
-        recordId: record.record_id,
-        lineId: record.line_id,
+    const hasCandidate = record.candidate_id !== undefined && record.candidate_id !== null;
+    if (typeof record.line_id === "string" && hasCandidate) {
+      fail("ADAPTER_CONTRACT", "record has both line_id and candidate_id", { recordId: record.record_id });
+    }
+    if (hasCandidate && record.line_id !== null) {
+      fail("ADAPTER_CONTRACT", "candidate record must explicitly set line_id to null", { recordId: record.record_id });
+    }
+    const candidate = record.line_id === null && typeof record.candidate_id === "string"
+      ? candidateById.get(record.candidate_id) : undefined;
+    const line = typeof record.line_id === "string" ? lineById.get(record.line_id) : undefined;
+    if (candidate === undefined && line === undefined) {
+      fail("ADAPTER_CONTRACT", "record references an unknown inventory line or has no known candidate identity", {
+        recordId: record.record_id, lineId: String(record.line_id), candidateId: String(record.candidate_id),
       });
     }
-    if (line.owner_skill !== skill) {
+    const identity = candidate ?? line!;
+    if (identity.owner_skill !== skill) {
       fail("ADAPTER_CONTRACT", "record is held by a skill the inventory does not assign it to", {
-        recordId: record.record_id,
-        holder: skill,
-        ownerSkill: line.owner_skill,
+        recordId: record.record_id, holder: skill, ownerSkill: identity.owner_skill,
       });
+    }
+    if (candidate !== undefined) {
+      if (candidateRecordById.has(candidate.candidate_id)) {
+        fail("ADAPTER_CONTRACT", "candidate inventory entry has more than one record", { candidateId: candidate.candidate_id });
+      }
+      candidateRecordById.set(candidate.candidate_id, record.record_id);
+      for (const field of ["mpn", "manufacturer", "lcsc", "package"] as const) {
+        if (record[field] !== candidate[field]) {
+          fail("ADAPTER_CONTRACT", "candidate record identity disagrees with candidate inventory", {
+            recordId: record.record_id, candidateId: candidate.candidate_id, field,
+          });
+        }
+      }
     }
 
     const recordRoutes = routes.byRecord.get(record.record_id) ?? [];
@@ -460,69 +530,125 @@ export function indexEvidence(
       });
     }
 
-    records.push({
+    const entities: IndexedRecordEntities = {
       skill,
       record,
-      line,
       sources: resolveAll("source", record.record_id, record.source_ids, sources.byId),
       facts: resolveAll("fact", record.record_id, record.fact_ids, facts.byId),
       coverage: coverage.byRecord.get(record.record_id) ?? [],
       interactionIds: record.interaction_ids,
       pinMaps: pinMaps.byRecord.get(record.record_id) ?? [],
       route: recordRoutes[0] as ProviderRoute,
-    });
+    };
+    if (candidate !== undefined) {
+      const entry = { ...entities, candidate };
+      candidates.push(entry);
+      allRecords.push(entry);
+    } else {
+      const entry: IndexedRecord = { ...entities, record: { ...record, line_id: line!.line_id }, line: line! };
+      records.push(entry);
+      allRecords.push(entry);
+    }
   }
 
+  for (const candidate of candidateById.values()) {
+    if (!candidateRecordById.has(candidate.candidate_id)) {
+      fail("ADAPTER_CONTRACT", "candidate inventory entry has no record", { candidateId: candidate.candidate_id });
+    }
+  }
+  const allRecordById = new Map(allRecords.map((entry) => [entry.record.record_id, entry]));
   const recordById = new Map(records.map((entry) => [entry.record.record_id, entry]));
 
   assertManifestListsEveryEntity(
-    "source",
-    sources,
-    (source) => source.source_id,
-    recordById,
-    (entry) => entry.record.source_ids,
+    "source", sources, (source) => source.source_id, allRecordById, (entry) => entry.record.source_ids,
   );
   assertManifestListsEveryEntity(
-    "fact",
-    facts,
-    (fact) => fact.fact_id,
-    recordById,
-    (entry) => entry.record.fact_ids,
+    "fact", facts, (fact) => fact.fact_id, allRecordById, (entry) => entry.record.fact_ids,
   );
 
-  assertParents(records, recordById);
+  assertParents(allRecords, allRecordById);
   assertFactSources(facts.byId, sources.byId);
   assertCoverageFactsResolve(coverage.byId, facts.byId);
-  assertInteractionLinks(interactionById, recordById, facts.byId);
+  assertInteractionLinks(interactionById, allRecordById, facts.byId);
   assertDependenciesResolve(facts.byId);
   assertDependenciesAcyclic(facts.byId);
 
+  // Nothing may disappear across the publication boundary. Check every link
+  // against the full maps before exposing fitted-only maps to consumers.
+  const candidateIds = new Set(candidates.map((entry) => entry.record.record_id));
+  const assertSamePartition = (from: string, to: string, relationship: string): void => {
+    if (candidateIds.has(from) !== candidateIds.has(to)) {
+      fail("ADAPTER_CONTRACT", `${relationship} crosses fitted/candidate partitions`, { from, to });
+    }
+  };
+  for (const entry of allRecords) {
+    if (entry.record.parent_record_id !== null) {
+      assertSamePartition(entry.record.record_id, entry.record.parent_record_id, "subordinate parent");
+    }
+  }
+  for (const fact of facts.all) {
+    for (const dependency of fact.depends_on) {
+      assertSamePartition(fact.record_id, facts.byId.get(dependency)!.record_id, "fact dependency");
+    }
+  }
+  for (const domain of coverage.all) {
+    for (const factId of [...domain.fact_ids, ...domain.blocking_fact_ids]) {
+      assertSamePartition(domain.record_id, facts.byId.get(factId)!.record_id, "coverage fact");
+    }
+  }
+  for (const interaction of interactionById.values()) {
+    for (const recordId of interaction.record_ids) {
+      assertSamePartition(interaction.record_ids[0]!, recordId, "interaction");
+    }
+  }
+  for (const rule of integrationRules) {
+    const ruleFacts = [
+      ...rule.fact_ids,
+      ...(rule.conditioned_calculations ?? []).flatMap((calculation) => calculation.fact_ids),
+      ...(rule.evidence_chain ?? []).flatMap((stage) => stage.fact_ids),
+    ];
+    if (rule.record_ids.some((id) => candidateIds.has(id)) ||
+        ruleFacts.some((id) => candidateIds.has(facts.byId.get(id)?.record_id ?? ""))) {
+      fail("ADAPTER_CONTRACT", "integration rule names an audited candidate record or fact", { ruleId: rule.rule_id });
+    }
+  }
+
+  const fitted = <T extends OwnedEntity>(values: readonly T[]): T[] =>
+    values.filter((value) => recordById.has(value.record_id));
+  const fittedInteractions = new Map([...interactionById].filter(
+    ([, interaction]) => recordById.has(interaction.record_ids[0]!),
+  ));
+  const fittedSources = fitted(sources.all);
+  const fittedFacts = fitted(facts.all);
+  const fittedPinMaps = fitted(pinMaps.all);
+  const fittedOwners = new Set(records.map((entry) => entry.skill));
   return {
     inventory,
-    ownerSkills: bundles.map((bundle) => bundle.skill),
+    ownerSkills: [...new Set(bundles.map((bundle) => bundle.skill).filter((skill) => fittedOwners.has(skill)))],
     integrationRules,
     records,
+    candidates,
     recordById,
-    factById: facts.byId,
-    interactionById,
+    factById: new Map(fittedFacts.map((fact) => [fact.fact_id, fact])),
+    interactionById: fittedInteractions,
     totals: {
-      sources: sources.all.length,
-      facts: facts.all.length,
-      coverage: coverage.all.length,
-      interactions: interactionById.size,
-      routes: routes.all.length,
-      pinMaps: pinMaps.all.length,
-      pins: pinMaps.all.reduce((sum, map) => sum + map.pins.length, 0),
+      sources: fittedSources.length,
+      facts: fittedFacts.length,
+      coverage: fitted(coverage.all).length,
+      interactions: fittedInteractions.size,
+      routes: fitted(routes.all).length,
+      pinMaps: fittedPinMaps.length,
+      pins: fittedPinMaps.reduce((sum, map) => sum + map.pins.length, 0),
     },
-    sourceIds: sources.all.map((source) => source.source_id),
+    sourceIds: fittedSources.map((source) => source.source_id),
   };
 }
 
 // --- relationship assertions ----------------------------------------------
 
 function assertParents(
-  records: readonly IndexedRecord[],
-  recordById: ReadonlyMap<string, IndexedRecord>,
+  records: readonly AnyIndexedRecord[],
+  recordById: ReadonlyMap<string, AnyIndexedRecord>,
 ): void {
   const orphans: string[] = [];
   const missing: string[] = [];
@@ -617,7 +743,7 @@ function assertCoverageFactsResolve(
  */
 function assertInteractionLinks(
   interactionById: ReadonlyMap<string, ProviderInteraction>,
-  recordById: ReadonlyMap<string, IndexedRecord>,
+  recordById: ReadonlyMap<string, AnyIndexedRecord>,
   factById: ReadonlyMap<string, ProviderFact>,
 ): void {
   const unresolvedRecords: string[] = [];
@@ -640,8 +766,13 @@ function assertInteractionLinks(
       expected.set(recordId, bucket);
     }
     for (const factId of interaction.fact_ids) {
-      if (!factById.has(factId)) {
+      const fact = factById.get(factId);
+      if (fact === undefined) {
         unresolvedFacts.push(`${interaction.interaction_id}:${factId}`);
+      } else if (!interaction.record_ids.includes(fact.record_id)) {
+        fail("ADAPTER_CONTRACT", "interaction fact belongs to a record outside its named records", {
+          interactionId: interaction.interaction_id, factId, recordId: fact.record_id,
+        });
       }
     }
   }
@@ -823,7 +954,7 @@ function uniqueById<T, V>(
   return map;
 }
 
-function resolveAll<T>(
+function resolveAll<T extends OwnedEntity>(
   kind: string,
   recordId: string,
   ids: readonly string[],
@@ -839,7 +970,12 @@ function resolveAll<T>(
     seen.add(id);
     const value = byId.get(id);
     if (value === undefined) missing.push(id);
-    else resolved.push(value);
+    else {
+      if (value.record_id !== recordId) {
+        fail("ADAPTER_CONTRACT", `record lists a ${kind} owned by another record`, { recordId, id });
+      }
+      resolved.push(value);
+    }
   }
   if (missing.length > 0) {
     fail("ADAPTER_CONTRACT", `record lists a ${kind} the provider does not have`, {
@@ -859,8 +995,8 @@ function assertManifestListsEveryEntity<T extends OwnedEntity>(
   kind: string,
   index: OwnedIndex<T>,
   idOf: (value: T) => string,
-  recordById: ReadonlyMap<string, IndexedRecord>,
-  declaredIds: (record: IndexedRecord) => readonly string[],
+  recordById: ReadonlyMap<string, AnyIndexedRecord>,
+  declaredIds: (record: AnyIndexedRecord) => readonly string[],
 ): void {
   const orphans: string[] = [];
   for (const value of index.all) {
