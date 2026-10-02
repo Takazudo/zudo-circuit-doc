@@ -60,6 +60,7 @@ import {
   indexEvidence,
   placementFits,
   readBundle,
+  readCandidateInventory,
   readIntegrationRules,
   readInventory,
   type EvidenceIndex,
@@ -136,12 +137,19 @@ export function createCircuitAdapter(options: CircuitAdapterOptions): ComponentD
 export async function readEvidenceIndex(options: EvidenceIndexOptions): Promise<EvidenceIndex> {
   const { paths, selection, reference } = options;
   const inventory = await readInventory(paths.bundlesRoot, paths.inventoryFile);
-  const ownerSkills = uniqueInOrder(inventory.lines.map((line) => line.owner_skill));
+  const candidates = paths.candidateInventoryFile == null ? undefined
+    : await readCandidateInventory(paths.bundlesRoot, paths.candidateInventoryFile);
+  const ownerSkills = uniqueInOrder([
+    ...inventory.lines.map((line) => line.owner_skill),
+    ...(candidates?.candidates ?? []).map((candidate) => candidate.owner_skill),
+  ]);
   const [bundles, rules] = await Promise.all([
     Promise.all(ownerSkills.map((skill) => readBundle(paths.bundlesRoot, skill))),
     readIntegrationRules(paths.bundlesRoot, paths.integrationRulesFile),
   ]);
-  const index = indexEvidence(inventory, bundles, rules.rules);
+  const index = indexEvidence(inventory, bundles, rules.rules, candidates);
+  assertNoCandidateSelection(index, (id) => selection.recordIds.includes(id), (id) =>
+    selection.sourceIds.includes(id) || selection.linkableSourceIds.includes(id));
   return {
     ...index,
     references: await readCircuitReferenceContract(index, selection, paths, reference),
@@ -159,6 +167,9 @@ export function projectIndex(
   options: ProjectIndexOptions = {},
 ): PublicViewModel {
   const { inventory } = index;
+
+  assertNoCandidateSelection(index, (id) => policy.isRecordSelected(id), (id) =>
+    policy.isSourceSelected(id) || policy.isSourceLinkable(id));
 
   // Fatal when the committed selection names something the provider lost, and
   // when the corpus size moved. Must run before anything is projected.
@@ -736,6 +747,18 @@ function projectPinMap(pinMap: ProviderPinMap, policy: PublicationPolicy): Publi
 }
 
 // --- selection and ordering ------------------------------------------------
+
+function assertNoCandidateSelection(
+  index: EvidenceIndex,
+  recordSelected: (id: string) => boolean,
+  sourceSelected: (id: string) => boolean,
+): void {
+  for (const entry of index.candidates) {
+    if (recordSelected(entry.record.record_id) || entry.sources.some((source) => sourceSelected(source.source_id))) {
+      fail("STALE_SELECTION", "selection names an audited candidate", { recordId: entry.record.record_id });
+    }
+  }
+}
 
 /**
  * Selection has to be closed under the links a published page renders.
