@@ -80,7 +80,7 @@ async function qualify(slug: string, options: DeriveOptions, distBuilt: boolean)
   try {
     identity = JSON.parse(titleLiteral);
     const descriptor = decodeComponentReferencesDescriptor(descriptorMatch[1] as string);
-    if (descriptor.document.authority.trim() === "") return undefined;
+    if ("authority" in descriptor.document && descriptor.document.authority.trim() === "") return undefined;
     assets = [descriptor.footprint.assetUrl, ...(descriptor.modelDescriptor === null ? [] : [decodeModelDescriptor(descriptor.modelDescriptor).modelUrl])];
   } catch {
     return undefined;

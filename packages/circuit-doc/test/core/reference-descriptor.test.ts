@@ -6,6 +6,7 @@ import {
   decodeComponentReferencesDescriptor,
   encodeComponentReferencesDescriptor,
   footprintAssetUrl,
+  DOCUMENT_UNAVAILABLE_LABEL,
 } from "../../src/core/reference-descriptor.ts";
 
 const descriptor = createComponentReferencesDescriptor({
@@ -46,13 +47,25 @@ describe("component references descriptor", () => {
 
   it("rejects a PDF label that was not supplied by the reviewed model", () => {
     const altered = { ...descriptor, document: { ...descriptor.document, label: "Product page" } };
-    assert.throws(() => encodeComponentReferencesDescriptor(altered));
+    assert.throws(() => encodeComponentReferencesDescriptor(altered as typeof descriptor));
   });
 
   it("rejects non-HTTP(S) and credential-bearing document URLs", () => {
     for (const url of ["javascript:alert(1)", "https://user:password@example.invalid/reference.pdf"]) {
       const altered = { ...descriptor, document: { ...descriptor.document, url } };
       assert.throws(() => encodeComponentReferencesDescriptor(altered));
+    }
+  });
+
+  it("round-trips the exact unavailable shape and rejects mixed or unsafe values", () => {
+    const unavailable = { ...descriptor, document: { label: DOCUMENT_UNAVAILABLE_LABEL, reason: "Distributor listing only." } as const };
+    assert.deepEqual(decodeComponentReferencesDescriptor(encodeComponentReferencesDescriptor(unavailable)), unavailable);
+    for (const document of [
+      { ...unavailable.document, url: "https://example.invalid/document.pdf" },
+      { ...unavailable.document, reason: "bad\u202evalue" },
+      { ...descriptor.document, label: DOCUMENT_UNAVAILABLE_LABEL },
+    ]) {
+      assert.throws(() => encodeComponentReferencesDescriptor({ ...descriptor, document } as typeof descriptor));
     }
   });
 });

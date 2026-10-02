@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import {
   createComponentReferencesDescriptor,
   encodeComponentReferencesDescriptor,
+  DOCUMENT_UNAVAILABLE_LABEL,
 } from "../../src/core/reference-descriptor.ts";
 import { bundleForSsr } from "./bundle.ts";
 
@@ -50,6 +51,18 @@ describe("evidence primitives SSR", () => {
 });
 
 describe("ComponentReferences SSR markup contract", () => {
+  it("renders an unavailable reason without a document anchor", () => {
+    const encoded = encodeComponentReferencesDescriptor(createComponentReferencesDescriptor({
+      document: { label: DOCUMENT_UNAVAILABLE_LABEL, reason: "Distributor listing only." },
+      footprintName: "PKG-FIXTURE", model: null,
+    }));
+    const markup = renderToString(h(ui.ComponentReferences, { descriptor: encoded }));
+    const documentCard = /<div class="zcd-component-references__document">([\s\S]*?)<\/div><div class="zcd-component-references__previews">/u.exec(markup)?.[1];
+    assert.ok(documentCard);
+    assert.match(documentCard, /Document unavailable/u);
+    assert.match(documentCard, /<p[^>]*data-document-unavailable="true"[^>]*>Distributor listing only\.<\/p>/u);
+    assert.doesNotMatch(documentCard, /<a\b/u);
+  });
   const descriptor = encodeComponentReferencesDescriptor(
     createComponentReferencesDescriptor({
       document: {

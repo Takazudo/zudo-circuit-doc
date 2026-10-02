@@ -205,6 +205,7 @@ function source(input: SourceInput): PublicSource {
 function referenceFor(recordId: string): PublicRecordReference {
   const packageId = `pkg-${recordId.replace(/^rec-/u, "")}`;
   return {
+    documentUnavailableReason: null,
     document: {
       sourceId: t(`src-${recordId.replace(/^rec-/u, "")}-reference`),
       documentTitle: t("Fixture datasheet"),

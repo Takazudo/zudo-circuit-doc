@@ -79,6 +79,7 @@ const ONE_RECORD_MODEL: PublicViewModel = {
       interactions: [],
       pinMaps: [],
       reference: {
+        documentUnavailableReason: null,
         document: {
           sourceId: t("src-fixture-one"),
           documentTitle: t("Fixture datasheet"),

@@ -2,6 +2,7 @@ import { decodeModelDescriptor, encodeModelDescriptor, type ModelViewerDescripto
 import { FOOTPRINT_ASSET_BASE } from "./site.ts";
 
 export { FOOTPRINT_ASSET_BASE };
+export const DOCUMENT_UNAVAILABLE_LABEL = "Document unavailable";
 
 export type ComponentReferencesDescriptor = {
   readonly version: 1;
@@ -11,6 +12,9 @@ export type ComponentReferencesDescriptor = {
     readonly authority: string;
     readonly availability: string;
     readonly url: string;
+  } | {
+    readonly label: typeof DOCUMENT_UNAVAILABLE_LABEL;
+    readonly reason: string;
   };
   readonly footprint: {
     readonly name: string;
@@ -83,6 +87,12 @@ export function assertComponentReferencesDescriptor(value: unknown): asserts val
 function assertDocument(value: unknown): asserts value is ComponentReferencesDescriptor["document"] {
   if (typeof value !== "object" || value === null) throw new Error("Component reference document is invalid");
   const document = value as Record<string, unknown>;
+  if (Object.keys(document).sort().join(",") === "label,reason") {
+    if (document.label !== DOCUMENT_UNAVAILABLE_LABEL || typeof document.reason !== "string" || !isDisplayText(document.reason) || document.reason.trim() === "") {
+      throw new Error("Component reference document unavailable reason is unsafe");
+    }
+    return;
+  }
   if (Object.keys(document).sort().join(",") !== "authority,availability,label,title,url") {
     throw new Error("Component reference document has unexpected fields");
   }

@@ -255,9 +255,9 @@ function checkPackagelessRecordPage(slug: string, html: string, record: PublicRe
   if (!html.includes(`>${statement}</p>`)) {
     fail("PUBLICATION_POLICY", `${slug} must state why no footprint or 3D model is published`, { slug });
   }
-  const documentUrl = String(record.reference.document.url);
+  const documentUrl = record.reference.document?.url;
   const hrefs = [...html.matchAll(/<a\b[^>]*\bhref=[^>]*>/gu)].map((match) => decodeHtml(readAttribute(match[0], "href", slug)));
-  if (!hrefs.includes(documentUrl)) {
+  if (documentUrl !== undefined && !hrefs.includes(String(documentUrl))) {
     fail("PUBLICATION_POLICY", `${slug} must link its selected document`, { slug, url: documentUrl });
   }
   if (html.includes(FOOTPRINT_ASSET_BASE) || html.includes(MODEL_ASSET_BASE)) {

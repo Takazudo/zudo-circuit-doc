@@ -252,7 +252,9 @@ export type PublicFootprintReference = {
 };
 
 export type PublicRecordReference = {
-  readonly document: PublicDocumentReference;
+  /** Exactly one of the selected document and reviewed unavailable reason is present. */
+  readonly document: PublicDocumentReference | null;
+  readonly documentUnavailableReason: SafeText | null;
   /**
    * Structural discriminator for rendering `footprint: null`: an `external`
    * part has no PCB footprint at all, a `pcb` part may simply have no package
