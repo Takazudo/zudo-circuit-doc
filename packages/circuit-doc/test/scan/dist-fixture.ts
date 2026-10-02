@@ -28,6 +28,11 @@ export type SyntheticProjectPaths = {
   readonly docsRoot: string;
 };
 
+export type SyntheticProjectOptions = {
+  /** Override the generated-content location to model `docs.generatedContent`. */
+  readonly generatedRoot?: string;
+};
+
 function segments(route: string): readonly string[] {
   return route.split("/").filter((segment) => segment !== "");
 }
@@ -49,9 +54,10 @@ async function write(path: string, contents: string): Promise<void> {
 export async function writeSyntheticProject(
   root: string,
   model: PublicViewModel,
+  options: SyntheticProjectOptions = {},
 ): Promise<SyntheticProjectPaths> {
   const paths: SyntheticProjectPaths = {
-    generatedRoot: join(root, "generated"),
+    generatedRoot: options.generatedRoot ?? join(root, "generated"),
     preflightFile: join(root, "circuit/generated/preflight.json"),
     distRoot: join(root, "dist"),
     docsRoot: join(root, "doc"),

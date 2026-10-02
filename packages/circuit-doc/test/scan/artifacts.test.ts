@@ -21,10 +21,10 @@ import { join } from "node:path";
 import { after, before, describe, it } from "node:test";
 
 import { ComponentDocsError } from "../../src/core/errors.ts";
-import { harvestCanaries } from "../../src/core/scan.ts";
+import { harvestCanaries, type ScanTarget } from "../../src/core/scan.ts";
 import { safeText } from "../../src/core/text.ts";
 import { VIEW_MODEL_VERSION, type PublicViewModel } from "../../src/core/view-model.ts";
-import { runArtifactScan } from "../../src/scan/artifacts.ts";
+import { authoredContentTargets, runArtifactScan } from "../../src/scan/artifacts.ts";
 import { buildScanPolicy } from "../../src/scan/policy.ts";
 import { fixtureModel } from "../fixtures/view-model-fixtures.ts";
 import { recordDistHtmlPath, writeSyntheticProject } from "./dist-fixture.ts";
@@ -83,6 +83,59 @@ function rejectsWith(promise: Promise<unknown>, code: string, messagePattern?: R
   });
 }
 
+describe("authoredContentTargets", () => {
+  const contentRoot = join(tmpdir(), "target-helper", "docs", "src/content/docs");
+  const target = (label: string): ScanTarget => ({ label, text: label });
+
+  it("excludes a nested generated root and keeps authored content", () => {
+    const targets = [
+      target("content/components/records/x/index.mdx"),
+      target("content/guide/intro.mdx"),
+    ];
+
+    assert.deepEqual(
+      authoredContentTargets(targets, {
+        contentRoot,
+        generatedRoot: join(contentRoot, "components"),
+      }),
+      [target("content/guide/intro.mdx")],
+    );
+  });
+
+  it("keeps every target when the generated root is outside content", () => {
+    const targets = [target("content/components/records/x/index.mdx"), target("content/guide/intro.mdx")];
+
+    assert.deepEqual(
+      authoredContentTargets(targets, {
+        contentRoot,
+        generatedRoot: join(tmpdir(), "target-helper", "generated"),
+      }),
+      targets,
+    );
+  });
+
+  it("drops every target when the generated root equals content", () => {
+    const targets = [target("content/components/records/x/index.mdx"), target("content/guide/intro.mdx")];
+
+    assert.deepEqual(authoredContentTargets(targets, { contentRoot, generatedRoot: contentRoot }), []);
+  });
+
+  it("does not exclude a sibling whose label only shares a prefix", () => {
+    const targets = [
+      target("content/components/records/x/index.mdx"),
+      target("content/components-extra/a.mdx"),
+    ];
+
+    assert.deepEqual(
+      authoredContentTargets(targets, {
+        contentRoot,
+        generatedRoot: join(contentRoot, "components"),
+      }),
+      [target("content/components-extra/a.mdx")],
+    );
+  });
+});
+
 describe("a correctly built dist tree passes", () => {
   it("reports both tiers clean and the built pages/searchable counts", async () => {
     const model = fixtureModel();
@@ -106,6 +159,33 @@ describe("a correctly built dist tree passes", () => {
       report.lines.some((line) => new RegExp(`searchable records\\s+${model.records.length}\\b`, "u").test(line)),
     );
     assert.ok(!report.lines.some((line) => line.startsWith("SKIP:")));
+  });
+
+  it("counts authored pages outside nested generatedContent as withheld from SITE", async () => {
+    const model = fixtureModel();
+    const root = join(scratch, "withheld-authored-content");
+    const contentRoot = join(root, "doc", "src/content/docs");
+    const project = await writeSyntheticProject(root, model, {
+      generatedRoot: join(contentRoot, "components"),
+    });
+    const value = "CANARY-AUTHORED-GUIDE-WITHHELD-FROM-SITE-0001";
+    const siteValue = "CANARY-REMAINS-IN-SITE-SCAN-0002";
+    await mkdir(join(contentRoot, "guide"), { recursive: true });
+    await writeFile(join(contentRoot, "guide", "intro.mdx"), value);
+
+    const report = await runArtifactScan({
+      policy: policy(),
+      paths: project,
+      docsRoot: project.docsRoot,
+      canaries: [...canaryFor(value), ...canaryFor(siteValue)],
+      model,
+      agentSkillRoot: null,
+    });
+
+    // This confirms the authored corpus is read; helper unit cases separately
+    // prove that the generated subtree itself is excluded.
+    const withheldLine = report.lines.find((line) => line.includes("canary/canaries withheld"));
+    assert.equal(withheldLine?.trim(), "1 canary/canaries withheld (published by another content source)");
   });
 });
 
