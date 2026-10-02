@@ -311,4 +311,40 @@ describe("mapCircuitConfig: LED-style pieces", async () => {
     assert.equal(input.policy.path, "/fixture/policy.json");
     assert.equal(input.integration.forwardTests, null);
   });
+
+  it("maps configured generator options and omits options that are unset", () => {
+    const config = mutable(LED_STYLE_CONFIG);
+    config.inventoryProvider = {
+      kind: "led-generator-v1",
+      specs: [
+        { path: "upstream/scripts/schgen/board_p_spec.py", board: "power" },
+        { path: "upstream/scripts/schgen/board_l_spec.py" },
+      ],
+      fit: "placement",
+      mpnFromValueLcsc: ["C144397"],
+    };
+    const input = validatorInputFor(resolveCircuitConfig(config as CircuitConfig, "/fixture"));
+    assert.deepEqual(input.inventory.provider, {
+      kind: "led-generator-v1",
+      specs: [
+        { path: "/fixture/upstream/scripts/schgen/board_p_spec.py", board: "power" },
+        { path: "/fixture/upstream/scripts/schgen/board_l_spec.py" },
+      ],
+      fit: "placement",
+      mpnFromValueLcsc: ["C144397"],
+    });
+
+    config.inventoryProvider.fit = "line";
+    delete config.inventoryProvider.mpnFromValueLcsc;
+    delete config.inventoryProvider.specs[0].board;
+    const fitOnly = validatorInputFor(resolveCircuitConfig(config as CircuitConfig, "/fixture"));
+    assert.deepEqual(fitOnly.inventory.provider, {
+      kind: "led-generator-v1",
+      specs: [
+        { path: "/fixture/upstream/scripts/schgen/board_p_spec.py" },
+        { path: "/fixture/upstream/scripts/schgen/board_l_spec.py" },
+      ],
+      fit: "line",
+    });
+  });
 });
