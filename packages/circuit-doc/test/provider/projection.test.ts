@@ -12,7 +12,7 @@ import { describe, it } from "node:test";
 
 import { ComponentDocsError } from "../../src/core/errors.ts";
 import { PublicationPolicy, type InstanceSelection } from "../../src/core/publication.ts";
-import { indexEvidence as rawIndexEvidence } from "../../src/provider/v1/evidence.ts";
+import { indexEvidence as rawIndexEvidence, type InventoryLine } from "../../src/provider/v1/evidence.ts";
 import { projectIndex } from "../../src/provider/v1/index.ts";
 import { VIEW_MODEL_VERSION, type PublicViewModel } from "../../src/core/view-model.ts";
 import {
@@ -42,6 +42,89 @@ function recordOf(model: PublicViewModel, slug: string) {
   assert.ok(found, `no record with slug ${slug}`);
   return found;
 }
+
+describe("effective placement fit", () => {
+  function projectLine(change: (line: InventoryLine) => void): PublicViewModel {
+    const inventory = fixtureInventory();
+    change(inventory.lines[0]!);
+    const index = indexEvidence(inventory, [fixtureBundle()], fixtureIntegrationRules());
+    return projectIndex(index, new PublicationPolicy(FIXTURE_MATRIX, FIXTURE_SELECTION));
+  }
+
+  it("preserves both bits on a two-board mixed line and rolls up to fitted", () => {
+    const model = projectLine((line) => {
+      delete line.dnp;
+      line.placements = [
+        { board: "L", refdes: "U2", dnp: true },
+        { board: "P", refdes: "U7", dnp: false },
+      ];
+    });
+    const { identity } = recordOf(model, "driver");
+    assert.equal(identity.dnp, false);
+    assert.deepEqual(identity.placements, [
+      { board: "L", refdes: "U2", dnp: true },
+      { board: "P", refdes: "U7", dnp: false },
+    ]);
+  });
+
+  for (const dnp of [false, true]) {
+    it(`inherits line dnp=${dnp}, accepting matching explicit placement bits`, () => {
+      const model = projectLine((line) => {
+        line.dnp = dnp;
+        line.placements = [{ board: "L", refdes: "U2" }, { board: "P", refdes: "U7", dnp }];
+      });
+      const { identity } = recordOf(model, "driver");
+      assert.equal(identity.dnp, dnp);
+      assert.deepEqual(identity.placements.map((p) => p.dnp), [dnp, dnp]);
+    });
+
+    it(`rolls up uniform explicit placement dnp=${dnp} without a line bit`, () => {
+      const model = projectLine((line) => {
+        delete line.dnp;
+        line.placements = [{ board: "L", refdes: "U2", dnp }, { board: "P", refdes: "U7", dnp }];
+      });
+      assert.equal(recordOf(model, "driver").identity.dnp, dnp);
+    });
+
+    it(`uses line dnp=${dnp} when there are no placements`, () => {
+      const model = projectLine((line) => { line.dnp = dnp; line.placements = []; });
+      assert.equal(recordOf(model, "driver").identity.dnp, dnp);
+      assert.deepEqual(recordOf(model, "driver").identity.placements, []);
+    });
+
+    it(`rejects a placement bit conflicting with line dnp=${dnp}`, () => {
+      assert.throws(() => projectLine((line) => {
+        line.dnp = dnp;
+        line.placements[0]!.dnp = !dnp;
+      }), (error: unknown) => error instanceof ComponentDocsError &&
+        error.code === "ADAPTER_CONTRACT" && /conflicts/u.test(error.message));
+    });
+  }
+
+  it("rejects a missing fit bit even when another placement has one", () => {
+    assert.throws(() => projectLine((line) => {
+      delete line.dnp;
+      line.placements = [{ board: "L", refdes: "U2", dnp: false }, { board: "P", refdes: "U7" }];
+    }), (error: unknown) => error instanceof ComponentDocsError && error.code === "ADAPTER_CONTRACT");
+  });
+
+  it("rejects a placement-less line with no fit bit", () => {
+    assert.throws(() => projectLine((line) => {
+      delete line.dnp;
+      line.placements = [];
+    }), (error: unknown) => error instanceof ComponentDocsError && error.code === "ADAPTER_CONTRACT");
+  });
+
+  for (const invalid of [null, "false", 0]) {
+    it(`rejects invalid JSON fit bit ${JSON.stringify(invalid)} at either level`, () => {
+      for (const placement of [false, true]) {
+        assert.throws(() => projectLine((line) => {
+          Object.assign(placement ? line.placements[0]! : line, { dnp: invalid });
+        }), (error: unknown) => error instanceof ComponentDocsError && error.code === "ADAPTER_CONTRACT");
+      }
+    });
+  }
+});
 
 describe("normalized relationships", () => {
   it("orders records inventory-line first, each standalone followed by its subordinates", () => {

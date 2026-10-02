@@ -55,14 +55,38 @@ export type InventoryLine = {
   manufacturer: string;
   lcsc: string;
   package: string;
-  dnp: boolean;
+  dnp?: boolean;
   mounting?: "pcb" | "external";
   owner_skill: string;
   identity_state: string;
   source_state: string;
   function: string;
-  placements: { board: string; refdes: string }[];
+  placements: { board: string; refdes: string; dnp?: boolean }[];
 };
+
+/** Resolve only the fit bits needed to publish each placement honestly. */
+export function placementFits(line: InventoryLine): { board: string; refdes: string; dnp: boolean }[] {
+  if (line.dnp !== undefined && typeof line.dnp !== "boolean") {
+    fail("ADAPTER_CONTRACT", "inventory line dnp is not a boolean", { lineId: line.line_id });
+  }
+  if (line.placements.length === 0 && line.dnp === undefined) {
+    fail("ADAPTER_CONTRACT", "placement-less inventory line has no dnp", { lineId: line.line_id });
+  }
+  return line.placements.map((placement) => {
+    const at = { lineId: line.line_id, board: placement.board, refdes: placement.refdes };
+    if (placement.dnp !== undefined && typeof placement.dnp !== "boolean") {
+      fail("ADAPTER_CONTRACT", "placement dnp is not a boolean", at);
+    }
+    if (placement.dnp !== undefined && line.dnp !== undefined && placement.dnp !== line.dnp) {
+      fail("ADAPTER_CONTRACT", "placement dnp conflicts with inventory line dnp", at);
+    }
+    const dnp = placement.dnp ?? line.dnp;
+    if (dnp === undefined) {
+      fail("ADAPTER_CONTRACT", "placement has no effective dnp", at);
+    }
+    return { board: placement.board, refdes: placement.refdes, dnp };
+  });
+}
 
 export type Inventory = {
   schema_version: number;

@@ -131,6 +131,51 @@ describe("catalog", () => {
   });
 });
 
+describe("mixed placement fit", () => {
+  const driver = recordOf(model, FIXTURE_IDS.driverRecord);
+  const mixed: PublicRecord = {
+    ...driver,
+    identity: {
+      ...driver.identity,
+      dnp: false,
+      placements: driver.identity.placements.map((placement, index) => ({ ...placement, dnp: index === 0 })),
+    },
+  };
+  const mixedModel: PublicViewModel = { ...model, records: [mixed] };
+  const catalog = renderCatalog(mixedModel).contents;
+  const page = renderRecord(mixed, buildRecordIndex(mixedModel)).contents;
+  const label = "Mixed: fitted and DNP or hand-fit by placement";
+
+  it("labels the catalog index, catalog entry and record identity as mixed", () => {
+    assert.match(catalog, new RegExp(`\\| ${label} +\\|`, "u"));
+    assert.ok(catalog.includes(`**Fit:** ${label}`));
+    assert.ok(page.includes(`**Fit:** ${label}`));
+  });
+
+  it("names only the DNP placements in the catalog's additional paragraph", () => {
+    assert.ok(catalog.includes("**Placements:** board-l U2; board-p U7"));
+    assert.equal(catalog.split("\n").find((line) => line.startsWith("**DNP or hand-fit placements:**")),
+      "**DNP or hand-fit placements:** board-l U2");
+  });
+
+  it("gives every placement its exact fit label in a third column", () => {
+    const placements = page.slice(page.indexOf("## Placements"), page.indexOf("## Coverage"));
+    assert.match(placements, /\| Board +\| Reference designator +\| Fit +\|/u);
+    assert.match(placements, /\| board-l +\| `U2` +\| DNP or hand-fit +\|/u);
+    assert.match(placements, /\| board-p +\| `U7` +\| Fitted +\|/u);
+  });
+
+  it("keeps uniform records free of mixed-fit paragraphs and columns", () => {
+    assert.doesNotMatch(catalogPage, /Mixed:|DNP or hand-fit placements/u);
+    for (const record of model.records) {
+      const uniform = pageFor(model, record.identity.recordId);
+      const placements = uniform.slice(uniform.indexOf("## Placements"), uniform.indexOf("## Coverage"));
+      assert.doesNotMatch(placements, /\| Fit +\|/u);
+      assert.ok(uniform.includes(`**Fit:** ${record.identity.dnp ? "DNP or hand-fit" : "Fitted"}`));
+    }
+  });
+});
+
 describe("record page — structure", () => {
   it("renders an unavailable reason without a document link, with evidence intact", () => {
     const record = recordOf(model, FIXTURE_IDS.driverRecord);
