@@ -123,6 +123,7 @@ function identity(input: IdentityInput): PublicRecordIdentity {
     placements: (input.placements ?? [["board-l", "U1"]]).map(([board, refdes]) => ({
       board: t(board),
       refdes: t(refdes),
+      dnp: input.dnp ?? false,
     })),
   };
 }

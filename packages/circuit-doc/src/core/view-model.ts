@@ -76,6 +76,8 @@ export type CorpusSummary = {
 export type PublicPlacement = {
   readonly board: SafeText;
   readonly refdes: SafeText;
+  /** Effective fit at this placement: true means DNP or hand-fit. */
+  readonly dnp: boolean;
 };
 
 /** Identity of one orderable line, as published. */
@@ -104,6 +106,7 @@ export type PublicRecordIdentity = {
   /** Verbatim provider state strings, e.g. `VERIFIED` / `UNRESOLVED`. */
   readonly identityState: SafeText;
   readonly sourceState: SafeText;
+  /** True iff every placement is DNP or hand-fit; line dnp when there are no placements. */
   readonly dnp: boolean;
   readonly placements: readonly PublicPlacement[];
 };

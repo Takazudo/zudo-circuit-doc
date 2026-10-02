@@ -45,7 +45,8 @@ import {
   agentResourceDestination,
   agentResourceDisabledNotice,
   aliasTerms,
-  fitLabel,
+  fitRollupLabel,
+  hasMixedFit,
   generatedNotice,
   openDomainRatio,
   openDomainSummary,
@@ -184,7 +185,7 @@ function indexRow(record: PublicRecord): TableRow {
     part,
     [code(identity.recordId)],
     [text(identity.function)],
-    [text(fitLabel(identity.dnp))],
+    [text(fitRollupLabel(identity))],
     [text(identity.identityState)],
     [text(identity.sourceState)],
     [text(openDomainRatio(record.coverage))],
@@ -238,7 +239,12 @@ function entry(record: PublicRecord, options: RenderOptions): RootContent[] {
     heading(3, identity.mpn),
     table([literal("Field"), literal("Recorded value")], details),
     paragraph(field("Placements", [text(placementSummary(identity.placements))])),
-    paragraph(field("Fit", [text(fitLabel(identity.dnp))])),
+    paragraph(field("Fit", [text(fitRollupLabel(identity))])),
+    ...(hasMixedFit(identity)
+      ? [paragraph(field("DNP or hand-fit placements", [
+          text(placementSummary(identity.placements.filter((placement) => placement.dnp))),
+        ]))]
+      : []),
     paragraph(field("Identity state", [text(identity.identityState)])),
     paragraph(field("Source state", [text(identity.sourceState)])),
     paragraph(field("Open coverage domains", [text(openDomainSummary(record.coverage))])),
