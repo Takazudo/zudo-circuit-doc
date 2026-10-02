@@ -1,3 +1,4 @@
+import { MODEL_UNAVAILABLE_TEXT } from "../core/reference-descriptor.ts";
 /**
  * The built-output reference checker (port of upstream
  * `check-built-component-references.mjs`; see
@@ -6,7 +7,7 @@
  *
  * Every structural assertion the upstream script made about a record page
  * (exactly one "Component references" section, rendered before the evidence
- * tables, one selected PDF label, one document link, one footprint preview
+ * tables, one selected document label, one document link, one footprint preview
  * image with its inert no-JS starting state, one selected model, two enlarge
  * controls, two closed dialog shells with media-specific accessible names and
  * no visible title, a retained Sources section) is kept verbatim — only the
@@ -35,9 +36,9 @@ import type { PublicRecord, PublicViewModel } from "../core/view-model.ts";
 /**
  * Mirrors the `labels` map `provider/v1/index.ts` `projectRecordReference`
  * assigns per `documentKind` — kept in sync by hand, the same way upstream's
- * `ALLOWED_PDF_LABELS` tracked its own adapter's three literal strings.
+ * `ALLOWED_DOCUMENT_LABELS` tracked its own adapter's three literal strings.
  */
-const ALLOWED_PDF_LABELS = new Set(["Datasheet PDF", "Specification PDF", "Mechanical drawing PDF"]);
+const ALLOWED_DOCUMENT_LABELS = new Set(["Datasheet PDF", "Specification PDF", "Mechanical drawing PDF", "Source record"]);
 
 const FOOTPRINT_SRC_PATTERN = new RegExp(
   `^${escapeRegExp(FOOTPRINT_ASSET_BASE)}[A-Za-z0-9._+-]+\\.svg$`,
@@ -66,6 +67,7 @@ export async function checkBuiltReferences(input: BuiltReferencesInput): Promise
 
   const expectedRecords = model.records.length;
   const expectedPackages = model.packagePreviews.length;
+  const expectedModels = model.packagePreviews.filter(p => p.modelPath !== null).length;
 
   const recordDirectories = await listRecordDirectories(recordsRoot);
   if (recordDirectories.length !== expectedRecords) {
@@ -101,7 +103,7 @@ export async function checkBuiltReferences(input: BuiltReferencesInput): Promise
       checkPackagelessRecordPage(slug, html, record);
       continue;
     }
-    checkRecordPage(slug, html, referencedFootprints, referencedModels);
+    checkRecordPage(slug, html, referencedFootprints, referencedModels, record?.reference.footprint?.modelPath !== null);
   }
 
   if (!setsEqual(referencedFootprints, manifest.names)) {
@@ -110,9 +112,9 @@ export async function checkBuiltReferences(input: BuiltReferencesInput): Promise
       actual: [...referencedFootprints].sort(byCodeUnit),
     });
   }
-  if (referencedModels.size !== expectedPackages) {
+  if (referencedModels.size !== expectedModels) {
     fail("PUBLICATION_POLICY", "record pages must deduplicate to exactly the selected package models", {
-      expected: expectedPackages,
+      expected: expectedModels,
       actual: referencedModels.size,
     });
   }
@@ -265,11 +267,12 @@ function checkPackagelessRecordPage(slug: string, html: string, record: PublicRe
 
 // --- per-record structural assertions (kept verbatim from upstream) --------
 
-function checkRecordPage(
+export function checkRecordPage(
   slug: string,
   html: string,
   referencedFootprints: Set<string>,
   referencedModels: Set<string>,
+  hasModel = true,
 ): void {
   const sections = extractReferenceSections(html);
   if (sections.length !== 1) {
@@ -288,10 +291,10 @@ function checkRecordPage(
       /<p\b[^>]*class=(?:"zcd-component-references__document-label"|zcd-component-references__document-label)[^>]*>([^<]+)<\/p>/gu,
     ),
   ];
-  if (labels.length !== 1) fail("PUBLICATION_POLICY", `${slug} must render one selected PDF label`, { slug });
+  if (labels.length !== 1) fail("PUBLICATION_POLICY", `${slug} must render one selected document label`, { slug });
   const label = decodeHtml(labels[0]?.[1] ?? "");
-  if (!ALLOWED_PDF_LABELS.has(label)) {
-    fail("PUBLICATION_POLICY", `${slug} has an unreviewed PDF label`, { slug, label });
+  if (!ALLOWED_DOCUMENT_LABELS.has(label)) {
+    fail("PUBLICATION_POLICY", `${slug} has an unreviewed document label`, { slug, label });
   }
 
   const documents = [
@@ -324,6 +327,21 @@ function checkRecordPage(
     fail("PUBLICATION_POLICY", `${slug} must retain the direct footprint link without JavaScript`, { slug });
   }
 
+  if (!hasModel) {
+    if (!section.includes(MODEL_UNAVAILABLE_TEXT) || !/data-model-unavailable/u.test(section)) {
+      fail("PUBLICATION_POLICY", `${slug} must explicitly state model unavailability`, { slug });
+    }
+    if (/data-model-url|PackageModelViewerIsland|data-component-model-viewer-root/u.test(section)) {
+      fail("PUBLICATION_POLICY", `${slug} must not invent a model viewer`, { slug });
+    }
+    for (const attribute of ["data-component-preview-enlarge", "data-component-preview-dialog"]) {
+      const tags = section.match(new RegExp(`<[^>]+\\b${attribute}=[^>]*>`, "gu")) ?? [];
+      if (tags.length !== 1 || readAttribute(tags[0], attribute, slug) !== "footprint") {
+        fail("PUBLICATION_POLICY", `${slug} must retain only the footprint control and dialog`, { slug });
+      }
+    }
+    return;
+  }
   const modelTags = section.match(/<[^>]+\bdata-model-url=(?:"[^"]+"|'[^']+'|[^\s>]+)[^>]*>/gu) ?? [];
   const modelPaths = modelTags.map((tag) => decodeHtml(readAttribute(tag, "data-model-url", slug)));
   if (modelPaths.length !== 1) fail("PUBLICATION_POLICY", `${slug} must render one selected package model`, { slug });

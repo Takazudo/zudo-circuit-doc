@@ -281,12 +281,13 @@ function projectRecordReference(
   policy.publishRequired("asset.datasheetPdf", true);
   if (footprint !== undefined) {
     policy.publishRequired("asset.footprintPreview", true);
-    policy.publishRequired("asset.modelPreview", true);
+    if (footprint.modelPath !== null) policy.publishRequired("asset.modelPreview", true);
   }
   const labels = {
     datasheet: "Datasheet PDF",
     specification: "Specification PDF",
     drawing: "Mechanical drawing PDF",
+    "source-record": "Source record",
   } as const;
   return {
     document: {
@@ -319,7 +320,7 @@ function projectFootprint(entry: CircuitPackageReference, policy: PublicationPol
     packageId: policy.publishRequired("reference.footprint.packageId", safeText(entry.packageId, { field: `${at}.packageId` })),
     footprintName: policy.publishRequired("reference.footprint.name", safeText(entry.footprintName, { field: `${at}.footprintName` })),
     footprintPath: policy.publishRequired("reference.footprint.path", safeText(entry.footprintPath, { field: `${at}.footprintPath` })),
-    modelPath: policy.publishRequired("reference.model.path", safeText(entry.modelPath, { field: `${at}.modelPath` })),
+    modelPath: policy.publishRequired("reference.model.path", entry.modelPath === null ? null : safeText(entry.modelPath, { field: `${at}.modelPath` })),
     offset: policy.publishRequired("reference.model.offset", entry.offset),
     rotation: policy.publishRequired("reference.model.rotation", entry.rotation),
     scale: policy.publishRequired("reference.model.scale", entry.scale),

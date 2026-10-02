@@ -19,7 +19,7 @@ What each project check establishes, and what it does not. Report a check's actu
 
 1. `--representatives <json>` on the command line.
 2. `browserSmoke.representatives` in `circuit.config.ts`, used exactly as configured — even an explicit empty list.
-3. Otherwise, up to 3 representatives **derived** from the preflight report: published record slugs, sorted, filtered to the ones whose generated page has a decodable component-references section (a reviewed PDF, a footprint and a WRL model), and, once the site is built, whose built output carries the matching marker and assets. A derived run prints `INFO: using derived representatives: ...`.
+3. Otherwise, up to 3 representatives **derived** from the preflight report: published record slugs, sorted, filtered to the ones whose generated page has a decodable component-references section (a reviewed document/source record, a footprint, and a valid WRL when one is declared), and, once the site is built, whose built output carries the matching marker and assets. When the first three qualifying pages are footprint-only, the final slot is reserved for the first later model-bearing page if one exists. Missing model interaction gates are reported NOT RUN. A derived run prints `INFO: using derived representatives: ...`.
 
 A declared-zero project (nothing published) is a `SKIP`, not a failure. If records are published but derivation finds none that qualifies, the command exits `4` rather than silently checking nothing — set `browserSmoke.representatives` in `circuit.config.ts` to name pages explicitly.
 

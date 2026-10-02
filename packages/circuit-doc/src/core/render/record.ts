@@ -193,8 +193,9 @@ function componentReferencesSection(record: PublicRecord): RootContent[] {
       paragraph([text(literal(PACKAGELESS_REFERENCE_TEXT[record.reference.mounting]))]),
     ];
   }
-  const modelName = String(footprint.modelPath).split("/").at(-1);
+  const modelName = footprint.modelPath === null ? null : String(footprint.modelPath).split("/").at(-1);
   if (modelName === undefined) throw new Error("Published model path has no basename");
+  if (footprint.modelPath !== null && (footprint.offset === null || footprint.rotation === null || footprint.scale === null)) throw new Error("Declared model placement is incomplete");
   const descriptor = encodeComponentReferencesDescriptor(createComponentReferencesDescriptor({
     document: {
       label: document.label,
@@ -204,14 +205,14 @@ function componentReferencesSection(record: PublicRecord): RootContent[] {
       url: document.url,
     },
     footprintName: footprint.footprintName,
-    model: {
+    model: modelName === null ? null : {
       version: 1,
       packageId: footprint.packageId,
       packageLabel: footprint.footprintName,
       modelUrl: `${MODEL_ASSET_BASE}${modelName}`,
-      offset: footprint.offset,
-      rotation: footprint.rotation,
-      scale: footprint.scale,
+      offset: footprint.offset!,
+      rotation: footprint.rotation!,
+      scale: footprint.scale!,
     },
   }));
   return [

@@ -17,11 +17,11 @@ export type ComponentReferencesDescriptor = {
     readonly assetUrl: string;
   };
   /** Kept encoded so the same validated descriptor reaches the client island. */
-  readonly modelDescriptor: string;
+  readonly modelDescriptor: string | null;
 };
 
 const HEX = /^(?:[0-9a-f]{2})+$/u;
-const DOCUMENT_LABELS = new Set(["Datasheet PDF", "Specification PDF", "Mechanical drawing PDF"]);
+const DOCUMENT_LABELS = new Set(["Datasheet PDF", "Specification PDF", "Mechanical drawing PDF", "Source record"]);
 const SAFE_FOOTPRINT_NAME = /^[A-Za-z0-9][A-Za-z0-9 ._+(),/-]*$/u;
 // `FOOTPRINT_ASSET_BASE` (from `./site.ts`) has no regex metacharacters, so it
 // is safe to splice straight into the pattern — the accepted URL set is
@@ -58,13 +58,13 @@ export function decodeComponentReferencesDescriptor(encoded: string): ComponentR
 export function createComponentReferencesDescriptor(input: {
   readonly document: ComponentReferencesDescriptor["document"];
   readonly footprintName: string;
-  readonly model: ModelViewerDescriptor;
+  readonly model: ModelViewerDescriptor | null;
 }): ComponentReferencesDescriptor {
   return {
     version: 1,
     document: input.document,
     footprint: { name: input.footprintName, assetUrl: footprintAssetUrl(input.footprintName) },
-    modelDescriptor: encodeModelDescriptor(input.model),
+    modelDescriptor: input.model === null ? null : encodeModelDescriptor(input.model),
   };
 }
 
@@ -76,8 +76,8 @@ export function assertComponentReferencesDescriptor(value: unknown): asserts val
   }
   assertDocument(descriptor.document);
   assertFootprint(descriptor.footprint);
-  if (typeof descriptor.modelDescriptor !== "string") throw new Error("Component references model descriptor is invalid");
-  decodeModelDescriptor(descriptor.modelDescriptor);
+  if (descriptor.modelDescriptor !== null && typeof descriptor.modelDescriptor !== "string") throw new Error("Component references model descriptor is invalid");
+  if (descriptor.modelDescriptor !== null) decodeModelDescriptor(descriptor.modelDescriptor);
 }
 
 function assertDocument(value: unknown): asserts value is ComponentReferencesDescriptor["document"] {
@@ -132,3 +132,5 @@ function isSafeHttpUrl(value: string): boolean {
 function isDisplayText(value: string): boolean {
   return value.length > 0 && value.length <= 1000 && !/[\p{Cc}\p{Cf}]/u.test(value);
 }
+
+export const MODEL_UNAVAILABLE_TEXT = "No 3D model is declared by this footprint; geometry and physical fit remain unverified.";

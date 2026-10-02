@@ -30,17 +30,17 @@ export type Transform3d = { readonly x: number; readonly y: number; readonly z: 
 export type CircuitDocumentReference = {
   readonly recordId: string;
   readonly source: ProviderSource;
-  readonly documentKind: "datasheet" | "specification" | "drawing";
+  readonly documentKind: "datasheet" | "specification" | "drawing" | "source-record";
 };
 
 export type CircuitPackageReference = {
   readonly packageId: string;
   readonly footprintName: string;
   readonly footprintPath: string;
-  readonly modelPath: string;
-  readonly offset: Transform3d;
-  readonly rotation: Transform3d;
-  readonly scale: Transform3d;
+  readonly modelPath: string | null;
+  readonly offset: Transform3d | null;
+  readonly rotation: Transform3d | null;
+  readonly scale: Transform3d | null;
   readonly recordIds: readonly string[];
 };
 
@@ -161,7 +161,7 @@ export async function readCircuitReferenceContract(
         modelLocatorPrefix,
         limits,
       );
-      aggregateModelBytes += await fileSize(
+      if (packageReference.modelPath !== null) aggregateModelBytes += await fileSize(
         join(canonicalPathBase, packageReference.modelPath),
         "model",
         recordId,
@@ -236,6 +236,65 @@ function canonicalFootprint(entry: IndexedRecord): string {
   return name;
 }
 
+function modelClauses(text: string, recordId: string, footprintName: string): RegExpExecArray[] {
+  if (!/^\s*\((?:footprint|module)\b/u.test(text)) {
+    fail("ADAPTER_CONTRACT", "not a footprint", { recordId });
+  }
+
+  const blocks: string[] = [];
+  let depth = 0;
+  let start = -1;
+  let quoted = false;
+  let escaped = false;
+  let rootSeen = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i]!;
+    if (quoted) {
+      if (escaped) escaped = false;
+      else if (c === "\\") escaped = true;
+      else if (c === '"') quoted = false;
+      continue;
+    }
+
+    if (depth === 0 && !/\s/u.test(c) && c !== '(') {
+      fail("ADAPTER_CONTRACT", "text outside footprint root", { recordId });
+    }
+    if (c === '"') {
+      quoted = true;
+      continue;
+    }
+    if (c === '(') {
+      if (depth === 0) {
+        if (rootSeen) fail("ADAPTER_CONTRACT", "multiple footprint roots", { recordId });
+        rootSeen = true;
+      }
+      if (depth === 1) start = i;
+      depth++;
+    }
+    if (c === ')') {
+      depth--;
+      if (depth < 0) fail("ADAPTER_CONTRACT", "unbalanced footprint", { recordId });
+      if (depth === 1 && start >= 0) {
+        const block = text.slice(start, i + 1);
+        if (/^\(\s*model(?:\s|\))/u.test(block)) blocks.push(block);
+        start = -1;
+      }
+    }
+  }
+
+  if (quoted || depth !== 0) fail("ADAPTER_CONTRACT", "unbalanced footprint", { recordId });
+  return blocks.map((block) => {
+    const match = /^\(\s*model\s+("(?:\\.|[^"\\])*")/u.exec(block);
+    if (match === null) {
+      fail("ADAPTER_CONTRACT", "malformed declared model", { recordId, footprint: footprintName });
+    }
+    match[1] = JSON.parse(match[1]!);
+    match[0] = block; // Preserve the complete declaration for scoped transform parsing.
+    return match;
+  });
+}
+
 async function readPackage(
   footprintName: string,
   recordId: string,
@@ -255,7 +314,19 @@ async function readPackage(
   const footprintStat = await lstat(footprintFile);
   assertReferenceSize("footprint", footprintStat.size, recordId, limits);
   const footprint = await readFile(footprintFile, "utf8");
-  const models = [...footprint.matchAll(/\(model\s+"([^"]+)"/gu)];
+  const models = modelClauses(footprint, recordId, footprintName);
+  if (models.length === 0) {
+    return {
+      packageId: footprintName,
+      footprintName,
+      footprintPath: relative(canonicalPathBase, footprintFile).split(sep).join("/"),
+      modelPath: null,
+      offset: null,
+      rotation: null,
+      scale: null,
+      recordIds: [],
+    };
+  }
   if (models.length !== 1) {
     fail("ADAPTER_CONTRACT", "footprint must reference exactly one model", {
       recordId,
@@ -264,6 +335,7 @@ async function readPackage(
     });
   }
   const modelLocator = models[0]?.[1] ?? "";
+  const modelText = models[0]![0];
   if (!modelLocator.startsWith(modelLocatorPrefix)) {
     fail("PATH_CONTAINMENT", "footprint model is not a safe local WRL", {
       recordId,
@@ -304,9 +376,9 @@ async function readPackage(
     // Published and hashed into committed manifests, so always POSIX separators.
     footprintPath: relative(canonicalPathBase, footprintFile).split(sep).join("/"),
     modelPath: relative(canonicalPathBase, modelFile).split(sep).join("/"),
-    offset: transform(footprint, "offset", recordId, footprintName),
-    rotation: transform(footprint, "rotate", recordId, footprintName),
-    scale: transform(footprint, "scale", recordId, footprintName),
+    offset: transform(modelText, "offset", recordId, footprintName),
+    rotation: transform(modelText, "rotate", recordId, footprintName),
+    scale: transform(modelText, "scale", recordId, footprintName),
     recordIds: [],
   };
 }

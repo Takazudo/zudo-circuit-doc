@@ -33,7 +33,7 @@ import type { ResolvedCircuitConfig } from "./resolve.ts";
 export const SELECTION_SCHEMA_VERSION = 1;
 export const ASSETS_SCHEMA_VERSION = 1;
 
-const DOCUMENT_KINDS = ["datasheet", "specification", "drawing"] as const;
+const DOCUMENT_KINDS = ["datasheet", "specification", "drawing", "source-record"] as const;
 
 /** One entry of `publication.assets` (ADR-018's deliberate-publication allowlist). */
 export type PublicationAsset = {

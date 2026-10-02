@@ -13,7 +13,7 @@ import { evaluate, waitFor, type CdpClient } from "../cdp.ts";
 import type { Representative } from "../types.ts";
 import { revealReadyViewer } from "./interactions.ts";
 
-const ALLOWED_PDF_LABELS = ["Datasheet PDF", "Specification PDF", "Mechanical drawing PDF"];
+const ALLOWED_DOCUMENT_LABELS = ["Datasheet PDF", "Specification PDF", "Mechanical drawing PDF", "Source record"];
 
 export type ReferencePageReport = { readonly themeSignature: string };
 
@@ -30,6 +30,7 @@ export async function inspectReferencePage(
     cdp,
     `document.querySelector('.zcd-component-references__footprint img')?.complete && document.querySelector('.zcd-component-references__footprint img')?.naturalWidth > 0`,
   );
+  if (await evaluate(cdp, `document.querySelector('[data-model-unavailable="true"]') !== null`)) return inspectFootprintOnly(cdp, representative, width, theme, shellAssertions);
   await revealReadyViewer(cdp);
   const report = (await evaluate(
     cdp,
@@ -153,8 +154,8 @@ export async function inspectReferencePage(
 
   assertEqual(report.viewport.inner, width, `${representative.kind} ${width}/${theme} viewport width`);
   assertEqual(report.viewport.scroll <= report.viewport.client + 1, true, `${representative.kind} ${width}/${theme} page overflow`);
-  assertEqual(ALLOWED_PDF_LABELS.includes(report.documentLabel), true, `${representative.kind} PDF label`);
-  assertEqual(/^https?:\/\//u.test(report.documentHref), true, `${representative.kind} PDF destination`);
+  assertEqual(ALLOWED_DOCUMENT_LABELS.includes(report.documentLabel), true, `${representative.kind} document label`);
+  assertEqual(/^https?:\/\//u.test(report.documentHref), true, `${representative.kind} document destination`);
   assertEqual((report.authority?.length ?? 0) > 0, true, `${representative.kind} document authority retained`);
   if (representative.availability !== undefined) {
     assertEqual(report.availability, representative.availability, `${representative.kind} availability`);
@@ -295,4 +296,77 @@ async function inspectNativeShell(cdp: CdpClient, representative: Representative
     await evaluate(cdp, `document.querySelector('header button[aria-label="Close sidebar"]').click()`);
     await waitFor(cdp, `document.querySelector('header button[aria-label="Open sidebar"]')?.getAttribute('aria-expanded') === 'false'`);
   }
+}
+
+// Footprint-only pages remain in responsive/theme inspection. Model interaction
+// checks select a different representative rather than inventing a ready viewer.
+async function inspectFootprintOnly(
+  cdp: CdpClient,
+  representative: Representative,
+  width: number,
+  theme: string,
+  shellAssertions: boolean,
+): Promise<ReferencePageReport> {
+  const report = (await evaluate(
+    cdp,
+    `(() => {
+      const section = document.querySelector('.zcd-component-references');
+      const notice = section.querySelector('[data-model-unavailable="true"]');
+      const image = section.querySelector('.zcd-component-references__footprint img');
+      const style = getComputedStyle(section);
+      const label = section.querySelector('.zcd-component-references__document-label');
+      const link = section.querySelector('.zcd-component-references__document-title a');
+      const heading = [...document.querySelectorAll('h2')].find(h => h.textContent.trim() === 'Documents and package');
+      const authority = [...section.querySelectorAll('dt')].find(n => n.textContent.trim() === 'Authority')?.nextElementSibling?.textContent.trim();
+      return {
+        width: innerWidth,
+        overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+        notice: notice?.textContent,
+        noticeVisible: notice !== null && getComputedStyle(notice).display !== 'none',
+        models: section.querySelectorAll('[data-model-url], [data-component-model-viewer-root], [data-component-preview-enlarge="model"]').length,
+        footprintLoaded: image?.complete && image.naturalWidth > 0,
+        label: label?.textContent.trim(),
+        href: link?.href,
+        authority,
+        theme: document.documentElement.dataset.theme,
+        headingId: heading?.id,
+        themeSignature: [
+          getComputedStyle(document.body).color,
+          getComputedStyle(document.body).backgroundColor,
+          style.color,
+          style.backgroundColor,
+        ].join('|'),
+      };
+    })()`,
+  )) as {
+    width: number;
+    overflow: boolean;
+    notice: string;
+    noticeVisible: boolean;
+    models: number;
+    footprintLoaded: boolean;
+    label: string;
+    href: string;
+    authority: string;
+    theme: string;
+    headingId: string;
+    themeSignature: string;
+  };
+  assertEqual(report.width, width, 'footprint-only viewport');
+  assertEqual(report.overflow, false, 'footprint-only no overflow');
+  assertEqual(
+    report.notice,
+    'No 3D model is declared by this footprint; geometry and physical fit remain unverified.',
+    'honest unavailable notice',
+  );
+  assertEqual(report.noticeVisible, true, 'unavailable notice visible');
+  assertEqual(report.models, 0, 'no invented model viewer or controls');
+  assertEqual(report.footprintLoaded, true, 'footprint preview loaded');
+  assertEqual(ALLOWED_DOCUMENT_LABELS.includes(report.label), true, 'reviewed document label');
+  assertEqual(/^https?:\/\//u.test(report.href), true, 'document URL');
+  assertEqual((report.authority?.length ?? 0) > 0, true, 'source authority retained');
+  assertEqual(report.theme, theme, 'theme retained');
+  assertEqual((report.headingId?.length ?? 0) > 0, true, 'reference heading retained');
+  if (shellAssertions) await inspectNativeShell(cdp, representative, width, report.headingId);
+  return { themeSignature: report.themeSignature };
 }
