@@ -43,6 +43,7 @@ export async function inspectReferencePage(
       const footprintLink = section.querySelector('.zcd-component-references__footprint-frame > a');
       const footprintImage = footprintLink.querySelector('img');
       const modelViewport = section.querySelector('[data-model-viewer-viewport]');
+      const caption = section.querySelector('.zcd-model-viewer__caption');
       const modelRoot = section.querySelector('[data-component-model-viewer-root]');
       const footprintTrigger = section.querySelector('[data-component-preview-enlarge="footprint"]');
       const modelTrigger = section.querySelector('[data-component-preview-enlarge="model"]');
@@ -81,6 +82,8 @@ export async function inspectReferencePage(
         footprintRect,
         imageRect,
         modelRect,
+        captionRect: caption === null ? null : rect(caption),
+        captionOverflows: caption === null ? null : caption.scrollWidth > caption.clientWidth + 1,
         footprintTrigger: {
           rect: rect(footprintTrigger),
           display: getComputedStyle(footprintTrigger).display,
@@ -126,6 +129,8 @@ export async function inspectReferencePage(
     footprintRect: Rect;
     imageRect: Rect;
     modelRect: Rect;
+    captionRect: Rect | null;
+    captionOverflows: boolean | null;
     footprintTrigger: { rect: Rect; display: string; label: string };
     modelTrigger: { rect: Rect; display: string; label: string };
     dialogs: ReadonlyArray<{ kind: string; open: boolean; accessibleName: string | null; hasVisibleTitleReference: boolean }>;
@@ -207,6 +212,10 @@ export async function inspectReferencePage(
   assertContained(report.footprintRect, footprintStage, `${representative.kind} footprint at ${width}/${theme}`);
   assertContained(report.imageRect, report.footprintRect, `${representative.kind} footprint image at ${width}/${theme}`);
   assertContained(report.modelRect, modelStage, `${representative.kind} model viewport at ${width}/${theme}`);
+  if (report.captionRect !== null) {
+    assertContained(report.captionRect, modelStage, `${representative.kind} model caption at ${width}/${theme}`);
+    assertEqual(report.captionOverflows, false, `${representative.kind} model caption has no internal overflow at ${width}/${theme}`);
+  }
   assertContained(report.footprintTrigger.rect, report.footprintRect, `${representative.kind} footprint enlarge at ${width}/${theme}`);
   assertContained(report.modelTrigger.rect, report.modelRect, `${representative.kind} model enlarge at ${width}/${theme}`);
   assertEqual(report.footprintTrigger.rect.width >= 44 && report.footprintTrigger.rect.height >= 44, true, `${representative.kind} footprint target size`);
