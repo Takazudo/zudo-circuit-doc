@@ -13,6 +13,7 @@ import { readCanaries } from "../../provider/v1/canaries.ts";
 import { projectIndex, readEvidenceIndex } from "../../provider/v1/index.ts";
 import { runArtifactScan } from "../../scan/artifacts.ts";
 import { buildScanPolicy } from "../../scan/policy.ts";
+import { derivePublicCanonicalHashes } from "../../scan/public-canonical.ts";
 import { checkPublicScope } from "../../scan/public-scope.ts";
 import { EXIT, flagValue, type CommandContext, type CommandMeta, type CommandModule } from "../command.ts";
 import { reportFailure } from "../run.ts";
@@ -72,11 +73,17 @@ async function run(context: CommandContext): Promise<number> {
       agentResources: project.config.docs.agentResources,
     });
 
+    const publicCanonicalHashes = await derivePublicCanonicalHashes({
+      declared: scanPolicy.publicCanonicalFootprints,
+      model,
+      paths: project.paths,
+    });
     const report = await runArtifactScan({
       policy: scanPolicy,
       paths: project.paths,
       docsRoot: project.config.docs.root,
       canaries,
+      publicCanonicalHashes,
       model,
       agentSkillRoot,
     });

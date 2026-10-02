@@ -54,6 +54,7 @@ import { GENERATED_ROUTE_PREFIX } from "../core/site.ts";
 import type { PublicRecord, PublicViewModel } from "../core/view-model.ts";
 import type { CircuitProjectPaths } from "../provider/v1/paths.ts";
 import type { ScanPolicy } from "./policy.ts";
+import { subtractPublicCanonicalHashes, type PublicCanonicalHash } from "./public-canonical.ts";
 
 export type Control = { readonly label: string; readonly value: string };
 
@@ -66,6 +67,8 @@ export type ArtifactScanInput = {
   readonly docsRoot: string;
   /** From `readCanaries(paths)` — the full denied-value canary set. */
   readonly canaries: readonly Canary[];
+  /** Verified canonical footprint digests; subtracted only from the SITE tier. */
+  readonly publicCanonicalHashes: readonly PublicCanonicalHash[];
   /** Already validated and projected (`readEvidenceIndex` + `projectIndex`). */
   readonly model: PublicViewModel;
   /** `--agent-skill <dir>`, or `null` when not passed. */
@@ -230,8 +233,8 @@ export async function runArtifactScan(input: ArtifactScanInput): Promise<Artifac
     contentRoot,
     generatedRoot: paths.generatedRoot,
   });
-  const siteCanaries = subtractPublishedElsewhere(canaries, contentTargets);
-  const withheld = canaries.length - siteCanaries.length;
+  const contentCanaries = subtractPublishedElsewhere(canaries, contentTargets);
+  const withheld = canaries.length - contentCanaries.length;
   if (policy.expectedWithheld !== null && withheld !== policy.expectedWithheld) {
     fail("PUBLICATION_POLICY", "the number of canaries withheld from the SITE tier changed", {
       expected: policy.expectedWithheld,
@@ -239,6 +242,8 @@ export async function runArtifactScan(input: ArtifactScanInput): Promise<Artifac
       why: "another content source started or stopped publishing a denied-only value; review the change, then update scan.expectedWithheld",
     });
   }
+  const publicCanonical = subtractPublicCanonicalHashes(contentCanaries, input.publicCanonicalHashes);
+  const siteCanaries = publicCanonical.kept;
   const siteTargets = [...distTargets, ...agentTargets];
   const siteResult = scanTargets(siteTargets, siteCanaries);
   const siteFloors = deriveFloors(policy, "site", model);
@@ -250,6 +255,7 @@ export async function runArtifactScan(input: ArtifactScanInput): Promise<Artifac
     "",
     `SITE tier              ${siteResult.canaries} canaries x ${siteResult.filesScanned} artifacts, 0 hits`,
     `                       ${withheld} canary/canaries withheld (published by another content source)`,
+    `                       ${publicCanonical.withheld.length} canary/canaries withheld as declared public canonical footprint hashes`,
     `                       ${siteResult.filesSkippedBinary} binary artifact(s) not text-scanned`,
   );
 
