@@ -81,6 +81,7 @@ export type EvidenceConfig = {
   readonly directRouting: ConfigPath;
   readonly vendorQualifiers: ConfigPath;
   readonly forwardTests?: ConfigPath | null;
+  readonly candidates?: ConfigPath | null;
   readonly sourceCache: ConfigPath;
 };
 

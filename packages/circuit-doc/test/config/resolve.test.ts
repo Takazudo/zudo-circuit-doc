@@ -24,6 +24,7 @@ describe("resolveCircuitConfig", () => {
     assert.equal(resolved.evidence.bundlesRoot, join(DIR, ".claude/skills"));
     assert.equal(resolved.evidence.ownerPrefix, "component-");
     assert.equal(resolved.evidence.forwardTests, null);
+    assert.equal(resolved.evidence.candidates, null);
     assert.equal(resolved.evidence.sourceCache, join(DIR, ".circuit-cache/sources"));
     assert.deepEqual(resolved.inventoryProvider, { kind: "manual" });
     assert.equal(resolved.publication.selection, join(DIR, "circuit/publication/selection.json"));
@@ -77,6 +78,15 @@ describe("resolveCircuitConfig", () => {
       fit: "placement",
       mpnFromValueLcsc: ["C144397"],
     });
+  });
+
+  test("resolves a configured candidate inventory path against the config directory", () => {
+    const config = mutable(DEFAULT_PROJECT_CONFIG);
+    config.evidence.candidates = "circuit/candidates.json";
+    assert.equal(
+      resolveCircuitConfig(config as typeof DEFAULT_PROJECT_CONFIG, DIR).evidence.candidates,
+      join(DIR, "circuit/candidates.json"),
+    );
   });
 
   test("an explicit footprintPathBase and partial limits override the defaults", () => {
