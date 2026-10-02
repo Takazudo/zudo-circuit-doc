@@ -1,5 +1,6 @@
 """Inventory profiles: shared checks plus one provider per ``inventory.provider.kind``."""
 
+from .candidates import load_candidates, validate_candidates
 from .common import (
     IDENTITY_STATES,
     SOURCE_STATES,
