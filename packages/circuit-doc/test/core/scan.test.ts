@@ -109,6 +109,20 @@ describe("normalisation folds the encodings artifacts apply", () => {
 });
 
 describe("harvesting subtracts values that publish legitimately elsewhere", () => {
+  it("keeps each denied key origin for equal values while deduplicating repeats of the same key", () => {
+    const digest = "abcdef0123456789".repeat(4);
+    for (const root of [
+      { sha256: digest, evidence_extract: digest },
+      { evidence_extract: digest, sha256: digest },
+    ]) {
+      const canaries = harvestCanaries([root, root, { nested: root }], { deniedKeys: DENIED_KEYS });
+      assert.equal(canaries.length, 2);
+      assert.deepEqual(new Set(canaries.map((canary) => canary.path.split(".").at(-1))), new Set(["sha256", "evidence_extract"]));
+      assert.ok(canaries.every((canary) => canary.normalized === digest));
+      assert.equal(harvestCanaries([root, { title: digest }], { deniedKeys: DENIED_KEYS }).length, 0);
+    }
+  });
+
   it("keeps a value only a denied key holds", () => {
     const canaries = harvest({
       sources: [

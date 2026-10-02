@@ -257,37 +257,41 @@ export function harvestCanaries(
   options: HarvestOptions,
 ): readonly Canary[] {
   const denied = new Set(options.deniedKeys);
-  const deniedValues = new Map<string, { value: string; path: string }>();
+  // Preserve the denied key as well as the normalized value: a later
+  // key-specific exemption must not erase an equal value held by another key.
+  const deniedValues = new Map<string, { value: string; normalized: string; path: string }>();
   const publishedValues: string[] = [];
 
-  const walk = (node: unknown, path: string, underDenied: boolean): void => {
+  const walk = (node: unknown, path: string, deniedKey: string | null): void => {
     if (typeof node === "string") {
       const normalized = normalizeForScan(node);
       if (normalized === "") return;
-      if (underDenied) {
-        if (!deniedValues.has(normalized)) deniedValues.set(normalized, { value: node, path });
+      if (deniedKey !== null) {
+        const key = JSON.stringify([normalized, deniedKey]);
+        if (!deniedValues.has(key)) deniedValues.set(key, { value: node, normalized, path });
       } else {
         publishedValues.push(normalized);
       }
       return;
     }
     if (Array.isArray(node)) {
-      for (const [index, item] of node.entries()) walk(item, `${path}[${index}]`, underDenied);
+      for (const [index, item] of node.entries()) walk(item, `${path}[${index}]`, deniedKey);
       return;
     }
     if (typeof node === "object" && node !== null) {
       for (const [key, value] of Object.entries(node)) {
-        walk(value, path === "" ? key : `${path}.${key}`, underDenied || denied.has(key));
+        walk(value, path === "" ? key : `${path}.${key}`, denied.has(key) ? key : deniedKey);
       }
     }
   };
 
-  for (const [index, root] of roots.entries()) walk(root, `[${index}]`, false);
+  for (const [index, root] of roots.entries()) walk(root, `[${index}]`, null);
 
   const publishedBlob = publishedValues.join(CORPUS_SEPARATOR);
 
   const canaries: Canary[] = [];
-  for (const [normalized, origin] of deniedValues) {
+  for (const origin of deniedValues.values()) {
+    const { normalized } = origin;
     if (isNonCanary(normalized)) continue;
     if (publishedBlob.includes(normalized)) continue;
     canaries.push({ value: origin.value, normalized, path: origin.path });
