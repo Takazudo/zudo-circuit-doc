@@ -93,8 +93,9 @@ export type PublicRecordIdentity = {
    * `component-al8860mp-13`. Not derivable from anything else here — 13 owners
    * cover 34 records and one of them owns eleven — and it is what lets a record
    * page link back to its raw agent resource at `/docs/claude-skills/<name>/`.
+   * `null` means the publication matrix denied this field.
    */
-  readonly ownerSkill: SafeText;
+  readonly ownerSkill: SafeText | null;
   readonly mpn: SafeText;
   readonly manufacturer: SafeText;
   readonly lcsc: SafeText;
@@ -268,7 +269,8 @@ export type PublicRecordReference = {
 
 /** The deduplicated renderer input; records retain lookup through packageId. */
 export type PublicPackagePreview = PublicFootprintReference & {
-  readonly recordIds: readonly SafeText[];
+  /** `null` means the publication matrix denied package membership. */
+  readonly recordIds: readonly SafeText[] | null;
 };
 
 /** One published record page's complete data. */
@@ -345,8 +347,9 @@ export type PublicIntegrationRule = {
    * The same role `PublicRecordIdentity.ownerSkill` plays for a record: it is
    * what lets the integration page link back to the raw agent resource it is a
    * projection of, without `core/` knowing any provider's directory names.
+   * `null` means the publication matrix denied this field.
    */
-  readonly ownerSkill: SafeText;
+  readonly ownerSkill: SafeText | null;
   readonly domain: SafeText;
   readonly recordIds: readonly SafeText[];
   readonly factIds: readonly SafeText[];

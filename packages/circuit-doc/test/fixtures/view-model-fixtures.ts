@@ -94,7 +94,7 @@ type IdentityInput = {
   readonly identityState?: string;
   readonly sourceState?: string;
   readonly dnp?: boolean;
-  readonly ownerSkill?: string;
+  readonly ownerSkill?: string | null;
   readonly placements?: readonly (readonly [board: string, refdes: string])[];
 };
 
@@ -108,7 +108,10 @@ function identity(input: IdentityInput): PublicRecordIdentity {
     parentRecordId: parentRecordId === null ? null : t(parentRecordId),
     parentSlug: parentRecordId === null ? null : recordSlug(parentRecordId),
     lineId: t(input.recordId.replace(/^rec-/u, "line-")),
-    ownerSkill: t(input.ownerSkill ?? "component-fixture-bundle"),
+    ownerSkill:
+      input.ownerSkill === null
+        ? null
+        : t(input.ownerSkill ?? "component-fixture-bundle"),
     mpn: t(input.mpn),
     manufacturer: t(input.manufacturer ?? "Fixture Semiconductor"),
     lcsc: t(input.lcsc ?? "C000001"),
