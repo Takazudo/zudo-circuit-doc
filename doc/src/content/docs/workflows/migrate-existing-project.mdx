@@ -17,7 +17,9 @@ your project currently uses.
 
 If the old generator keeps its publication selection in a TypeScript module, map its
 `InstanceSelection` fields (`recordIds`, `sourceIds`, `linkableSourceIds`, `documentSelections`,
-`expect`) to the package's JSON selection file. The runtime reads this schema-validated file at
+optional `documentExceptions`, `expect`) to the package's JSON selection file. Each selected record
+must have exactly one document selection or document exception; omitted `documentExceptions` means
+an empty list. The runtime reads this schema-validated file at
 `circuit/publication/selection.json` — see [Reference → Publication
 schemas](../reference/schemas.mdx#selection-json) for its exact shape. Keep any separate
 document-verification history as a project-owned record if you still need it; it has no equivalent
