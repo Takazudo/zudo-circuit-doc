@@ -8,8 +8,8 @@
  * the frontmatter `title` is the record's MPN (its identity), and the
  * `ComponentReferences` descriptor carries the document, footprint and model
  * that `checks/reference-page.ts` asserts on. A record qualifies only when its
- * descriptor decodes (reviewed PDF label, http(s) URL, non-empty authority,
- * footprint, WRL model) and the page keeps Sources plus at least one evidence
+ * descriptor decodes (reviewed document label, http(s) URL, non-empty authority,
+ * footprint, optional declared WRL model) and the page keeps Sources plus at least one evidence
  * fact after the references section. When the site is already built, the
  * built page must carry the references section and the footprint/model assets
  * must exist.
@@ -68,7 +68,7 @@ export async function readPublishedSlugs(preflightFile: string): Promise<readonl
   return slugs as string[];
 }
 
-async function qualify(slug: string, options: DeriveOptions, distBuilt: boolean): Promise<Representative | undefined> {
+async function qualify(slug: string, options: DeriveOptions, distBuilt: boolean): Promise<{ representative: Representative; hasModel: boolean } | undefined> {
   const markdown = await readFile(join(options.generatedRoot, "records", slug, "index.mdx"), "utf8").catch(() => null);
   if (markdown === null) return undefined;
 
@@ -81,7 +81,7 @@ async function qualify(slug: string, options: DeriveOptions, distBuilt: boolean)
     identity = JSON.parse(titleLiteral);
     const descriptor = decodeComponentReferencesDescriptor(descriptorMatch[1] as string);
     if (descriptor.document.authority.trim() === "") return undefined;
-    assets = [descriptor.footprint.assetUrl, decodeModelDescriptor(descriptor.modelDescriptor).modelUrl];
+    assets = [descriptor.footprint.assetUrl, ...(descriptor.modelDescriptor === null ? [] : [decodeModelDescriptor(descriptor.modelDescriptor).modelUrl])];
   } catch {
     return undefined;
   }
@@ -102,13 +102,14 @@ async function qualify(slug: string, options: DeriveOptions, distBuilt: boolean)
       if (!(await exists(join(options.distRoot, asset)))) return undefined;
     }
   }
-  return representative;
+  return { representative, hasModel: assets.length > 1 };
 }
 
 /**
  * Deterministic: records are considered in sorted slug order (slugs are the
  * record IDs' public form) and the first {@link MAX_DERIVED_REPRESENTATIVES}
- * that qualify are taken. Each gets a unique `kind`, because `run.ts` keys the
+ * that qualify are taken, reserving the final slot for the first later model
+ * when all initial slots are footprint-only. Each gets a unique `kind`, because `run.ts` keys the
  * light/dark comparison by `${width}:${kind}`.
  */
 export async function deriveRepresentatives(options: DeriveOptions): Promise<DerivedRepresentatives> {
@@ -119,11 +120,19 @@ export async function deriveRepresentatives(options: DeriveOptions): Promise<Der
   // means the built-output checks cannot run yet.
   const distBuilt = await exists(join(options.distRoot, "index.html"));
   const representatives: Representative[] = [];
+  let hasModel = false;
   for (const slug of slugs) {
     const representative = await qualify(slug, options, distBuilt);
     if (representative === undefined) continue;
-    representatives.push(representative);
-    if (representatives.length === MAX_DERIVED_REPRESENTATIVES) break;
+    if (representatives.length < MAX_DERIVED_REPRESENTATIVES) {
+      representatives.push(representative.representative);
+    } else if (representative.hasModel) {
+      // Keep at least one actual model for the deep-interaction pass when one
+      // exists; leading footprint-only records must not silently suppress it.
+      representatives[MAX_DERIVED_REPRESENTATIVES - 1] = representative.representative;
+    }
+    hasModel ||= representative.hasModel;
+    if (representatives.length === MAX_DERIVED_REPRESENTATIVES && hasModel) break;
   }
   return representatives.length === 0
     ? { outcome: "none-qualify", publishedRecords: slugs.length }

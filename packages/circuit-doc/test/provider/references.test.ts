@@ -498,6 +498,28 @@ describe("readCircuitReferenceContract", () => {
     );
   });
 
+  it("a corrupt declared WRL fails instead of becoming a footprint-only package", async () => {
+    const roots = await makeRoots("corrupt-declared-model");
+    await writeFile(
+      join(roots.footprintLibraryRoot, "PKG-A.kicad_mod"),
+      footprintText("PKG-A", `${MODEL_PREFIX}PKG-A.wrl`),
+    );
+    await writeFile(
+      join(roots.modelRoot, "PKG-A.wrl"),
+      '#VRML V2.0 utf8\nInline { url "https://evil.invalid/model.wrl" }',
+    );
+    const { line, record: rec, route: rt, pinMap: pm } = pcbFixture("rec-pcb", "line-pcb", "PKG-A");
+    const index = indexEvidence(inventoryOf([line]), [bundleOf([rec], [rt], [pm])], []);
+
+    await rejectsWith(
+      readCircuitReferenceContract(index, selectionFor(["rec-pcb"], 1), roots, {
+        modelLocatorPrefix: MODEL_PREFIX,
+      }),
+      "PUBLICATION_POLICY",
+      /resource-loading or executable VRML construct/u,
+    );
+  });
+
   it("a model locator escaping the root fails PATH_CONTAINMENT", async () => {
     const roots = await makeRoots("escaping-locator");
     await writeFile(
@@ -640,3 +662,52 @@ async function rejectsWith(run: Promise<unknown>, code: ErrorCode, message: RegE
     return true;
   });
 }
+
+describe("a footprint without a declared model", () => {
+  async function readCase(name: string, text: string, omitFootprint = false, ambiguous = false) {
+    const roots = await makeRoots(`optional-${name}`);
+    if (!omitFootprint) await writeFile(join(roots.footprintLibraryRoot, 'PKG-A.kicad_mod'), text);
+    const {line, record: rec, route: rt, pinMap: pm} = pcbFixture('rec-pcb', 'line-pcb', 'PKG-A');
+    const maps = ambiguous ? [pm, pinMap('second', 'rec-pcb', 'OTHER')] : [pm];
+    const index = indexEvidence(inventoryOf([line]), [bundleOf([rec], [rt], maps)], []);
+    return readCircuitReferenceContract(index, selectionFor(['rec-pcb'], 1), roots, {modelLocatorPrefix: MODEL_PREFIX});
+  }
+  it('retains a mandatory footprint and explicit null model/placement', async () => {
+    const result = await readCase('absent', '(footprint "PKG-A" (descr "quoted (model fake) is not a declaration"))');
+    assert.equal(result.packages.length, 1);
+    const part = result.packages[0]!;
+    assert.equal(part.footprintPath, 'footprints/pretty/PKG-A.kicad_mod');
+    assert.equal(part.modelPath, null); assert.equal(part.offset, null); assert.equal(part.rotation, null); assert.equal(part.scale, null);
+  });
+  it('preserves legacy KiCad module roots', async () => {
+    const result = await readCase('legacy', '(module PKG-A (layer F.Cu))');
+    assert.equal(result.packages[0]?.modelPath, null);
+  });
+  it('cannot borrow missing model transforms from unrelated footprint siblings', async () => {
+    const roots = await makeRoots('optional-scoped-transform');
+    await writeGoodPackage(roots, 'PKG-A');
+    await writeFile(join(roots.footprintLibraryRoot, 'PKG-A.kicad_mod'), `(footprint "PKG-A" (offset (xyz 1 2 3)) (rotate (xyz 0 0 0)) (scale (xyz 1 1 1)) (model "${MODEL_PREFIX}PKG-A.wrl"))`);
+    const {line, record: rec, route: rt, pinMap: pm} = pcbFixture('rec-pcb', 'line-pcb', 'PKG-A');
+    const index = indexEvidence(inventoryOf([line]), [bundleOf([rec], [rt], [pm])], []);
+    await assert.rejects(readCircuitReferenceContract(index, selectionFor(['rec-pcb'], 1), roots, {modelLocatorPrefix: MODEL_PREFIX}), /offset/);
+  });
+  it('does not hide spaced or newline model heads as absence', async () => {
+    for (const [name, head] of [['space', '( model'], ['newline', '(\n model']] as const) {
+      await assert.rejects(readCase(name, `(footprint "PKG-A" ${head} "${MODEL_PREFIX}missing.wrl" (offset (xyz 0 0 0)) (rotate (xyz 0 0 0)) (scale (xyz 1 1 1))))`));
+      await assert.rejects(readCase(`${name}-malformed`, `(footprint "PKG-A" ${head}))`), /malformed declared model/);
+    }
+  });
+  it('rejects malformed declared models rather than treating them as absent', async () => {
+    await assert.rejects(readCase('malformed', '(footprint "PKG-A" (model))'), /malformed declared model/);
+  });
+  it('rejects a second root rather than hiding its model declaration', async () => {
+    await assert.rejects(readCase('roots', '(footprint "PKG-A") (model "missing.wrl")'), /multiple footprint roots/);
+  });
+  it('rejects duplicate declarations', async () => {
+    await assert.rejects(readCase('duplicate', '(footprint "PKG-A" (model "a.wrl") (model "b.wrl"))'), /exactly one model/);
+  });
+  it('still requires the mapped footprint file and a unique pin-map footprint', async () => {
+    await assert.rejects(readCase('missing-footprint', '', true));
+    await assert.rejects(readCase('ambiguous', '(footprint "PKG-A")', false, true), /exactly one footprint/);
+  });
+});

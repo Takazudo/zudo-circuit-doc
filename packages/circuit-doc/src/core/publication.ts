@@ -163,14 +163,14 @@ export type InstanceSelection = {
    */
   readonly linkableSourceIds: readonly string[];
   /**
-   * One reviewed PDF-representing source for every selected record. This is an
+   * One reviewed document/source record for every selected record. This is an
    * audit decision, not a URL heuristic or a request to perform network I/O at
    * generation time.
    */
   readonly documentSelections: readonly {
     readonly recordId: string;
     readonly sourceId: string;
-    readonly documentKind: "datasheet" | "specification" | "drawing";
+    readonly documentKind: "datasheet" | "specification" | "drawing" | "source-record";
   }[];
   /** Asserted corpus counts; a mismatch means the selection went stale. */
   readonly expect: {
@@ -287,7 +287,7 @@ export class PublicationPolicy {
           sourceId: document.sourceId,
         });
       }
-      if (!["datasheet", "specification", "drawing"].includes(document.documentKind)) {
+      if (!["datasheet", "specification", "drawing", "source-record"].includes(document.documentKind)) {
         fail("PUBLICATION_POLICY", `document source ${document.sourceId} has an invalid kind`, {
           recordId: document.recordId,
           sourceId: document.sourceId,

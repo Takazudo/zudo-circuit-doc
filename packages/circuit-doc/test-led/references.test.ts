@@ -120,7 +120,7 @@ describe("reviewed document shortcuts", () => {
 describe("KiCad preview manifest", () => {
   it("maps every record to one descriptor and collapses it to exactly 25 packages", () => {
     assert.equal(
-      model.records.filter((record) => record.reference.footprint?.modelPath.endsWith(".wrl")).length,
+      model.records.filter((record) => record.reference.footprint?.modelPath?.endsWith(".wrl")).length,
       35,
     );
     assert.equal(model.packagePreviews.length, 25);
@@ -131,7 +131,7 @@ describe("KiCad preview manifest", () => {
   it("preserves non-zero Z rotations from the footprint", () => {
     const fnr = model.packagePreviews.find((entry) => entry.footprintName === "IND-SMD_L4.0-W4.0_FNR40XXS");
     const r0603 = model.packagePreviews.find((entry) => entry.footprintName === "R0603");
-    assert.equal(fnr?.rotation.z, 90);
-    assert.equal(r0603?.rotation.z, 270);
+    assert.equal(fnr?.rotation?.z, 90);
+    assert.equal(r0603?.rotation?.z, 270);
   });
 });

@@ -1,7 +1,7 @@
 /** @jsxRuntime automatic */
 /** @jsxImportSource preact */
 
-import { decodeComponentReferencesDescriptor } from "../core/reference-descriptor.ts";
+import { decodeComponentReferencesDescriptor, MODEL_UNAVAILABLE_TEXT } from "../core/reference-descriptor.ts";
 import { FootprintPreview } from "./footprint-preview.tsx";
 import { PackageModelViewer } from "./package-model-viewer.tsx";
 
@@ -10,7 +10,7 @@ export type ComponentReferencesProps = { readonly descriptor: string };
 /**
  * The compact, server-rendered reference shortcut for a component detail page.
  * Its source data is an encoded, validated descriptor rather than prose parsed
- * from the MDX file, keeping PDF labels and asset paths faithful to the model.
+ * from the MDX file, keeping document labels and asset paths faithful to the model.
  */
 export function ComponentReferences({ descriptor: encoded }: ComponentReferencesProps) {
   const descriptor = decodeComponentReferencesDescriptor(encoded);
@@ -34,7 +34,9 @@ export function ComponentReferences({ descriptor: encoded }: ComponentReferences
         </article>
         <article className="zcd-component-references__preview zcd-component-references__model-card">
           <h3 className="zcd-component-references__card-heading">Package model</h3>
-          <PackageModelViewer descriptor={descriptor.modelDescriptor} />
+          {descriptor.modelDescriptor === null
+            ? <p data-model-unavailable="true">{MODEL_UNAVAILABLE_TEXT}</p>
+            : <PackageModelViewer descriptor={descriptor.modelDescriptor} />}
         </article>
       </div>
     </section>

@@ -86,7 +86,7 @@ async function run(context: CommandContext): Promise<number> {
       if (derived.outcome === "none-qualify") {
         io.stderr.write(
           `not run: ${derived.publishedRecords} record(s) are published but none qualifies for a default browser smoke ` +
-            "(a component-references section with a reviewed PDF, footprint and WRL model); " +
+            "(a component-references section with a reviewed document/source record and footprint, with a valid WRL if declared); " +
             "set browserSmoke.representatives in circuit.config.ts\n",
         );
         return EXIT.NOT_RUN;

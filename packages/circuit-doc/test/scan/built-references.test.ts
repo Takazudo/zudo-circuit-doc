@@ -250,11 +250,11 @@ describe("each structural removal fails", () => {
     await rejectsWith(checkBuiltReferences({ distRoot, model: ONE_RECORD_MODEL }), "PUBLICATION_POLICY", /exactly one/u);
   });
 
-  it("fails on an unreviewed PDF label", async () => {
+  it("fails on an unreviewed document label", async () => {
     const distRoot = await scaffoldDist("bad-label", {
       recordHtml: assembleHtml({ label: `<p class="zcd-component-references__document-label">Random PDF</p>` }),
     });
-    await rejectsWith(checkBuiltReferences({ distRoot, model: ONE_RECORD_MODEL }), "PUBLICATION_POLICY", /unreviewed PDF label/u);
+    await rejectsWith(checkBuiltReferences({ distRoot, model: ONE_RECORD_MODEL }), "PUBLICATION_POLICY", /unreviewed document label/u);
   });
 
   it("fails when the direct no-JS SVG link is dropped", async () => {

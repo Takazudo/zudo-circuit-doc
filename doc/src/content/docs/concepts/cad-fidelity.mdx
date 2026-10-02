@@ -51,10 +51,15 @@ footprint's matched STEP+WRL pair only exists in an older tagged library release
 itself, a project may pin from that older release, or record the WRL as unavailable — either way, in
 the receipt.
 
-## STEP is optional; WRL is required
+## Absent models are explicit; declared WRL references remain required
 
-Generation needs a **WRL** model for every published package — that's what the 3D viewer renders,
-and it's checked and projected. A **STEP** file, if a project keeps one for CAD-authoring or
+A mapped footprint with no model declaration may be published. Its page retains the footprint
+preview and explicitly states that no 3D model is declared and geometry/physical fit remain
+unverified. No model viewer, request or export is created. Footprint and pin-map checks still run.
+A declared model must be a valid contained **WRL**; missing, malformed, duplicate or unsafe
+references fail rather than becoming an unavailable-model state. STEP-to-WRL conversion is not
+introduced. Nullable model paths/transforms/descriptors require corresponding checks in typed
+consumers. A **STEP** file, if a project keeps one for CAD-authoring or
 mechanical-review purposes outside this site, is never required and its absence is silent: no
 warning, no check failure. The one rule that does apply when a STEP file is present or declared is
 that it must share the WRL's basename, and its path must still pass the same containment checks as
