@@ -415,6 +415,36 @@ describe("readCircuitReferenceContract", () => {
     }
   });
 
+  it("maps a reviewed document exception without requiring a linkable source", async () => {
+    const roots = await makeRoots("document-exception");
+    const { line, record: rec, route: rt, pinMap: pm } = externalFixture("rec-ext", "line-ext");
+    const index = indexEvidence(inventoryOf([line]), [bundleOf([rec], [rt], [pm])], []);
+    const selection = {
+      ...selectionFor(["rec-ext"], 0),
+      documentExceptions: [{ recordId: "rec-ext", reason: "No public document exists." }],
+    };
+
+    const contract = await readCircuitReferenceContract(index, selection, roots, { enabled: false });
+
+    assert.deepEqual([...contract.documentExceptionsByRecordId], [["rec-ext", "No public document exists."]]);
+    assert.deepEqual([...contract.documentsByRecordId], []);
+  });
+
+  it("fails with STALE_SELECTION when a document exception record is missing from the index", async () => {
+    const roots = await makeRoots("stale-document-exception");
+    const index = indexEvidence(inventoryOf([]), [bundleOf([], [], [])], []);
+    const selection = {
+      ...selectionFor(["rec-ghost"], 0),
+      documentExceptions: [{ recordId: "rec-ghost", reason: "No public document exists." }],
+    };
+
+    await rejectsWith(
+      readCircuitReferenceContract(index, selection, roots, { enabled: false }),
+      "STALE_SELECTION",
+      /missing record rec-ghost/u,
+    );
+  });
+
   it("CAD disabled refuses a selected PCB-mounted record instead of silently skipping it", async () => {
     const roots = await makeRoots("disabled-pcb", false);
     const { line, record: rec, route: rt, pinMap: pm } = pcbFixture("rec-pcb", "line-pcb", "PKG-A");

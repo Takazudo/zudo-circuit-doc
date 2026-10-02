@@ -320,7 +320,7 @@ function count(value: unknown, where: string, problems: string[]): number {
   return value as number;
 }
 
-/** `selection.json`: `{schema_version: 1, recordIds, sourceIds, linkableSourceIds, documentSelections, expect}`. */
+/** `selection.json`: `{schema_version: 1, recordIds, sourceIds, linkableSourceIds, documentSelections, documentExceptions?, expect}`. */
 export async function readSelection(config: ResolvedCircuitConfig): Promise<InstanceSelection> {
   const path = config.publication.selection;
   const data = await readDeclaredJson(config, "publication.selection", path);
@@ -331,7 +331,7 @@ export async function readSelection(config: ResolvedCircuitConfig): Promise<Inst
     data,
     "",
     ["schema_version", "recordIds", "sourceIds", "linkableSourceIds", "documentSelections", "expect"],
-    ["comment"],
+    ["comment", "documentExceptions"],
     problems,
   );
   if ("schema_version" in data && data.schema_version !== SELECTION_SCHEMA_VERSION) {
@@ -371,6 +371,8 @@ export async function readSelection(config: ResolvedCircuitConfig): Promise<Inst
     });
   }
 
+  const documentExceptions = readDocumentExceptions(data.documentExceptions, problems);
+
   let expect: InstanceSelection["expect"] = { records: 0, sources: 0, integrationRules: 0, packages: 0 };
   if (!isPlainObject(data.expect)) {
     if ("expect" in data) problems.push("expect: must be an object");
@@ -385,7 +387,39 @@ export async function readSelection(config: ResolvedCircuitConfig): Promise<Inst
   }
 
   if (problems.length > 0) invalid(config, "publication.selection", path, problems);
-  return { recordIds, sourceIds, linkableSourceIds, documentSelections, expect };
+  return { recordIds, sourceIds, linkableSourceIds, documentSelections, documentExceptions, expect };
+}
+
+function readDocumentExceptions(
+  value: unknown,
+  problems: string[],
+): NonNullable<InstanceSelection["documentExceptions"]>[number][] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) {
+    problems.push("documentExceptions: must be an array");
+    return [];
+  }
+
+  const exceptions: NonNullable<InstanceSelection["documentExceptions"]>[number][] = [];
+  value.forEach((entry: unknown, index) => {
+    const where = `documentExceptions[${index}]`;
+    if (!isPlainObject(entry)) {
+      problems.push(`${where}: must be an object`);
+      return;
+    }
+    checkKeys(entry, `${where}.`, ["recordId", "reason"], [], problems);
+    const { recordId, reason } = entry;
+    if ("recordId" in entry && (typeof recordId !== "string" || recordId === "")) {
+      problems.push(`${where}.recordId: must be a non-empty string`);
+    }
+    if ("reason" in entry && (typeof reason !== "string" || reason === "")) {
+      problems.push(`${where}.reason: must be a non-empty string`);
+    }
+    if (typeof recordId === "string" && recordId !== "" && typeof reason === "string" && reason !== "") {
+      exceptions.push({ recordId, reason });
+    }
+  });
+  return exceptions;
 }
 
 /** `assets.json`: `{schema_version: 1, assets: [{path, reason, source_id?}]}`. */

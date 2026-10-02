@@ -46,6 +46,7 @@ export type CircuitPackageReference = {
 
 export type CircuitReferenceContract = {
   readonly documentsByRecordId: ReadonlyMap<string, CircuitDocumentReference>;
+  readonly documentExceptionsByRecordId: ReadonlyMap<string, string>;
   readonly packages: readonly CircuitPackageReference[];
   readonly packageByRecordId: ReadonlyMap<string, CircuitPackageReference>;
   /**
@@ -125,6 +126,13 @@ export async function readCircuitReferenceContract(
   // files themselves are canonicalised before the relative path is taken.
   const canonicalPathBase = await realpath(options.footprintPathBase ?? roots.projectRoot);
   const documentsByRecordId = selectDocuments(index, selection);
+  const documentExceptionsByRecordId = new Map<string, string>();
+  for (const exception of selection.documentExceptions ?? []) {
+    if (!index.recordById.has(exception.recordId)) {
+      fail("STALE_SELECTION", `missing record ${exception.recordId}`, { recordId: exception.recordId });
+    }
+    documentExceptionsByRecordId.set(exception.recordId, exception.reason);
+  }
   const packageByRecordId = new Map<string, CircuitPackageReference>();
   const packagesByName = new Map<string, CircuitPackageReference>();
   const unpublishedPackageRecordIds = new Set<string>();
@@ -186,7 +194,13 @@ export async function readCircuitReferenceContract(
       actual: packages.length,
     });
   }
-  return { documentsByRecordId, packages, packageByRecordId, unpublishedPackageRecordIds };
+  return {
+    documentsByRecordId,
+    documentExceptionsByRecordId,
+    packages,
+    packageByRecordId,
+    unpublishedPackageRecordIds,
+  };
 }
 
 function selectDocuments(
