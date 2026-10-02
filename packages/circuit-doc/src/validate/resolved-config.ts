@@ -47,6 +47,7 @@ export type ValidatorInput = {
   readonly inventory: {
     readonly path: string;
     readonly provider: ValidatorInventoryProvider;
+    readonly candidatesPath?: string | null;
   };
   readonly routing: {
     readonly directRouting: string | null;
@@ -90,6 +91,7 @@ export type ResolvedValidatorConfig = {
   readonly inventory: {
     readonly path: string;
     readonly provider: ValidatorInventoryProvider;
+    readonly candidatesPath: string | null;
   };
   readonly routing: {
     readonly directRouting: string | null;
@@ -148,7 +150,11 @@ export function buildResolvedValidatorConfig(input: ValidatorInput): ResolvedVal
       auditSkillDir: input.bundles.auditSkillDir,
       requireSkillMd: input.bundles.requireSkillMd ?? true,
     },
-    inventory: { path: input.inventory.path, provider: input.inventory.provider },
+    inventory: {
+      path: input.inventory.path,
+      provider: input.inventory.provider,
+      candidatesPath: input.inventory.candidatesPath ?? null,
+    },
     routing: {
       directRouting: input.routing.directRouting,
       vendorQualifiers: input.routing.vendorQualifiers,

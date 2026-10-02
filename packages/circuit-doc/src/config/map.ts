@@ -91,6 +91,7 @@ export function declaredProjectFiles(config: ResolvedCircuitConfig): readonly De
   ];
   const optional: [string, string | null][] = [
     ["evidence.forwardTests", config.evidence.forwardTests],
+    ["evidence.candidates", config.evidence.candidates],
     ["docs.integrationGloss", config.docs.integrationGloss],
     ["validation.policy", config.validation.policy],
     ["publication.matrix", matrixOverridePath(config)],
@@ -201,6 +202,7 @@ export function projectPathsFor(config: ResolvedCircuitConfig): CircuitProjectPa
     projectRoot: config.root,
     bundlesRoot: config.evidence.bundlesRoot,
     inventoryFile: config.evidence.inventory,
+    candidateInventoryFile: config.evidence.candidates,
     integrationRulesFile: config.evidence.integrationRules,
     generatedRoot: config.docs.generatedContent,
     preflightFile: config.docs.preflight,
@@ -230,6 +232,7 @@ export function validatorInputFor(config: ResolvedCircuitConfig): ValidatorInput
     },
     inventory: {
       path: evidence.inventory,
+      candidatesPath: evidence.candidates,
       provider:
         config.inventoryProvider.kind === "manual"
           ? { kind: "manual" }

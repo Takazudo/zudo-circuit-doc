@@ -18,6 +18,8 @@ export type CircuitProjectPaths = {
   /** The only directory evidence is read from (`.claude/skills` in v1). */
   readonly bundlesRoot: string;
   readonly inventoryFile: string;
+  /** Optional audited candidate inventory; `null` means it is not configured. */
+  readonly candidateInventoryFile?: string | null;
   readonly integrationRulesFile: string;
   /** The exclusively-owned generated page tree. */
   readonly generatedRoot: string;
@@ -36,9 +38,11 @@ export type CircuitProjectPaths = {
   readonly footprintPreviewRoot: string;
 };
 
-export type CircuitProjectPathKey = keyof CircuitProjectPaths;
+/** Required path keys keep their historical type contract; project paths may add nullable optional entries. */
+export type CircuitProjectPathKey = Exclude<keyof CircuitProjectPaths, "candidateInventoryFile">;
+export type CircuitProjectRequiredPathKey = CircuitProjectPathKey;
 
-export const CIRCUIT_PROJECT_PATH_KEYS: readonly CircuitProjectPathKey[] = [
+export const CIRCUIT_PROJECT_PATH_KEYS: readonly CircuitProjectRequiredPathKey[] = [
   "projectRoot",
   "bundlesRoot",
   "inventoryFile",
@@ -56,11 +60,14 @@ export const CIRCUIT_PROJECT_PATH_KEYS: readonly CircuitProjectPathKey[] = [
 
 /**
  * Build a `CircuitProjectPaths` from a root and root-relative entries. Every
- * key is required, so a caller cannot silently fall back to a guessed layout.
+ * required key is supplied, so a caller cannot silently fall back to a guessed
+ * layout. The nullable candidate inventory path is included when provided.
  */
 export function projectPaths(
   root: string,
-  relative: Readonly<Record<CircuitProjectPathKey, string>>,
+  relative: Readonly<Record<CircuitProjectRequiredPathKey, string>> & {
+    readonly candidateInventoryFile?: string | null;
+  },
 ): CircuitProjectPaths {
   if (!isAbsolute(root)) {
     fail("PATH_CONTAINMENT", "project root must be an absolute path", { root });
@@ -72,7 +79,16 @@ export function projectPaths(
     }
     return [key, resolve(root, value)] as const;
   });
-  return Object.freeze(Object.fromEntries(entries)) as CircuitProjectPaths;
+  const candidateInventoryFile = relative.candidateInventoryFile;
+  return Object.freeze({
+    ...Object.fromEntries(entries),
+    ...(candidateInventoryFile === undefined
+      ? {}
+      : {
+          candidateInventoryFile:
+            candidateInventoryFile === null ? null : resolve(root, candidateInventoryFile),
+        }),
+  }) as CircuitProjectPaths;
 }
 
 /** Per-record bundle files, in the order a record page consumes them. */

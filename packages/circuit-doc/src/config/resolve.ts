@@ -72,6 +72,7 @@ export type ResolvedCircuitConfig = {
     readonly directRouting: string;
     readonly vendorQualifiers: string;
     readonly forwardTests: string | null;
+    readonly candidates: string | null;
     readonly sourceCache: string;
   };
   readonly inventoryProvider: ResolvedInventoryProvider;
@@ -134,6 +135,7 @@ export function resolveCircuitConfig(config: CircuitConfig, configDir: string): 
       directRouting: at(evidence.directRouting, "evidence.directRouting"),
       vendorQualifiers: at(evidence.vendorQualifiers, "evidence.vendorQualifiers"),
       forwardTests: atOrNull(evidence.forwardTests, "evidence.forwardTests"),
+      candidates: atOrNull(evidence.candidates, "evidence.candidates"),
       sourceCache: at(evidence.sourceCache, "evidence.sourceCache"),
     },
     inventoryProvider:

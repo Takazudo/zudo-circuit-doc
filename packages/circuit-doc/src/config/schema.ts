@@ -226,6 +226,7 @@ const EVIDENCE_SHAPE: Shape = {
   directRouting: required(configPath),
   vendorQualifiers: required(configPath),
   forwardTests: optional(nullable(configPath)),
+  candidates: optional(nullable(configPath)),
   sourceCache: required(configPath),
 };
 

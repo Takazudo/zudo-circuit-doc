@@ -310,4 +310,16 @@ describe("path rules", () => {
       "validation.policy",
     ]);
   });
+
+  test("evidence.candidates is an optional nullable path", () => {
+    const config = mutable(DEFAULT_PROJECT_CONFIG);
+    config.evidence.candidates = null;
+    assert.deepEqual(collectCircuitConfigIssues(config), []);
+
+    config.evidence.candidates = "circuit/candidates.json";
+    assert.deepEqual(collectCircuitConfigIssues(config), []);
+
+    config.evidence.candidates = 42;
+    assert.deepEqual(paths(collectCircuitConfigIssues(config)), ["evidence.candidates"]);
+  });
 });
