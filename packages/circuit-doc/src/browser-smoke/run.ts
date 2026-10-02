@@ -62,9 +62,11 @@ export async function runBrowserSmoke(options: BrowserSmokeOptions): Promise<Bro
   }
   if (record === undefined) {
     lines.push(
-      resolved.all.length === 0
-        ? "SKIP: no representative publishes a component-references section (declared-zero project)"
-        : "SKIP: none of the declared representatives publishes a component-references section",
+      resolved.withReferences.length > 0
+        ? `INFO: ${resolved.withReferences.length} footprint-only representative(s); no published model representative`
+        : resolved.all.length === 0
+          ? "SKIP: no representative publishes a component-references section (declared-zero project)"
+          : "SKIP: none of the declared representatives publishes a component-references section",
     );
   }
 
@@ -74,6 +76,7 @@ export async function runBrowserSmoke(options: BrowserSmokeOptions): Promise<Bro
     const cdp = session.cdp;
     try {
       let inspected = 0;
+      let referenceInspections = 0;
       const lightThemeSignatures = new Map<string, string>();
       for (const width of VIEWPORTS) {
         for (const theme of THEMES) {
@@ -82,6 +85,7 @@ export async function runBrowserSmoke(options: BrowserSmokeOptions): Promise<Bro
             await navigate(cdp, site.origin, representative.path);
             await setDocumentTheme(cdp, theme);
             if (withReferences.has(representative.slug)) {
+              referenceInspections += 1;
               const report = await inspectReferencePage(cdp, representative, width, theme, options.shellAssertions);
               const signatureKey = `${width}:${representative.kind}`;
               if (theme === "light") lightThemeSignatures.set(signatureKey, report.themeSignature);
@@ -106,9 +110,7 @@ export async function runBrowserSmoke(options: BrowserSmokeOptions): Promise<Bro
 
       await checkViewerFreeCatalog(cdp, site.origin, options.awayRoute);
 
-      lines.push(
-        `component reference browser smoke passed: ${inspected} responsive/theme cases, paired references, media-only dialogs, interactions, focus, on-demand idle, SPA cleanup, fallbacks, no-JS, viewer-free catalog`,
-      );
+      lines.push(referenceSmokeSummary(inspected, referenceInspections, record !== undefined));
       return { lines };
     } catch (error) {
       const diagnostics = await evaluate(
@@ -204,4 +206,12 @@ async function runRecordChecks(
   // Any representative with a published model works here; RECORD itself is
   // guaranteed to have one, unlike an arbitrary "first representative".
   await checkNoJsFallback(cdp, origin, recordPath);
+}
+
+/** Only name gates that actually ran; footprint-only pages have no model gates. */
+export function referenceSmokeSummary(navigated: number, referenceInspections: number, hasModel: boolean): string {
+  const common = `component reference browser smoke passed: ${navigated} viewport/theme navigations, ${referenceInspections} component-reference inspections, viewer-free catalog`;
+  return hasModel
+    ? `${common}; model-bearing representative: dialogs, interactions, focus, on-demand idle, SPA cleanup, fallbacks and no-JS passed`
+    : `${common}; model dialogs/interactions, focus, idle, SPA, fallbacks and no-JS NOT RUN (no published model representative)`;
 }

@@ -440,6 +440,7 @@ export function withFixtureReferences(index: EvidenceIndex): EvidenceIndex {
   );
   const references: CircuitReferenceContract = {
     documentsByRecordId,
+    documentExceptionsByRecordId: new Map(),
     packages,
     packageByRecordId,
     unpublishedPackageRecordIds: new Set(),

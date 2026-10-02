@@ -13,7 +13,7 @@ import { evaluate, waitFor, type CdpClient } from "../cdp.ts";
 import type { Representative } from "../types.ts";
 import { revealReadyViewer } from "./interactions.ts";
 
-const ALLOWED_PDF_LABELS = ["Datasheet PDF", "Specification PDF", "Mechanical drawing PDF"];
+const ALLOWED_DOCUMENT_LABELS = ["Datasheet PDF", "Specification PDF", "Mechanical drawing PDF", "Source record"];
 
 export type ReferencePageReport = { readonly themeSignature: string };
 
@@ -30,6 +30,7 @@ export async function inspectReferencePage(
     cdp,
     `document.querySelector('.zcd-component-references__footprint img')?.complete && document.querySelector('.zcd-component-references__footprint img')?.naturalWidth > 0`,
   );
+  if (await evaluate(cdp, `document.querySelector('[data-model-unavailable="true"]') !== null`)) return inspectFootprintOnly(cdp, representative, width, theme, shellAssertions);
   await revealReadyViewer(cdp);
   const report = (await evaluate(
     cdp,
@@ -49,6 +50,7 @@ export async function inspectReferencePage(
       const modelTrigger = section.querySelector('[data-component-preview-enlarge="model"]');
       const documentLink = section.querySelector('.zcd-component-references__document-title a');
       const label = section.querySelector('.zcd-component-references__document-label');
+      const unavailableDocument = section.querySelector('[data-document-unavailable="true"]');
       const metadata = [...(metadataList?.querySelectorAll(':scope > div') ?? [])];
       const authority = metadata.find((row) => row.querySelector('dt')?.textContent.trim() === 'Authority')?.querySelector('dd')?.textContent.trim();
       const availability = metadata.find((row) => row.querySelector('dt')?.textContent.trim() === 'Availability')?.querySelector('dd')?.textContent.trim();
@@ -60,7 +62,7 @@ export async function inspectReferencePage(
       const sectionRect = rect(section);
       const documentRect = rect(documentRow);
       const documentDetailsRect = rect(documentDetails);
-      const metadataRect = rect(metadataList);
+      const metadataRect = metadataList === null ? null : rect(metadataList);
       const previewsRect = rect(previews);
       const stageRects = stages.map(rect);
       const footprintRect = rect(footprintLink);
@@ -102,6 +104,14 @@ export async function inspectReferencePage(
         })),
         documentLabel: label?.textContent.trim(),
         documentHref: documentLink?.href,
+        documentUnavailable: unavailableDocument !== null,
+        documentReason: unavailableDocument?.textContent.trim(),
+        documentReasonVisible: unavailableDocument !== null && (() => {
+          const style = getComputedStyle(unavailableDocument);
+          const bounds = unavailableDocument.getBoundingClientRect();
+          return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0 && bounds.width > 0 && bounds.height > 0;
+        })(),
+        documentLinkCount: documentRow.querySelectorAll('a').length,
         authority,
         availability,
         footprintObjectFit: getComputedStyle(footprintImage).objectFit,
@@ -123,7 +133,7 @@ export async function inspectReferencePage(
     sectionRect: Rect;
     documentRect: Rect;
     documentDetailsRect: Rect;
-    metadataRect: Rect;
+    metadataRect: Rect | null;
     previewsRect: Rect;
     stageRects: readonly Rect[];
     footprintRect: Rect;
@@ -134,8 +144,12 @@ export async function inspectReferencePage(
     footprintTrigger: { rect: Rect; display: string; label: string };
     modelTrigger: { rect: Rect; display: string; label: string };
     dialogs: ReadonlyArray<{ kind: string; open: boolean; accessibleName: string | null; hasVisibleTitleReference: boolean }>;
-    documentLabel: string;
-    documentHref: string;
+    documentLabel: string | undefined;
+    documentHref: string | undefined;
+    documentUnavailable: boolean;
+    documentReason: string | undefined;
+    documentReasonVisible: boolean;
+    documentLinkCount: number;
     authority: string | undefined;
     availability: string | undefined;
     footprintObjectFit: string;
@@ -153,12 +167,8 @@ export async function inspectReferencePage(
 
   assertEqual(report.viewport.inner, width, `${representative.kind} ${width}/${theme} viewport width`);
   assertEqual(report.viewport.scroll <= report.viewport.client + 1, true, `${representative.kind} ${width}/${theme} page overflow`);
-  assertEqual(ALLOWED_PDF_LABELS.includes(report.documentLabel), true, `${representative.kind} PDF label`);
-  assertEqual(/^https?:\/\//u.test(report.documentHref), true, `${representative.kind} PDF destination`);
-  assertEqual((report.authority?.length ?? 0) > 0, true, `${representative.kind} document authority retained`);
-  if (representative.availability !== undefined) {
-    assertEqual(report.availability, representative.availability, `${representative.kind} availability`);
-  }
+  assertDocumentState(report, representative);
+  assertEqual(report.metadataRect === null, report.documentUnavailable, `${representative.kind} document metadata follows availability`);
   assertEqual(report.footprintObjectFit, "contain", `${representative.kind} footprint containment mode`);
   assertEqual(report.footprintNatural.every((value) => value > 0), true, `${representative.kind} footprint loaded`);
   assertEqual(report.viewerRoots, 1, `${representative.kind} viewer root count`);
@@ -181,7 +191,9 @@ export async function inspectReferencePage(
   assertEqual(report.theme, theme, `${representative.kind} ${theme} theme retained`);
   assertEqual((report.referenceHeadingId?.length ?? 0) > 0, true, `${representative.kind} Documents and package is a native heading`);
   assertContained(report.documentRect, report.sectionRect, `${representative.kind} document row at ${width}/${theme}`);
-  assertContained(report.metadataRect, report.documentRect, `${representative.kind} document metadata at ${width}/${theme}`);
+  if (report.metadataRect !== null) {
+    assertContained(report.metadataRect, report.documentRect, `${representative.kind} document metadata at ${width}/${theme}`);
+  }
   assertContained(report.previewsRect, report.sectionRect, `${representative.kind} paired preview stages at ${width}/${theme}`);
   assertEqual(report.stageRects.length, 2, `${representative.kind} has paired preview stages`);
   for (const [index, stage] of report.stageRects.entries()) {
@@ -202,12 +214,14 @@ export async function inspectReferencePage(
     assertEqual(Math.abs(footprintStage.height - modelStage.height) <= 2, true, `${representative.kind} paired stages have equal height at ${width}/${theme}`);
     assertEqual(modelStage.left > footprintStage.left, true, `${representative.kind} previews pair left-to-right at ${width}/${theme}`);
   }
-  if (stackAtContentWidth) {
-    assertEqual(Math.abs(report.documentDetailsRect.left - report.metadataRect.left) <= 1, true, `${representative.kind} document metadata stacks at ${width}/${theme}`);
-    assertEqual(report.metadataRect.top >= report.documentDetailsRect.bottom - 1, true, `${representative.kind} stacked document metadata order at ${width}/${theme}`);
-  } else {
-    assertEqual(Math.abs(report.documentDetailsRect.top - report.metadataRect.top) <= 1, true, `${representative.kind} document metadata aligns in row at ${width}/${theme}`);
-    assertEqual(report.metadataRect.left > report.documentDetailsRect.left, true, `${representative.kind} document metadata occupies second column at ${width}/${theme}`);
+  if (report.metadataRect !== null) {
+    if (stackAtContentWidth) {
+      assertEqual(Math.abs(report.documentDetailsRect.left - report.metadataRect.left) <= 1, true, `${representative.kind} document metadata stacks at ${width}/${theme}`);
+      assertEqual(report.metadataRect.top >= report.documentDetailsRect.bottom - 1, true, `${representative.kind} stacked document metadata order at ${width}/${theme}`);
+    } else {
+      assertEqual(Math.abs(report.documentDetailsRect.top - report.metadataRect.top) <= 1, true, `${representative.kind} document metadata aligns in row at ${width}/${theme}`);
+      assertEqual(report.metadataRect.left > report.documentDetailsRect.left, true, `${representative.kind} document metadata occupies second column at ${width}/${theme}`);
+    }
   }
   assertContained(report.footprintRect, footprintStage, `${representative.kind} footprint at ${width}/${theme}`);
   assertContained(report.imageRect, report.footprintRect, `${representative.kind} footprint image at ${width}/${theme}`);
@@ -235,6 +249,32 @@ export async function inspectReferencePage(
   assertEqual(loaded.modelResources.length >= 1, true, `${representative.kind} model requested`);
   assertEqual(loaded.modelResources.every((url) => url.endsWith(".wrl")), true, `${representative.kind} only WRL requested`);
   return { themeSignature: report.themeSignature };
+}
+
+type DocumentInspection = {
+  readonly documentLabel: string | undefined;
+  readonly documentHref: string | undefined;
+  readonly documentUnavailable: boolean;
+  readonly documentReason: string | undefined;
+  readonly documentReasonVisible: boolean;
+  readonly documentLinkCount: number;
+  readonly authority: string | undefined;
+  readonly availability: string | undefined;
+};
+
+function assertDocumentState(report: DocumentInspection, representative: Representative): void {
+  if (report.documentUnavailable) {
+    assertEqual((report.documentReason?.trim().length ?? 0) > 0, true, `${representative.kind} unavailable document reason`);
+    assertEqual(report.documentReasonVisible, true, `${representative.kind} unavailable document reason visible`);
+    assertEqual(report.documentLinkCount, 0, `${representative.kind} unavailable document has no link`);
+    return;
+  }
+  assertEqual(ALLOWED_DOCUMENT_LABELS.includes(report.documentLabel ?? ""), true, `${representative.kind} document label`);
+  assertEqual(/^https?:\/\//u.test(report.documentHref ?? ""), true, `${representative.kind} document destination`);
+  assertEqual((report.authority?.length ?? 0) > 0, true, `${representative.kind} document authority retained`);
+  if (representative.availability !== undefined) {
+    assertEqual(report.availability, representative.availability, `${representative.kind} availability`);
+  }
 }
 
 async function inspectNativeShell(cdp: CdpClient, representative: Representative, width: number, headingId: string): Promise<void> {
@@ -295,4 +335,98 @@ async function inspectNativeShell(cdp: CdpClient, representative: Representative
     await evaluate(cdp, `document.querySelector('header button[aria-label="Close sidebar"]').click()`);
     await waitFor(cdp, `document.querySelector('header button[aria-label="Open sidebar"]')?.getAttribute('aria-expanded') === 'false'`);
   }
+}
+
+// Footprint-only pages remain in responsive/theme inspection. Model interaction
+// checks select a different representative rather than inventing a ready viewer.
+async function inspectFootprintOnly(
+  cdp: CdpClient,
+  representative: Representative,
+  width: number,
+  theme: string,
+  shellAssertions: boolean,
+): Promise<ReferencePageReport> {
+  const report = (await evaluate(
+    cdp,
+    `(() => {
+      const section = document.querySelector('.zcd-component-references');
+      const notice = section.querySelector('[data-model-unavailable="true"]');
+      const image = section.querySelector('.zcd-component-references__footprint img');
+      const style = getComputedStyle(section);
+      const documentRow = section.querySelector('.zcd-component-references__document');
+      const label = section.querySelector('.zcd-component-references__document-label');
+      const link = section.querySelector('.zcd-component-references__document-title a');
+      const unavailableDocument = section.querySelector('[data-document-unavailable="true"]');
+      const heading = [...document.querySelectorAll('h2')].find(h => h.textContent.trim() === 'Documents and package');
+      const authority = [...section.querySelectorAll('dt')].find(n => n.textContent.trim() === 'Authority')?.nextElementSibling?.textContent.trim();
+      return {
+        width: innerWidth,
+        overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+        notice: notice?.textContent,
+        noticeVisible: notice !== null && getComputedStyle(notice).display !== 'none',
+        models: section.querySelectorAll('[data-model-url], [data-component-model-viewer-root], [data-component-preview-enlarge="model"]').length,
+        footprintLoaded: image?.complete && image.naturalWidth > 0,
+        label: label?.textContent.trim(),
+        href: link?.href,
+        documentUnavailable: unavailableDocument !== null,
+        documentReason: unavailableDocument?.textContent.trim(),
+        documentReasonVisible: unavailableDocument !== null && (() => {
+          const unavailableStyle = getComputedStyle(unavailableDocument);
+          const bounds = unavailableDocument.getBoundingClientRect();
+          return unavailableStyle.display !== 'none' && unavailableStyle.visibility !== 'hidden' && Number(unavailableStyle.opacity) > 0 && bounds.width > 0 && bounds.height > 0;
+        })(),
+        documentLinkCount: documentRow.querySelectorAll('a').length,
+        authority,
+        theme: document.documentElement.dataset.theme,
+        headingId: heading?.id,
+        themeSignature: [
+          getComputedStyle(document.body).color,
+          getComputedStyle(document.body).backgroundColor,
+          style.color,
+          style.backgroundColor,
+        ].join('|'),
+      };
+    })()`,
+  )) as {
+    width: number;
+    overflow: boolean;
+    notice: string;
+    noticeVisible: boolean;
+    models: number;
+    footprintLoaded: boolean;
+    label: string | undefined;
+    href: string | undefined;
+    documentUnavailable: boolean;
+    documentReason: string | undefined;
+    documentReasonVisible: boolean;
+    documentLinkCount: number;
+    authority: string | undefined;
+    theme: string;
+    headingId: string;
+    themeSignature: string;
+  };
+  assertEqual(report.width, width, 'footprint-only viewport');
+  assertEqual(report.overflow, false, 'footprint-only no overflow');
+  assertEqual(
+    report.notice,
+    'No 3D model is declared by this footprint; geometry and physical fit remain unverified.',
+    'honest unavailable notice',
+  );
+  assertEqual(report.noticeVisible, true, 'unavailable notice visible');
+  assertEqual(report.models, 0, 'no invented model viewer or controls');
+  assertEqual(report.footprintLoaded, true, 'footprint preview loaded');
+  assertDocumentState({
+    documentLabel: report.label,
+    documentHref: report.href,
+    documentUnavailable: report.documentUnavailable,
+    documentReason: report.documentReason,
+    documentReasonVisible: report.documentReasonVisible,
+    documentLinkCount: report.documentLinkCount,
+    authority: report.authority,
+    availability: undefined,
+  }, representative);
+  assertEqual(report.theme, theme, 'theme retained');
+  assertEqual((report.headingId?.length ?? 0) > 0, true, 'reference heading retained');
+  if (shellAssertions) await inspectNativeShell(cdp, representative, width, report.headingId);
+  return { themeSignature: report.themeSignature };
 }

@@ -55,7 +55,7 @@ import {
 } from "../mdx.ts";
 import { MODEL_ASSET_BASE } from "../model-descriptor.ts";
 import { anchor } from "../ids.ts";
-import { createComponentReferencesDescriptor, encodeComponentReferencesDescriptor } from "../reference-descriptor.ts";
+import { createComponentReferencesDescriptor, encodeComponentReferencesDescriptor, DOCUMENT_UNAVAILABLE_LABEL } from "../reference-descriptor.ts";
 import { buildPage, type GeneratedPage } from "../page.ts";
 import { joinSafe, literal, safeText, type SafeText } from "../text.ts";
 import {
@@ -178,6 +178,19 @@ export const PACKAGELESS_REFERENCE_TEXT = {
 function componentReferencesSection(record: PublicRecord): RootContent[] {
   const footprint = record.reference.footprint;
   const document = record.reference.document;
+  const unavailableReason = record.reference.documentUnavailableReason;
+  if ((document === null) !== (unavailableReason != null)) throw new Error("Published record must have exactly one document state");
+  const documentBlocks: RootContent[] = document === null
+    ? [
+      paragraph([strong(literal("Selected document:")), space(), text(literal(DOCUMENT_UNAVAILABLE_LABEL))]),
+      paragraph(field("Reason", [text(unavailableReason!)])),
+    ]
+    : [
+      paragraph([strong(literal("Selected document:")), space(), link(document.url, document.label), space(), text(literal("—")), space(), text(document.documentTitle)]),
+      paragraph(field("Selected source ID", [code(document.sourceId)])),
+      paragraph(field("Authority", [text(document.authorityClass)])),
+      paragraph(field("Availability", [text(document.availability)])),
+    ];
   const headingBlocks: RootContent[] = [
     heading(2, literal("Documents and package")),
     evidenceAnchor(anchor("component-references-heading")),
@@ -186,17 +199,18 @@ function componentReferencesSection(record: PublicRecord): RootContent[] {
     return [
       ...headingBlocks,
       evidenceAnchor(anchor("component-references")),
-      paragraph([link(document.url, document.label), space(), text(literal("—")), space(), text(document.documentTitle)]),
-      paragraph(field("Selected source ID", [code(document.sourceId)])),
-      paragraph(field("Authority", [text(document.authorityClass)])),
-      paragraph(field("Availability", [text(document.availability)])),
+      ...(document === null ? documentBlocks : [
+        paragraph([link(document.url, document.label), space(), text(literal("—")), space(), text(document.documentTitle)]),
+        ...documentBlocks.slice(1),
+      ]),
       paragraph([text(literal(PACKAGELESS_REFERENCE_TEXT[record.reference.mounting]))]),
     ];
   }
-  const modelName = String(footprint.modelPath).split("/").at(-1);
+  const modelName = footprint.modelPath === null ? null : String(footprint.modelPath).split("/").at(-1);
   if (modelName === undefined) throw new Error("Published model path has no basename");
+  if (footprint.modelPath !== null && (footprint.offset === null || footprint.rotation === null || footprint.scale === null)) throw new Error("Declared model placement is incomplete");
   const descriptor = encodeComponentReferencesDescriptor(createComponentReferencesDescriptor({
-    document: {
+    document: document === null ? { label: DOCUMENT_UNAVAILABLE_LABEL, reason: unavailableReason! } : {
       label: document.label,
       title: document.documentTitle,
       authority: document.authorityClass,
@@ -204,23 +218,20 @@ function componentReferencesSection(record: PublicRecord): RootContent[] {
       url: document.url,
     },
     footprintName: footprint.footprintName,
-    model: {
+    model: modelName === null ? null : {
       version: 1,
       packageId: footprint.packageId,
       packageLabel: footprint.footprintName,
       modelUrl: `${MODEL_ASSET_BASE}${modelName}`,
-      offset: footprint.offset,
-      rotation: footprint.rotation,
-      scale: footprint.scale,
+      offset: footprint.offset!,
+      rotation: footprint.rotation!,
+      scale: footprint.scale!,
     },
   }));
   return [
     ...headingBlocks,
     component("ComponentReferences", { descriptor }),
-    paragraph([strong(literal("Selected document:")), space(), link(document.url, document.label), space(), text(literal("—")), space(), text(document.documentTitle)]),
-    paragraph(field("Selected source ID", [code(document.sourceId)])),
-    paragraph(field("Authority", [text(document.authorityClass)])),
-    paragraph(field("Availability", [text(document.availability)])),
+    ...documentBlocks,
     paragraph(field("Package footprint", [code(footprint.footprintName)])),
     paragraph([text(literal("This geometry represents a shared footprint package and may not exactly match the manufacturer part."))]),
   ];

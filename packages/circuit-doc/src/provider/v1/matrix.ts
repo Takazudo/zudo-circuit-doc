@@ -155,6 +155,7 @@ export const CIRCUIT_PUBLICATION_MATRIX: PublicationMatrix = {
   "reference.document.label": "PUBLISH",
   "reference.document.authorityClass": "PUBLISH",
   "reference.document.url": "PUBLISH",
+  // Also publishes the reviewed reason when a selected document is unavailable.
   "reference.document.availability": "PUBLISH",
   "reference.document.documentKind": "PUBLISH",
   "reference.footprint.packageId": "PUBLISH",

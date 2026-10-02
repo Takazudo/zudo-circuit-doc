@@ -34,6 +34,7 @@ page even for a fully selected record.
   "sourceIds": [],
   "linkableSourceIds": [],
   "documentSelections": [],
+  "documentExceptions": [],
   "expect": { "records": 0, "sources": 0, "integrationRules": 0, "packages": 0 }
 }
 ```
@@ -41,8 +42,20 @@ page even for a fully selected record.
 - `recordIds` / `sourceIds` — which records and sources clear the INSTANCE gate.
 - `linkableSourceIds` — selecting a source publishes its metadata; an outbound link is published
   only for source IDs also listed here.
-- `documentSelections` — one document choice per record (`documentKind`: `datasheet`,
-  `specification` or `drawing`), decided after inspecting the content.
+- `documentSelections` — reviewed document choices with a `recordId`, `sourceId` and
+  `documentKind` (`datasheet`, `specification`, `drawing` or `source-record`). The first three
+  kinds explicitly describe PDFs. `source-record` displays **Source record** for a reviewed
+  non-PDF source; it does not promote source authority or exact-part applicability.
+- `documentExceptions` — optional `{ recordId, reason }` entries for selected records with no
+  document to publish. The reason is shown as the document's availability on the component page,
+  through the existing publication-matrix key `reference.document.availability`. Write a concise,
+  reviewed reason that says what was checked and what remains unavailable. Do not describe
+  distributor evidence as a manufacturer document or invent a URL. Keep relevant evidence in
+  `sourceIds` so it remains in Sources; add its URL to `linkableSourceIds` only when that outbound
+  link is approved.
+- **Partition rule:** each ID in `recordIds` must appear in exactly one of `documentSelections` or
+  `documentExceptions`. The lists cannot overlap, and together they must cover every selected
+  record. If `documentExceptions` is omitted, it is treated as `[]`.
 - `expect` — a reviewed count lock (`records`, `sources`, `integrationRules`, `packages`), each of
   which may be `0`. It gates `generate`/`check`/`build` and is **never serialized into the
   preflight report**. `cad.enabled` is a separate capability flag — a selected PCB record while CAD is

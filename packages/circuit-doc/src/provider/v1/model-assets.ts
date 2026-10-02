@@ -74,6 +74,7 @@ export async function buildModelAssetPlan(
   const names = new Set<string>();
   const entries: ModelAssetPlanEntry[] = [];
   for (const descriptor of packages) {
+    if (descriptor.modelPath === null) continue;
     const name = basename(descriptor.modelPath);
     assertSafePreviewAssetName(name, descriptor.recordIds[0] ?? descriptor.packageId);
     if (extname(name).toLowerCase() !== ".wrl" || names.has(name)) {

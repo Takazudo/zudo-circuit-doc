@@ -264,32 +264,34 @@ function projectRecordReference(
 ): PublicRecordReference {
   const recordId = entry.record.record_id;
   const document = references.documentsByRecordId.get(recordId);
+  const unavailableReason = references.documentExceptionsByRecordId.get(recordId);
   const footprint = references.packageByRecordId.get(recordId);
   const mounting = entry.line.mounting === "external" ? "external" : "pcb";
   const declaredUnpublished = references.unpublishedPackageRecordIds.has(recordId);
-  if (document === undefined || (footprint === undefined && mounting === "pcb" && !declaredUnpublished)) {
+  if ((document === undefined && unavailableReason === undefined) || (footprint === undefined && mounting === "pcb" && !declaredUnpublished)) {
     fail("ADAPTER_CONTRACT", "record has no complete reference descriptor", { recordId });
   }
-  const classified = classifyUrl(document.source.authoritative_url);
-  if (classified.decision === "DENY") {
-    fail("UNSAFE_VALUE", "selected document URL failed classification", {
-      recordId,
-      sourceId: document.source.source_id,
-      reason: classified.reason,
-    });
-  }
-  policy.publishRequired("asset.datasheetPdf", true);
-  if (footprint !== undefined) {
-    policy.publishRequired("asset.footprintPreview", true);
-    policy.publishRequired("asset.modelPreview", true);
-  }
-  const labels = {
-    datasheet: "Datasheet PDF",
-    specification: "Specification PDF",
-    drawing: "Mechanical drawing PDF",
-  } as const;
-  return {
-    document: {
+  let publishedDocument: PublicRecordReference["document"] = null;
+  let documentUnavailableReason: PublicRecordReference["documentUnavailableReason"] = null;
+  if (document === undefined) {
+    documentUnavailableReason = policy.publishRequired("reference.document.availability", safeText(unavailableReason, { field: `${recordId}.reference.documentUnavailableReason` }));
+  } else {
+    const classified = classifyUrl(document.source.authoritative_url);
+    if (classified.decision === "DENY") {
+      fail("UNSAFE_VALUE", "selected document URL failed classification", {
+        recordId,
+        sourceId: document.source.source_id,
+        reason: classified.reason,
+      });
+    }
+    policy.publishRequired("asset.datasheetPdf", true);
+    const labels = {
+      datasheet: "Datasheet PDF",
+      specification: "Specification PDF",
+      drawing: "Mechanical drawing PDF",
+      "source-record": "Source record",
+    } as const;
+    publishedDocument = {
       sourceId: policy.publishRequired("reference.document.sourceId", safeText(document.source.source_id, { field: `${recordId}.reference.sourceId` })),
       documentTitle: policy.publishRequired("reference.document.documentTitle", safeText(document.source.document_title, { field: `${recordId}.reference.documentTitle` })),
       label: policy.publishRequired("reference.document.label", safeText(labels[document.documentKind], { field: `${recordId}.reference.label` })),
@@ -297,7 +299,15 @@ function projectRecordReference(
       url: policy.publishRequired("reference.document.url", classified.url),
       availability: policy.publishRequired("reference.document.availability", safeText(document.source.availability, { field: `${recordId}.reference.availability` })),
       documentKind: policy.publishRequired("reference.document.documentKind", document.documentKind),
-    },
+    };
+  }
+  if (footprint !== undefined) {
+    policy.publishRequired("asset.footprintPreview", true);
+    if (footprint.modelPath !== null) policy.publishRequired("asset.modelPreview", true);
+  }
+  return {
+    document: publishedDocument,
+    documentUnavailableReason,
     mounting,
     footprint: footprint === undefined ? null : projectFootprint(footprint, policy),
   };
@@ -319,7 +329,7 @@ function projectFootprint(entry: CircuitPackageReference, policy: PublicationPol
     packageId: policy.publishRequired("reference.footprint.packageId", safeText(entry.packageId, { field: `${at}.packageId` })),
     footprintName: policy.publishRequired("reference.footprint.name", safeText(entry.footprintName, { field: `${at}.footprintName` })),
     footprintPath: policy.publishRequired("reference.footprint.path", safeText(entry.footprintPath, { field: `${at}.footprintPath` })),
-    modelPath: policy.publishRequired("reference.model.path", safeText(entry.modelPath, { field: `${at}.modelPath` })),
+    modelPath: policy.publishRequired("reference.model.path", entry.modelPath === null ? null : safeText(entry.modelPath, { field: `${at}.modelPath` })),
     offset: policy.publishRequired("reference.model.offset", entry.offset),
     rotation: policy.publishRequired("reference.model.rotation", entry.rotation),
     scale: policy.publishRequired("reference.model.scale", entry.scale),

@@ -11,11 +11,19 @@ sidebar_position: 5
 ```json
 {
   "schema_version": 1,
-  "recordIds": [],
-  "sourceIds": [],
-  "linkableSourceIds": [],
-  "documentSelections": [],
-  "expect": { "records": 0, "sources": 0, "integrationRules": 0, "packages": 0 }
+  "recordIds": ["rec-with-document", "rec-without-document"],
+  "sourceIds": ["src-datasheet", "src-distributor"],
+  "linkableSourceIds": ["src-datasheet", "src-distributor"],
+  "documentSelections": [
+    { "recordId": "rec-with-document", "sourceId": "src-datasheet", "documentKind": "datasheet" }
+  ],
+  "documentExceptions": [
+    {
+      "recordId": "rec-without-document",
+      "reason": "The reviewed distributor listing establishes order identity only; no manufacturer document was found in the sources checked."
+    }
+  ],
+  "expect": { "records": 2, "sources": 2, "integrationRules": 0, "packages": 0 }
 }
 ```
 
@@ -25,13 +33,16 @@ sidebar_position: 5
 | `recordIds` | `string[]` | Record IDs cleared for publication (the INSTANCE gate) |
 | `sourceIds` | `string[]` | Source IDs cleared for publication |
 | `linkableSourceIds` | `string[]` | Subset of `sourceIds` whose outbound URL is also published |
-| `documentSelections` | `array` | One entry per published record choosing its primary document, `documentKind`: `datasheet` \| `specification` \| `drawing` |
+| `documentSelections` | `array` | Document choices with `recordId`, `sourceId` and `documentKind`: `datasheet` \| `specification` \| `drawing` \| `source-record` |
+| `documentExceptions` | `array` (optional) | Reviewed no-document decisions with `recordId` and a non-empty `reason` (up to 1000 characters); omitted means `[]` |
 | `expect.records` / `expect.sources` / `expect.integrationRules` / `expect.packages` | `number` | Reviewed counts, `0` allowed for every one |
-| `comment` | `string` (optional) | The only extra key the schema allows beyond the above |
+| `comment` | `string` (optional) | A human note about the selection |
 
-Strictly validated: every key above is required except the optional `comment`; any other extra key
-is rejected. See [Concepts → Publication](../concepts/publication.mdx#the-selection-lock) for what
-each field gates.
+Every selected record must occur in exactly one of `documentSelections` or `documentExceptions`;
+the two lists are disjoint and together cover `recordIds`. A document selection's record and source
+must be selected, and its source must be linkable. Every field above is required except the optional
+`documentExceptions` and `comment`; any other extra key is rejected. See
+[Concepts → Publication](../concepts/publication.mdx#the-selection-lock) for what each field gates.
 
 ## `assets.json`
 

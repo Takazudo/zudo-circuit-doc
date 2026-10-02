@@ -62,6 +62,7 @@ describe("mapCircuitConfig", () => {
       sourceIds: [],
       linkableSourceIds: [],
       documentSelections: [],
+      documentExceptions: [],
       expect: { records: 0, sources: 0, integrationRules: 0, packages: 0 },
     });
     assert.deepEqual(mapping.assets, { schema_version: 1, assets: [] });
@@ -157,6 +158,50 @@ describe("mapCircuitConfig", () => {
     const { root, resolved } = await fixture();
     await writeJson(join(root, SELECTION), { ...EMPTY_SELECTION, expect: { ...EMPTY_SELECTION.expect, packages: 2 } });
     assert.equal((await mapCircuitConfig(resolved)).selection.expect.packages, 2);
+  });
+
+  it("reads a document exception as part of a valid selection partition", async () => {
+    const { root, resolved } = await fixture();
+    await writeJson(join(root, SELECTION), {
+      ...EMPTY_SELECTION,
+      recordIds: ["rec-a", "rec-b"],
+      sourceIds: ["src-a"],
+      linkableSourceIds: ["src-a"],
+      documentSelections: [{ recordId: "rec-a", sourceId: "src-a", documentKind: "datasheet" }],
+      documentExceptions: [{ recordId: "rec-b", reason: "No public document exists." }],
+      expect: { records: 2, sources: 1, integrationRules: 0, packages: 0 },
+    });
+
+    assert.deepEqual((await mapCircuitConfig(resolved)).selection.documentExceptions, [
+      { recordId: "rec-b", reason: "No public document exists." },
+    ]);
+  });
+
+  it("rejects malformed document exception shapes and empty fields", async () => {
+    const { root, resolved } = await fixture();
+    await writeJson(join(root, SELECTION), {
+      ...EMPTY_SELECTION,
+      documentExceptions: [{ recordId: "rec-a", reason: "Not published", sourceId: "src-a" }],
+    });
+    await rejectsAdapter(mapCircuitConfig(resolved), /documentExceptions\[0\]\.sourceId: unknown key/u);
+
+    await writeJson(join(root, SELECTION), {
+      ...EMPTY_SELECTION,
+      documentExceptions: [{ recordId: "rec-a", reason: "" }],
+    });
+    await rejectsAdapter(mapCircuitConfig(resolved), /documentExceptions\[0\]\.reason: must be a non-empty string/u);
+
+    await writeJson(join(root, SELECTION), {
+      ...EMPTY_SELECTION,
+      documentExceptions: [{ recordId: "", reason: "No public document exists." }],
+    });
+    await rejectsAdapter(mapCircuitConfig(resolved), /documentExceptions\[0\]\.recordId: must be a non-empty string/u);
+
+    await writeJson(join(root, SELECTION), { ...EMPTY_SELECTION, documentExceptions: {} });
+    await rejectsAdapter(mapCircuitConfig(resolved), /documentExceptions: must be an array/u);
+
+    await writeJson(join(root, SELECTION), { ...EMPTY_SELECTION, documentExceptions: [null] });
+    await rejectsAdapter(mapCircuitConfig(resolved), /documentExceptions\[0\]: must be an object/u);
   });
 
   it("rejects malformed selection, assets and non-JSON files", async () => {

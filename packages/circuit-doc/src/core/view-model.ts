@@ -219,14 +219,14 @@ export type PublicPinMap = {
   readonly pins: readonly PublicPin[];
 };
 
-export type PublicDocumentKind = "datasheet" | "specification" | "drawing";
+export type PublicDocumentKind = "datasheet" | "specification" | "drawing" | "source-record";
 
 /** The one reviewed, PDF-representing shortcut for a record. */
 export type PublicDocumentReference = {
   readonly sourceId: SafeText;
   /** The source's own title, preserved rather than replaced by UI wording. */
   readonly documentTitle: SafeText;
-  /** Exactly one of Datasheet PDF / Specification PDF / Mechanical drawing PDF. */
+  /** One reviewed label: Datasheet PDF / Specification PDF / Mechanical drawing PDF / Source record. */
   readonly label: SafeText;
   readonly authorityClass: SafeText;
   readonly url: SafeUrl;
@@ -245,14 +245,16 @@ export type PublicFootprintReference = {
   readonly packageId: SafeText;
   readonly footprintName: SafeText;
   readonly footprintPath: SafeText;
-  readonly modelPath: SafeText;
-  readonly offset: PublicTransform3d;
-  readonly rotation: PublicTransform3d;
-  readonly scale: PublicTransform3d;
+  readonly modelPath: SafeText | null;
+  readonly offset: PublicTransform3d | null;
+  readonly rotation: PublicTransform3d | null;
+  readonly scale: PublicTransform3d | null;
 };
 
 export type PublicRecordReference = {
-  readonly document: PublicDocumentReference;
+  /** Exactly one of the selected document and reviewed unavailable reason is present. */
+  readonly document: PublicDocumentReference | null;
+  readonly documentUnavailableReason: SafeText | null;
   /**
    * Structural discriminator for rendering `footprint: null`: an `external`
    * part has no PCB footprint at all, a `pcb` part may simply have no package

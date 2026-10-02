@@ -53,6 +53,13 @@ function options(paths: CircuitProjectPaths, selection = FIXTURE_SELECTION): Mod
 }
 
 describe("buildModelAssetPlan / publishModelAssets", () => {
+  it("omits truly absent models from export while keeping the package count lock", async () => {
+    const paths = await writeFixtureProject(join(scratch, "optional-model"));
+    const names = (await readdir(paths.footprintLibraryRoot)).filter(name => name.endsWith('.kicad_mod'));
+    for (const name of names) await writeFile(join(paths.footprintLibraryRoot, name), `(footprint "${name.slice(0, -10)}")`);
+    assert.equal(names.length, FIXTURE_PACKAGE_COUNT);
+    assert.deepEqual(await buildModelAssetPlan(options(paths)), []);
+  });
   it("refuses to plan anything when the canonical validator did not pass", async () => {
     const paths = await writeFixtureProject(join(scratch, "unvalidated"));
     await rejectsWith(

@@ -224,10 +224,10 @@ The Chrome-found path then has three outcomes:
   INFO: using derived representatives: /docs/components/records/al8860mp-13/ (AL8860MP-13), /docs/components/records/c22807/ (C22807)
   ```
 - **Records are published, but none qualifies** (no component-references section with a reviewed
-  PDF, footprint and WRL model): exits `4` with
+  document/source record and footprint, with a valid WRL if declared): exits `4` with
   ```
   not run: 2 record(s) are published but none qualifies for a default browser smoke (a
-  component-references section with a reviewed PDF, footprint and WRL model); set
+  component-references section with a reviewed document/source record and footprint, with a valid WRL if declared); set
   browserSmoke.representatives in circuit.config.ts
   ```
   A missing or invalid preflight report while deriving is a usage error (exit `2`), not exit `4`.
