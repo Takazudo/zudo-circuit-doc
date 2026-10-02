@@ -12,7 +12,7 @@ import re
 from pathlib import Path, PurePosixPath
 
 from ..errors import ContractError, require, required_keys
-from .common import InventoryProvider, ProviderResult, placements, validate_counts, validate_owner_parity
+from .common import InventoryProvider, ProviderResult, effective_fit, line_fit, placements, validate_counts, validate_owner_parity
 
 SPEC_OPTION_KEYS = {"path", "board"}
 
@@ -181,14 +181,14 @@ def inventory_key(line):
     return "external:" + line["mpn"] if line.get("mounting") == "external" else line["lcsc"]
 
 
-def validate_generator_parity(data, generated, excluded):
+def validate_generator_parity(data, generated, excluded, *, placement_fit=False):
     """Every inventory line matches the generator: LCSC key, MPN, package, placements, DNP, exclusions."""
     lines = data["lines"]
     require(len({inventory_key(line) for line in lines}) == len(lines), "inventory: duplicate LCSC ownership")
     require(set(generated) == {inventory_key(line) for line in lines}, "inventory: LCSC identity differs from generator specs")
     for line in lines:
         if line.get("mounting") == "external":
-            require(line["lcsc"] == "" and not line["dnp"], f"{line['line_id']}: external identity must have no LCSC and be fitted")
+            require(line["lcsc"] == "" and not line.get("dnp") and not any(line_fit(line)), f"{line['line_id']}: external identity must have no LCSC and be fitted")
         else:
             require(re.fullmatch(r"C[0-9]+", line["lcsc"]), f"{line['line_id']}: PCB line needs LCSC")
         expected = generated[inventory_key(line)]
@@ -198,10 +198,10 @@ def validate_generator_parity(data, generated, excluded):
                 require(line.get(key) == expected["external"][key], f"{line['line_id']}: external {key} mismatch")
         require(line["mpn"] == expected["mpn"], f"{line['line_id']}: wrong MPN against generator")
         require(line["package"] == expected["package"], f"{line['line_id']}: wrong package against generator")
-        want_places = {(x["board"], x["refdes"], x["dnp"]) for x in expected["placements"]}
-        got_places = {(x["board"], x["refdes"], line["dnp"]) for x in line["placements"]}
+        want_places = sorted((x["board"], x["refdes"], x["dnp"]) for x in expected["placements"])
+        got_places = sorted((x["board"], x["refdes"], effective_fit(line, x)) for x in line["placements"])
         require(got_places == want_places, f"{line['line_id']}: board/refdes or DNP mismatch")
-    validate_counts(data)
+    validate_counts(data, placement_fit=placement_fit)
     exclusions = {(x["board"], x["refdes"]) for x in data["exclusions"]}
     require(exclusions == set(excluded), "inventory: bare-copper exclusions differ from blank-LCSC generator entries")
 
@@ -221,8 +221,11 @@ class LedGeneratorProvider(InventoryProvider):
 
     def __init__(self, options):
         super().__init__(options)
-        unexpected = set(options) - {"kind", "specs"}
+        unexpected = set(options) - {"kind", "specs", "fit"}
         require(not unexpected, f"inventory provider led-generator-v1: unexpected options {sorted(unexpected)}")
+        fit = options.get("fit", "line")
+        require(fit in ("line", "placement"), "inventory provider led-generator-v1: fit must be 'line' or 'placement'")
+        self.placement_fit = fit == "placement"
         require("specs" in options, "inventory provider led-generator-v1: specs option is required")
         self.specs = _spec_options(options["specs"])
         self._generated = None
@@ -250,7 +253,7 @@ class LedGeneratorProvider(InventoryProvider):
         configured = self.relative_spec_paths(config["projectRoot"])
         require(inventory["generator_specs"] == configured, f"inventory: generator_specs {inventory['generator_specs']} differ from the configured specs {configured}")
         grouped, excluded, _boards = self.generated()
-        validate_generator_parity(inventory, grouped, excluded)
+        validate_generator_parity(inventory, grouped, excluded, placement_fit=self.placement_fit)
 
     def validate(self, inventory, aggregate, config):
         self.validate_inventory(inventory, config)
@@ -262,6 +265,8 @@ class LedGeneratorProvider(InventoryProvider):
             f"inventory provider=led-generator-v1; placements bound to {len(self.specs)} generator specs "
             f"({len(lines)} lines, {len(bound)} placements, {len(inventory['exclusions'])} exclusions); pin-asset check {pin_assets}"
         )
+        if self.placement_fit:
+            scope += "; fit=placement"
         return ProviderResult(lines=lines, placements=bound, scope_lines=[scope])
 
     def extra_pin_asset_checks(self, provider_result, aggregate):
