@@ -55,7 +55,7 @@ the vendored scaffold:
 
 ```md
 ## create-zudo-doc
-- pinned: <commit> (v5.27.0)
+- pinned: <commit> (v6.0.0)
 - files: doc/pages/docs/[[...slug]].tsx, doc/pages/index.tsx, doc/tsconfig.json,
   doc/src/styles/global.css, doc/scripts/check-links.js
 - notes: doc/pages/docs/[[...slug]].tsx carries one added import beyond the upstream stub;
@@ -70,6 +70,64 @@ To refresh a project's scaffold by hand after a new `create-zudo-doc` release:
 3. Re-apply the project-specific lines `ZUDO_DEPS_PINS.md`'s notes call out (they are not part of
    the upstream scaffold, and a plain re-copy would silently drop them).
 4. Update `ZUDO_DEPS_PINS.md`'s `pinned:`/`updated:` fields.
+
+## Migrating the 0.2 runtime family to 0.3 (pending)
+
+Runtime **0.3.0** and initializer **0.2.0** are prepared but **not published**.
+Do not migrate production consumers yet: published zudo-doc **6.0.0** rejects the direct
+required-prop MDX registry. Upstream [#4531](https://github.com/zudolab/zudo-doc/pull/4531)
+fixes this, but the fix must ship in a stable package and pass the packed-consumer gate first.
+The migration PR stays draft until then. A successful bundle is not evidence of type compatibility.
+
+The old pairing is runtime `^0.2.0`, zudo-doc/history-server 5.27.0 and the aligned ZFB 2.21.0
+family. A caret on runtime `^0.2.0` does not opt into 0.3. Keep that pairing until you deliberately
+migrate the entire host. The prepared new pairing is runtime `^0.3.0`, initializer 0.2.0,
+zudo-doc/history-server/create-zudo-doc 6.0.0 and ZFB/runtime/md-wasm 4.3.1. The zudo-doc pin
+and runtime peer minimum must advance to the actual fixed stable release before use.
+Independently released packages need not share a patch version.
+
+Once the published gate is satisfied, apply this recipe on a project branch:
+
+1. Back up authored content, evidence, configuration and CAD receipts. Update the runtime range
+   in both root and `doc/package.json`; update the exact zudo-doc/history-server and all three
+   ZFB pins in the doc host together. Remove retired direct Preact and preact-render-to-string
+   dependencies unless independently used by another explicitly owned renderer. Keep the existing
+   Node, pnpm and Python floors. Reinstall and retain the generated lockfile.
+2. Generate a **separate** reference project from the recorded `create-zudo-doc` version. Never
+   run an initializer over your existing app, and never add `create-zudo-doc` to app dependencies.
+   Compare the docs route, root route, tsconfig, global CSS and link checker listed above.
+3. Extend `@takazudo/zudo-doc/tsconfig.base.json`. Remove React-to-Preact paths and JSX pragmas,
+   preserve genuine aliases with a local `baseUrl`, and inherit the base's top-level `files`.
+   Custom TSX imports `Child`/`Description` and the published intrinsic types from zudo-react.
+   Interactive components use setup-owned signals/computed values, `Show`, native `on:*`
+   handlers and scope activation/cleanup. A one-time `.value` read is not a reactive binding.
+4. Replace Tailwind directives, removed `safelist.css` and `theme-no-reset.css` with
+   `@layer zw-reset, zd-flow;`, followed by the public `theme.css`, `content.css`,
+   `page-loading.css` and `features.css` imports. Move token values to ordinary `:root`.
+   Import `@takazudo/zudo-circuit-doc/styles.css` immediately after feature CSS.
+   `zudoDoc()` registers its Wind manifest; do not scan package sources to recover old utilities.
+5. Use `DocHistoryBoundary as DocHistory` from `@takazudo/zudo-doc/doc-history-area` in chrome
+   bindings. Keep the direct `mdxExtras: { ...circuitDocMdxExtras }` registration with its required
+   props. Retain the docs route's `import "../lib/_circuit-doc-islands";` and that seed file's
+   package import. Named `Island` targets transport only strings and hydrate when visible.
+   Custom dialog code uses `modalDialog(scope, options)` from the retained use-modal-dialog
+   subpath; conditional model surfaces own abort and disposal, including pending initialization.
+6. Preserve `base: "/"`, `/docs/` paths, categories/locales, assets, `strictContentBridge`,
+   history exclusions, agent-resource links, wide/TOC and `llmsTxt` choices. Keep `circuit.config.ts`
+   separate. Header dropdowns group links; they do not define document ancestry. Check the actual
+   sidebar's broader tree, focus/restore and filter behavior without duplicating parent rows.
+7. Run circuit checks, host TypeScript checking (`pnpm --dir doc exec tsc --noEmit`), builds,
+   and the strict built-HTML link/anchor scanner. Source-only checking cannot see EvidenceAnchor
+   output. Run `pnpm --dir doc exec zfb wind audit --project-root . --fail-on error` and inspect
+   computed dialog stacking, focus, tables and themes. Exercise search, mobile drawer, history,
+   footprint/model enlargement, Escape/backdrop, no-JS/error states, SPA/reload and delayed-load
+   cleanup with shell/search browser assertions enabled. Update dependency provenance only after
+   reviewing the generated diffs; never change evidence to hide a renderer regression.
+
+The monorepo verifies local runtime and initializer tarballs in empty/minimal/LED consumers,
+including strict direct registration and host types. Publication is separate: publish/approve
+runtime first, pass `verify:pack --fixture empty --published-runtime`, then publish/approve the
+initializer. The unpublished runtime's absence on npm is not an implementation merge gate.
 
 ## Adding an authored section
 

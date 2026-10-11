@@ -13,6 +13,7 @@ import { launchChrome } from "./chrome.ts";
 import { checkSystemAppearance } from "./checks/appearance.ts";
 import { checkViewerFreeCatalog } from "./checks/catalog.ts";
 import { checkSourceDetailExpansion } from "./checks/details.ts";
+import { checkDelayedModelCleanup } from "./checks/delayed-load.ts";
 import { checkForcedModelFailure, checkForcedWebglFailure } from "./checks/forced-failures.ts";
 import {
   exerciseDialogGeometry,
@@ -200,6 +201,7 @@ async function runRecordChecks(
   await setDocumentTheme(cdp, "light");
   await revealReadyViewer(cdp);
   await exerciseSpaDisposeAndRemount(cdp, recordPath, options.awayRoute);
+  await checkDelayedModelCleanup(cdp, origin, recordPath, options.awayRoute);
 
   await checkForcedModelFailure(cdp, origin, recordPath);
   await checkForcedWebglFailure(cdp, origin, recordPath);
@@ -212,6 +214,6 @@ async function runRecordChecks(
 export function referenceSmokeSummary(navigated: number, referenceInspections: number, hasModel: boolean): string {
   const common = `component reference browser smoke passed: ${navigated} viewport/theme navigations, ${referenceInspections} component-reference inspections, viewer-free catalog`;
   return hasModel
-    ? `${common}; model-bearing representative: dialogs, interactions, focus, on-demand idle, SPA cleanup, fallbacks and no-JS passed`
+    ? `${common}; model-bearing representative: dialogs, interactions, focus, on-demand idle, SPA cleanup, delayed-load cleanup, fallbacks and no-JS passed`
     : `${common}; model dialogs/interactions, focus, idle, SPA, fallbacks and no-JS NOT RUN (no published model representative)`;
 }

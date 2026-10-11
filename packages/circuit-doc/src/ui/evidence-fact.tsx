@@ -1,13 +1,13 @@
 /** @jsxRuntime automatic */
-/** @jsxImportSource preact */
+/** @jsxImportSource @takazudo/zfb/zudo-react */
 
-import type { ComponentChildren, JSX } from "preact";
+import type { Child, Description } from "@takazudo/zfb/zudo-react";
 
 /** Groups one complete fact while leaving its Markdown claims visible in SSR. */
 export type EvidenceFactProps = {
-  children?: ComponentChildren;
+  children?: Child;
 };
 
-export function EvidenceFact({ children }: EvidenceFactProps): JSX.Element {
+export function EvidenceFact({ children }: EvidenceFactProps): Description {
   return <div class="zcd-evidence-fact">{children}</div>;
 }

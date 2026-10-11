@@ -10,7 +10,7 @@
     "strict": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "jsx": "react-jsx",
-    "jsxImportSource": "preact",
+    "jsxImportSource": "@takazudo/zfb/zudo-react",
     "noEmit": true
   },
   "include": ["src", "test", "test-led"]

@@ -41,7 +41,7 @@ iteration) and the literal source of the generated project template.
 
 **Decision:** zudo-doc composition uses a fixture-derived template: `examples/empty` is synced
 into `templates/default`. A dev-time upstream parity check diffs the upstream-owned host files
-against `createZudoDoc()` output from the pinned `create-zudo-doc@5.27.0`.
+against `createZudoDoc()` output from the pinned `create-zudo-doc@6.0.0`.
 
 **Rejected alternative:** Calling `create-zudo-doc` at user runtime. It needs `chdir`, has no
 staging, swallows install failures, and skips nested `pnpm-workspace.yaml`.
@@ -59,11 +59,9 @@ slightly different dependency families, and the validator's declared `>=3.12` Py
 only ever a CI-parity pin (the measured floor is 3.9, see the
 [extraction baseline](./extraction-baseline.md#toolchain)).
 
-**Decision:** The version family is exact-pinned: `@takazudo/zudo-doc` 5.27.0,
-`@takazudo/zfb`/`zfb-runtime`/`zfb-md-wasm` 2.21.0, pnpm 11.5.2 (via `packageManager` and
-corepack), Node >=22.18.0, Python >=3.10 (stdlib only). Fallback rule: if the M1 host or island
-hydration fails on zfb 2.21.0 but passes on 2.20.3, pin 2.20.3 across the family and file an
-upstream report with `/dev-upstream-report`. Generated-project pnpm settings live only in the
+**Decision:** The current migration family is zudo-doc/history-server/create-zudo-doc 6.0.0,
+with aligned zfb/runtime/md-wasm 4.3.1. ADR-021 records its published compatibility hold.
+The historical 2.20.3 fallback is retired. Retain pnpm 11.5.2, Node >=22.18.0 and Python >=3.10. Generated-project pnpm settings live only in the
 root `pnpm-workspace.yaml` — there are no `.npmrc` files, because `pnpm pack` drops them and
 pnpm only reads them at the workspace root. The file sets `minimumReleaseAge: 0` (a known
 trade-off, to revisit at publish time in [#34](https://github.com/Takazudo/zudo-circuit-doc/issues/34)),
@@ -413,3 +411,30 @@ LED fixture turns it off to keep its goldens byte-identical. Templates set the l
 allowlist or goldens.
 
 **Owning issue:** [#14](https://github.com/Takazudo/zudo-circuit-doc/issues/14)
+
+
+## ADR-021 — zudo-react migration and release boundary
+
+**Status:** Implementation pending published dependency compatibility (issue #155).
+
+The runtime 0.3.0 and initializer 0.2.0 prepare a pre-1.0 breaking minor under Scheme B.
+Old generated hosts retain runtime ^0.2.0 with zudo-doc 5 / ZFB 2; the new template selects
+^0.3.0 with zudo-doc 6 / ZFB 4. The private root version stays unchanged.
+
+Registry inspection on 2026-10-11 found zudo-doc, history-server and create-zudo-doc 6.0.0,
+and aligned zfb, zfb-runtime and zfb-md-wasm 4.3.1. The actual 6.0.0 tarball declares
+`mdxExtras?: Record<string, Component<Record<string, unknown>>>`, rejecting the circuit registry's
+required props. Upstream zudolab/zudo-doc#4531 fixes this but is not published in that version.
+The development peer ^6.0.0 is provisional: before integration, require a fixed stable version,
+raise the peer minimum and exact host pin, and pass the strict direct packed-consumer check.
+No casts, weaker props, adapters, installed-file patches or floating upstream refs are allowed.
+
+zudo-react setup scopes own signals, native events and activation cleanup. Conditional dialog
+viewers dispose on close, including pending imports/loads. Static named Island targets retain
+string transport and the existing island seed. Host glue follows the published reference
+scaffold with only the recorded circuit additions; Wind supplies upstream feature CSS.
+
+Local tarballs are the integration gate; the unpublished circuit runtime is not expected on npm.
+After separate release authorization: publish/approve runtime, run the existing empty consumer
+`--published-runtime` gate, then publish/approve initializer. No tags, staging or publication are
+part of implementation. Existing automatic documentation deployment follows a later eligible merge.

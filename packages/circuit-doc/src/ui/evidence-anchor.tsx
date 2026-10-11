@@ -1,5 +1,5 @@
 /** @jsxRuntime automatic */
-/** @jsxImportSource preact */
+/** @jsxImportSource @takazudo/zfb/zudo-react */
 
 /**
  * A stable in-page link target for a record, source, fact, coverage domain,
@@ -25,12 +25,12 @@
  * generated-page contract for no gain.
  */
 
-import type { JSX } from "preact";
+import type { Description } from "@takazudo/zfb/zudo-react";
 
 export type EvidenceAnchorProps = {
   id: string;
 };
 
-export function EvidenceAnchor({ id }: EvidenceAnchorProps): JSX.Element {
+export function EvidenceAnchor({ id }: EvidenceAnchorProps): Description {
   return <span class="zcd-evidence-anchor" id={id} aria-hidden="true" />;
 }

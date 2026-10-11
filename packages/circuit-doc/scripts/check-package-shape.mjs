@@ -9,6 +9,7 @@
 //   5. No `lib/**/*.js` import specifier ends in `.ts`/`.tsx` (Node refuses
 //      type stripping under node_modules). Declaration files are exempt.
 //   6. `styles.css` and `lib/islands.d.ts` exist.
+//   7. Owned runtime entries never import the retired Preact/React SDK.
 //
 // Usage: node scripts/check-package-shape.mjs   (exit 1 on any violation)
 
@@ -100,6 +101,9 @@ for (const file of jsFiles(LIB)) {
   const source = readFileSync(file, "utf8");
   for (const match of source.matchAll(SPECIFIER)) {
     const specifier = match[2];
+    if (/^(?:preact(?:\/|$)|preact-render-to-string(?:\/|$)|react(?:\/|$)|@takazudo\/zfb-runtime(?:\/|$))/u.test(specifier)) {
+      errors.push(`${relative(PKG_ROOT, file)} imports retired runtime "${specifier}"`);
+    }
     if (/\.tsx?$/u.test(specifier)) {
       errors.push(`${relative(PKG_ROOT, file)} imports "${specifier}" (a .ts/.tsx specifier survived the build)`);
     }

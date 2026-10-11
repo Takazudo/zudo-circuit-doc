@@ -60,13 +60,13 @@ The dependency versions below are exact-pinned across the whole repo — do not 
 
 | Package | Version |
 | --- | --- |
-| `@takazudo/zudo-doc` | 5.27.0 |
-| `@takazudo/zfb`, `@takazudo/zfb-runtime`, `@takazudo/zfb-md-wasm` | 2.21.0 |
+| `@takazudo/zudo-doc`, `@takazudo/zudo-doc-history-server`, `create-zudo-doc` | 6.0.0 |
+| `@takazudo/zfb`, `@takazudo/zfb-runtime`, `@takazudo/zfb-md-wasm` | 4.3.1 |
 | pnpm (`packageManager`, via corepack) | 11.5.2 |
 | Node | >=22.18.0 |
 | Python | >=3.10 (stdlib only) |
 
-**Fallback rule:** if the M1 host or island hydration fails on zfb 2.21.0 but passes on 2.20.3, pin 2.20.3 across the family and file an upstream report with `/dev-upstream-report`.
+**Integration hold:** zudo-doc 6.0.0 rejects required-prop MDX components. Keep this migration draft until a fixed stable release passes `verify:pack` strict host checking; then raise its exact host pins and runtime peer minimum together. See issue #155 and ADR-021.
 
 ## Node type stripping
 

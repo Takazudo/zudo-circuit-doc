@@ -66,6 +66,7 @@ import {
   writeShim,
 } from "./lib/verify-helpers.mjs";
 import { spawn } from "node:child_process";
+import { checkHostTypes } from "./lib/check-host-types.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const RUNTIME_SELECTOR = "@takazudo/zudo-circuit-doc";
@@ -660,6 +661,11 @@ async function emptyFixtureFlow({
   await assertForeignPackage(frozenHostDir, RUNTIME_NAME);
   pass("INSTALL-FOREIGN", "the packed runtime installs under the consumer's own node_modules (root + doc/) and survives a --frozen-lockfile reinstall from a clean copy");
 
+  await scenario("STRICT-HOST-TYPES", "strict direct public MDX registration and generated host types", async () => {
+    await checkHostTypes(hostDir);
+    pass("STRICT-HOST-TYPES", "published declarations accept the direct registry and host under strict checking");
+  });
+
   // --- git init + commit (spec item 3.6) --------------------------------
   await run("git", ["add", "-A"], hostDir);
   await run(
@@ -959,6 +965,11 @@ async function minimalFixtureFlow(root, runtimeTarball, scratch) {
   await assertForeignPackage(hostDir, RUNTIME_NAME);
   pass("INSTALL-FOREIGN", "examples/minimal installs the packed runtime under its own node_modules (root + doc/)");
 
+  await scenario("STRICT-HOST-TYPES", "strict direct public MDX registration and generated host types", async () => {
+    await checkHostTypes(hostDir);
+    pass("STRICT-HOST-TYPES", "published declarations accept the direct registry and host under strict checking");
+  });
+
   let checkOutput = "";
   await scenario(
     "BUILD-CHECK",
@@ -1138,6 +1149,11 @@ async function ledFixtureFlow(root, runtimeTarball, scratch, ledOutDir) {
       );
     },
   );
+
+  await scenario("STRICT-HOST-TYPES", "strict direct public MDX registration and generated host types", async () => {
+    await checkHostTypes(ledOutDir);
+    pass("STRICT-HOST-TYPES", "published declarations accept the direct registry and host under strict checking");
+  });
 
   await scenario(
     "M4",

@@ -127,6 +127,22 @@ describe("check-upstream-scaffold.mjs", () => {
     );
   });
 
+  test("rejects retired renderer dependencies while preserving circuit-specific additions", async () => {
+    const exampleDocDir = copyExampleDoc();
+    const packageJsonPath = join(exampleDocDir, "package.json");
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
+    packageJson.dependencies.preact = "^10.27.0";
+    packageJson.devDependencies["@types/react"] = "^19.0.0";
+    packageJson.dependencies["host-specific-addon"] = "1.0.0";
+    writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
+
+    const { drift } = await checkUpstreamScaffold({ upstreamDir, exampleDocDir });
+    assert.equal(drift.some((line) => line.includes("dependencies.preact")), true);
+    assert.equal(drift.some((line) => line.includes("devDependencies.@types/react")), true);
+    assert.equal(drift.some((line) => line.includes("@takazudo/zudo-circuit-doc")), false);
+    assert.equal(drift.some((line) => line.includes("host-specific-addon")), false);
+  });
+
   test("the CLI reports OK against the real committed fixture", () => {
     const result = spawnSync(process.execPath, [SCRIPT_PATH], { encoding: "utf8" });
     assert.equal(result.status, 0, result.stderr);

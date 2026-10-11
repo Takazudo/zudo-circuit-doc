@@ -1,5 +1,5 @@
 /** @jsxRuntime automatic */
-/** @jsxImportSource preact */
+/** @jsxImportSource @takazudo/zfb/zudo-react */
 
 import { Island } from "@takazudo/zfb";
 import { PackageModelViewerIsland } from "../islands/package-model-viewer-island.tsx";

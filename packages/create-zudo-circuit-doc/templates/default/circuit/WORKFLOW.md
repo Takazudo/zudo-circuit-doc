@@ -50,7 +50,7 @@ A project may add its own top-level authored section (for example `testing/` or 
 
 1. Add the content under `doc/src/content/docs/<section>/`, with an `index.mdx` as the section's landing page.
 2. Give it a matching `categoryMatch` (equal to the section's directory name) wherever it appears in `headerNav` in `doc/zfb.config.ts`. Without a matching `categoryMatch`, the section's sidebar stays empty even though the pages exist.
-3. The header nav is capped at **6 top-level items** (zudo-doc 5.27.0; the zudo-circuit-doc project documentation's "Getting started → What you get" page states the same cap). Project, Architecture, Research, Decisions, Verification and Components already fill it, so add the new section as a `children` entry under one of the existing dropdown items instead of a seventh top-level entry.
+3. The header nav is capped at **6 top-level items** (zudo-doc 6.0.0; the zudo-circuit-doc project documentation's "Getting started → What you get" page states the same cap). Project, Architecture, Research, Decisions, Verification and Components already fill it, so add the new section as a `children` entry under one of the existing dropdown items instead of a seventh top-level entry.
 4. `project/index.mdx` and `project/next-actions.mdx` stay required regardless of what you add — the Shared entry above reads them first, on every task.
 
 ## Commands

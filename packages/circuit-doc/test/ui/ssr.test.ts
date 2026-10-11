@@ -33,7 +33,7 @@ describe("evidence primitives SSR", () => {
   it("anchors, discloses and scroll-contains with zcd- classes", () => {
     assert.equal(
       renderToString(h(ui.EvidenceAnchor, { id: "fact-example" })),
-      '<span id="fact-example" aria-hidden="true" class="zcd-evidence-anchor"></span>',
+      '<span class="zcd-evidence-anchor" id="fact-example" aria-hidden="true"></span>',
     );
     assert.match(
       renderToString(h(ui.EvidenceDetails, { label: "pin-assignments" }, "rows")),
@@ -41,11 +41,11 @@ describe("evidence primitives SSR", () => {
     );
     assert.match(
       renderToString(h(ui.EvidenceTable, { label: "parts-index" }, "table")),
-      /^<div tabindex="0" class="zcd-evidence-table zcd-evidence-table--parts-index">table<\/div>$/u,
+      /^<div class="zcd-evidence-table zcd-evidence-table--parts-index" tabindex="0">table<\/div>$/u,
     );
     assert.match(
       renderToString(h(ui.EvidenceTable, { label: "Not A Slug" }, "table")),
-      /^<div tabindex="0" class="zcd-evidence-table">/u,
+      /^<div class="zcd-evidence-table" tabindex="0">/u,
     );
   });
 });
@@ -121,6 +121,19 @@ describe("ComponentReferences SSR markup contract", () => {
     );
   });
 
+  it("transports only required string props to real visible island targets", () => {
+    const boundaries = [...html.matchAll(/<div\b[^>]*data-zfb-island="([^"]+)"[^>]*>/gu)];
+    assert.deepEqual(boundaries.map((match) => match[1]).sort(), ["FootprintPreviewIsland", "PackageModelViewerIsland"]);
+    for (const [tag, name] of boundaries) {
+      assert.equal(attribute(tag, "data-when"), "visible");
+      assert.equal(attribute(tag, "data-zfb-protocol"), "zudo-react/1");
+      assert.equal(attribute(tag, "data-zfb-transport"), "json/1");
+      const props = JSON.parse(attribute(tag, "data-props").replace(/&quot;/gu, '"').replace(/&amp;/gu, "&")) as Record<string, unknown>;
+      assert.deepEqual(Object.keys(props).sort(), name === "FootprintPreviewIsland" ? ["assetUrl", "footprintName"] : ["descriptor"]);
+      assert.ok(Object.values(props).every((value) => typeof value === "string"));
+    }
+  });
+
   it("renders two enlarge controls and two closed, media-labelled dialogs", () => {
     const triggers = html.match(/<button\b[^>]*\bdata-component-preview-enlarge="[^"]+"[^>]*>/gu) ?? [];
     assert.deepEqual(triggers.map((tag) => attribute(tag, "data-component-preview-enlarge")).sort(), ["footprint", "model"]);
@@ -135,16 +148,16 @@ describe("ComponentReferences SSR markup contract", () => {
       assert.doesNotMatch(tag, /\sopen(?:[\s=>]|$)/u, "dialog shells must render closed");
       assert.match(attribute(tag, "aria-label"), /^(?:Footprint preview for|Interactive 3D view of) /u);
       assert.doesNotMatch(tag, /\baria-labelledby=/u);
-      assert.match(attribute(tag, "class"), /^zcd-preview-dialog zcd-preview-dialog--(?:footprint|model) z-modal$/u);
+      assert.match(attribute(tag, "class"), /^zcd-preview-dialog zcd-preview-dialog--(?:footprint|model)$/u);
     }
     assert.doesNotMatch(html, /__title/u);
   });
 
-  it("uses only zcd- classes plus the zudo-doc safelisted z-modal", () => {
+  it("uses only package-owned zcd- classes", () => {
     const classes = [...html.matchAll(/\bclass="([^"]*)"/gu)].flatMap((match) => (match[1] ?? "").split(/\s+/u));
     assert.ok(classes.length > 0);
     for (const name of classes) {
-      assert.ok(name.startsWith("zcd-") || name === "z-modal", `unexpected class ${name}`);
+      assert.ok(name.startsWith("zcd-"), `unexpected class ${name}`);
     }
   });
 });

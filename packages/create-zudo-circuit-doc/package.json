@@ -1,6 +1,6 @@
 {
   "name": "create-zudo-circuit-doc",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "license": "MIT",
   "description": "Create a new zudo-circuit-doc project.",
@@ -12,7 +12,13 @@
   "bugs": {
     "url": "https://github.com/Takazudo/zudo-circuit-doc/issues"
   },
-  "keywords": ["create", "scaffold", "circuit", "zudo-circuit-doc", "cli"],
+  "keywords": [
+    "create",
+    "scaffold",
+    "circuit",
+    "zudo-circuit-doc",
+    "cli"
+  ],
   "engines": {
     "node": ">=22.18.0"
   },
