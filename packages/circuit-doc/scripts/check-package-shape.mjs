@@ -101,7 +101,7 @@ for (const file of jsFiles(LIB)) {
   const source = readFileSync(file, "utf8");
   for (const match of source.matchAll(SPECIFIER)) {
     const specifier = match[2];
-    if (/^(?:preact(?:\/|$)|preact-render-to-string(?:\/|$)|react(?:\/|$)|@takazudo\/zfb-runtime(?:\/|$))/u.test(specifier)) {
+    if (/^(?:preact(?:\/|$)|preact-render-to-string(?:\/|$)|react(?:\/|$)|react-dom(?:\/|$)|@takazudo\/zfb-runtime(?:\/|$))/u.test(specifier)) {
       errors.push(`${relative(PKG_ROOT, file)} imports retired runtime "${specifier}"`);
     }
     if (/\.tsx?$/u.test(specifier)) {

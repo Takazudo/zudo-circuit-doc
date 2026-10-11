@@ -3,7 +3,7 @@
 /** @jsxRuntime automatic */
 /** @jsxImportSource @takazudo/zfb/zudo-react */
 
-import { getScope, Show, signal, type Ref } from "@takazudo/zfb/zudo-react";
+import { getScope, Show, signal, type Ref, type HTMLAttributes } from "@takazudo/zfb/zudo-react";
 
 import { decodeModelDescriptor } from "../core/model-descriptor.ts";
 import { PreviewEnlargeDialog } from "./preview-enlarge-dialog.tsx";
@@ -59,6 +59,26 @@ function ModelViewerSurface({
     return activateModelViewer(root, descriptor);
   });
 
+  // Listener props must be absent on the dialog surface. zudo-react validates
+  // native listener keys during a Show mount, including keys set to undefined.
+  const viewportListeners: HTMLAttributes<HTMLDivElement> = instance === "inline" ? {
+    "on:pointerdown": (event) => {
+      pointerStart = { x: event.clientX, y: event.clientY };
+    },
+    "on:click": (event) => {
+      const start = pointerStart;
+      pointerStart = null;
+      if (start !== null && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 5) return;
+      if (rootRef.current?.dataset.viewerState === "ready") onEnlarge?.(event.currentTarget);
+    },
+    "on:keydown": (event) => {
+      if ((event.key === "Enter" || event.key === " ") && rootRef.current?.dataset.viewerState === "ready") {
+        event.preventDefault();
+        onEnlarge?.(event.currentTarget);
+      }
+    },
+  } : {};
+
   return (
     <figure
       ref={rootRef}
@@ -78,21 +98,7 @@ function ModelViewerSurface({
           data-model-viewer-viewport=""
           tabindex={instance === "inline" ? 0 : -1}
           aria-label={`Interactive 3D view of shared footprint package ${descriptor.packageLabel}`}
-          on:pointerdown={instance === "inline" ? (event) => {
-            pointerStart = { x: event.clientX, y: event.clientY };
-          } : undefined}
-          on:click={instance === "inline" ? (event) => {
-            const start = pointerStart;
-            pointerStart = null;
-            if (start !== null && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 5) return;
-            if (rootRef.current?.dataset.viewerState === "ready") onEnlarge?.(event.currentTarget);
-          } : undefined}
-          on:keydown={instance === "inline" ? (event) => {
-            if ((event.key === "Enter" || event.key === " ") && rootRef.current?.dataset.viewerState === "ready") {
-              event.preventDefault();
-              onEnlarge?.(event.currentTarget);
-            }
-          } : undefined}
+          {...viewportListeners}
         />
         {onEnlarge !== undefined && (
           <button

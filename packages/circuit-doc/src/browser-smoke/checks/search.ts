@@ -16,6 +16,10 @@ import { assertEqual } from "../assertions.ts";
 import type { Representative } from "../types.ts";
 
 const REFERENCE_HEADING = "## Documents and package";
+// zudo-doc 6.0.0's searchMaxBodyLength default (settings.d.ts and the
+// search-index collector): indexed match depth is 3000, independently of the
+// search widget's short display excerpt. Fixture hosts use that default.
+const DEFAULT_SEARCH_BODY_LENGTH = 3000;
 
 /**
  * Provider evidence-id prefixes (`core/ids.ts`): the identifiers a reader
@@ -48,7 +52,8 @@ export async function checkSearchAndLlmExport(
       true,
       `${representative.kind} identity is searchable through title or description`,
     );
-    assertEqual(searchEntry.body.length <= 300, true, `${representative.kind} search body respects the 300-character excerpt`);
+    assertEqual(searchEntry.body.trim().length > 0, true, `${representative.kind} search body has indexed content`);
+    assertEqual(searchEntry.body.length <= DEFAULT_SEARCH_BODY_LENGTH, true, `${representative.kind} search body respects the 3000-character indexed match depth`);
 
     const markdown = await readFile(join(generatedRoot, "records", representative.slug, "index.mdx"), "utf8");
     assertEqual(markdown.includes(REFERENCE_HEADING), true, `${representative.kind} generated Markdown has the native "Documents and package" heading`);

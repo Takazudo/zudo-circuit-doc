@@ -86,6 +86,7 @@ const DEPENDENCY_FIELDS = ["dependencies", "devDependencies"];
 // renderer dependencies, while allowing circuit-doc and other host additions.
 const RETIRED_RENDERER_DEPENDENCIES = new Set([
   "preact",
+  "preact-render-to-string",
   "react",
   "react-dom",
   "@types/react",

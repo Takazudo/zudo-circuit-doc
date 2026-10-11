@@ -102,6 +102,8 @@ async function rememberPausedViewer(cdp: CdpClient, instance: "inline" | "dialog
 async function assertDelayedViewerDisposed(cdp: CdpClient, instance: "inline" | "dialog", liveCanvases: number): Promise<void> {
   await waitFor(cdp, `window.__zcdLoadProbe.requests[0].signal?.aborted === true`);
   await waitFor(cdp, `window.__zcdLoadProbe.viewers.every((entry) => !entry.root.isConnected)`);
+  assertEqual(await evaluate(cdp, `window.__zcdLoadProbe.listeners.filter((entry) => entry.active).length`), 0, `${instance} abort removes pending controls before the held response completes`);
+  assertEqual(await evaluate(cdp, `window.__zcdLoadProbe.viewers.every((entry) => !entry.root.querySelector('canvas'))`), true, `${instance} abort removes pending canvas before the held response completes`);
   await evaluate(cdp, `window.__zcdLoadProbe.release()`);
   await waitFor(cdp, `window.__zcdLoadProbe.requests.every((request) => request.released)`);
   // Let all promise continuations, observers and scheduled rendering complete.

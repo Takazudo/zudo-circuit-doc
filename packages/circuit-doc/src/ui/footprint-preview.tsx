@@ -11,9 +11,13 @@ export type FootprintPreviewProps = {
 
 /** SSR-safe footprint preview with a static direct-link fallback. */
 export function FootprintPreview(props: FootprintPreviewProps) {
+  // The published scanner supports component-map entries whose fixed
+  // Island boundary is nested in a Fragment (the MDX components recipe).
   return (
-    <Island when="visible">
-      <FootprintPreviewIsland {...props} />
-    </Island>
+    <>
+      <Island when="visible">
+        <FootprintPreviewIsland {...props} />
+      </Island>
+    </>
   );
 }

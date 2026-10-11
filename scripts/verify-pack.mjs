@@ -709,12 +709,17 @@ async function emptyFixtureFlow({
     pass("NEXTSTEPS", "pnpm install / pnpm circuit:doctor ran verbatim; zfb dev booted on a free port and served /docs/project/ with 200");
   });
 
-  // --- pnpm check / build / check:site ------------------------------------
-  await scenario("BUILD-CHECK", "pnpm check, pnpm build and pnpm check:site all pass on the packed consumer", async () => {
-    checkOutput = await runStreamed(PNPM[0], [...PNPM.slice(1), "run", "check"], hostDir);
+  // Keep independent build evidence even when a published type contract fails.
+  await scenario("PROJECT-CHECK", "pnpm check passes on the packed consumer", async () => {
+    const result = await runCapture(PNPM[0], [...PNPM.slice(1), "run", "check"], hostDir);
+    checkOutput = result.stdout;
+    assert(result.status === 0, `pnpm check failed:\n${result.stdout}\n${result.stderr}`);
+    pass("PROJECT-CHECK", "pnpm check passed");
+  });
+  await scenario("BUILD-CHECK", "pnpm build and pnpm check:site pass on the packed consumer", async () => {
     await runHeavy("verify-pack:build", PNPM[0], [...PNPM.slice(1), "run", "build"], hostDir);
     await runHeavy("verify-pack:check-site", PNPM[0], [...PNPM.slice(1), "run", "check:site"], hostDir);
-    pass("BUILD-CHECK", "pnpm check, pnpm build and pnpm check:site all passed");
+    pass("BUILD-CHECK", "pnpm build and pnpm check:site passed");
   });
 
   await scenario("INIT-04", "the canonical Python validator ran from node_modules (SCOPE: line present in `pnpm check` output)", async () => {
@@ -971,16 +976,21 @@ async function minimalFixtureFlow(root, runtimeTarball, scratch) {
   });
 
   let checkOutput = "";
+  await scenario("PROJECT-CHECK", "pnpm check passes on the packed minimal consumer", async () => {
+    const result = await runCapture(PNPM[0], [...PNPM.slice(1), "run", "check"], hostDir);
+    checkOutput = result.stdout;
+    assert(result.status === 0, `pnpm check failed:\n${result.stdout}\n${result.stderr}`);
+    pass("PROJECT-CHECK", "pnpm check passed");
+  });
   await scenario(
     "BUILD-CHECK",
-    "pnpm check, pnpm build and pnpm check:site all pass on the packed minimal consumer",
+    "pnpm build and pnpm check:site pass on the packed minimal consumer",
     async () => {
-      checkOutput = await runStreamed(PNPM[0], [...PNPM.slice(1), "run", "check"], hostDir);
       await runHeavy("verify-pack:minimal-build", PNPM[0], [...PNPM.slice(1), "run", "build"], hostDir);
       await runHeavy("verify-pack:minimal-check-site", PNPM[0], [...PNPM.slice(1), "run", "check:site"], hostDir);
       pass(
         "BUILD-CHECK",
-        "pnpm check, pnpm build and pnpm check:site all passed (check-built 1/1/1, scan, authored→generated links under --strict-broken/--strict-anchors)",
+        "pnpm build and pnpm check:site passed (check-built 1/1/1, scan, authored→generated links under --strict-broken/--strict-anchors)",
       );
     },
   );

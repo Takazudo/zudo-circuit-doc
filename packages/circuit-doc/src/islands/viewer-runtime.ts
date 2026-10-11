@@ -191,7 +191,7 @@ export async function mountModelViewer(
     return { dispose };
   } catch (error) {
     dispose();
-    if ((error as Error).name !== "AbortError") {
+    if (!signal.aborted && (error as Error).name !== "AbortError") {
       setViewerState(root, "error", "The interactive package model could not be loaded. The package identity remains available.");
     }
     throw error;

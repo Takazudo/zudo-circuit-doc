@@ -132,6 +132,8 @@ describe("check-upstream-scaffold.mjs", () => {
     const packageJsonPath = join(exampleDocDir, "package.json");
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
     packageJson.dependencies.preact = "^10.27.0";
+    packageJson.dependencies["preact-render-to-string"] = "^6.6.6";
+    packageJson.devDependencies["preact-render-to-string"] = "^6.6.6";
     packageJson.devDependencies["@types/react"] = "^19.0.0";
     packageJson.dependencies["host-specific-addon"] = "1.0.0";
     writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
@@ -139,6 +141,8 @@ describe("check-upstream-scaffold.mjs", () => {
     const { drift } = await checkUpstreamScaffold({ upstreamDir, exampleDocDir });
     assert.equal(drift.some((line) => line.includes("dependencies.preact")), true);
     assert.equal(drift.some((line) => line.includes("devDependencies.@types/react")), true);
+    assert.equal(drift.some((line) => line.includes("dependencies.preact-render-to-string")), true);
+    assert.equal(drift.some((line) => line.includes("devDependencies.preact-render-to-string")), true);
     assert.equal(drift.some((line) => line.includes("@takazudo/zudo-circuit-doc")), false);
     assert.equal(drift.some((line) => line.includes("host-specific-addon")), false);
   });

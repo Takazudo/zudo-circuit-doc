@@ -27,6 +27,7 @@ import { checkNoJsFallback } from "./checks/no-js.ts";
 import { inspectReferencePage } from "./checks/reference-page.ts";
 import { checkDirectReload } from "./checks/reload.ts";
 import { checkSearchAndLlmExport } from "./checks/search.ts";
+import { checkNativeShellInteractions } from "./checks/shell-interactions.ts";
 import { exerciseSpaDisposeAndRemount } from "./checks/spa.ts";
 import { checkLongTables } from "./checks/tables.ts";
 import { resolveRepresentatives } from "./representatives.ts";
@@ -105,8 +106,9 @@ export async function runBrowserSmoke(options: BrowserSmokeOptions): Promise<Bro
 
       if (record !== undefined) {
         await runRecordChecks(cdp, site.origin, record.path, options);
+        if (options.shellAssertions) lines.push("native shell: current ancestry, sidebar filter/focus/broaden/restore, interactive search and appearance menu verified");
       } else {
-        lines.push("SKIP: dialog, SPA, forced-failure and no-JS viewer checks (no representative has a published model)");
+        lines.push("SKIP: dialog, SPA, delayed-load cleanup, forced-failure and no-JS viewer checks (no representative has a published model)");
       }
 
       await checkViewerFreeCatalog(cdp, site.origin, options.awayRoute);
@@ -166,6 +168,11 @@ async function runRecordChecks(
   await exerciseFootprintDialog(cdp, recordPath);
   await exerciseModelDialog(cdp);
   await exerciseViewerInteractions(cdp);
+  if (options.shellAssertions) {
+    const identity = options.representatives.find((representative) => representative.path === recordPath)?.identity;
+    if (identity === undefined) throw new Error("native shell interaction representative has no identity");
+    await checkNativeShellInteractions(cdp, recordPath, identity);
+  }
 
   // No continuous animation loop: after interaction/resize settles, the
   // diagnostic render count stays unchanged without input. Slow CI runners can
@@ -215,5 +222,5 @@ export function referenceSmokeSummary(navigated: number, referenceInspections: n
   const common = `component reference browser smoke passed: ${navigated} viewport/theme navigations, ${referenceInspections} component-reference inspections, viewer-free catalog`;
   return hasModel
     ? `${common}; model-bearing representative: dialogs, interactions, focus, on-demand idle, SPA cleanup, delayed-load cleanup, fallbacks and no-JS passed`
-    : `${common}; model dialogs/interactions, focus, idle, SPA, fallbacks and no-JS NOT RUN (no published model representative)`;
+    : `${common}; model dialogs/interactions, focus, idle, SPA, delayed-load cleanup, fallbacks and no-JS NOT RUN (no published model representative)`;
 }

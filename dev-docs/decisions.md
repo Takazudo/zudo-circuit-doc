@@ -415,7 +415,7 @@ allowlist or goldens.
 
 ## ADR-021 — zudo-react migration and release boundary
 
-**Status:** Implementation pending published dependency compatibility (issue #155).
+**Status:** Implementation pending published dependency compatibility and LED publication parity (issue #155).
 
 The runtime 0.3.0 and initializer 0.2.0 prepare a pre-1.0 breaking minor under Scheme B.
 Old generated hosts retain runtime ^0.2.0 with zudo-doc 5 / ZFB 2; the new template selects
@@ -428,6 +428,13 @@ required props. Upstream zudolab/zudo-doc#4531 fixes this but is not published i
 The development peer ^6.0.0 is provisional: before integration, require a fixed stable version,
 raise the peer minimum and exact host pin, and pass the strict direct packed-consumer check.
 No casts, weaker props, adapters, installed-file patches or floating upstream refs are allowed.
+
+The built LED host also fails the unchanged OWNED publication scan: zudo-doc 6.0.0 serializes
+three denied-value descriptions from independently public authored pages into SidebarToggle /
+SidebarTree `data-props.navigation.roots[*].children[*].description` on 39 generated pages
+(117 hits). Existing SITE-only authored-public subtraction does not apply to OWNED artifacts.
+Keep this gate red pending a supported upstream transport fix; do not mask payload fields,
+weaken canaries or change the hash-locked evidence corpus to make the migration pass.
 
 zudo-react setup scopes own signals, native events and activation cleanup. Conditional dialog
 viewers dispose on close, including pending imports/loads. Static named Island targets retain

@@ -4,6 +4,26 @@ All notable changes to `@takazudo/zudo-circuit-doc` are documented in this file.
 
 The format is based on Keep a Changelog, and release notes are generated from the changelog MDX pages.
 
+## [Unreleased]
+
+**Pending 0.3.0; not published.** Integration is held until a stable zudo-doc release accepts
+required-prop MDX registrations directly. Current 6.0.0 does not; see
+[issue #155](https://github.com/Takazudo/zudo-circuit-doc/issues/155).
+
+## Breaking changes
+
+- Port the public UI and islands to zudo-react with activation-owned viewer disposal.
+- Keep old generated projects on runtime ^0.2.0 with zudo-doc 5 / ZFB 2 until the complete host
+  migration is intentional. The prepared pins are zudo-doc/history/create-zudo-doc 6.0.0 and
+  the aligned ZFB 4.3.1 tuple; zudo-doc's pin and runtime peer minimum must move to the fixed release.
+- Follow the existing-consumer migration recipe.
+
+## Verification and publication
+
+Strict packed-consumer types, build, browser and fixture verification gate integration.
+Publish/approve runtime first, run the empty consumer's published-runtime gate, then
+publish/approve initializer. These publication steps remain separately pending.
+
 ## [0.2.0] - 2026-10-02
 
 Version 0.2.0 widens exported reference and descriptor types for optional documents and 3D models.

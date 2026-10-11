@@ -78,6 +78,9 @@ Do not migrate production consumers yet: published zudo-doc **6.0.0** rejects th
 required-prop MDX registry. Upstream [#4531](https://github.com/zudolab/zudo-doc/pull/4531)
 fixes this, but the fix must ship in a stable package and pass the packed-consumer gate first.
 The migration PR stays draft until then. A successful bundle is not evidence of type compatibility.
+The LED publication gate also remains blocked: the released sidebar serializes three denied-value
+descriptions from public authored pages into generated pages (117 scan hits). The existing OWNED
+artifact scan remains strict; a supported upstream fix must restore publication parity.
 
 The old pairing is runtime `^0.2.0`, zudo-doc/history-server 5.27.0 and the aligned ZFB 2.21.0
 family. A caret on runtime `^0.2.0` does not opt into 0.3. Keep that pairing until you deliberately
@@ -142,7 +145,7 @@ A new top-level section (a sibling of `project/`, `architecture/`, `research/`, 
    ```ts
    { label: "My Section", path: "/docs/my-section", categoryMatch: "my-section" }
    ```
-3. **A slot in the 6-item header nav cap.** The scaffold's default `headerNav` already uses 6 items
+3. **A slot in the scaffold's six-item header navigation.** The scaffold's default `headerNav` already uses 6 items
    (Project, Architecture, Research, Decisions, Verification, Components) — the same number the
    generated site's own [What you get](../getting-started/generated-project.mdx) page counts. Adding
    a 7th top-level entry means either removing one, or nesting the new section as a `children` entry
