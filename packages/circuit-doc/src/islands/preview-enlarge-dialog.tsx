@@ -1,19 +1,19 @@
 "use client";
 
 /** @jsxRuntime automatic */
-/** @jsxImportSource preact */
+/** @jsxImportSource @takazudo/zfb/zudo-react */
 
-import type { ComponentChildren, JSX, RefObject } from "preact";
+import { getScope, type Child, type ReadonlySignal, type Ref } from "@takazudo/zfb/zudo-react";
 
 import { ENLARGE_DIALOG_STYLE } from "@takazudo/zudo-doc/island-types";
 import { AFTER_NAVIGATE_EVENT } from "@takazudo/zudo-doc/transitions";
-import { useModalDialog } from "@takazudo/zudo-doc/use-modal-dialog";
+import { modalDialog } from "@takazudo/zudo-doc/use-modal-dialog";
 
 export type PreviewEnlargeDialogProps = {
-  readonly children: ComponentChildren;
-  readonly isOpen: boolean;
+  readonly children: Child;
+  readonly isOpen: ReadonlySignal<boolean>;
   readonly onClose: () => void;
-  readonly returnFocusRef: RefObject<HTMLElement>;
+  readonly returnFocusRef: Ref<HTMLElement>;
   readonly title: string;
   readonly variant: "footprint" | "model";
 };
@@ -27,7 +27,7 @@ export function PreviewEnlargeDialog({
   title,
   variant,
 }: PreviewEnlargeDialogProps) {
-  const { dialogRef, handleBackdropClick } = useModalDialog({
+  const { dialogRef, handleBackdropClick } = modalDialog(getScope(), {
     isOpen,
     onClose,
     navigateEvent: AFTER_NAVIGATE_EVENT,
@@ -36,20 +36,15 @@ export function PreviewEnlargeDialog({
     returnFocusRef,
   });
 
-  // zudo-doc still declares this hook's handler with the ambient React namespace,
-  // while its shared base tsconfig types JSX as preact since 5.0.0 — the two
-  // mouse-event shapes are structurally interchangeable at this call site.
-  const handleDialogClick = handleBackdropClick as unknown as JSX.MouseEventHandler<HTMLDialogElement>;
-
   return (
     <dialog
       ref={dialogRef}
-      className={`zcd-preview-dialog zcd-preview-dialog--${variant} z-modal`}
+      class={`zcd-preview-dialog zcd-preview-dialog--${variant}`}
       style={ENLARGE_DIALOG_STYLE}
       aria-label={title}
       data-component-preview-dialog={variant}
-      onClick={handleDialogClick}
-      onKeyDown={(event) => {
+      on:click={handleBackdropClick}
+      on:keydown={(event) => {
         if (event.key !== "Tab") return;
         const dialog = event.currentTarget;
         const focusable = [...dialog.querySelectorAll<HTMLElement>(
@@ -71,23 +66,23 @@ export function PreviewEnlargeDialog({
     >
       <button
         type="button"
-        className="zcd-preview-dialog__close"
+        class="zcd-preview-dialog__close"
         aria-label={`Close enlarged ${variant} preview`}
-        onClick={() => dialogRef.current?.close()}
+        on:click={() => dialogRef.current?.close()}
       >
         <svg
-          className="zcd-preview-dialog__close-icon"
+          class="zcd-preview-dialog__close-icon"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2"
+          stroke-width="2"
           aria-hidden="true"
           focusable="false"
         >
           <path d="M5 5l14 14M19 5L5 19" />
         </svg>
       </button>
-      <div className="zcd-preview-dialog__content">
+      <div class="zcd-preview-dialog__content">
         {children}
       </div>
     </dialog>

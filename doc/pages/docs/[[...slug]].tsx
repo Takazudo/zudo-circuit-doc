@@ -1,18 +1,35 @@
-/** @jsxRuntime automatic */
-/** @jsxImportSource preact */
-// Self-contained doc-route stub — required for `pnpm dev` / `pnpm build` to
-// serve /docs/*. See @takazudo/zudo-doc's own generated project scaffold for
-// the sanctioned entrypoints this stub is built from; do not fork a route
-// stub for presentational customization — use src/chrome-bindings.tsx instead.
+// Locked manifest (#2653 Decision 4): a SELF-CONTAINED doc-route stub retained
+// for explicit host route ownership. zfb also serves package-injected dynamic
+// routes in dev. This stub reconstructs the doc route from scratch using ONLY the
+// sanctioned package entrypoints — no `pages/lib`, no `@/config`:
+//   1. the `virtual:zudo-doc-route-context` virtual module (serializable
+//      settings/translations/tagVocabulary/colorSchemes payload),
+//   2. `@takazudo/zudo-doc/route-context` (`createRouteContext`),
+//   3. `@takazudo/zudo-doc/chrome` (`createChrome`), and
+//   4. `virtual:zudo-doc-chrome-bindings` (the host-callables channel).
+// The bindings import is unconditional: the routes plugin supplies an empty
+// object when `chromeBindingsModule` is unset, while configured projects get
+// their MDX/chrome bindings without editing this stub.
+// Makes `/docs/getting-started/` return 200 in BOTH `zfb dev` and `zfb build`.
+// The route-injection build test covers the corresponding package-owned route;
+// this kept file remains the explicit host-owned seam.
+//
+// docHistory note: when the docHistory feature is selected, the generator
+// patches this file to statically import DocHistory from
+// "@takazudo/zudo-doc/doc-history" and merge it over chromeBindings in
+// createChrome's hostBindings (second) argument —
+// DocHistory's chrome-derive default is a no-op stub (unlike
+// DesignTokenPanelBootstrap server boundary, which the package auto-defaults), so without
+// that patch the doc-history button never hydrates on this route.
 
-import type { JSX } from "preact";
+import type { JSX } from "@takazudo/zfb/zudo-react/jsx-runtime";
 import { routeContext } from "virtual:zudo-doc-route-context";
 import {
   createRouteContext,
   type RouteContextPayload,
 } from "@takazudo/zudo-doc/route-context";
 import { createChrome } from "@takazudo/zudo-doc/chrome";
-import { DocHistory } from "@takazudo/zudo-doc/doc-history";
+import { DocHistoryBoundary as DocHistory } from "@takazudo/zudo-doc/doc-history-area";
 import { defineChromeBindings } from "@takazudo/zudo-doc/chrome-bindings";
 import { chromeBindings } from "virtual:zudo-doc-chrome-bindings";
 
@@ -28,16 +45,14 @@ export const frontmatter = { title: "Docs" };
 export function paths(): Array<{ params: { slug: string[] }; props: unknown }> {
   const locale = routeCtx.defaultLocale;
   const source = routeCtx.resolveNavSource(locale, undefined);
-  return routeCtx
-    .buildDocRouteEntries({
-      source,
-      locale,
-      routeSig: `docs;${locale}`,
-    })
-    .map((item) => ({
-      params: { slug: item.slugParams },
-      props: item.props,
-    }));
+  return routeCtx.buildDocRouteEntries({
+    source,
+    locale,
+    routeSig: `docs;${locale}`,
+  }).map((item) => ({
+    params: { slug: item.slugParams },
+    props: item.props,
+  }));
 }
 
 type PageArgs = { params: { slug: string[] } } & Record<string, unknown>;

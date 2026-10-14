@@ -60,13 +60,13 @@ The dependency versions below are exact-pinned across the whole repo — do not 
 
 | Package | Version |
 | --- | --- |
-| `@takazudo/zudo-doc` | 5.27.0 |
-| `@takazudo/zfb`, `@takazudo/zfb-runtime`, `@takazudo/zfb-md-wasm` | 2.21.0 |
+| `@takazudo/zudo-doc`, `@takazudo/zudo-doc-history-server`, `create-zudo-doc` | 6.2.0 |
+| `@takazudo/zfb`, `@takazudo/zfb-runtime`, `@takazudo/zfb-md-wasm` | 4.5.0 |
 | pnpm (`packageManager`, via corepack) | 11.5.2 |
 | Node | >=22.18.0 |
 | Python | >=3.10 (stdlib only) |
 
-**Fallback rule:** if the M1 host or island hydration fails on zfb 2.21.0 but passes on 2.20.3, pin 2.20.3 across the family and file an upstream report with `/dev-upstream-report`.
+**Integration gates:** the 6.2.0 / 4.5.0 family passes strict packed MDX registration and the unchanged LED publication scan. Keep issue #155 / PR #156 gated on the complete current-revision verification contract; publication remains separate. See ADR-021 and `ZUDO_DEPS_PINS.md`.
 
 ## Node type stripping
 

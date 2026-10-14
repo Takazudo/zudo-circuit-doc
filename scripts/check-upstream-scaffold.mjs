@@ -36,7 +36,7 @@ const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 export const ROOT_DIR = resolve(SCRIPT_DIR, "..");
 export const EXAMPLE_DOC_DIR = join(ROOT_DIR, "examples", "empty", "doc");
 
-// The 11 features create-zudo-doc@5.27.0 enables by default (constants.ts
+// The 11 features create-zudo-doc@6.2.0 enables by default (constants.ts
 // FEATURES.filter(f => f.default)), in that order. `create-zudo-doc`'s
 // package.json `exports` only publishes "." (dist/api.js), so this list
 // cannot be imported from the package itself and must be kept in sync by
@@ -81,6 +81,17 @@ const VERSION_EXEMPT_DEPENDENCIES = new Set([
 ]);
 
 const DEPENDENCY_FIELDS = ["dependencies", "devDependencies"];
+
+// zudo-react owns the renderer in the 6.x scaffold. Reject only the retired
+// renderer dependencies, while allowing circuit-doc and other host additions.
+const RETIRED_RENDERER_DEPENDENCIES = new Set([
+  "preact",
+  "preact-render-to-string",
+  "react",
+  "react-dom",
+  "@types/react",
+  "@types/react-dom",
+]);
 
 // Files diffed byte-for-byte with no allowed differences.
 const EXACT_FILES = ["pages/index.tsx", "tsconfig.json", "scripts/check-links.js"];
@@ -167,6 +178,11 @@ function diffDependencyPins(upstreamPackageJsonText, examplePackageJsonText) {
   for (const field of DEPENDENCY_FIELDS) {
     const upstreamDeps = upstream[field] ?? {};
     const exampleDeps = example[field] ?? {};
+    for (const name of RETIRED_RENDERER_DEPENDENCIES) {
+      if (name in exampleDeps && !(name in upstreamDeps)) {
+        messages.push(`doc/package.json: retired renderer dependency ${field}.${name} is absent from the upstream scaffold.`);
+      }
+    }
     for (const [name, upstreamSpec] of Object.entries(upstreamDeps)) {
       const exampleSpec = exampleDeps[name];
       if (exampleSpec === undefined) {

@@ -6,8 +6,7 @@
    unused `.…evidence-table--facts` selector (upstream 467-470) is dropped, and
    the upstream LED class prefix is renamed to `zcd-` (ADR-015).
 
-   Unlayered on purpose; it uses only @takazudo/zudo-doc theme tokens (and the
-   zudo-doc safelisted `z-modal` utility). Import it after
+   Unlayered on purpose; it uses only @takazudo/zudo-doc theme tokens. Import it after
    `@takazudo/zudo-doc/features.css`:
 
      @import "@takazudo/zudo-circuit-doc/styles.css"; */
@@ -315,6 +314,7 @@
 }
 
 .zcd-preview-dialog {
+  z-index: var(--z-index-modal, 1000);
   width: min(90rem, calc(100vw - 2rem));
   height: min(64rem, calc(100vh - 2rem));
   height: min(64rem, calc(100dvh - 2rem));

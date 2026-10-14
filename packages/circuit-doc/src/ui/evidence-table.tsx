@@ -1,5 +1,5 @@
 /** @jsxRuntime automatic */
-/** @jsxImportSource preact */
+/** @jsxImportSource @takazudo/zfb/zudo-react */
 
 /**
  * The scroll container a dense evidence table lives in.
@@ -28,7 +28,7 @@
  * present in the HTML and the search index either way.
  */
 
-import type { ComponentChildren, JSX } from "preact";
+import type { Child, Description } from "@takazudo/zfb/zudo-react";
 
 /** The same shape the generator's `ATTRIBUTE_VALUE_PATTERN` enforces. */
 const LABEL_PATTERN = /^[a-z0-9][a-z0-9-]*$/u;
@@ -45,12 +45,12 @@ function modifierFor(label: string): string {
 
 export type EvidenceTableProps = {
   label: string;
-  children?: ComponentChildren;
+  children?: Child;
 };
 
-export function EvidenceTable({ label, children }: EvidenceTableProps): JSX.Element {
+export function EvidenceTable({ label, children }: EvidenceTableProps): Description {
   return (
-    <div class={`zcd-evidence-table${modifierFor(label)}`} tabIndex={0}>
+    <div class={`zcd-evidence-table${modifierFor(label)}`} tabindex={0}>
       {children}
     </div>
   );

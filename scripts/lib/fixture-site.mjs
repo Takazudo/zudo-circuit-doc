@@ -5,7 +5,7 @@
 // `@takazudo/zudo-circuit-doc` runtime the same way a real generated project
 // would — a packed tarball (`--mode pack`, the default) or the built package
 // directory injected by pnpm (`--mode file-dir`) — never `link:` (a symlink
-// back into this monorepo would resolve `preact`/`@takazudo/zudo-doc` from
+// back into this monorepo would resolve `@takazudo/zfb`/`@takazudo/zudo-doc` from
 // THIS repo's own node_modules instead of the fixture site's, duplicating
 // both). See `scripts/build-fixture-site.mjs` for the CLI entry point and
 // `fixtures/led/circuit/site-overlay.json` for the docs.* path rewrite this
@@ -34,7 +34,7 @@
 //   5. obtain the runtime package (pack the workspace package into a tarball,
 //      or point `file:` at the built package directory), install with
 //      `corepack pnpm install --config.strict-dep-builds=true`, and assert a
-//      single `preact`/`@takazudo/zudo-doc` instance.
+//      single `@takazudo/zfb`/`@takazudo/zudo-doc` instance.
 //   6. `pnpm run build` (models -> generate -> zfb build), assert zero drift
 //      against the seeded goldens, then `pnpm run check:site` (check-built,
 //      scan against the re-baselined `circuit/scan-policy.json`, and
@@ -510,9 +510,9 @@ export async function buildFixtureSite(options) {
       runPnpm(["install", "--config.strict-dep-builds=true"], { cwd: outDir }),
     );
 
-    const preactRoot = assertSingleInstance(outDir, "preact");
+    const zfbRoot = assertSingleInstance(outDir, "@takazudo/zfb");
     const zudoDocRoot = assertSingleInstance(outDir, "@takazudo/zudo-doc");
-    log(`single preact instance: ${preactRoot}`);
+    log(`single @takazudo/zfb instance: ${zfbRoot}`);
     log(`single @takazudo/zudo-doc instance: ${zudoDocRoot}`);
 
     log("pnpm run build (models -> generate -> zfb build)...");

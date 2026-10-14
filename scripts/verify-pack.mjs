@@ -66,6 +66,7 @@ import {
   writeShim,
 } from "./lib/verify-helpers.mjs";
 import { spawn } from "node:child_process";
+import { checkHostTypes } from "./lib/check-host-types.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const RUNTIME_SELECTOR = "@takazudo/zudo-circuit-doc";
@@ -660,6 +661,11 @@ async function emptyFixtureFlow({
   await assertForeignPackage(frozenHostDir, RUNTIME_NAME);
   pass("INSTALL-FOREIGN", "the packed runtime installs under the consumer's own node_modules (root + doc/) and survives a --frozen-lockfile reinstall from a clean copy");
 
+  await scenario("STRICT-HOST-TYPES", "strict direct public MDX registration and generated host types", async () => {
+    await checkHostTypes(hostDir);
+    pass("STRICT-HOST-TYPES", "published declarations accept the direct registry and host under strict checking");
+  });
+
   // --- git init + commit (spec item 3.6) --------------------------------
   await run("git", ["add", "-A"], hostDir);
   await run(
@@ -703,12 +709,17 @@ async function emptyFixtureFlow({
     pass("NEXTSTEPS", "pnpm install / pnpm circuit:doctor ran verbatim; zfb dev booted on a free port and served /docs/project/ with 200");
   });
 
-  // --- pnpm check / build / check:site ------------------------------------
-  await scenario("BUILD-CHECK", "pnpm check, pnpm build and pnpm check:site all pass on the packed consumer", async () => {
-    checkOutput = await runStreamed(PNPM[0], [...PNPM.slice(1), "run", "check"], hostDir);
+  // Keep independent build evidence even when a published type contract fails.
+  await scenario("PROJECT-CHECK", "pnpm check passes on the packed consumer", async () => {
+    const result = await runCapture(PNPM[0], [...PNPM.slice(1), "run", "check"], hostDir);
+    checkOutput = result.stdout;
+    assert(result.status === 0, `pnpm check failed:\n${result.stdout}\n${result.stderr}`);
+    pass("PROJECT-CHECK", "pnpm check passed");
+  });
+  await scenario("BUILD-CHECK", "pnpm build and pnpm check:site pass on the packed consumer", async () => {
     await runHeavy("verify-pack:build", PNPM[0], [...PNPM.slice(1), "run", "build"], hostDir);
     await runHeavy("verify-pack:check-site", PNPM[0], [...PNPM.slice(1), "run", "check:site"], hostDir);
-    pass("BUILD-CHECK", "pnpm check, pnpm build and pnpm check:site all passed");
+    pass("BUILD-CHECK", "pnpm build and pnpm check:site passed");
   });
 
   await scenario("INIT-04", "the canonical Python validator ran from node_modules (SCOPE: line present in `pnpm check` output)", async () => {
@@ -959,17 +970,27 @@ async function minimalFixtureFlow(root, runtimeTarball, scratch) {
   await assertForeignPackage(hostDir, RUNTIME_NAME);
   pass("INSTALL-FOREIGN", "examples/minimal installs the packed runtime under its own node_modules (root + doc/)");
 
+  await scenario("STRICT-HOST-TYPES", "strict direct public MDX registration and generated host types", async () => {
+    await checkHostTypes(hostDir);
+    pass("STRICT-HOST-TYPES", "published declarations accept the direct registry and host under strict checking");
+  });
+
   let checkOutput = "";
+  await scenario("PROJECT-CHECK", "pnpm check passes on the packed minimal consumer", async () => {
+    const result = await runCapture(PNPM[0], [...PNPM.slice(1), "run", "check"], hostDir);
+    checkOutput = result.stdout;
+    assert(result.status === 0, `pnpm check failed:\n${result.stdout}\n${result.stderr}`);
+    pass("PROJECT-CHECK", "pnpm check passed");
+  });
   await scenario(
     "BUILD-CHECK",
-    "pnpm check, pnpm build and pnpm check:site all pass on the packed minimal consumer",
+    "pnpm build and pnpm check:site pass on the packed minimal consumer",
     async () => {
-      checkOutput = await runStreamed(PNPM[0], [...PNPM.slice(1), "run", "check"], hostDir);
       await runHeavy("verify-pack:minimal-build", PNPM[0], [...PNPM.slice(1), "run", "build"], hostDir);
       await runHeavy("verify-pack:minimal-check-site", PNPM[0], [...PNPM.slice(1), "run", "check:site"], hostDir);
       pass(
         "BUILD-CHECK",
-        "pnpm check, pnpm build and pnpm check:site all passed (check-built 1/1/1, scan, authored→generated links under --strict-broken/--strict-anchors)",
+        "pnpm build and pnpm check:site passed (check-built 1/1/1, scan, authored→generated links under --strict-broken/--strict-anchors)",
       );
     },
   );
@@ -1138,6 +1159,11 @@ async function ledFixtureFlow(root, runtimeTarball, scratch, ledOutDir) {
       );
     },
   );
+
+  await scenario("STRICT-HOST-TYPES", "strict direct public MDX registration and generated host types", async () => {
+    await checkHostTypes(ledOutDir);
+    pass("STRICT-HOST-TYPES", "published declarations accept the direct registry and host under strict checking");
+  });
 
   await scenario(
     "M4",

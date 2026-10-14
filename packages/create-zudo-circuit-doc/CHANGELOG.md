@@ -4,6 +4,27 @@ All notable changes to `create-zudo-circuit-doc` are documented in this file.
 
 The format is based on Keep a Changelog, and release notes are generated from the changelog MDX pages.
 
+## [Unreleased]
+
+**Pending 0.2.0; not published.** The selected 6.2.0 / 4.5.0 family passes direct
+strict packed MDX registration and the unchanged LED publication scan; full verification
+still gates integration. See
+[issue #155](https://github.com/Takazudo/zudo-circuit-doc/issues/155).
+
+## Breaking changes
+
+- Generate the zudo-doc 6 / ZFB 4 host and select runtime ^0.3.0.
+- Keep old generated projects on runtime ^0.2.0 with zudo-doc 5 / ZFB 2 until the complete host
+  migration is intentional. The prepared pins are zudo-doc/history/create-zudo-doc 6.2.0 and
+  the aligned ZFB 4.5.0 tuple, with tested runtime peer floors ^6.2.0 / ^4.5.0.
+- Follow the existing-consumer migration recipe.
+
+## Verification and publication
+
+Strict packed-consumer types, build, browser and fixture verification gate integration.
+Publish/approve runtime first, run the empty consumer's published-runtime gate, then
+publish/approve initializer. These publication steps remain separately pending.
+
 ## [0.1.0] - 2026-09-27
 
 Initial release of `create-zudo-circuit-doc`, an initializer that creates a ready-to-use

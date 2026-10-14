@@ -5,7 +5,7 @@
     "noEmit": false,
     "rewriteRelativeImportExtensions": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "preact",
+    "jsxImportSource": "@takazudo/zfb/zudo-react",
     "declaration": true,
     "outDir": "lib",
     "rootDir": "src"

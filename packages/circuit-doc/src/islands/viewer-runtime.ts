@@ -86,6 +86,26 @@ export async function mountModelViewer(
   let removeWindowResize: (() => void) | undefined;
   let themeObserver: MutationObserver | undefined;
   let disposed = false;
+  let invalidator: ReturnType<typeof createOnDemandInvalidator> | undefined;
+  // Release controls while their canvas still belongs to the document. A
+  // pending response body may settle only after Show has removed the surface.
+  const dispose = () => {
+    if (disposed) return;
+    disposed = true;
+    signal.removeEventListener("abort", dispose);
+    invalidator?.cancel();
+    resizeObserver?.disconnect();
+    removeWindowResize?.();
+    themeObserver?.disconnect();
+    controls?.stopListenToKeyEvents();
+    controls?.dispose();
+    if (model !== undefined) disposeObject(model);
+    renderer?.dispose();
+    renderer?.forceContextLoss();
+    renderer?.domElement.remove();
+    root.dataset.viewerDisposed = "true";
+  };
+  signal.addEventListener("abort", dispose, { once: true });
 
   try {
     if (signal.aborted) throw new DOMException("Viewer disposed", "AbortError");
@@ -135,7 +155,7 @@ export async function mountModelViewer(
       renderer.render(scene, camera);
       root.dataset.renderCount = String(Number(root.dataset.renderCount ?? "0") + 1);
     };
-    const invalidator = createOnDemandInvalidator(render);
+    invalidator = createOnDemandInvalidator(render);
     controls.addEventListener("change", invalidator.invalidate);
 
     const response = await fetch(descriptor.modelUrl, {
@@ -157,7 +177,7 @@ export async function mountModelViewer(
       resizeObserver.observe(viewport);
     } else {
       window.addEventListener("resize", invalidator.invalidate, { passive: true });
-      removeWindowResize = () => window.removeEventListener("resize", invalidator.invalidate);
+      removeWindowResize = () => window.removeEventListener("resize", invalidator!.invalidate);
     }
     themeObserver = new MutationObserver(invalidator.invalidate);
     themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "class"] });
@@ -168,31 +188,10 @@ export async function mountModelViewer(
     render();
     root.dataset.viewerState = "ready";
 
-    return {
-      dispose() {
-        if (disposed) return;
-        disposed = true;
-        invalidator.cancel();
-        resizeObserver?.disconnect();
-        removeWindowResize?.();
-        themeObserver?.disconnect();
-        controls?.stopListenToKeyEvents();
-        controls?.dispose();
-        if (model !== undefined) disposeObject(model);
-        renderer?.dispose();
-        renderer?.forceContextLoss();
-        renderer?.domElement.remove();
-        root.dataset.viewerDisposed = "true";
-      },
-    };
+    return { dispose };
   } catch (error) {
-    controls?.stopListenToKeyEvents();
-    controls?.dispose();
-    if (model !== undefined) disposeObject(model);
-    renderer?.dispose();
-    renderer?.forceContextLoss();
-    renderer?.domElement.remove();
-    if ((error as Error).name !== "AbortError") {
+    dispose();
+    if (!signal.aborted && (error as Error).name !== "AbortError") {
       setViewerState(root, "error", "The interactive package model could not be loaded. The package identity remains available.");
     }
     throw error;

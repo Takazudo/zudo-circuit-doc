@@ -1,5 +1,5 @@
 /** @jsxRuntime automatic */
-/** @jsxImportSource preact */
+/** @jsxImportSource @takazudo/zfb/zudo-react */
 
 /**
  * Static disclosure for the one kind of content on a generated page that is
@@ -25,7 +25,7 @@
  * than rendering nothing, so a new label is never an invisible failure.
  */
 
-import type { ComponentChildren, JSX } from "preact";
+import type { Child, Description } from "@takazudo/zfb/zudo-react";
 
 const SUMMARY_LABELS: Readonly<Record<string, string>> = {
   "pin-assignments": "Pin assignments",
@@ -40,10 +40,10 @@ function summaryFor(label: string): string {
 
 export type EvidenceDetailsProps = {
   label: string;
-  children?: ComponentChildren;
+  children?: Child;
 };
 
-export function EvidenceDetails({ label, children }: EvidenceDetailsProps): JSX.Element {
+export function EvidenceDetails({ label, children }: EvidenceDetailsProps): Description {
   return (
     <details class="zcd-evidence-details">
       <summary>{summaryFor(label)}</summary>
