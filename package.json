@@ -31,7 +31,7 @@
   "devDependencies": {
     "typescript": "^5.9.0",
     "@types/node": "^22.0.0",
-    "@takazudo/zfb": "4.3.1",
-    "create-zudo-doc": "6.0.0"
+    "@takazudo/zfb": "4.5.0",
+    "create-zudo-doc": "6.2.0"
   }
 }

@@ -60,13 +60,13 @@ The dependency versions below are exact-pinned across the whole repo — do not 
 
 | Package | Version |
 | --- | --- |
-| `@takazudo/zudo-doc`, `@takazudo/zudo-doc-history-server`, `create-zudo-doc` | 6.0.0 |
-| `@takazudo/zfb`, `@takazudo/zfb-runtime`, `@takazudo/zfb-md-wasm` | 4.3.1 |
+| `@takazudo/zudo-doc`, `@takazudo/zudo-doc-history-server`, `create-zudo-doc` | 6.2.0 |
+| `@takazudo/zfb`, `@takazudo/zfb-runtime`, `@takazudo/zfb-md-wasm` | 4.5.0 |
 | pnpm (`packageManager`, via corepack) | 11.5.2 |
 | Node | >=22.18.0 |
 | Python | >=3.10 (stdlib only) |
 
-**Integration hold:** zudo-doc 6.0.0 rejects required-prop MDX components. Keep this migration draft until a fixed stable release passes `verify:pack` strict host checking; then raise its exact host pins and runtime peer minimum together. See issue #155 and ADR-021.
+**Integration gates:** the 6.2.0 / 4.5.0 family passes strict packed MDX registration and the unchanged LED publication scan. Keep issue #155 / PR #156 gated on the complete current-revision verification contract; publication remains separate. See ADR-021 and `ZUDO_DEPS_PINS.md`.
 
 ## Node type stripping
 

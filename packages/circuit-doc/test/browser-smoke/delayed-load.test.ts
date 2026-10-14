@@ -21,18 +21,22 @@ function installProbe() {
       super.removeEventListener(...args);
     }
   }
-  class Element extends ProbeEventTarget {
+  class Node extends ProbeEventTarget {
+    getRootNode(): ProbeEventTarget { return document; }
+  }
+  class Element extends Node {
     matches(): boolean { return true; }
   }
   const document = new ProbeEventTarget();
   const nativeFetch = async () => new Response("#VRML V2.0 utf8");
   const window = { fetch: nativeFetch } as unknown as { fetch: typeof fetch; __zcdLoadProbe: Probe };
   const nativeAdd = ProbeEventTarget.prototype.addEventListener;
+  const nativeGetRootNode = Node.prototype.getRootNode;
   runInNewContext(MODEL_LOAD_PROBE, {
-    window, document, Element, EventTarget: ProbeEventTarget, URL,
+    window, document, Element, Node, queueMicrotask, EventTarget: ProbeEventTarget, URL,
     location: { href: "https://example.org/record/" },
   });
-  return { window, document, canvas: new Element(), nativeFetch, nativeAdd, ProbeEventTarget };
+  return { window, document, canvas: new Element(), nativeFetch, nativeAdd, nativeGetRootNode, ProbeEventTarget, Node };
 }
 
 test("model response stays pending through abort until explicitly released, then returns the real source", async (t) => {
@@ -64,12 +68,12 @@ test("non-model responses pass through without a delay", async (t) => {
 });
 
 test("listener audit catches removal from the wrong target or capture phase and restores instrumentation", () => {
-  const { window, document, canvas, nativeFetch, nativeAdd, ProbeEventTarget } = installProbe();
+  const { window, document, canvas, nativeFetch, nativeAdd, nativeGetRootNode, ProbeEventTarget, Node } = installProbe();
   const probe = window.__zcdLoadProbe;
   try {
     const control = () => {};
-    document.addEventListener("keydown", control, { capture: true, passive: true });
-    document.addEventListener("keydown", control, true);
+    canvas.getRootNode().addEventListener("keydown", control, { capture: true, passive: true });
+    canvas.getRootNode().addEventListener("keydown", control, true);
     assert.equal(probe.listeners.length, 1, "duplicate listener registrations are counted once");
     canvas.removeEventListener("keydown", control, true);
     document.removeEventListener("keydown", control, false);
@@ -87,5 +91,23 @@ test("listener audit catches removal from the wrong target or capture phase and 
   }
   assert.equal(window.fetch, nativeFetch);
   assert.equal(ProbeEventTarget.prototype.addEventListener, nativeAdd);
+  assert.equal(Node.prototype.getRootNode, nativeGetRootNode);
   assert.equal(window.__zcdLoadProbe, undefined);
+});
+
+
+test("document-lifetime shell controls are excluded without hiding canvas-root controls", async (t) => {
+  const { window, document, canvas } = installProbe();
+  t.after(() => window.__zcdLoadProbe.restore());
+  const probe = window.__zcdLoadProbe;
+  document.addEventListener("keydown", () => {}, true);
+  assert.equal(probe.listeners.length, 0, "shell startup does not allocate viewer controls");
+  canvas.getRootNode().addEventListener("keydown", () => {}, { capture: true });
+  document.addEventListener("keydown", () => {}, true);
+  assert.equal(probe.listeners.length, 1, "the root lookup attributes only the viewer registration");
+  canvas.getRootNode();
+  await Promise.resolve();
+  document.addEventListener("keydown", () => {}, true);
+  assert.equal(probe.listeners.length, 1, "an unrelated later registration cannot inherit a canvas lookup");
+  assert.equal(probe.listeners[0]?.active, true, "an unremoved viewer control remains a detected leak");
 });

@@ -119,7 +119,7 @@ const DEPENDENCY_FIELDS = [
 // generated project stands alone and needs its own. Per ADR-003 every pnpm
 // setting lives here and the template ships no .npmrc.
 //
-// create-zudo-doc 6.0.0's own scaffold also ships a .npmrc with
+// create-zudo-doc 6.2.0's own scaffold also ships a .npmrc with
 // `trust-policy-exclude[]=undici-types@6.21.0`. Verified with a real `pnpm
 // install` of this exact dependency set under pnpm 11.5.2: pnpm's
 // `trustPolicy` is off by default and this template never turns it on, so
@@ -129,7 +129,7 @@ const DEPENDENCY_FIELDS = [
 const GENERATED_WORKSPACE_YAML = `packages: ["doc"]
 # pnpm 11 defaults minimumReleaseAge to 1440min. The exclude matcher can't
 # match a fresh install's peer-nested lockfile keys (upstream pnpm bug), the
-# same reason create-zudo-doc 6.0.0's own scaffold disables the gate
+# same reason create-zudo-doc 6.2.0's own scaffold disables the gate
 # outright instead of excluding specific packages. Revisit once that's fixed
 # and this project is ready to publish.
 minimumReleaseAge: 0

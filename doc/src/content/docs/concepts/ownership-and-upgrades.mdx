@@ -55,7 +55,7 @@ the vendored scaffold:
 
 ```md
 ## create-zudo-doc
-- pinned: <commit> (v6.0.0)
+- pinned: <commit> (v6.2.0)
 - files: doc/pages/docs/[[...slug]].tsx, doc/pages/index.tsx, doc/tsconfig.json,
   doc/src/styles/global.css, doc/scripts/check-links.js
 - notes: doc/pages/docs/[[...slug]].tsx carries one added import beyond the upstream stub;
@@ -64,7 +64,7 @@ the vendored scaffold:
 
 To refresh a project's scaffold by hand after a new `create-zudo-doc` release:
 
-1. Run the pinned (or newer) `create-zudo-doc` into a scratch directory and diff its `app/` output
+1. Run the pinned (or newer) `create-zudo-doc` into a scratch directory and diff its project output
    against the files `ZUDO_DEPS_PINS.md` lists.
 2. Apply the upstream diff to your project's copies.
 3. Re-apply the project-specific lines `ZUDO_DEPS_PINS.md`'s notes call out (they are not part of
@@ -74,22 +74,22 @@ To refresh a project's scaffold by hand after a new `create-zudo-doc` release:
 ## Migrating the 0.2 runtime family to 0.3 (pending)
 
 Runtime **0.3.0** and initializer **0.2.0** are prepared but **not published**.
-Do not migrate production consumers yet: published zudo-doc **6.0.0** rejects the direct
-required-prop MDX registry. Upstream [#4531](https://github.com/zudolab/zudo-doc/pull/4531)
-fixes this, but the fix must ship in a stable package and pass the packed-consumer gate first.
-The migration PR stays draft until then. A successful bundle is not evidence of type compatibility.
-The LED publication gate also remains blocked: the released sidebar serializes three denied-value
-descriptions from public authored pages into generated pages (117 scan hits). The existing OWNED
-artifact scan remains strict; a supported upstream fix must restore publication parity.
+The selected published upstream family is zudo-doc/history-server/create-zudo-doc **6.2.0**
+and ZFB/runtime/md-wasm **4.5.0**. It passes the direct strict packed MDX registration and
+unchanged LED publication scan that blocked the 6.0.0 attempt (TS2322 and 117 hits).
+The sidebar fix minimizes hydration payloads while preserving authored server content.
+Production consumers must still wait for separately authorized circuit-package publication.
+Full current-revision verification and repository policy gate integration; a successful
+bundle alone does not establish type compatibility.
 
 The old pairing is runtime `^0.2.0`, zudo-doc/history-server 5.27.0 and the aligned ZFB 2.21.0
 family. A caret on runtime `^0.2.0` does not opt into 0.3. Keep that pairing until you deliberately
 migrate the entire host. The prepared new pairing is runtime `^0.3.0`, initializer 0.2.0,
-zudo-doc/history-server/create-zudo-doc 6.0.0 and ZFB/runtime/md-wasm 4.3.1. The zudo-doc pin
-and runtime peer minimum must advance to the actual fixed stable release before use.
+zudo-doc/history-server/create-zudo-doc 6.2.0 and ZFB/runtime/md-wasm 4.5.0. Runtime peer
+floors are ^6.2.0 and ^4.5.0, matching this verified family.
 Independently released packages need not share a patch version.
 
-Once the published gate is satisfied, apply this recipe on a project branch:
+Once the circuit runtime is published and the published-runtime gate is satisfied, apply this recipe on a project branch:
 
 1. Back up authored content, evidence, configuration and CAD receipts. Update the runtime range
    in both root and `doc/package.json`; update the exact zudo-doc/history-server and all three
@@ -100,7 +100,8 @@ Once the published gate is satisfied, apply this recipe on a project branch:
    run an initializer over your existing app, and never add `create-zudo-doc` to app dependencies.
    Compare the docs route, root route, tsconfig, global CSS and link checker listed above.
 3. Extend `@takazudo/zudo-doc/tsconfig.base.json`. Remove React-to-Preact paths and JSX pragmas,
-   preserve genuine aliases with a local `baseUrl`, and inherit the base's top-level `files`.
+   remove `baseUrl`, preserve genuine aliases with explicitly relative targets such as
+   `"@/*": ["./src/*"]`, and inherit the base's top-level `files`. Keep TypeScript 5.9.
    Custom TSX imports `Child`/`Description` and the published intrinsic types from zudo-react.
    Interactive components use setup-owned signals/computed values, `Show`, native `on:*`
    handlers and scope activation/cleanup. A one-time `.value` read is not a reactive binding.

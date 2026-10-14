@@ -41,7 +41,7 @@ iteration) and the literal source of the generated project template.
 
 **Decision:** zudo-doc composition uses a fixture-derived template: `examples/empty` is synced
 into `templates/default`. A dev-time upstream parity check diffs the upstream-owned host files
-against `createZudoDoc()` output from the pinned `create-zudo-doc@6.0.0`.
+against `createZudoDoc()` output from the pinned `create-zudo-doc@6.2.0`.
 
 **Rejected alternative:** Calling `create-zudo-doc` at user runtime. It needs `chdir`, has no
 staging, swallows install failures, and skips nested `pnpm-workspace.yaml`.
@@ -59,8 +59,8 @@ slightly different dependency families, and the validator's declared `>=3.12` Py
 only ever a CI-parity pin (the measured floor is 3.9, see the
 [extraction baseline](./extraction-baseline.md#toolchain)).
 
-**Decision:** The current migration family is zudo-doc/history-server/create-zudo-doc 6.0.0,
-with aligned zfb/runtime/md-wasm 4.3.1. ADR-021 records its published compatibility hold.
+**Decision:** The current migration family is zudo-doc/history-server/create-zudo-doc 6.2.0,
+with aligned zfb/runtime/md-wasm 4.5.0. ADR-021 records the verified compatibility gates.
 The historical 2.20.3 fallback is retired. Retain pnpm 11.5.2, Node >=22.18.0 and Python >=3.10. Generated-project pnpm settings live only in the
 root `pnpm-workspace.yaml` — there are no `.npmrc` files, because `pnpm pack` drops them and
 pnpm only reads them at the workspace root. The file sets `minimumReleaseAge: 0` (a known
@@ -415,26 +415,28 @@ allowlist or goldens.
 
 ## ADR-021 — zudo-react migration and release boundary
 
-**Status:** Implementation pending published dependency compatibility and LED publication parity (issue #155).
+**Status:** Both dependency gates verified; integration requires the complete issue #155 acceptance contract.
 
 The runtime 0.3.0 and initializer 0.2.0 prepare a pre-1.0 breaking minor under Scheme B.
 Old generated hosts retain runtime ^0.2.0 with zudo-doc 5 / ZFB 2; the new template selects
 ^0.3.0 with zudo-doc 6 / ZFB 4. The private root version stays unchanged.
 
-Registry inspection on 2026-10-11 found zudo-doc, history-server and create-zudo-doc 6.0.0,
-and aligned zfb, zfb-runtime and zfb-md-wasm 4.3.1. The actual 6.0.0 tarball declares
-`mdxExtras?: Record<string, Component<Record<string, unknown>>>`, rejecting the circuit registry's
-required props. Upstream zudolab/zudo-doc#4531 fixes this but is not published in that version.
-The development peer ^6.0.0 is provisional: before integration, require a fixed stable version,
-raise the peer minimum and exact host pin, and pass the strict direct packed-consumer check.
-No casts, weaker props, adapters, installed-file patches or floating upstream refs are allowed.
+The previous 6.0.0 / 4.3.1 attempt failed strict registration (TS2322 for required
+MDX props) and the raw LED OWNED publication scan (117 description-propagation hits).
+Those results remain recorded on issue #155 and PR #156.
 
-The built LED host also fails the unchanged OWNED publication scan: zudo-doc 6.0.0 serializes
-three denied-value descriptions from independently public authored pages into SidebarToggle /
-SidebarTree `data-props.navigation.roots[*].children[*].description` on 39 generated pages
-(117 hits). Existing SITE-only authored-public subtraction does not apply to OWNED artifacts.
-Keep this gate red pending a supported upstream transport fix; do not mask payload fields,
-weaken canaries or change the hash-locked evidence corpus to make the migration pass.
+On 2026-10-14, registry metadata and published tarball diffs verified the selected
+6.2.0 / 4.5.0 family. zudo-doc's 6.0.1 fixes are present: the registry uses
+`Component<never>` and both native sidebar boundaries project client payloads without
+descriptions. The local packed empty consumer passes direct strict registration and
+host types; the real packed LED host passes the unchanged raw OWNED/full-canary scan
+with zero hits, generated/model parity and strict built links. Frozen input bytes,
+required props, all six bindings and scanner policy are unchanged. Runtime peer floors
+are conservatively ^6.2.0 and ^4.5.0; older combinations are not advertised.
+
+The actual 6.2.0 scaffold removes `baseUrl` and declares relative aliases. All hosts
+inherit upstream files and preserve their local integration. `ZUDO_DEPS_PINS.md`
+records generator/tag provenance, the direct-write allowlist and impact assessment.
 
 zudo-react setup scopes own signals, native events and activation cleanup. Conditional dialog
 viewers dispose on close, including pending imports/loads. Static named Island targets retain

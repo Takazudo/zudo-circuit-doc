@@ -5,16 +5,17 @@ sidebar_position: 0
 pagination_next: null
 ---
 
-**Pending 0.3.0; not published.** Integration is held until a stable zudo-doc release accepts
-required-prop MDX registrations directly. Current 6.0.0 does not; see
+**Pending 0.3.0; not published.** The selected 6.2.0 / 4.5.0 family passes direct
+strict packed MDX registration and the unchanged LED publication scan; full verification
+still gates integration. See
 [issue #155](https://github.com/Takazudo/zudo-circuit-doc/issues/155).
 
 ## Breaking changes
 
 - Port the public UI and islands to zudo-react with activation-owned viewer disposal.
 - Keep old generated projects on runtime ^0.2.0 with zudo-doc 5 / ZFB 2 until the complete host
-  migration is intentional. The prepared pins are zudo-doc/history/create-zudo-doc 6.0.0 and
-  the aligned ZFB 4.3.1 tuple; zudo-doc's pin and runtime peer minimum must move to the fixed release.
+  migration is intentional. The prepared pins are zudo-doc/history/create-zudo-doc 6.2.0 and
+  the aligned ZFB 4.5.0 tuple, with tested runtime peer floors ^6.2.0 / ^4.5.0.
 - Follow the [existing-consumer migration recipe](../../concepts/ownership-and-upgrades.mdx).
 
 ## Verification and publication

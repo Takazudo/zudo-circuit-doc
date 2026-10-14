@@ -13,6 +13,8 @@ export const MODEL_LOAD_PROBE = String.raw`(() => {
   const nativeFetch = window.fetch;
   const nativeAdd = EventTarget.prototype.addEventListener;
   const nativeRemove = EventTarget.prototype.removeEventListener;
+  const nativeGetRootNode = Node.prototype.getRootNode;
+  let canvasRootLookup;
   const capture = (options) => typeof options === 'boolean' ? options : Boolean(options?.capture);
   const probe = window.__zcdLoadProbe = {
     paused: true,
@@ -42,8 +44,21 @@ export const MODEL_LOAD_PROBE = String.raw`(() => {
       window.fetch = nativeFetch;
       EventTarget.prototype.addEventListener = nativeAdd;
       EventTarget.prototype.removeEventListener = nativeRemove;
+      Node.prototype.getRootNode = nativeGetRootNode;
       delete window.__zcdLoadProbe;
     },
+  };
+  // Three's pinned OrbitControls obtains its canvas root immediately before
+  // registering document controls. Attribute that registration to the canvas,
+  // rather than counting document-lifetime shell handlers (e.g. sidebar scroll
+  // preservation) as viewer leaks when this probe runs before shell startup.
+  Node.prototype.getRootNode = function(...args) {
+    const root = nativeGetRootNode.apply(this, args);
+    if (this instanceof Element && this.matches('canvas')) {
+      const lookup = canvasRootLookup = { root };
+      queueMicrotask(() => { if (canvasRootLookup === lookup) canvasRootLookup = undefined; });
+    }
+    return root;
   };
   EventTarget.prototype.addEventListener = function(type, listener, options) {
     const viewerTarget = this instanceof Element && (
@@ -51,7 +66,8 @@ export const MODEL_LOAD_PROBE = String.raw`(() => {
     );
     // OrbitControls also installs a capturing keydown listener on the canvas's
     // original document. Track its removal even if the canvas becomes detached.
-    const documentTarget = this === document && type === 'keydown' && capture(options);
+    const documentTarget = this === document && canvasRootLookup?.root === this && type === 'keydown' && capture(options);
+    if (documentTarget) canvasRootLookup = undefined;
     if (listener && (viewerTarget || documentTarget)) {
       const duplicate = probe.listeners.some((entry) => entry.active && entry.target === this && entry.type === type && entry.listener === listener && entry.capture === capture(options));
       if (!duplicate) probe.listeners.push({ target: this, type, listener, capture: capture(options), active: true });
