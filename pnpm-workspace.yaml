@@ -20,4 +20,4 @@ minimumReleaseAgeExclude:
   - "@takazudo/zudo-doc"
   - "@takazudo/zudo-doc-history-server"
   - "create-zudo-doc"
-  - '@takazudo/zfb-slugify@4.5.0'
+  - '@takazudo/zfb-slugify@4.5.2'

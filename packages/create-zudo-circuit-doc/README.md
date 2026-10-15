@@ -49,7 +49,7 @@ This tool only creates new projects. There is no `update` or "adopt an existing 
 
 ## Tool requirements
 
-- Node >=22.18.0
+- Node 24 LTS (>=24 <25)
 - pnpm (via corepack; the generated project pins `packageManager`)
 - git, if `--git` is not disabled
 

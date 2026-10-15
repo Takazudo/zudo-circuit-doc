@@ -43,7 +43,7 @@ Agent-facing commands (new component bundles, online source refresh) are listed 
 
 | Tool | Required | Used for |
 | --- | --- | --- |
-| Node.js ≥22.18 | Yes | Everything |
+| Node.js 24 LTS | Yes | Everything |
 | pnpm 11 (via corepack) | Yes | Install and scripts |
 | Python ≥3.10 | Yes | Evidence validation (standard library only) |
 | git | Yes | History and review diffs |

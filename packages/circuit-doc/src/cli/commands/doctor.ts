@@ -12,7 +12,7 @@ import { promisify } from "node:util";
 
 import { DEFAULT_PYTHON_MIN_VERSION } from "../../config/define.ts";
 import { ConfigError } from "../../config/errors.ts";
-import { loadCircuitConfig } from "../../config/load.ts";
+import { isSupportedNodeVersion, loadCircuitConfig } from "../../config/load.ts";
 import { configRelative, mapCircuitConfig, missingProjectFiles } from "../../config/map.ts";
 import { resolveCircuitConfig, type ResolvedCircuitConfig } from "../../config/resolve.ts";
 import { resolvePythonBin } from "../../validate/python.ts";
@@ -115,9 +115,8 @@ export async function collectDoctorRows(context: CommandContext): Promise<readon
 
 function nodeRow(): DoctorRow {
   const range = packageInfo().engines.node ?? "";
-  const floor = /^>=\s*(\d+(?:\.\d+){0,2})$/u.exec(range.trim())?.[1];
   const version = process.versions.node;
-  const ok = floor === undefined || compareVersions(version, floor) >= 0;
+  const ok = isSupportedNodeVersion(version);
   return {
     name: "node",
     level: "required",

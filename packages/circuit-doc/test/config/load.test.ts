@@ -176,21 +176,21 @@ describe("error-hint mapping", () => {
 });
 
 describe("Node version gate", () => {
-  test("Node older than 22.18 gets a targeted error naming the minimum", () => {
-    assert.equal(MIN_NODE_VERSION, "22.18.0");
-    for (const version of ["22.17.1", "20.19.0", "v18.0.0"]) {
+  test("unsupported Node lines and prereleases get a targeted error naming the range", () => {
+    assert.equal(MIN_NODE_VERSION, "24.0.0");
+    for (const version of ["22.18.0", "23.6.0", "25.0.0", "v25.0.0-pre", "24.0.0-rc.1", "20.19.0", "v18.0.0"]) {
       assert.throws(
         () => assertSupportedNodeVersion(version),
         (error: unknown) =>
           error instanceof ConfigError &&
           error.code === "NODE_VERSION_UNSUPPORTED" &&
-          error.message.includes("22.18.0"),
+          error.message.includes(">=24 <25"),
       );
     }
   });
 
-  test("Node 22.18+ passes", () => {
-    for (const version of ["22.18.0", "22.20.1", "23.6.0", "24.13.1", "v25.0.0-pre"]) {
+  test("stable Node 24 releases pass", () => {
+    for (const version of ["24.0.0", "24.13.1", "v24.19.0", "24.19.0+build.1"]) {
       assert.doesNotThrow(() => assertSupportedNodeVersion(version), version);
     }
     assert.doesNotThrow(() => assertSupportedNodeVersion());

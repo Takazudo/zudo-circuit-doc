@@ -60,13 +60,13 @@ The dependency versions below are exact-pinned across the whole repo — do not 
 
 | Package | Version |
 | --- | --- |
-| `@takazudo/zudo-doc`, `@takazudo/zudo-doc-history-server`, `create-zudo-doc` | 6.2.0 |
-| `@takazudo/zfb`, `@takazudo/zfb-runtime`, `@takazudo/zfb-md-wasm` | 4.5.0 |
+| `@takazudo/zudo-doc`, `@takazudo/zudo-doc-history-server`, `create-zudo-doc` | 7.0.0 |
+| `@takazudo/zfb`, `@takazudo/zfb-runtime`, `@takazudo/zfb-md-wasm` | 4.5.2 |
 | pnpm (`packageManager`, via corepack) | 11.5.2 |
-| Node | >=22.18.0 |
+| Node | >=24 <25 (24 LTS) |
 | Python | >=3.10 (stdlib only) |
 
-**Integration gates:** the 6.2.0 / 4.5.0 family passes strict packed MDX registration and the unchanged LED publication scan. Keep issue #155 / PR #156 gated on the complete current-revision verification contract; publication remains separate. See ADR-021 and `ZUDO_DEPS_PINS.md`.
+**Integration gates:** upgrades must pass strict packed MDX registration, unchanged LED publication scans and browser verification. Issue #155 / PR #156 merged the earlier 6.2.0 / 4.5.0 migration; the current published family is 7.0.0 / 4.5.2 on Node 24 LTS. Publication remains separate. See ADR-021, ADR-022 and `ZUDO_DEPS_PINS.md`.
 
 ## Node type stripping
 
