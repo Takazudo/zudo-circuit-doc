@@ -1,7 +1,7 @@
 packages: ["doc"]
 # pnpm 11 defaults minimumReleaseAge to 1440min. The exclude matcher can't
 # match a fresh install's peer-nested lockfile keys (upstream pnpm bug), the
-# same reason create-zudo-doc 6.2.0's own scaffold disables the gate
+# same reason create-zudo-doc 7.0.0's own scaffold disables the gate
 # outright instead of excluding specific packages. Revisit once that's fixed
 # and this project is ready to publish.
 minimumReleaseAge: 0

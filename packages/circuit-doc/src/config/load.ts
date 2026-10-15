@@ -9,8 +9,9 @@ import { DEFAULT_CONFIG_FILENAME, type CircuitConfig } from "./define.ts";
 import { ConfigError } from "./errors.ts";
 import { validateCircuitConfig } from "./schema.ts";
 
-/** First Node release with unflagged type stripping on the 22.x line. */
-export const MIN_NODE_VERSION = "22.18.0";
+/** zudo-doc 7 supports the Node 24 LTS line. */
+export const MIN_NODE_VERSION = "24.0.0";
+export const SUPPORTED_NODE_RANGE = ">=24 <25";
 
 const PACKAGE_NAME = "@takazudo/zudo-circuit-doc";
 const IMPORT_TYPE_HINT =
@@ -37,12 +38,16 @@ export type LoadedCircuitConfig = {
 
 let freshCounter = 0;
 
+export function isSupportedNodeVersion(version: string): boolean {
+  return /^v?24\.\d+\.\d+(?:\+[^\s]+)?$/u.test(version);
+}
+
 export function assertSupportedNodeVersion(version: string = process.versions.node): void {
-  if (compareVersions(version, MIN_NODE_VERSION) >= 0) return;
+  if (isSupportedNodeVersion(version)) return;
   throw new ConfigError(
     "NODE_VERSION_UNSUPPORTED",
-    [{ path: "", message: `Node ${version} cannot load circuit.config.ts; Node >= ${MIN_NODE_VERSION} is required` }],
-    { hint: `upgrade to Node ${MIN_NODE_VERSION} or newer (native TypeScript type stripping)` },
+    [{ path: "", message: `Node ${version} is unsupported; Node ${SUPPORTED_NODE_RANGE} is required` }],
+    { hint: "use Node 24 LTS (required by zudo-doc 7)" },
   );
 }
 
@@ -106,15 +111,4 @@ export function mapLoadError(cause: unknown, configPath: string): ConfigError {
     hint,
     cause,
   });
-}
-
-function compareVersions(a: string, b: string): number {
-  const parse = (version: string) => version.replace(/^v/u, "").split(/[.-]/u).slice(0, 3).map(Number);
-  const left = parse(a);
-  const right = parse(b);
-  for (let index = 0; index < 3; index += 1) {
-    const difference = (left[index] ?? 0) - (right[index] ?? 0);
-    if (difference !== 0) return difference;
-  }
-  return 0;
 }

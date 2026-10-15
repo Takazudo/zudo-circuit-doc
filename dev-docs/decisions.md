@@ -41,7 +41,7 @@ iteration) and the literal source of the generated project template.
 
 **Decision:** zudo-doc composition uses a fixture-derived template: `examples/empty` is synced
 into `templates/default`. A dev-time upstream parity check diffs the upstream-owned host files
-against `createZudoDoc()` output from the pinned `create-zudo-doc@6.2.0`.
+against `createZudoDoc()` output from the pinned `create-zudo-doc@7.0.0`.
 
 **Rejected alternative:** Calling `create-zudo-doc` at user runtime. It needs `chdir`, has no
 staging, swallows install failures, and skips nested `pnpm-workspace.yaml`.
@@ -59,9 +59,9 @@ slightly different dependency families, and the validator's declared `>=3.12` Py
 only ever a CI-parity pin (the measured floor is 3.9, see the
 [extraction baseline](./extraction-baseline.md#toolchain)).
 
-**Decision:** The current migration family is zudo-doc/history-server/create-zudo-doc 6.2.0,
-with aligned zfb/runtime/md-wasm 4.5.0. ADR-021 records the verified compatibility gates.
-The historical 2.20.3 fallback is retired. Retain pnpm 11.5.2, Node >=22.18.0 and Python >=3.10. Generated-project pnpm settings live only in the
+**Decision:** The current family is zudo-doc/history-server/create-zudo-doc 7.0.0,
+with aligned zfb/runtime/md-wasm 4.5.2. ADR-021 records the earlier migration; ADR-022 records this update.
+The historical 2.20.3 fallback is retired. Retain pnpm 11.5.2 and Python >=3.10; Node follows the upstream 24 LTS contract (>=24 <25). Generated-project pnpm settings live only in the
 root `pnpm-workspace.yaml` — there are no `.npmrc` files, because `pnpm pack` drops them and
 pnpm only reads them at the workspace root. The file sets `minimumReleaseAge: 0` (a known
 trade-off, to revisit at publish time in [#34](https://github.com/Takazudo/zudo-circuit-doc/issues/34)),
@@ -447,3 +447,30 @@ Local tarballs are the integration gate; the unpublished circuit runtime is not 
 After separate release authorization: publish/approve runtime, run the existing empty consumer
 `--published-runtime` gate, then publish/approve initializer. No tags, staging or publication are
 part of implementation. Existing automatic documentation deployment follows a later eligible merge.
+
+
+## ADR-022 — published zudo-doc 7 / ZFB 4.5.2 family
+
+**Status:** Local strict-registration, publication-scan and browser gates verified on 2026-10-15; publication remains separate.
+
+The bounded upgrade starts at merged main a6f9413 (issue #155 / PR #156), not at
+its earlier draft. Exact development/host pins become zudo-doc/history/create-zudo-doc
+7.0.0 and ZFB/runtime/md-wasm 4.5.2. Runtime peers preserve caret operators at
+^7.0.0 / ^4.5.2. Prepared runtime 0.3.0, initializer 0.2.0 and template ^0.3.0
+remain unchanged; no unpublished upstream dependency is used.
+
+Doc 7 requires Node 24 LTS (>=24 <25), so all live engines, generated hosts, the
+CLI's supported-version gate/doctor and CI use that line. TypeScript stays 5.9,
+pnpm 11.5.2 and Python >=3.10. The optional KaTeX peer floor changed upstream;
+these hosts do not enable math or install KaTeX.
+
+Published exports and the eleven-feature scaffold remain compatible. Preserve
+history, circuit CSS/island imports, direct six-component registration, shell
+configuration and evidence generators. The original #4530 typed-prop and #4536
+sidebar-description regressions remain explicit integration gates. Doc 7 changes
+stationary chrome/loading transitions and prose wrapping; ZFB 4.5.2 fixes live
+public assets, startup readiness and explicit/compact MDX tables.
+
+No test, scanner policy, canary, frozen corpus or generated evidence is weakened.
+Existing automatic main documentation deployment still follows a future eligible
+merge; approving that merge therefore also needs awareness of that deployment.

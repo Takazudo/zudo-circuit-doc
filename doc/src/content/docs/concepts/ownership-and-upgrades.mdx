@@ -55,7 +55,7 @@ the vendored scaffold:
 
 ```md
 ## create-zudo-doc
-- pinned: <commit> (v6.2.0)
+- pinned: <commit> (v7.0.0)
 - files: doc/pages/docs/[[...slug]].tsx, doc/pages/index.tsx, doc/tsconfig.json,
   doc/src/styles/global.css, doc/scripts/check-links.js
 - notes: doc/pages/docs/[[...slug]].tsx carries one added import beyond the upstream stub;
@@ -74,8 +74,8 @@ To refresh a project's scaffold by hand after a new `create-zudo-doc` release:
 ## Migrating the 0.2 runtime family to 0.3 (pending)
 
 Runtime **0.3.0** and initializer **0.2.0** are prepared but **not published**.
-The selected published upstream family is zudo-doc/history-server/create-zudo-doc **6.2.0**
-and ZFB/runtime/md-wasm **4.5.0**. It passes the direct strict packed MDX registration and
+The selected published upstream family is zudo-doc/history-server/create-zudo-doc **7.0.0**
+and ZFB/runtime/md-wasm **4.5.2**. It passes the direct strict packed MDX registration and
 unchanged LED publication scan that blocked the 6.0.0 attempt (TS2322 and 117 hits).
 The sidebar fix minimizes hydration payloads while preserving authored server content.
 Production consumers must still wait for separately authorized circuit-package publication.
@@ -85,8 +85,8 @@ bundle alone does not establish type compatibility.
 The old pairing is runtime `^0.2.0`, zudo-doc/history-server 5.27.0 and the aligned ZFB 2.21.0
 family. A caret on runtime `^0.2.0` does not opt into 0.3. Keep that pairing until you deliberately
 migrate the entire host. The prepared new pairing is runtime `^0.3.0`, initializer 0.2.0,
-zudo-doc/history-server/create-zudo-doc 6.2.0 and ZFB/runtime/md-wasm 4.5.0. Runtime peer
-floors are ^6.2.0 and ^4.5.0, matching this verified family.
+zudo-doc/history-server/create-zudo-doc 7.0.0 and ZFB/runtime/md-wasm 4.5.2. Runtime peer
+floors are ^7.0.0 and ^4.5.2, matching this verified family.
 Independently released packages need not share a patch version.
 
 Once the circuit runtime is published and the published-runtime gate is satisfied, apply this recipe on a project branch:
@@ -95,7 +95,7 @@ Once the circuit runtime is published and the published-runtime gate is satisfie
    in both root and `doc/package.json`; update the exact zudo-doc/history-server and all three
    ZFB pins in the doc host together. Remove retired direct Preact and preact-render-to-string
    dependencies unless independently used by another explicitly owned renderer. Keep the existing
-   Node, pnpm and Python floors. Reinstall and retain the generated lockfile.
+   pnpm and Python floors; use Node 24 LTS (`>=24 <25`) for zudo-doc 7. Reinstall and retain the generated lockfile.
 2. Generate a **separate** reference project from the recorded `create-zudo-doc` version. Never
    run an initializer over your existing app, and never add `create-zudo-doc` to app dependencies.
    Compare the docs route, root route, tsconfig, global CSS and link checker listed above.

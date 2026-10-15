@@ -6,17 +6,17 @@ The format is based on Keep a Changelog, and release notes are generated from th
 
 ## [Unreleased]
 
-**Pending 0.2.0; not published.** The selected 6.2.0 / 4.5.0 family passes direct
-strict packed MDX registration and the unchanged LED publication scan; full verification
-still gates integration. See
-[issue #155](https://github.com/Takazudo/zudo-circuit-doc/issues/155).
+**Pending 0.2.0; not published.** The prepared upstream family is
+zudo-doc 7.0.0 / ZFB 4.5.2, following the merged [#156](https://github.com/Takazudo/zudo-circuit-doc/pull/156) migration.
 
 ## Breaking changes
 
-- Generate the zudo-doc 6 / ZFB 4 host and select runtime ^0.3.0.
+- Require Node 24 LTS (`>=24 <25`), matching zudo-doc 7. Node 22 and 25 are unsupported.
+
+- Generate the zudo-doc 7 / ZFB 4 host and select runtime ^0.3.0.
 - Keep old generated projects on runtime ^0.2.0 with zudo-doc 5 / ZFB 2 until the complete host
-  migration is intentional. The prepared pins are zudo-doc/history/create-zudo-doc 6.2.0 and
-  the aligned ZFB 4.5.0 tuple, with tested runtime peer floors ^6.2.0 / ^4.5.0.
+  migration is intentional. The prepared pins are zudo-doc/history/create-zudo-doc 7.0.0 and
+  the aligned ZFB 4.5.2 tuple, with tested runtime peer floors ^7.0.0 / ^4.5.2.
 - Follow the existing-consumer migration recipe.
 
 ## Verification and publication

@@ -339,7 +339,7 @@ Adding evidence does not publish it. `circuit/publication/selection.json` lists 
 
 | Tool | Status | Needed for |
 | --- | --- | --- |
-| Node.js ≥22.18 | Required | Everything |
+| Node.js 24 LTS | Required | Everything |
 | pnpm 11 (via corepack) | Required | Install and scripts |
 | Python ≥3.10 (stdlib only) | Required | `pnpm circuit:check` (override the interpreter with `CIRCUIT_DOC_PYTHON`) |
 | git | Required | History, review diffs, doc history |
