@@ -36,7 +36,7 @@ const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 export const ROOT_DIR = resolve(SCRIPT_DIR, "..");
 export const EXAMPLE_DOC_DIR = join(ROOT_DIR, "examples", "empty", "doc");
 
-// The 11 features create-zudo-doc@7.0.0 enables by default (constants.ts
+// The 11 features create-zudo-doc@7.1.0 enables by default (constants.ts
 // FEATURES.filter(f => f.default)), in that order. `create-zudo-doc`'s
 // package.json `exports` only publishes "." (dist/api.js), so this list
 // cannot be imported from the package itself and must be kept in sync by

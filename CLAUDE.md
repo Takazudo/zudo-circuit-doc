@@ -60,13 +60,13 @@ The dependency versions below are exact-pinned across the whole repo — do not 
 
 | Package | Version |
 | --- | --- |
-| `@takazudo/zudo-doc`, `@takazudo/zudo-doc-history-server`, `create-zudo-doc` | 7.0.0 |
-| `@takazudo/zfb`, `@takazudo/zfb-runtime`, `@takazudo/zfb-md-wasm` | 4.5.2 |
+| `@takazudo/zudo-doc`, `@takazudo/zudo-doc-history-server`, `create-zudo-doc` | 7.1.0 |
+| `@takazudo/zfb`, `@takazudo/zfb-runtime`, `@takazudo/zfb-md-wasm` | 4.7.0 |
 | pnpm (`packageManager`, via corepack) | 11.5.2 |
 | Node | >=24 <25 (24 LTS) |
 | Python | >=3.10 (stdlib only) |
 
-**Integration gates:** upgrades must pass strict packed MDX registration, unchanged LED publication scans and browser verification. Issue #155 / PR #156 merged the earlier 6.2.0 / 4.5.0 migration; the current published family is 7.0.0 / 4.5.2 on Node 24 LTS. Publication remains separate. See ADR-021, ADR-022 and `ZUDO_DEPS_PINS.md`.
+**Integration gates:** upgrades must pass strict packed MDX registration, unchanged LED publication scans and browser verification. Issue #155 / PR #156 merged the earlier 6.2.0 / 4.5.0 migration and PR #157 moved to 7.0.0 / 4.5.2; the current published family is 7.1.0 / 4.7.0 on Node 24 LTS. ZFB 5 is held back until zudo-doc's ZFB peer accepts it. Publication remains separate. See ADR-021, ADR-022, ADR-023 and `ZUDO_DEPS_PINS.md`.
 
 ## Node type stripping
 
