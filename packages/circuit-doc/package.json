@@ -78,8 +78,8 @@
     "three": "0.185.1"
   },
   "peerDependencies": {
-    "@takazudo/zfb": "^4.7.0",
-    "@takazudo/zudo-doc": "^7.1.0"
+    "@takazudo/zfb": "^5.0.1",
+    "@takazudo/zudo-doc": "^8.0.0"
   },
   "devDependencies": {
     "typescript": "^5.9.0",
@@ -87,7 +87,7 @@
     "@types/mdast": "^4.0.0",
     "@types/three": "0.185.3",
     "esbuild": "^0.28.0",
-    "@takazudo/zfb": "4.7.0",
-    "@takazudo/zudo-doc": "7.1.0"
+    "@takazudo/zfb": "5.0.1",
+    "@takazudo/zudo-doc": "8.0.0"
   }
 }
