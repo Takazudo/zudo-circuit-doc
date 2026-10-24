@@ -41,7 +41,7 @@ iteration) and the literal source of the generated project template.
 
 **Decision:** zudo-doc composition uses a fixture-derived template: `examples/empty` is synced
 into `templates/default`. A dev-time upstream parity check diffs the upstream-owned host files
-against `createZudoDoc()` output from the pinned `create-zudo-doc@7.0.0`.
+against `createZudoDoc()` output from the pinned `create-zudo-doc@8.0.0`.
 
 **Rejected alternative:** Calling `create-zudo-doc` at user runtime. It needs `chdir`, has no
 staging, swallows install failures, and skips nested `pnpm-workspace.yaml`.
@@ -59,8 +59,8 @@ slightly different dependency families, and the validator's declared `>=3.12` Py
 only ever a CI-parity pin (the measured floor is 3.9, see the
 [extraction baseline](./extraction-baseline.md#toolchain)).
 
-**Decision:** The current family is zudo-doc/history-server/create-zudo-doc 7.0.0,
-with aligned zfb/runtime/md-wasm 4.5.2. ADR-021 records the earlier migration; ADR-022 records this update.
+**Decision:** The current family is zudo-doc/history-server/create-zudo-doc 8.0.0,
+with aligned zfb/runtime/md-wasm 5.0.1. ADR-021 and ADR-022 record the earlier migrations; ADR-023 records this update.
 The historical 2.20.3 fallback is retired. Retain pnpm 11.5.2 and Python >=3.10; Node follows the upstream 24 LTS contract (>=24 <25). Generated-project pnpm settings live only in the
 root `pnpm-workspace.yaml` — there are no `.npmrc` files, because `pnpm pack` drops them and
 pnpm only reads them at the workspace root. The file sets `minimumReleaseAge: 0` (a known
@@ -474,3 +474,30 @@ public assets, startup readiness and explicit/compact MDX tables.
 No test, scanner policy, canary, frozen corpus or generated evidence is weakened.
 Existing automatic main documentation deployment still follows a future eligible
 merge; approving that merge therefore also needs awareness of that deployment.
+
+## ADR-023 — published zudo-doc 8 / ZFB 5.0.1 family
+
+**Status:** Local build, typecheck, full test suites, template/scaffold parity, host builds and
+the minimal packed-consumer verifier (including model-viewer browser smoke) verified on
+2026-10-24; CI carries the LED scan/browser gates. Publication remains separate.
+
+Exact development/host pins become zudo-doc/history/create-zudo-doc 8.0.0 and
+ZFB/runtime/md-wasm 5.0.1; runtime peers move to ^8.0.0 / ^5.0.1 and the slugify release-age
+exception follows to 5.0.1. Prepared runtime 0.3.0, initializer 0.2.0 and template ^0.3.0 are
+unchanged. Node stays `>=24 <25` even though zudo-doc 8 drops its upper cap, because Node 24
+LTS is the only CI-verified line.
+
+An intermediate zudo-doc 7.1.0 / ZFB 4.7.0 attempt failed the model-viewer browser gate: under
+ZFB 4.7's Rolldown bundler, lazy island chunks imported an unpublished islands entry, so the
+viewer ended in its error state. ZFB 5.0.1 fixes that (zfb#4444/#4449), and zudo-doc 8.0.0
+requires it.
+
+Upstream impact: ZFB 5.0.0 raises the Node floor to 24 (already required here) and keeps
+Rolldown as the page/SSR/island bundler (island hashes change; `ZFB_BUNDLER=esbuild` reverts).
+zudo-doc 8.0.0 removes the short-lived `plugins/optional-peers` export (never registered by
+these hosts), requires ZFB ^5.0.1 and history-server 8.x, adds an opt-in
+`siteTreeNavInitiallyCollapsed` setting, and fixes tab-panel prose and heading spacing.
+create-zudo-doc 8.0.0 changes only its generated pins and Node range; the eleven-feature
+scaffold file output is unchanged, so host glue is unchanged.
+
+No test, scanner policy, canary, frozen corpus or generated evidence is weakened.

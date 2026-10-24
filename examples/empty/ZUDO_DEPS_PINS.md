@@ -14,11 +14,11 @@ Updated by `/dev-bump-zudo-deps` on every sync — keep `pinned:` accurate.
   `doc/src/styles/global.css` (the Wind CSS import chain; the `:root` override slot is empty
   by design), `doc/scripts/check-links.js`
 - source: `packages/create-zudo-doc/templates/base/{pages/docs/[[...slug]].tsx,pages/index.tsx,tsconfig.json,src/styles/global.css,scripts/check-links.js}`
-  (the pinned `create-zudo-doc@7.0.0` output, generated from published bytes and re-derived by the zudo-circuit-doc monorepo's upstream-scaffold parity check)
+  (the pinned `create-zudo-doc@8.0.0` output, generated from published bytes and re-derived by the zudo-circuit-doc monorepo's upstream-scaffold parity check)
 - track: releases
-- pinned: 82049856397927077c5288465db34e44d0939260 (v7.0.0)
-- updated: 2026-10-15
-- sync: run `create-zudo-doc@7.0.0` into a scratch dir and diff its project output against the
+- pinned: 1e6fb670d2eed2b7d84ea66e87bf947001142c0e (v8.0.0)
+- updated: 2026-10-24
+- sync: run `create-zudo-doc@8.0.0` into a scratch dir and diff its project output against the
   files listed above; `/dev-bump-zudo-deps` performs the upstream-scaffold parity check (#24) the
   same way
 - notes: `doc/scripts/check-links.js` is byte-identical to upstream — it resolves paths from
@@ -40,11 +40,11 @@ Updated by `/dev-bump-zudo-deps` on every sync — keep `pinned:` accurate.
 - files: `doc/package.json`
 - source: n/a (registry release, not a vendored file copy)
 - track: releases
-- pinned: 4.5.2
-- updated: 2026-10-15
+- pinned: 5.0.1
+- updated: 2026-10-24
 - sync: bump `doc/package.json` (registry dep edit), not a file sync
 - notes: keep the three engine packages aligned. zudo-doc/history-server/create-zudo-doc are
-  each published at 7.0.0. The prepared circuit runtime 0.3.0 / initializer 0.2.0 are not
-  published. Runtime peers are ^7.0.0 / ^4.5.2; integration requires strict packed-consumer
+  each published at 8.0.0. The prepared circuit runtime 0.3.0 / initializer 0.2.0 are not
+  published. Runtime peers are ^8.0.0 / ^5.0.1; integration requires strict packed-consumer
   registration, unchanged LED publication scans and browser checks. Node 24 LTS
   (>=24 <25) is required by zudo-doc 7; keep pnpm 11.5.2 and TypeScript 5.9.
