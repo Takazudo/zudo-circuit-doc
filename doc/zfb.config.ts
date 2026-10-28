@@ -6,6 +6,8 @@ export default defineConfig(
     siteName: "zudo-circuit-doc",
     siteUrl: "https://zudo-circuit-doc.zudolab.dev",
     sitemap: true,
+    // zudo-doc 9 resolves an omitted themePack to Graphite; keep the Classic look.
+    themePack: "default",
     themePacks: ["default"],
     llmsTxt: true,
     cjkFriendly: true,

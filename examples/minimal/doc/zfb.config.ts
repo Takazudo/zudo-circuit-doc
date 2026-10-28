@@ -13,6 +13,8 @@ const site = zudoDoc({
   base: "/",
   // ADR-020: templates set the locale explicitly.
   defaultLocale: "en",
+  // zudo-doc 9 resolves an omitted themePack to Graphite; keep the Classic look.
+  themePack: "default",
   themePacks: ["default"],
   llmsTxt: true,
   cjkFriendly: true,
