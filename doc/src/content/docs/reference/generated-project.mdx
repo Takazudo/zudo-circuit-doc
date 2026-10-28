@@ -50,7 +50,7 @@ This is the exhaustive version of [Getting Started → What you get](../getting-
 | `pages/lib/_circuit-doc-islands.ts` | Side-effect import of `@takazudo/zudo-circuit-doc/islands` |
 | `src/chrome-bindings.tsx` | Spreads `circuitDocMdxExtras` into the host's MDX component set |
 | `src/styles/global.css` | Imports the package's `styles.css` after zudo-doc's own CSS |
-| `zfb.config.ts` | `claudeResources { claudeDir: "../.claude", scanRoot: ".." }`, `docHistoryExclude ["components", "components/**"]`, `defaultLocaleOnlyPrefixes` for `/docs/components/` and `/docs/claude*/`, `themePacks: ["default"]`, `dynamicPageTransition`, `llmsTxt`, `strictContentBridge` |
+| `zfb.config.ts` | `claudeResources { claudeDir: "../.claude", scanRoot: ".." }`, `docHistoryExclude ["components", "components/**"]`, `defaultLocaleOnlyPrefixes` for `/docs/components/` and `/docs/claude*/`, `themePack: "default"` with `themePacks: ["default"]` (keeps the Classic look under zudo-doc 9), `dynamicPageTransition`, `llmsTxt`, `strictContentBridge` |
 | `src/content/docs/{project,architecture,research,decisions,verification}/` | Authored — yours to write |
 | `src/content/docs/components/**` | Generated — never hand-edited |
 | `public/assets/component-previews/**` | Generated footprint SVGs and published WRL models |

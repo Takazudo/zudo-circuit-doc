@@ -59,8 +59,8 @@ slightly different dependency families, and the validator's declared `>=3.12` Py
 only ever a CI-parity pin (the measured floor is 3.9, see the
 [extraction baseline](./extraction-baseline.md#toolchain)).
 
-**Decision:** The current family is zudo-doc/history-server/create-zudo-doc 8.0.0,
-with aligned zfb/runtime/md-wasm 5.0.1. ADR-021 and ADR-022 record the earlier migrations; ADR-023 records this update.
+**Decision:** The current family is zudo-doc/history-server/create-zudo-doc 9.1.0,
+with aligned zfb/runtime/md-wasm 5.1.5. ADR-021 through ADR-023 record the earlier migrations; ADR-024 records this update.
 The historical 2.20.3 fallback is retired. Retain pnpm 11.5.2 and Python >=3.10; Node follows the upstream 24 LTS contract (>=24 <25). Generated-project pnpm settings live only in the
 root `pnpm-workspace.yaml` — there are no `.npmrc` files, because `pnpm pack` drops them and
 pnpm only reads them at the workspace root. The file sets `minimumReleaseAge: 0` (a known
@@ -498,6 +498,34 @@ zudo-doc 8.0.0 removes the short-lived `plugins/optional-peers` export (never re
 these hosts), requires ZFB ^5.0.1 and history-server 8.x, adds an opt-in
 `siteTreeNavInitiallyCollapsed` setting, and fixes tab-panel prose and heading spacing.
 create-zudo-doc 8.0.0 changes only its generated pins and Node range; the eleven-feature
+scaffold file output is unchanged, so host glue is unchanged.
+
+No test, scanner policy, canary, frozen corpus or generated evidence is weakened.
+
+## ADR-024 — published zudo-doc 9.1 / ZFB 5.1.5 family
+
+**Status:** Local build, typecheck, full test suites, template/scaffold parity and host builds
+verified on 2026-10-28; CI carries the LED scan/browser gates. Publication remains separate.
+
+Exact development/host pins become zudo-doc/history/create-zudo-doc 9.1.0 and
+ZFB/runtime/md-wasm 5.1.5; runtime peers move to ^9.1.0 / ^5.1.5 and the slugify release-age
+exception follows to 5.1.5. Prepared runtime 0.3.0, initializer 0.2.0 and template ^0.3.0 are
+unchanged, and Node stays `>=24 <25`.
+
+zudo-doc 9.0.0 makes Graphite the default look: an omitted `themePack` resolves to Graphite,
+and an explicit `themePacks` list without `"graphite"` and no `themePack` fails the build.
+Every host here already restricts `themePacks` to `["default"]`, so each now also sets
+`themePack: "default"`. That keeps the Classic look the circuit stylesheet and LED
+publication scans are verified against; adopting Graphite would be a separate design change.
+
+Upstream impact otherwise: zudo-doc 8.1–9.1 add the opt-in `headerBrand`, match
+`categoryMatch` on the whole top-level segment (every match here already is one), load
+KaTeX/diff through package-owned loader subpaths, add an inline head script (relevant only to
+CSP hash pins, none here) and move the history-server peer to ^9.0.0. ZFB 5.1.0 fails the
+build when an islands chunk imports the islands entry (the 5.0.1 failure class); 5.1.1–5.1.4
+are Windows/symlink fixes and 5.1.5 rebuilds against tokio 1.54.1 (RUSTSEC-2026-0386). The
+`zfb`/`zfb-runtime` tarballs change only manifests and md-wasm ships rebuilt WASM.
+create-zudo-doc 9.1.0 changes generated pins and its theme-pack default; the eleven-feature
 scaffold file output is unchanged, so host glue is unchanged.
 
 No test, scanner policy, canary, frozen corpus or generated evidence is weakened.

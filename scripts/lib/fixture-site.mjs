@@ -266,6 +266,7 @@ const site = zudoDoc({
   siteName: ${JSON.stringify(siteName)},
   base: "/",
   defaultLocale: "en",
+  themePack: "default",
   themePacks: ["default"],
   llmsTxt: true,
   cjkFriendly: true,

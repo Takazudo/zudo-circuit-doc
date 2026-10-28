@@ -7,7 +7,7 @@ The format is based on Keep a Changelog, and release notes are generated from th
 ## [Unreleased]
 
 **Pending 0.2.0; not published.** The prepared upstream family is
-zudo-doc 8.0.0 / ZFB 5.0.1, following the merged [#156](https://github.com/Takazudo/zudo-circuit-doc/pull/156) migration.
+zudo-doc 9.1.0 / ZFB 5.1.5, following the merged [#156](https://github.com/Takazudo/zudo-circuit-doc/pull/156) migration.
 
 ## Breaking changes
 
@@ -15,8 +15,8 @@ zudo-doc 8.0.0 / ZFB 5.0.1, following the merged [#156](https://github.com/Takaz
 
 - Generate the zudo-doc 7 / ZFB 4 host and select runtime ^0.3.0.
 - Keep old generated projects on runtime ^0.2.0 with zudo-doc 5 / ZFB 2 until the complete host
-  migration is intentional. The prepared pins are zudo-doc/history/create-zudo-doc 8.0.0 and
-  the aligned ZFB 5.0.1 tuple, with tested runtime peer floors ^8.0.0 / ^5.0.1.
+  migration is intentional. The prepared pins are zudo-doc/history/create-zudo-doc 9.1.0 and
+  the aligned ZFB 5.1.5 tuple, with tested runtime peer floors ^9.1.0 / ^5.1.5.
 - Follow the existing-consumer migration recipe.
 
 ## Verification and publication
