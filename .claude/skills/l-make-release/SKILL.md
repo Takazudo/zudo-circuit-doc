@@ -233,16 +233,11 @@ workflow, push event, exact `BUMP_SHA`, and creation after this tag push;
 first, then follow [Failure recovery](#failure-recovery). Never infer absence
 from a red workflow.
 
-The workflow **stages** the version with a stage-only `NPM_TOKEN`; a green run
-does not mean it is live. Find the stage with `npx npm@11.20.0 stage list
-<pkg>` and ask the owner for a 2FA code, then run `npx npm@11.20.0 stage
-approve <stage-id> --otp=<code>` (the owner may approve it themselves). For a
-package's **first** version npm cannot stage a new name, so the stage step
-fails by design: once every earlier step passed, `pnpm pack` the tagged tree
-and have the owner run `npm publish <tarball> --access public --tag latest
---otp=<code>` after `npm login` (see the runbook's first-version section).
-Public registry reads can return a cached 404 for a few minutes after a first
-publish; poll before concluding it is absent.
+The workflow publishes directly to npm `latest` with `NPM_TOKEN` (a
+publish-capable, 2FA-bypassing granular token), so a green run means the
+version is live; no stage approval or OTP is needed. Public registry reads can
+return a cached 404 for a few minutes after a publish (especially a package's
+first version); poll before concluding it is absent.
 
 Once the exact version is confirmed live, verify the tag still points to the
 published commit. Reuse an existing `gh release view <tag>` if present.
@@ -296,7 +291,9 @@ npm view "<pkg>@<version>" version --registry=https://registry.npmjs.org/
 - If npm clearly confirms the version absent (`E404` or no matching version),
   inspect `gh run view <run-id> --log-failed`. Correct a transient or
   credential-only cause, recheck absence immediately before retry, then use
-  the guarded dispatch at the **unchanged tag**:
+  the guarded dispatch at the **unchanged tag** (when the workflow file changed
+  after the tag, dispatch from `main` with `-f tag=<tag>` instead so the
+  current workflow builds the tagged tree):
   `gh workflow run publish-zudo-circuit-doc.yml --ref v<version>` for runtime
   or `gh workflow run publish-create-zudo-circuit-doc.yml --ref
   create-zudo-circuit-doc-v<version>` for initializer. Watch the new run and

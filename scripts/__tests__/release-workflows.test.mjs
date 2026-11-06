@@ -43,8 +43,10 @@ describe("npm publish workflows", () => {
       assert.match(source, /--provenance/u);
       assert.match(source, /NODE_AUTH_TOKEN:\s*\$\{\{\s*secrets\.NPM_TOKEN\s*\}\}/u);
       assert.match(source, new RegExp(`working-directory: ${escapeRegExp(workflow.packageDir)}\\s*\\n`, "u"));
-      assert.match(source, /npm stage publish --tag latest --access public --provenance/u);
-      assert.doesNotMatch(source, /pnpm [^\n]*\bpublish\b/u);
+      assert.match(source, /pnpm publish --tag latest --access public --no-git-checks --provenance/u);
+      assert.doesNotMatch(source, /npm stage publish/u);
+      assert.match(source, /ref: \$\{\{ inputs\.tag \|\| github\.ref \}\}/u);
+      assert.match(source, /RELEASE_REF_NAME: \$\{\{ inputs\.tag \|\| github\.ref_name \}\}/u);
       assert.ok(source.includes(workflow.fixture), `missing verification command: ${workflow.fixture}`);
       assert.match(source, /git diff --exit-code -- packages\/circuit-doc\/CHANGELOG\.md packages\/create-zudo-circuit-doc\/CHANGELOG\.md/u);
       assert.match(source, /dev-docs\/publishing\.md/u);

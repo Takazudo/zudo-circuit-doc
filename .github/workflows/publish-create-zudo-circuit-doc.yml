@@ -8,6 +8,11 @@ on:
     tags:
       - "create-zudo-circuit-doc-v*.*.*"
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to publish (leave empty to use the dispatch ref)"
+        type: string
+        required: false
 
 concurrency:
   group: publish-create-zudo-circuit-doc
@@ -25,6 +30,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Setup
         uses: ./.github/actions/setup
@@ -37,6 +44,9 @@ jobs:
           cache: pnpm
 
       - name: Guard stable initializer release tag
+        env:
+          RELEASE_REF_TYPE: ${{ inputs.tag && 'tag' || github.ref_type }}
+          RELEASE_REF_NAME: ${{ inputs.tag || github.ref_name }}
         run: node scripts/lib/release-guard.mjs initializer
 
       - name: Build
@@ -64,16 +74,11 @@ jobs:
       - name: Verify with published runtime
         run: pnpm verify:pack --fixture empty --published-runtime
 
-      # npm staged publishing: NPM_TOKEN is a stage-only token, so this job
-      # uploads a pending stage and a maintainer promotes it to `latest` with
-      # `npm stage approve <stage-id> --otp <code>`. Staging needs npm >= 11.15.0
-      # and only works for a package that already exists on npm (the first
-      # version is published directly by a maintainer). See dev-docs/publishing.md.
-      - name: Install npm with staged publishing
-        run: npm install -g npm@11.20.0
-
-      - name: Stage package for approval
+      # Direct CI publishing: NPM_TOKEN is a granular token with publish
+      # permission that bypasses 2FA, so pushing the release tag is the
+      # human gate. See dev-docs/publishing.md.
+      - name: Publish package
         working-directory: packages/create-zudo-circuit-doc
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm stage publish --tag latest --access public --provenance
+        run: pnpm publish --tag latest --access public --no-git-checks --provenance

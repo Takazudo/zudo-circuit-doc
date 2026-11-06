@@ -28,48 +28,20 @@ the template's `^X.Y.Z` range from npm. That version must already be live. A run
 does not require an initializer release; a runtime minor or major release does, because the
 initializer's runtime range must be updated and verified.
 
-The workflows build and check their package, verify a consumer install, and **stage** the version
-with `npm stage publish --tag latest --provenance`. A staged version is not live: a maintainer
-approves it with 2FA, which puts it on the npm `latest` tag. A pushed matching release tag starts
-its workflow. A manual retry must also name the exact release tag because the workflow guard
-rejects branch refs.
-
-## First version of a package
-
-npm cannot stage a package name that does not exist yet, and the stage-only token cannot publish
-directly. A package's first version is therefore published once by a maintainer from the exact
-release tag tree:
-
-```sh
-pnpm --filter <package> build
-cd packages/<dir> && pnpm pack --pack-destination <dir>
-npm login --registry=https://registry.npmjs.org/
-npm publish <tarball> --access public --tag latest --otp=<code>
-```
-
-Push the release tag and let its workflow pass every check first; its stage step fails for a new
-package, which is expected. A local publish has no provenance statement.
-
-## Approving a staged release
-
-After the publish workflow succeeds, approve the pending stage with npm 11.15.0 or newer (use
-`npx npm@11.20.0` when the installed npm is older):
-
-```sh
-npx npm@11.20.0 stage list <package>
-npx npm@11.20.0 stage view <stage-id>
-npx npm@11.20.0 stage approve <stage-id> --otp=<code>
-```
-
-`npm stage reject <stage-id>` discards a bad stage. See
-[staged publishing](https://docs.npmjs.com/staged-publishing/).
+The workflows build and check their package, verify a consumer install, and **publish** the
+version directly with `pnpm publish --tag latest --access public --provenance`, the same model as
+[zudo-doc](https://github.com/zudolab/zudo-doc). Pushing a matching release tag is the human gate:
+the version is live on npm `latest` as soon as its workflow turns green, with no approval step.
+A manual retry must also name the exact release tag because the workflow guard rejects branch refs.
 
 ## Publish credentials
 
-The repository `NPM_TOKEN` secret is a **stage-only** npm granular access token (replaced
-2026-09-27). Before a release, confirm that it is unexpired and has these settings:
+The repository `NPM_TOKEN` secret is an npm granular access token with direct publish permission
+that bypasses 2FA (replaced 2026-11-07; it previously was a stage-only token). Before a release,
+confirm that it is unexpired and has these settings:
 
-- **Read and write (stage only)** permissions. npm rejects a direct `npm publish` with this token.
+- **Read and write** permissions with **bypass 2FA** enabled, so CI can run `pnpm publish`
+  without an OTP.
 - Coverage for the `@takazudo` scope and the unscoped `create-zudo-circuit-doc` package. Choose
   **All packages** or an equivalent selection; selecting only the scope does not cover the unscoped
   initializer.
@@ -88,14 +60,13 @@ See [npm access tokens](https://docs.npmjs.com/about-access-tokens/) and
 
 After each package exists on npm, configure a GitHub Actions trusted publisher in that package's npm
 settings. Use owner `Takazudo`, repository `zudo-circuit-doc`, and the matching workflow filename.
-Keep it stage-only so a maintainer still approves each version.
 
 | Package | Workflow filename |
 | --- | --- |
 | `@takazudo/zudo-circuit-doc` | `publish-zudo-circuit-doc.yml` |
 | `create-zudo-circuit-doc` | `publish-create-zudo-circuit-doc.yml` |
 
-Verify that an OIDC-authenticated `npm stage publish` succeeds before removing the
+Verify that an OIDC-authenticated publish succeeds before removing the
 `NPM_TOKEN` secret and revoking the token. Dry runs cannot verify npm authentication or prove that
 provenance will be issued. npm has scheduled the end of token-based direct publishing for January
 2027, so complete this migration before then. See
@@ -103,8 +74,7 @@ provenance will be issued. npm has scheduled the end of token-based direct publi
 
 ## If a publish workflow fails
 
-A green workflow means the version is staged, not live; approve it as described above. For a failed
-run, check the exact package version on the public npm registry before retrying or changing a tag:
+A green workflow means the version is live. For a failed run, check the exact package version on the public npm registry before retrying or changing a tag:
 
 ```sh
 npm view "@takazudo/zudo-circuit-doc@<version>" version --registry=https://registry.npmjs.org/
@@ -118,15 +88,18 @@ through `/l-make-release`.
 Retry only when the registry clearly confirms the exact version is absent. A timeout, authentication
 error, or other inconclusive registry response means stop and check again later.
 
-- For a transient or credential-only failure, fix the cause, then dispatch the existing workflow at
-  the exact release tag:
+- For a transient or credential-only failure, fix the cause, then dispatch the workflow for the
+  exact release tag:
 
   ```sh
   gh workflow run publish-zudo-circuit-doc.yml --ref vX.Y.Z
   gh workflow run publish-create-zudo-circuit-doc.yml --ref create-zudo-circuit-doc-vX.Y.Z
   ```
 
-  A branch ref is rejected by the workflow's tag guard. If rotating the token, update
+  If the workflow itself changed after the tag was cut, dispatch from `main` with the tag as
+  input instead, so the current workflow builds the tagged tree:
+  `gh workflow run <workflow-file> --ref main -f tag=<release-tag>`. A branch ref without a
+  `tag` input is rejected by the workflow's tag guard. If rotating the token, update
   `NPM_TOKEN` as described above before dispatching.
 - If the package needs a code fix, release a new version through `/l-make-release`. Do not move or
   recreate the existing tag at different content.
@@ -139,7 +112,7 @@ Run the non-publishing release check before preparing a release:
 pnpm release:dry-run
 ```
 
-This checks release preparation locally. It does not test GitHub's secret, npm permissions, staging,
+This checks release preparation locally. It does not test GitHub's secret, npm permissions,
 Trusted Publishing, or provenance issuance.
 
 ## Generated template install age

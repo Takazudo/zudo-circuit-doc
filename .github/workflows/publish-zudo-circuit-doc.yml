@@ -10,6 +10,11 @@ on:
     tags:
       - "v*.*.*"
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to publish (leave empty to use the dispatch ref)"
+        type: string
+        required: false
 
 concurrency:
   group: publish-zudo-circuit-doc
@@ -27,13 +32,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Setup
         uses: ./.github/actions/setup
 
       # The shared setup action installs Node for builds. Setup Node again
       # with npm registry configuration so NODE_AUTH_TOKEN is available to
-      # npm stage publish.
+      # pnpm publish.
       - name: Setup Node.js for npm publish
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -42,6 +49,9 @@ jobs:
           cache: pnpm
 
       - name: Guard stable runtime release tag
+        env:
+          RELEASE_REF_TYPE: ${{ inputs.tag && 'tag' || github.ref_type }}
+          RELEASE_REF_NAME: ${{ inputs.tag || github.ref_name }}
         run: node scripts/lib/release-guard.mjs runtime
 
       - name: Build
@@ -75,16 +85,11 @@ jobs:
       - name: Verify minimal consumer
         run: pnpm verify:pack --fixture minimal
 
-      # npm staged publishing: NPM_TOKEN is a stage-only token, so this job
-      # uploads a pending stage and a maintainer promotes it to `latest` with
-      # `npm stage approve <stage-id> --otp <code>`. Staging needs npm >= 11.15.0
-      # and only works for a package that already exists on npm (the first
-      # version is published directly by a maintainer). See dev-docs/publishing.md.
-      - name: Install npm with staged publishing
-        run: npm install -g npm@11.20.0
-
-      - name: Stage package for approval
+      # Direct CI publishing: NPM_TOKEN is a granular token with publish
+      # permission that bypasses 2FA, so pushing the release tag is the
+      # human gate. See dev-docs/publishing.md.
+      - name: Publish package
         working-directory: packages/circuit-doc
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm stage publish --tag latest --access public --provenance
+        run: pnpm publish --tag latest --access public --no-git-checks --provenance

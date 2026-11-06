@@ -64,8 +64,8 @@ async function main() {
   const manifest = JSON.parse(await readFile(path.join(ROOT, config.manifest), "utf8"));
   const release = assertReleaseTag({
     packageName,
-    refType: process.env.GITHUB_REF_TYPE,
-    refName: process.env.GITHUB_REF_NAME,
+    refType: process.env.RELEASE_REF_TYPE || process.env.GITHUB_REF_TYPE,
+    refName: process.env.RELEASE_REF_NAME || process.env.GITHUB_REF_NAME,
     version: manifest.version,
   });
 
