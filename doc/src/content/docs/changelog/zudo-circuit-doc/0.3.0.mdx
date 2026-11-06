@@ -1,0 +1,26 @@
+---
+title: 0.3.0
+description: zudo-doc 9.1.3 / ZFB 5.2.2 renderer migration and Node 24 LTS requirement.
+sidebar_position: 3
+pagination_next: null
+---
+
+Released: 2026-11-06
+
+Version 0.3.0 moves the runtime onto the published zudo-doc 9.1.3 / ZFB 5.2.2 family, following
+the [#156](https://github.com/Takazudo/zudo-circuit-doc/pull/156) migration. Hosts must upgrade
+together with the runtime; see the
+[existing-consumer migration recipe](../../concepts/ownership-and-upgrades.mdx).
+
+## Breaking changes
+
+- Require Node 24 LTS (`>=24 <25`), matching zudo-doc 7 and later. Node 22 and 25 are unsupported.
+- Require the zudo-doc 9.1.3 / ZFB 5.2.2 host family through runtime peer floors `^9.1.3` /
+  `^5.2.2`. Projects that are not ready to migrate their host should stay on runtime `^0.2.0` with
+  zudo-doc 5 / ZFB 2.
+
+## Other changes
+
+- Port the public UI and islands to zudo-react with activation-owned viewer disposal.
+- Validate migrated islands and packed-host behavior under strict packed-consumer types, build,
+  browser, and fixture verification.

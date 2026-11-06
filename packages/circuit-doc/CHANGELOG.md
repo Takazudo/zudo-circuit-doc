@@ -4,26 +4,25 @@ All notable changes to `@takazudo/zudo-circuit-doc` are documented in this file.
 
 The format is based on Keep a Changelog, and release notes are generated from the changelog MDX pages.
 
-## [Unreleased]
+## [0.3.0] - 2026-11-06
 
-**Pending 0.3.0; not published.** The prepared upstream family is
-zudo-doc 9.1.3 / ZFB 5.2.2, following the merged [#156](https://github.com/Takazudo/zudo-circuit-doc/pull/156) migration.
+Version 0.3.0 moves the runtime onto the published zudo-doc 9.1.3 / ZFB 5.2.2 family, following
+the [#156](https://github.com/Takazudo/zudo-circuit-doc/pull/156) migration. Hosts must upgrade
+together with the runtime; see the
+existing-consumer migration recipe.
 
 ## Breaking changes
 
-- Require Node 24 LTS (`>=24 <25`), matching zudo-doc 7. Node 22 and 25 are unsupported.
+- Require Node 24 LTS (`>=24 <25`), matching zudo-doc 7 and later. Node 22 and 25 are unsupported.
+- Require the zudo-doc 9.1.3 / ZFB 5.2.2 host family through runtime peer floors `^9.1.3` /
+  `^5.2.2`. Projects that are not ready to migrate their host should stay on runtime `^0.2.0` with
+  zudo-doc 5 / ZFB 2.
+
+## Other changes
 
 - Port the public UI and islands to zudo-react with activation-owned viewer disposal.
-- Keep old generated projects on runtime ^0.2.0 with zudo-doc 5 / ZFB 2 until the complete host
-  migration is intentional. The prepared pins are zudo-doc/history/create-zudo-doc 9.1.3 and
-  the aligned ZFB 5.2.2 tuple, with tested runtime peer floors ^9.1.3 / ^5.2.2.
-- Follow the existing-consumer migration recipe.
-
-## Verification and publication
-
-Strict packed-consumer types, build, browser and fixture verification gate integration.
-Publish/approve runtime first, run the empty consumer's published-runtime gate, then
-publish/approve initializer. These publication steps remain separately pending.
+- Validate migrated islands and packed-host behavior under strict packed-consumer types, build,
+  browser, and fixture verification.
 
 ## [0.2.0] - 2026-10-02
 
