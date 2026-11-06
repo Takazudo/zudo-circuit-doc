@@ -59,8 +59,8 @@ slightly different dependency families, and the validator's declared `>=3.12` Py
 only ever a CI-parity pin (the measured floor is 3.9, see the
 [extraction baseline](./extraction-baseline.md#toolchain)).
 
-**Decision:** The current family is zudo-doc/history-server/create-zudo-doc 9.1.0,
-with aligned zfb/runtime/md-wasm 5.1.5. ADR-021 through ADR-023 record the earlier migrations; ADR-024 records this update.
+**Decision:** The current family is zudo-doc/history-server/create-zudo-doc 9.1.3,
+with aligned zfb/runtime/md-wasm 5.2.2. ADR-021 through ADR-024 record the earlier migrations; ADR-025 records this update.
 The historical 2.20.3 fallback is retired. Retain pnpm 11.5.2 and Python >=3.10; Node follows the upstream 24 LTS contract (>=24 <25). Generated-project pnpm settings live only in the
 root `pnpm-workspace.yaml` — there are no `.npmrc` files, because `pnpm pack` drops them and
 pnpm only reads them at the workspace root. The file sets `minimumReleaseAge: 0` (a known
@@ -527,5 +527,27 @@ are Windows/symlink fixes and 5.1.5 rebuilds against tokio 1.54.1 (RUSTSEC-2026-
 `zfb`/`zfb-runtime` tarballs change only manifests and md-wasm ships rebuilt WASM.
 create-zudo-doc 9.1.0 changes generated pins and its theme-pack default; the eleven-feature
 scaffold file output is unchanged, so host glue is unchanged.
+
+No test, scanner policy, canary, frozen corpus or generated evidence is weakened.
+
+## ADR-025 — published zudo-doc 9.1.3 / ZFB 5.2.2 family
+
+**Status:** Local build, typecheck, full test suites, template/scaffold parity and host builds
+verified on 2026-11-06; CI carries the LED scan/browser gates. Publication remains separate.
+
+Exact development/host pins become zudo-doc/history/create-zudo-doc 9.1.3 and
+ZFB/runtime/md-wasm 5.2.2; runtime peers move to ^9.1.3 / ^5.2.2 (zudo-doc 9.1.3 itself
+requires the ZFB family at ^5.2.2) and the slugify release-age exception follows to 5.2.2.
+Prepared runtime 0.3.0, initializer 0.2.0 and template ^0.3.0 are unchanged, and Node stays
+`>=24 <25`.
+
+Upstream impact: zudo-doc 9.1.1 lets a `categoryMatch` value own its `foo-*` sibling
+directories again (a 9.1.0 regression fix); 9.1.2 and 9.1.3 only raise the ZFB peer floor.
+ZFB 5.2.0–5.2.2 change only the client router (native link targets, document-base form
+actions and SVG/xlink URLs, browser-equivalent form submission, cancelling stale navigation
+on Back); the `zfb` tarball changes only manifests and md-wasm ships rebuilt WASM.
+create-zudo-doc 9.1.3 adds generated `AUTHORING.md`/`AGENTS.md` pointers and raises its
+generated zudo-doc pin; the eleven default features and the vendored scaffold files are
+unchanged, so host glue is unchanged and the upstream parity check passes.
 
 No test, scanner policy, canary, frozen corpus or generated evidence is weakened.
