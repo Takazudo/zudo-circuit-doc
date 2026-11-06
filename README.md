@@ -1,36 +1,68 @@
 # zudo-circuit-doc
 
-A circuit-development project initializer powered by [zudo-doc](https://github.com/zudolab/zudo-doc).
+Build a circuit project whose decisions, component evidence and open questions stay visible in
+its documentation.
 
-It follows the same initializer/runtime split as [zudo-sg](https://github.com/Takazudo/zudo-sg):
+**Documentation: <https://zudo-circuit-doc.zudolab.dev/>**
 
-- **`create-zudo-circuit-doc`** creates a new circuit project.
-- **`@takazudo/zudo-circuit-doc`** is the runtime package the project depends on.
+[![npm: @takazudo/zudo-circuit-doc](https://img.shields.io/npm/v/@takazudo/zudo-circuit-doc?label=%40takazudo%2Fzudo-circuit-doc)](https://www.npmjs.com/package/@takazudo/zudo-circuit-doc)
+[![npm: create-zudo-circuit-doc](https://img.shields.io/npm/v/create-zudo-circuit-doc?label=create-zudo-circuit-doc)](https://www.npmjs.com/package/create-zudo-circuit-doc)
 
-A new project opens as useful documentation before it contains any component, board, KiCad file or firmware. It carries one canonical agent workflow for exact-component evidence: datasheets, facts, CAD assets, and design decisions.
+zudo-circuit-doc has two parts, following the same initializer/runtime split as
+[zudo-sg](https://github.com/Takazudo/zudo-sg):
 
-**Status:** under construction. See the implementation epic: https://github.com/Takazudo/zudo-circuit-doc/issues/1
+- **[`create-zudo-circuit-doc`](https://www.npmjs.com/package/create-zudo-circuit-doc)** creates a new circuit project.
+- **[`@takazudo/zudo-circuit-doc`](https://www.npmjs.com/package/@takazudo/zudo-circuit-doc)** is the runtime the project depends on: its commands, evidence checks and component pages.
 
-## Monorepo layout
+A new project opens as useful documentation before it contains any component, board, KiCad file
+or firmware. It gives you a project brief, an agent workflow, an initially empty component
+catalog, and commands to validate evidence (datasheets, facts, CAD assets, design decisions) and
+regenerate the site. The generated site runs on [zudo-doc](https://github.com/zudolab/zudo-doc).
+
+## Quick start
+
+You need Node.js 24 LTS, pnpm through Corepack, and Python 3.10 or newer
+([requirements](https://zudo-circuit-doc.zudolab.dev/docs/getting-started/requirements/)).
+
+```sh
+pnpm create zudo-circuit-doc my-circuit
+cd my-circuit
+pnpm circuit:doctor   # check the toolchain
+pnpm dev              # open the project's documentation site
+```
+
+Then [begin your first task](https://zudo-circuit-doc.zudolab.dev/docs/getting-started/first-task/):
+write the project brief, and add a component once you know its exact part number.
+
+## Documentation
+
+- [Getting Started](https://zudo-circuit-doc.zudolab.dev/docs/getting-started/): create a project and run it for the first time
+- [Concepts](https://zudo-circuit-doc.zudolab.dev/docs/concepts/): the evidence, publication, CAD and file-ownership rules
+- [Workflows](https://zudo-circuit-doc.zudolab.dev/docs/workflows/): the tasks an agent carries out in a generated project
+- [Reference](https://zudo-circuit-doc.zudolab.dev/docs/reference/): commands, configuration, schemas and generated files
+- [Changelog](https://zudo-circuit-doc.zudolab.dev/docs/changelog/)
+
+## Developing this repository
+
+This is the monorepo that builds both packages.
 
 ```
 packages/
   circuit-doc/               @takazudo/zudo-circuit-doc — the runtime package
   create-zudo-circuit-doc/   the initializer CLI
-examples/                    fixture hosts consumed by CI (added by later sub-issues)
+examples/                    fixture hosts consumed by CI
 fixtures/                    pinned regression corpora, not workspace members
-doc/                         this project's own zudo-doc documentation site
+doc/                         the documentation site above (zudo-doc)
 ```
 
-See [CLAUDE.md](./CLAUDE.md) for the full development guide.
-
-## Commands
-
 - `corepack pnpm install` — install dependencies
-- `pnpm build` — build every runtime package
-- `pnpm typecheck` — typecheck every runtime package
+- `pnpm build` — build every package
+- `pnpm typecheck` — typecheck every package
 - `pnpm test` — run the TypeScript and Python test suites
-- `pnpm doc:build` — build this repo's own documentation site
+- `pnpm doc:build` — build the documentation site
+
+See [CLAUDE.md](./CLAUDE.md) for the full development guide, and [dev-docs/](./dev-docs) for
+publishing, site deployment and design decisions.
 
 ## License
 

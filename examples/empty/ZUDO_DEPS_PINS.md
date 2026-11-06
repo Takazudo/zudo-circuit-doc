@@ -14,11 +14,11 @@ Updated by `/dev-bump-zudo-deps` on every sync — keep `pinned:` accurate.
   `doc/src/styles/global.css` (the Wind CSS import chain; the `:root` override slot is empty
   by design), `doc/scripts/check-links.js`
 - source: `packages/create-zudo-doc/templates/base/{pages/docs/[[...slug]].tsx,pages/index.tsx,tsconfig.json,src/styles/global.css,scripts/check-links.js}`
-  (the pinned `create-zudo-doc@9.1.3` output, generated from published bytes and re-derived by the zudo-circuit-doc monorepo's upstream-scaffold parity check)
+  (the pinned `create-zudo-doc@9.1.4` output, generated from published bytes and re-derived by the zudo-circuit-doc monorepo's upstream-scaffold parity check)
 - track: releases
-- pinned: dee47852d9c12500b2dacf7a4d2a1d6bb0a8ecf5 (create-zudo-doc@9.1.3 npm gitHead)
+- pinned: 054c1dabb5810afa24485a5431bce094b14fae21 (create-zudo-doc@9.1.4 npm gitHead)
 - updated: 2026-11-06
-- sync: run `create-zudo-doc@9.1.3` into a scratch dir and diff its project output against the
+- sync: run `create-zudo-doc@9.1.4` into a scratch dir and diff its project output against the
   files listed above; `/dev-bump-zudo-deps` performs the upstream-scaffold parity check (#24) the
   same way
 - notes: `doc/scripts/check-links.js` is byte-identical to upstream — it resolves paths from
@@ -44,7 +44,6 @@ Updated by `/dev-bump-zudo-deps` on every sync — keep `pinned:` accurate.
 - updated: 2026-11-06
 - sync: bump `doc/package.json` (registry dep edit), not a file sync
 - notes: keep the three engine packages aligned. zudo-doc/history-server/create-zudo-doc are
-  each published at 9.1.3. The prepared circuit runtime 0.3.0 / initializer 0.2.0 are not
-  published. Runtime peers are ^9.1.3 / ^5.2.2; integration requires strict packed-consumer
+  each published at 9.1.4. Runtime peers are ^9.1.3 / ^5.2.2; integration requires strict packed-consumer
   registration, unchanged LED publication scans and browser checks. Node 24 LTS
   (>=24 <25) is required by zudo-doc 7; keep pnpm 11.5.2 and TypeScript 5.9.
