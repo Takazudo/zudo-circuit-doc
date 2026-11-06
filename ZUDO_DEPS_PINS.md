@@ -2,7 +2,7 @@
 
 Recorded 2026-11-06 for the zudo-doc 9.1.4 update and Graphite adoption (ADR-026), on top of
 the 9.1.3 / 5.2.2 update from #161. Historical release notes and the frozen LED corpus retain
-their original pins. Runtime 0.3.0 and initializer 0.2.0 are published.
+their original pins. Runtime 0.3.0 and initializer 0.2.1 are published.
 
 ## Published family
 
