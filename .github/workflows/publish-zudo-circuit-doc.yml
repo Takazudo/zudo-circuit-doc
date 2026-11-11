@@ -54,6 +54,7 @@ jobs:
       tag: ${{ steps.admit.outputs.tag }}
       version: ${{ steps.admit.outputs.version }}
       source_sha: ${{ steps.admit.outputs.source_sha }}
+      control_sha: ${{ steps.admit.outputs.control_sha }}
       mode: ${{ steps.admit.outputs.mode }}
     steps:
       - name: Checkout control commit
@@ -86,6 +87,7 @@ jobs:
       integrity: ${{ steps.pack.outputs.integrity }}
     env:
       SOURCE_SHA: ${{ needs.admit.outputs.source_sha }}
+      CONTROL_SHA: ${{ needs.admit.outputs.control_sha }}
       VERSION: ${{ needs.admit.outputs.version }}
     steps:
       - name: Checkout tag commit
@@ -96,6 +98,15 @@ jobs:
 
       - name: Confirm checkout is the admitted source
         run: test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+
+      # Release helpers come from the control commit (outside the workspace),
+      # so gates run on the source tree while checks use current rules, even
+      # for tags cut before the helpers existed.
+      - name: Extract control release helpers
+        run: |
+          git fetch --no-tags --depth=1 origin "$CONTROL_SHA"
+          mkdir -p "$RUNNER_TEMP/control"
+          git archive "$CONTROL_SHA" scripts/release.mjs scripts/lib/release-core.mjs | tar -x -C "$RUNNER_TEMP/control"
 
       - name: Setup
         uses: ./.github/actions/setup
@@ -137,7 +148,7 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/release"
           pnpm --filter @takazudo/zudo-circuit-doc pack --pack-destination "$RUNNER_TEMP/release"
-          node scripts/release.mjs tarball-info --package runtime --version "$VERSION" --tarball "$(ls "$RUNNER_TEMP"/release/*.tgz)"
+          node "$RUNNER_TEMP/control/scripts/release.mjs" tarball-info --package runtime --version "$VERSION" --tarball "$(ls "$RUNNER_TEMP"/release/*.tgz)"
 
       # No id-token in this job, so this cannot authenticate or write.
       - name: Publish dry-run

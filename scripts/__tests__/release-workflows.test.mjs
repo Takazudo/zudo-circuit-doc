@@ -125,7 +125,8 @@ describe("npm publish workflows", () => {
         jobs.verify,
         /git diff --exit-code -- packages\/circuit-doc\/CHANGELOG\.md packages\/create-zudo-circuit-doc\/CHANGELOG\.md/u,
       );
-      assert.match(jobs.verify, new RegExp(`tarball-info --package ${workflow.packageName}`, "u"));
+      assert.match(jobs.verify, new RegExp(`"\\$RUNNER_TEMP/control/scripts/release\\.mjs" tarball-info --package ${workflow.packageName}`, "u"));
+      assert.match(jobs.verify, /git archive "\$CONTROL_SHA" scripts\/release\.mjs scripts\/lib\/release-core\.mjs/u);
     });
 
     test(`${workflow.file} dry-run cannot authenticate or write`, () => {
