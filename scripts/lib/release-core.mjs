@@ -164,11 +164,14 @@ export function classifyRegistryResponse({ status, body, error }, { selector, ve
     return { state: "uncertain", reason: "registry returned 200 with a document for a different package or version" };
   }
   if (status === 404) {
+    // npm answers an unknown version with the JSON string
+    // `"version not found: X"` and an unknown package with
+    // `{"error":"Not found"}`. Only those exact shapes are definite; a proxy
+    // or CDN "404 Not Found" page is not.
+    if (body === `version not found: ${version}`) return { state: "absent" };
+    if (body && typeof body === "object" && body.error === "Not found") return { state: "absent" };
     const text = typeof body === "string" ? body : JSON.stringify(body ?? "");
-    // npm answers an unknown version with `"version not found: X"` and an
-    // unknown package with `{"error":"Not found"}`. Both are definite.
-    if (/version not found|not found/iu.test(text)) return { state: "absent" };
-    return { state: "uncertain", reason: `registry returned 404 without a not-found body: ${text.slice(0, 200)}` };
+    return { state: "uncertain", reason: `registry returned 404 without npm's not-found body: ${text.slice(0, 200)}` };
   }
   return { state: "uncertain", reason: `registry returned HTTP ${status}` };
 }
@@ -373,7 +376,10 @@ export function planGithubRelease({ existing, tag }) {
  * which is a different tree from the commit that would be tagged.
  */
 export function evaluateCiRuns({ runs, sha }) {
-  const forSha = runs.filter((run) => run.headSha === sha);
+  // The publish workflows also run on push (of a tag at this commit); they
+  // are release attempts, not CI for the candidate.
+  const publishPaths = new Set(Object.values(PACKAGES).map((config) => `.github/workflows/${config.workflow}`));
+  const forSha = runs.filter((run) => run.headSha === sha && !publishPaths.has(run.path));
   const counted = forSha.filter((run) => run.event === "push");
   const ignored = forSha.filter((run) => run.event !== "push");
   const pending = counted.filter((run) => run.status !== "completed");

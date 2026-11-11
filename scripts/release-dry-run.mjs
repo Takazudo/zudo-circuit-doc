@@ -7,22 +7,11 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
+import { PACKAGES as RELEASE_PACKAGES } from "./lib/release-core.mjs";
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const GUARD = path.join(ROOT, "scripts/lib/release-guard.mjs");
-const PACKAGES = [
-  {
-    name: "runtime",
-    selector: "@takazudo/zudo-circuit-doc",
-    manifest: "packages/circuit-doc/package.json",
-    tag: (version) => `v${version}`,
-  },
-  {
-    name: "initializer",
-    selector: "create-zudo-circuit-doc",
-    manifest: "packages/create-zudo-circuit-doc/package.json",
-    tag: (version) => `create-zudo-circuit-doc-v${version}`,
-  },
-];
+const PACKAGES = Object.values(RELEASE_PACKAGES).map((config) => ({ ...config, name: config.packageName }));
 
 const REQUIRED_FILES = ["CHANGELOG.md", "README.md", "LICENSE"];
 

@@ -11,7 +11,7 @@
 #            id-token:write         dependency install runs in this job
 #   confirm  contents:read          prove an OIDC upload with provenance for the
 #                                   tag commit (not just "the version exists")
-#   finalize contents:write         create the GitHub Release if missing; never
+#   finalize contents:write         after confirm, create the GitHub Release if missing; never
 #                                   publishes, never rewrites an existing one
 #
 # Provenance attests the run's own commit, so a publish is admitted only when
@@ -35,8 +35,10 @@ on:
         type: boolean
         default: false
 
+# One queue per tag, and dry-runs apart from real runs, so a dispatch can never
+# replace (cancel) a pending publish run for the same package.
 concurrency:
-  group: publish-zudo-circuit-doc
+  group: publish-zudo-circuit-doc-${{ inputs.dry_run && 'dry-run' || 'release' }}-${{ inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
 permissions: {}
@@ -161,8 +163,6 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    env:
-      TARBALL: ${{ runner.temp }}/release/${{ needs.verify.outputs.tarball }}
     steps:
       - name: Checkout tag commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
@@ -190,12 +190,15 @@ jobs:
 
       - name: Publish preflight
         env:
+          TARBALL: ${{ runner.temp }}/release/${{ needs.verify.outputs.tarball }}
           INTEGRITY: ${{ needs.verify.outputs.integrity }}
         run: |
           echo "Publishing executable: $(command -v pnpm) $(pnpm --version)"
           node scripts/release.mjs publish-preflight --tarball "$TARBALL" --integrity "$INTEGRITY"
 
       - name: Publish package
+        env:
+          TARBALL: ${{ runner.temp }}/release/${{ needs.verify.outputs.tarball }}
         run: pnpm publish "$TARBALL" --tag latest --access public --no-git-checks --provenance
 
   confirm:
@@ -229,10 +232,10 @@ jobs:
 
   finalize:
     name: Finalize GitHub Release
-    needs: [admit, publish]
+    needs: [admit, publish, confirm]
     if: >-
       always() && (needs.admit.outputs.mode == 'finalize' ||
-      (needs.admit.outputs.mode == 'publish' && needs.publish.result == 'success'))
+      (needs.admit.outputs.mode == 'publish' && needs.confirm.result == 'success'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

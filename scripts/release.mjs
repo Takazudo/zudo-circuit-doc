@@ -73,6 +73,12 @@ function writeSummary(markdown) {
   if (file) appendFileSync(file, `${markdown}\n`);
 }
 
+function waitSeconds(values, fallback) {
+  const raw = values.wait ?? String(fallback);
+  if (!/^\d+$/u.test(raw)) throw new ReleaseError(`--wait must be a whole number of seconds; received ${JSON.stringify(raw)}.`);
+  return Number(raw);
+}
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -254,7 +260,7 @@ async function cmdRegistryState(values) {
 async function cmdVerifyPublication(values) {
   const config = packageConfig(values.package);
   const version = values.version;
-  const state = await waitForPresence(config, version, Number(values.wait ?? 600));
+  const state = await waitForPresence(config, version, waitSeconds(values, 600));
   if (state.state !== "present") {
     throw new UncertainStateError(
       `${config.selector}@${version} is not visible on npm yet (${state.state}${state.reason ? `: ${state.reason}` : ""}). ` +
@@ -304,7 +310,7 @@ async function cmdFinalize(values) {
   const tag = config.tag(version);
 
   // Finalization never publishes. It requires the exact version to be on npm.
-  const state = await waitForPresence(config, version, Number(values.wait ?? 600));
+  const state = await waitForPresence(config, version, waitSeconds(values, 600));
   if (state.state !== "present") {
     throw new UncertainStateError(`${config.selector}@${version} is not confirmed on npm (${state.state}); GitHub Release not created.`);
   }
@@ -360,9 +366,9 @@ async function listRunsForSha(sha) {
         createdAt: runInfo.created_at,
       });
     }
-    if (response.body.workflow_runs.length < 100) break;
+    if (response.body.workflow_runs.length < 100) return runs;
   }
-  return runs;
+  throw new UncertainStateError(`More than 500 workflow runs for ${sha}; refusing to judge CI from a partial list.`);
 }
 
 function check(label, fn) {
@@ -498,7 +504,7 @@ async function cmdDispatch(values) {
   const config = packageConfig(values.package);
   const tag = values.tag;
   const ref = values.ref || tag;
-  const startedAt = new Date(Date.now() - 5_000).toISOString();
+  const startedAt = new Date(Date.now() - 5_000).toISOString().replace(/\.\d{3}Z$/u, "Z");
   const response = await github(`/repos/${repository()}/actions/workflows/${config.workflow}/dispatches`, {
     method: "POST",
     body: { ref, inputs: { tag, dry_run: values["dry-run"] ? "true" : "false" } },
@@ -507,9 +513,11 @@ async function cmdDispatch(values) {
   for (let attempt = 0; attempt < 20; attempt += 1) {
     await sleep(3_000);
     const runs = await github(
-      `/repos/${repository()}/actions/workflows/${config.workflow}/runs?event=workflow_dispatch&per_page=10&created=>=${startedAt}`,
+      `/repos/${repository()}/actions/workflows/${config.workflow}/runs?event=workflow_dispatch&per_page=20&created=${encodeURIComponent(`>=${startedAt}`)}`,
     );
-    const found = runs.body?.workflow_runs?.[0];
+    if (runs.status !== 200) throw new UncertainStateError(`Could not list dispatched runs (HTTP ${runs.status ?? runs.error}).`);
+    // Match the ref we dispatched; a concurrent dispatch at another ref is not ours.
+    const found = runs.body.workflow_runs.find((candidate) => candidate.head_branch === ref);
     if (found) {
       log(JSON.stringify({ runId: found.id, url: found.html_url, ref, tag, dryRun: Boolean(values["dry-run"]) }));
       return;
@@ -528,7 +536,7 @@ async function cmdEnsureRun(values) {
   const tag = values.tag;
   const peeled = remoteTag(tag);
   if (!peeled) throw new ReleaseError(`Tag ${tag} does not exist on origin.`);
-  const deadline = Date.now() + Number(values.wait ?? 120) * 1000;
+  const deadline = Date.now() + waitSeconds(values, 120) * 1000;
   while (Date.now() < deadline) {
     // Only runs whose ref is the tag itself can publish it; a main-ref run on
     // the same commit (dry-run/finalize) does not count.

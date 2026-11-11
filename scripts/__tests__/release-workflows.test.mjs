@@ -142,6 +142,16 @@ describe("npm publish workflows", () => {
       assert.match(jobs.finalize, new RegExp(`finalize --package ${workflow.packageName}`, "u"));
       assert.match(jobs.finalize, /GH_TOKEN: \$\{\{ github\.token \}\}/u);
       assert.match(jobs.finalize, /needs\.admit\.outputs\.mode == 'finalize'/u);
+      assert.match(jobs.finalize, /needs: \[admit, publish, confirm\]/u);
+      assert.match(jobs.finalize, /needs\.confirm\.result == 'success'/u);
+    });
+
+    test(`${workflow.file} uses only contexts GitHub allows at job level`, () => {
+      for (const [name, text] of Object.entries(jobs)) {
+        const jobEnv = /^ {4}env:\n((?: {6}.*\n)+)/mu.exec(text)?.[1] ?? "";
+        assert.doesNotMatch(jobEnv, /\$\{\{[^}]*\brunner\./u, `${name} job env cannot use the runner context`);
+      }
+      assert.match(preamble, /group: publish-[\w-]+-\$\{\{ inputs\.dry_run && 'dry-run' \|\| 'release' \}\}-\$\{\{ inputs\.tag \|\| github\.ref_name \}\}/u);
     });
 
     test(`${workflow.file} pins every action to a full commit SHA`, () => {

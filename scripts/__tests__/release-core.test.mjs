@@ -149,6 +149,8 @@ describe("registry classification", () => {
     assert.equal(classifyRegistryResponse({ status: 401, body: {} }, target).state, "uncertain");
     assert.equal(classifyRegistryResponse({ status: 503, body: "" }, target).state, "uncertain");
     assert.equal(classifyRegistryResponse({ status: 404, body: "<html>gateway</html>" }, target).state, "uncertain");
+    assert.equal(classifyRegistryResponse({ status: 404, body: "<html><h1>404 Not Found</h1></html>" }, target).state, "uncertain");
+    assert.equal(classifyRegistryResponse({ status: 404, body: "version not found: 1.2.4" }, target).state, "uncertain");
     assert.equal(classifyRegistryResponse({ status: 200, body: { name: target.selector, version: "1.2.2" } }, target).state, "uncertain");
   });
 });
@@ -309,6 +311,11 @@ describe("executed CI binding", () => {
     const result = evaluateCiRuns({ runs: [run({ event: "pull_request" })], sha: TAG_SHA });
     assert.equal(result.ok, false);
     assert.deepEqual(result.ignored, ["CI Core (pull_request)"]);
+  });
+
+  test("earlier publish-workflow attempts on the same commit are not CI", () => {
+    const publishRun = run({ workflowName: "Publish zudo-circuit-doc to npm", path: ".github/workflows/publish-zudo-circuit-doc.yml", conclusion: "failure" });
+    assert.equal(evaluateCiRuns({ runs: [run({ path: ".github/workflows/ci-core.yml" }), publishRun], sha: TAG_SHA }).ok, true);
   });
 
   test("pending or failed runs and other commits' runs block", () => {
