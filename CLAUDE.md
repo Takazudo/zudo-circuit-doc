@@ -31,7 +31,10 @@ Later sub-issues add scripts for the LED fixture, template sync, packed-consumer
 ## Releasing
 
 Use `/l-make-release` to prepare a package release and follow the
-[publishing runbook](dev-docs/publishing.md). The documentation site deploys
+[publishing runbook](dev-docs/publishing.md), which is canonical. Codex uses the
+repository skill `.agents/skills/release/`; both drive the shared helper
+`node scripts/release.mjs`. Publishing uses npm Trusted Publishing (GitHub OIDC);
+no npm token is stored or needed. The documentation site deploys
 automatically from `main` to [zudo-circuit-doc.zudolab.dev](https://zudo-circuit-doc.zudolab.dev);
 see [site deployment](dev-docs/site-deploy.md).
 

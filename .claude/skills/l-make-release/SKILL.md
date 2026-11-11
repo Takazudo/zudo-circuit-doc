@@ -17,20 +17,31 @@ argument-description: >-
 
 # /l-make-release
 
-This skill releases the two stable npm packages from `main`. The runtime is
-`@takazudo/zudo-circuit-doc` (`packages/circuit-doc/package.json`, tag
-`vX.Y.Z`, `.github/workflows/publish-zudo-circuit-doc.yml`). The initializer is
-`create-zudo-circuit-doc` (`packages/create-zudo-circuit-doc/package.json`, tag
-`create-zudo-circuit-doc-vX.Y.Z`,
-`.github/workflows/publish-create-zudo-circuit-doc.yml`). Each package's own
-manifest is its version source. Never bump the private root `package.json` as
-a release version. These are stable-only releases to npm `latest`; do not use
-prerelease suffixes or a `next` channel.
+[`dev-docs/publishing.md`](../../../dev-docs/publishing.md) is the canonical
+procedure: release policy, workflow jobs and modes, the
+`scripts/release.mjs` helper, dry runs, and failure recovery. Read it before
+preparing or recovering a release. This skill adds the judgement (what to
+release, which version, the changelog) and drives the runbook's steps. The
+Codex skill [`release`](../../../.agents/skills/release/SKILL.md) mirrors these
+rules.
 
-Read [the publishing runbook](../../../dev-docs/publishing.md)
-when preparing or recovering a release. The two tag pushes start the publish
-workflows; a GitHub Release does not start publishing. The skill never runs
-`npm publish` or `pnpm publish` itself.
+| Package | Helper `--package` | Manifest | Tag | Workflow |
+| --- | --- | --- | --- | --- |
+| `@takazudo/zudo-circuit-doc` | `runtime` | `packages/circuit-doc/package.json` | `vX.Y.Z` | `publish-zudo-circuit-doc.yml` |
+| `create-zudo-circuit-doc` | `initializer` | `packages/create-zudo-circuit-doc/package.json` | `create-zudo-circuit-doc-vX.Y.Z` | `publish-create-zudo-circuit-doc.yml` |
+
+Each package's own manifest is its version source; never bump the private root
+`package.json`. Stable npm `latest` only: no prerelease suffixes, no `next`.
+Publishing happens only in the tag-triggered workflow via npm Trusted
+Publishing (GitHub OIDC). No npm token exists or is needed. The skill never
+runs `npm publish` / `pnpm publish` and never creates the GitHub Release
+itself; the workflow's `finalize` job does.
+
+**Heavy commands** (`pnpm build`, `pnpm doc:build`, `pnpm verify:pack ...`):
+when `$HOME/.claude/scripts/heavy-guard.sh` is present (the owner's Mac;
+`preflight` reports it), run them as
+`bash $HOME/.claude/scripts/heavy-guard.sh -- <cmd>` in the foreground and obey
+its `verdict=` and exit-75 rules. Otherwise run them directly.
 
 ## Selection and authorization
 
@@ -38,8 +49,9 @@ workflows; a GitHub Release does not start publishing. The skill never runs
   ship. A request naming only `runtime` or `@takazudo/zudo-circuit-doc`
   selects the runtime. `create-zudo-circuit-doc` or `initializer` selects only
   the initializer. If both are selected, release runtime first and complete
-  its npm verification before beginning initializer mutation or its release
-  gate. Use separate commits, tags, changelogs, workflows, and GitHub Releases.
+  its verification (`status` shows `missing: []`) before beginning initializer
+  mutation or its release gate. Use separate commits, tags, changelogs,
+  workflows, and GitHub Releases.
 - Runtime work means runtime-relevant commits since its latest `v*.*.*` tag.
   Initializer work means no initializer tag exists yet; or commits since the
   latest `create-zudo-circuit-doc-v*.*.*` tag touch
@@ -57,63 +69,57 @@ workflows; a GitHub Release does not start publishing. The skill never runs
   continue through both selected packages without another prompt. `cancel`
   goes directly to [Cancelling](#cancelling).
 
-## 1. Preconditions and release mode
+## 1. Preflight and release mode
 
-Stop with a clear reason if any precondition fails:
+For each selected package run
+`node scripts/release.mjs preflight --package <p>`. It checks Node/pnpm, a
+clean `main` equal to `origin/main`, origin, git push and GitHub auth, npm
+reachability, and binds HEAD to its manifest version, tag, push-event CI and
+exact npm state. Stop on any `FAIL` and report the failing lines. This
+skill pushes the release commit and tag with git, so its `info.gitPush` line
+must also read `available`. Bring a
+behind `main` current first; stop on divergence rather than guessing which tree
+to release. Pending or failed CI at HEAD is a stop.
 
-1. `git branch --show-current` is `main`; `gh auth status` succeeds; and
-   `git status --porcelain` is empty.
-2. `git fetch origin` and `git fetch --tags origin`, then verify local `main`
-   equals `origin/main`. Bring a behind branch current before proceeding;
-   stop on divergence rather than guessing which tree to release.
-3. Check Actions runs at the current `main` HEAD with
-   `gh run list --branch main --limit 100 --json name,status,conclusion,headSha,workflowName`.
-   All runs for that SHA must finish successfully, including applicable
-   `ci-*.yml` checks and the documentation deployment in `main-deploy.yml`
-   (the workflow name here is `Deploy Documentation Site`). Page through more
-   runs if 100 does not cover that SHA. A path-filtered workflow need not have
-   a run. Stop for pending, missing expected, or failed checks. Check the
-   target SHA again after each release commit.
-4. `NPM_TOKEN` is already a repository secret. Do not ask the operator for a
-   speculative credential confirmation; authentication failures have a
-   recovery path below.
-
-For each selected package, read its manifest version (`CUR`) and latest tag in
-**its own namespace**. `git tag -l 'v*.*.*' --sort=-v:refname` is for the
-runtime; `git tag -l 'create-zudo-circuit-doc-v*.*.*' --sort=-v:refname` is for
-the initializer. Validate exact stable `X.Y.Z` tags before using them as bases.
+Read the manifest version (`CUR`) and the latest tag in **the package's own
+namespace** (`git tag -l 'v*.*.*' --sort=-v:refname` for runtime,
+`git tag -l 'create-zudo-circuit-doc-v*.*.*' --sort=-v:refname` for
+initializer). Validate exact stable `X.Y.Z` tags before using them as bases.
+Exact npm state always comes from
+`node scripts/release.mjs registry-state --package <p> --version <v>`:
+`present`, `absent`, or `uncertain` (exit 3). Uncertain is a stop, never an
+absence.
 
 - **first:** no tag exists in that namespace. Analyze the package's history,
-  including the commit that introduced its manifest. The seeded `0.1.0` is
-  unpublished preparation, not evidence that a release happened. Confirm
-  first-release status with `npm view <package> versions --json
-  --registry=https://registry.npmjs.org/`: an `E404` means the name is absent;
-  existing versions or an inconclusive query require reconciliation.
-- **bump:** the tag for `CUR` exists. Check that version on npm before assuming
-  the tag means publication; recover an unpublished tagged version first.
-  Otherwise analyze commits since the latest tag.
+  including the commit that introduced its manifest. A seeded `0.1.0` is
+  unpublished preparation, not evidence of a release; `registry-state` must
+  say `absent`.
+- **bump:** the tag for `CUR` exists. Run
+  `node scripts/release.mjs status --package <p> --version <CUR>`; if anything
+  is `missing`, recover that version first (see
+  [Failure recovery](#failure-recovery)). Otherwise analyze commits since the
+  latest tag.
 - **resume-candidate:** at least one prior tag exists but the tag for `CUR` is
   absent. Locate the commit that introduced `CUR` in the selected manifest
   (`git log -1 -S'"version": "<CUR>"' -- <manifest>`). Resume only when it is
   a complete preparation commit with subject `chore(release): <pkg> v<CUR>`,
   a matching manifest, a dated changelog page with no `unreleased` text, and
-  the generated package `CHANGELOG.md` entry. Check the exact version on npm.
-  Print a resume proposal with that commit. In `--confirm` mode wait unless
-  this exact resume was already authorized in the session. Re-run the local
-  gate on the **same tree** and tag that verified commit only. If later commits
-  follow it, surface them and obtain a choice between validating the original
-  tree and preparing a fresh release including them; never test `HEAD` and
-  tag an earlier untested commit.
+  the generated package `CHANGELOG.md` entry; check it with
+  `status --package <p> --version <CUR> --sha <commit>`. Print a resume
+  proposal with that commit. In `--confirm` mode wait unless this exact resume
+  was already authorized in the session. Re-run the local gate on the **same
+  tree** and tag that verified commit only. If later commits follow it,
+  surface them and obtain a choice between validating the original tree and
+  preparing a fresh release including them; never test `HEAD` and tag an
+  earlier untested commit.
 
 Each package is judged independently. Its first-release history begins at
 the commit adding its manifest (`git log --diff-filter=A --format=%H --follow
 -- <manifest> | tail -1`); include that commit explicitly because `base..HEAD`
 excludes it. Otherwise inspect the full commit subjects, bodies, and paths
-since its latest namespace tag. Check the public registry for the **exact
-proposed version** before mutation with `npm view "<pkg>@<version>" version
---registry=https://registry.npmjs.org/`. Proceed only on a confirmed absence
-(`E404` or no matching version); if present or inconclusive, stop and use
-[Failure recovery](#failure-recovery).
+since its latest namespace tag. Before mutation, the **exact proposed
+version** must be `absent` per `registry-state`; on `present` or `uncertain`,
+stop and use [Failure recovery](#failure-recovery).
 
 ## 2. Version and proposal
 
@@ -131,13 +137,12 @@ for `1.0.0`. In a combined run, that argument applies to the runtime, while
 the initializer remains commit-judged. Explain any patch proposal containing
 only non-feature/non-fix commits.
 
-The first release normally retains the seeded `0.1.0` in each manifest and
-finalizes its changelog. Still analyze history and print a proposal; do not
-manufacture `0.1.1` because the manifest already reads `0.1.0`. If evidence
-requires another first version or an explicit bump is requested, explain the
-choice and never silently lower a prepared version. New versions must exceed
-the current manifest version except when retaining an unpublished first
-version. Never propose a lower version.
+A first release normally retains the seeded `0.1.0` and finalizes its
+changelog; do not manufacture `0.1.1` because the manifest already reads
+`0.1.0`. If evidence requires another first version or an explicit bump is
+requested, explain the choice and never silently lower a prepared version. New
+versions must exceed the current manifest version except when retaining an
+unpublished first version. Never propose a lower version.
 
 Present one proposal listing both selected packages, their current and new
 versions, reason, tag, relevant commits with hashes, and changelog categories.
@@ -148,14 +153,12 @@ order. A confirmed `--confirm` proposal authorizes the whole selected flow.
 
 Prepare and finish each package separately in the selected order.
 
-1. Set `version` in that package's manifest to the proposed version. The
-   default first release retains `0.1.0`. For a runtime release, run
-   `pnpm sync:template && pnpm check:template` and inspect the generated diff.
-   Keep generated template files in the **same runtime release commit**. The
-   generated template runtime dependency must be `^<runtime version>`, a
-   caret range, never an exact pin. Leave generated `minimumReleaseAge: 0` for
-   the first release; [publishing.md](../../../dev-docs/publishing.md)
-   states when it can be reconsidered.
+1. Set `version` in that package's manifest to the proposed version. For a
+   runtime release, run `pnpm sync:template && pnpm check:template` and
+   inspect the generated diff. Keep generated template files in the **same
+   runtime release commit**. The generated template runtime dependency must be
+   `^<runtime version>`, a caret range, never an exact pin. Leave generated
+   `minimumReleaseAge: 0`; publishing.md states when it can be reconsidered.
 2. Write English release notes in
    `doc/src/content/docs/changelog/zudo-circuit-doc/<version>.mdx` for runtime
    or `doc/src/content/docs/changelog/create-zudo-circuit-doc/<version>.mdx`
@@ -167,27 +170,23 @@ Prepare and finish each package separately in the selected order.
    `pagination_next: null`. Keep `sidebar_position: 1` for the first entry;
    later pages use one greater than the highest existing position in **that
    package's** changelog directory. Add only categories with real entries.
-3. Run `bash $HOME/.claude/scripts/heavy-guard.sh -- pnpm doc:build`. Its
-   changelog generator in `doc/zfb.config.ts`
-   writes `packages/circuit-doc/CHANGELOG.md` and
+   This page is also the GitHub Release body (`release-notes` renders it).
+3. Run `pnpm doc:build` (heavy). Its changelog generator in
+   `doc/zfb.config.ts` writes `packages/circuit-doc/CHANGELOG.md` and
    `packages/create-zudo-circuit-doc/CHANGELOG.md`. Verify the selected
    package's generated file includes the new dated entry. Inspect any other
    generated diff before staging.
 
 ## 4. Local gate and commit
 
-Run all applicable checks on the prepared tree. Route heavy commands through
-the shared gate in the repository guide; keep the queue and command in the
-foreground and obey its `verdict=` and exit-75 rules. Use
-`bash $HOME/.claude/scripts/heavy-guard.sh -- pnpm build` and the same wrapper
-for `pnpm verify:pack --fixture empty` and
-`pnpm verify:pack --fixture minimal`. Run `pnpm typecheck`, `pnpm test`,
-`pnpm check:template`, and `pnpm release:dry-run` too. For the initializer,
-also run `bash $HOME/.claude/scripts/heavy-guard.sh -- pnpm verify:pack
---fixture empty --published-runtime`. That last gate must install the range
-from npm and can run only after the required runtime is live. Do not swap in
-the local tarball gate. Fix failures and repeat affected checks before commit;
-if the gate cannot pass, stop without a release tag.
+Run the runbook's local gate on the prepared tree: `pnpm build` (heavy),
+`pnpm typecheck`, `pnpm test`, `pnpm check:template`, `pnpm release:dry-run`;
+for the runtime also `pnpm verify:pack --fixture empty` and
+`pnpm verify:pack --fixture minimal` (heavy). For the initializer run
+`pnpm verify:pack --fixture empty --published-runtime` (heavy): it installs the
+template's runtime range from npm, so it runs only after the required runtime
+is live. Do not swap in the local tarball gate. Fix failures and repeat
+affected checks before commit; if the gate cannot pass, stop without a tag.
 
 Stage only this package's manifest, changelog MDX, generated CHANGELOG, and
 expected generated template changes for a runtime bump. Review the staged
@@ -199,68 +198,45 @@ BUMP_SHA=$(git rev-parse HEAD)
 git push origin main
 ```
 
-Confirm `origin/main` contains `BUMP_SHA`. Wait for every applicable Actions
-run at exactly `BUMP_SHA` to finish successfully, using `gh run list --branch
-main --limit 100 --json name,status,conclusion,headSha,workflowName` and
-additional pages as needed. Include the `ci-*.yml` workflows triggered for
-that commit and `main-deploy.yml`. If CI fails, fix, commit, push, re-run the
+Wait for that commit's own push-event CI, then confirm the binding with
+`node scripts/release.mjs preflight --package <p> --sha "$BUMP_SHA"`. Only
+push-event runs on exactly `BUMP_SHA` count; `pull_request` runs tested a merge
+tree and are listed as ignored. If CI fails, fix, commit, push, re-run the
 checks that cover the fix, and replace `BUMP_SHA` with the newly verified
 commit. Never tag a SHA whose CI did not pass.
 
-## 5. Tag, publish, and GitHub Release
+## 5. Tag, publish, verify
 
-Recheck that the exact version is absent from npm and the proposed tag does
-not exist. Create the appropriate tag at **`BUMP_SHA`**, then push it:
+Recheck: `registry-state --package <p> --version <v>` is `absent` and
+`git ls-remote origin refs/tags/<tag>` is empty. Then tag **`BUMP_SHA`** and
+push only that tag:
 
 ```bash
-git tag "v<version>" "$BUMP_SHA"                         # runtime only
-git push origin "v<version>"                              # runtime only
-git tag "create-zudo-circuit-doc-v<version>" "$BUMP_SHA" # initializer only
-git push origin "create-zudo-circuit-doc-v<version>"      # initializer only
+git tag "<tag>" "$BUMP_SHA"
+git push origin "<tag>"
+node scripts/release.mjs ensure-run --package <p> --tag "<tag>"
 ```
 
-Run only the two lines for the selected package. A pushed tag is the
-irreversible release boundary. The runtime tag triggers
-`publish-zudo-circuit-doc.yml`; the initializer tag triggers
-`publish-create-zudo-circuit-doc.yml`.
+A pushed tag is the irreversible release boundary. `ensure-run` reports the
+publish run(s) for the tag, or dispatches one at the tag if none appears.
+Watch it with `gh run watch <run-id> --exit-status` (or the Actions page). A
+red run is not evidence of absence: go to [Failure recovery](#failure-recovery).
 
-Find the new run with `gh run list --workflow <workflow-file> --limit 30
---json databaseId,headSha,event,createdAt,status,conclusion`. Match the
-workflow, push event, exact `BUMP_SHA`, and creation after this tag push;
-`headBranch` may be empty for tags. If ambiguous, inspect candidates with
-`gh run view <run-id>` and verify their tag before selecting. Wait with
-`gh run watch <run-id> --exit-status`. If it fails, check the exact npm version
-first, then follow [Failure recovery](#failure-recovery). Never infer absence
-from a red workflow.
+Verify with `node scripts/release.mjs status --package <p> --version <v>`. It
+must show `npm: "present"`, a non-null `trustedPublisher`, a GitHub Release
+URL, and `missing: []`. Report the npm URL, publish run URL, and GitHub Release
+URL. In a combined run, start the initializer only after this. If the runtime
+does not reach npm, stop and report why; the initializer can be released later
+with `/l-make-release initializer`.
 
-The workflow publishes directly to npm `latest` with `NPM_TOKEN` (a
-publish-capable, 2FA-bypassing granular token), so a green run means the
-version is live; no stage approval or OTP is needed. Public registry reads can
-return a cached 404 for a few minutes after a publish (especially a package's
-first version); poll before concluding it is absent.
-
-Once the exact version is confirmed live, verify the tag still points to the
-published commit. Reuse an existing `gh release view <tag>` if present.
-Otherwise put the changelog body after YAML frontmatter in a temporary notes
-file and use `gh release create <tag> --verify-tag --title "<pkg> <version>"
---notes-file <notes-file>`. Verify `npm view "<pkg>@<version>" version
---registry=https://registry.npmjs.org/` and `npm dist-tag ls <pkg>` show the
-version on `latest`. Report npm URL, publish run URL, and GitHub Release URL.
-In a combined run, start the initializer only after this runtime verification.
-If runtime does not reach npm, stop and report why; the initializer can be
-released later with `/l-make-release initializer`.
-
-After the first package release is live, make a **separate docs commit** on
+After a package's first release is live, make a **separate docs commit** on
 `main` updating the unpublished-status notice in
 `doc/src/content/docs/getting-started/create-a-project.mdx` and any other
 content that says a package is not published. Keep the status accurate while
 the other package remains unpublished. Once the initializer is live, replace
 its unpublished notice with the working `pnpm create zudo-circuit-doc`
 instructions. Run the relevant docs check and push the docs commit. Do this
-only after publication, never in a release commit. Remind the owner to
-configure npm Trusted Publishing (OIDC) for both workflows and verify an OIDC
-publish before removing `NPM_TOKEN`; the [publishing runbook](../../../dev-docs/publishing.md)
-records the January 2027 token deadline.
+only after publication, never in a release commit.
 
 ## Cancelling
 
@@ -272,36 +248,27 @@ if later commits bury it, leave it and explain that a later release must
 supersede the prepared version. Do not rewrite shared history.
 
 After a tag push, treat the version as potentially live. Never delete, move,
-or recreate a pushed release tag. Check the registry and follow recovery.
-Retraction of an already published package is an owner decision outside this
-skill.
+or recreate a pushed release tag. Run `status` and follow recovery. Retraction
+of an already published package is an owner decision outside this skill.
 
 ## Failure recovery
 
-For **any** failure after a tag push, first query the exact package version:
+After a tag push, start every recovery with
+`node scripts/release.mjs status --package <p> --version <v> --sha <BUMP_SHA>`
+and act on its `missing` list using the table in publishing.md
+("If a release step fails"). In short:
 
-```bash
-npm view "<pkg>@<version>" version --registry=https://registry.npmjs.org/
-```
-
-- If it resolves to that version, publication succeeded. Keep the tag and
-  commit; do not rerun the publish job. Finish or reuse the GitHub Release and
-  verify `latest`. If its tag is missing or points elsewhere, stop to
-  reconcile; never retag.
-- If npm clearly confirms the version absent (`E404` or no matching version),
-  inspect `gh run view <run-id> --log-failed`. Correct a transient or
-  credential-only cause, recheck absence immediately before retry, then use
-  the guarded dispatch at the **unchanged tag** (when the workflow file changed
-  after the tag, dispatch from `main` with `-f tag=<tag>` instead so the
-  current workflow builds the tagged tree):
-  `gh workflow run publish-zudo-circuit-doc.yml --ref v<version>` for runtime
-  or `gh workflow run publish-create-zudo-circuit-doc.yml --ref
-  create-zudo-circuit-doc-v<version>` for initializer. Watch the new run and
-  recheck npm. A code fix requires a new release version; never repoint the
-  pushed tag.
-- A timeout, network/authentication error, or ambiguous registry response is
-  inconclusive. Stop until npm status can be established. Do not dispatch or
-  publish again based on a failed query.
+- `missing: ["github-release"]`: npm has it. Run
+  `node scripts/release.mjs dispatch --package <p> --tag <tag> --ref main`
+  (finalize-only run). Never republish.
+- `missing: ["publish", "github-release"]`: npm clearly lacks it. Read the
+  failed run's log (`gh run view <run-id> --log-failed`), fix a transient or
+  OIDC-configuration cause, then retry only via
+  `dispatch --package <p> --tag <tag>` (ref = the tag). A code or workflow fix
+  needs a new version. Pre-OIDC tags can only be finalized.
+- Uncertain state (exit 3, timeout, auth error) or an inconsistent-history
+  error: stop. Never dispatch on a failed query; never move, delete, or
+  recreate a pushed tag.
 
 Before a tag push, a local gate failure means fix and rerun without committing
 an invalid release; a CI failure means fix, push a new commit, and verify its

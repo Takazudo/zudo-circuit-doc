@@ -1,5 +1,23 @@
 # Publish create-zudo-circuit-doc to npm from its stable
-# create-zudo-circuit-doc-vX.Y.Z tag.
+# create-zudo-circuit-doc-vX.Y.Z tag with
+# npm Trusted Publishing (GitHub OIDC). No stored npm credential is used.
+# Procedure, recovery and owner setup: dev-docs/publishing.md.
+#
+# Jobs and their only permissions:
+#   admit    contents:read          prove the tag exists, bind source commit,
+#                                   version and exact npm state; pick a mode
+#   verify   contents:read          every release gate on the tag commit, then
+#                                   pack the tarball (dry-run stops here)
+#   publish  contents:read,         publish exactly the verified tarball; no
+#            id-token:write         dependency install runs in this job
+#   confirm  contents:read          prove an OIDC upload with provenance for the
+#                                   tag commit (not just "the version exists")
+#   finalize contents:write         after confirm, create the GitHub Release if missing; never
+#                                   publishes, never rewrites an existing one
+#
+# Provenance attests the run's own commit, so a publish is admitted only when
+# the run's ref is the tag itself (tag push, or dispatch --ref <tag>). A run
+# dispatched from main for an older tag can dry-run or finalize, not publish.
 
 name: Publish create-zudo-circuit-doc to npm
 
@@ -10,44 +28,89 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Existing release tag to publish (leave empty to use the dispatch ref)"
+        description: "Exact existing release tag (create-zudo-circuit-doc-vX.Y.Z). Dispatch with --ref set to the same tag to publish."
         type: string
-        required: false
+        required: true
+      dry_run:
+        description: "Run admission and every gate, pack, and stop (no publish, no GitHub Release)."
+        type: boolean
+        default: false
 
+# One queue per tag, and dry-runs apart from real runs, so a dispatch can never
+# replace (cancel) a pending publish run for the same package.
 concurrency:
-  group: publish-create-zudo-circuit-doc
+  group: publish-create-zudo-circuit-doc-${{ inputs.dry_run && 'dry-run' || 'release' }}-${{ inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
-permissions:
-  contents: read
-  id-token: write
+permissions: {}
 
 jobs:
-  publish:
-    name: Build, verify, and publish
+  admit:
+    name: Admit release
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      tag: ${{ steps.admit.outputs.tag }}
+      version: ${{ steps.admit.outputs.version }}
+      source_sha: ${{ steps.admit.outputs.source_sha }}
+      control_sha: ${{ steps.admit.outputs.control_sha }}
+      mode: ${{ steps.admit.outputs.mode }}
     steps:
-      - name: Checkout
+      - name: Checkout control commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
         with:
-          ref: ${{ inputs.tag || github.ref }}
+          persist-credentials: false
 
-      - name: Setup
-        uses: ./.github/actions/setup
-
-      - name: Setup Node.js for npm publish
+      - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
-          registry-url: https://registry.npmjs.org
-          cache: pnpm
 
-      - name: Guard stable initializer release tag
+      - name: Admit tag, source and npm state
+        id: admit
         env:
-          RELEASE_REF_TYPE: ${{ inputs.tag && 'tag' || github.ref_type }}
-          RELEASE_REF_NAME: ${{ inputs.tag || github.ref_name }}
-        run: GITHUB_REF_TYPE="$RELEASE_REF_TYPE" GITHUB_REF_NAME="$RELEASE_REF_NAME" node scripts/lib/release-guard.mjs initializer
+          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+        run: node scripts/release.mjs admit --package initializer
+
+  verify:
+    name: Verify and pack
+    needs: admit
+    if: needs.admit.outputs.mode == 'publish' || needs.admit.outputs.mode == 'dry-run'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    outputs:
+      tarball: ${{ steps.pack.outputs.tarball }}
+      integrity: ${{ steps.pack.outputs.integrity }}
+    env:
+      SOURCE_SHA: ${{ needs.admit.outputs.source_sha }}
+      CONTROL_SHA: ${{ needs.admit.outputs.control_sha }}
+      VERSION: ${{ needs.admit.outputs.version }}
+    steps:
+      - name: Checkout tag commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+        with:
+          ref: ${{ needs.admit.outputs.source_sha }}
+          persist-credentials: false
+
+      - name: Confirm checkout is the admitted source
+        run: test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+
+      # Release helpers come from the control commit (outside the workspace),
+      # so gates run on the source tree while checks use current rules, even
+      # for tags cut before the helpers existed.
+      - name: Extract control release helpers
+        run: |
+          git fetch --no-tags --depth=1 origin "$CONTROL_SHA"
+          mkdir -p "$RUNNER_TEMP/control"
+          git archive "$CONTROL_SHA" scripts/release.mjs scripts/lib/release-core.mjs | tar -x -C "$RUNNER_TEMP/control"
+
+      - name: Setup
+        uses: ./.github/actions/setup
 
       - name: Build
         run: pnpm build
@@ -71,14 +134,134 @@ jobs:
         with:
           python-version: "3.12"
 
+      # The runtime this initializer's template selects must already be live
+      # on npm; this installs it from the registry, not from a local tarball.
       - name: Verify with published runtime
         run: pnpm verify:pack --fixture empty --published-runtime
 
-      # Direct CI publishing: NPM_TOKEN is a granular token with publish
-      # permission that bypasses 2FA, so pushing the release tag is the
-      # human gate. See dev-docs/publishing.md.
-      - name: Publish package
-        working-directory: packages/create-zudo-circuit-doc
+      # pnpm pack rewrites workspace: ranges; tarball-info rejects any left over.
+      - name: Pack release tarball
+        id: pack
+        run: |
+          mkdir -p "$RUNNER_TEMP/release"
+          pnpm --filter create-zudo-circuit-doc pack --pack-destination "$RUNNER_TEMP/release"
+          node "$RUNNER_TEMP/control/scripts/release.mjs" tarball-info --package initializer --version "$VERSION" --tarball "$(ls "$RUNNER_TEMP"/release/*.tgz)"
+
+      # No id-token in this job, so this cannot authenticate or write.
+      - name: Publish dry-run
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm publish --tag latest --access public --no-git-checks --provenance
+          TARBALL: ${{ runner.temp }}/release/${{ steps.pack.outputs.tarball }}
+        run: pnpm publish "$TARBALL" --dry-run --tag latest --access public --no-git-checks
+
+      - name: Upload verified tarball
+        if: needs.admit.outputs.mode == 'publish'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: release-tarball
+          path: ${{ runner.temp }}/release/${{ steps.pack.outputs.tarball }}
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish with OIDC
+    needs: [admit, verify]
+    if: needs.admit.outputs.mode == 'publish'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout tag commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+        with:
+          ref: ${{ needs.admit.outputs.source_sha }}
+          persist-credentials: false
+
+      # pnpm (packageManager) publishes natively and performs the npm OIDC
+      # exchange itself; no `pnpm install` runs in this id-token job.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          dest: ~/setup-pnpm-publish
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Download verified tarball
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: release-tarball
+          path: ${{ runner.temp }}/release
+
+      - name: Publish preflight
+        env:
+          TARBALL: ${{ runner.temp }}/release/${{ needs.verify.outputs.tarball }}
+          INTEGRITY: ${{ needs.verify.outputs.integrity }}
+        run: |
+          echo "Publishing executable: $(command -v pnpm) $(pnpm --version)"
+          node scripts/release.mjs publish-preflight --tarball "$TARBALL" --integrity "$INTEGRITY"
+
+      - name: Publish package
+        env:
+          TARBALL: ${{ runner.temp }}/release/${{ needs.verify.outputs.tarball }}
+        run: pnpm publish "$TARBALL" --tag latest --access public --no-git-checks --provenance
+
+  confirm:
+    name: Confirm OIDC publication
+    needs: [admit, verify, publish]
+    if: needs.admit.outputs.mode == 'publish' && needs.publish.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout control commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Verify trusted publisher and provenance source
+        env:
+          VERSION: ${{ needs.admit.outputs.version }}
+          TAG: ${{ needs.admit.outputs.tag }}
+          SOURCE_SHA: ${{ needs.admit.outputs.source_sha }}
+          INTEGRITY: ${{ needs.verify.outputs.integrity }}
+        run: >-
+          node scripts/release.mjs verify-publication --package initializer
+          --version "$VERSION" --tag "$TAG" --source-sha "$SOURCE_SHA" --integrity "$INTEGRITY"
+
+  finalize:
+    name: Finalize GitHub Release
+    needs: [admit, publish, confirm]
+    if: >-
+      always() && (needs.admit.outputs.mode == 'finalize' ||
+      (needs.admit.outputs.mode == 'publish' && needs.confirm.result == 'success'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout control commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Create GitHub Release if missing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.admit.outputs.version }}
+          SOURCE_SHA: ${{ needs.admit.outputs.source_sha }}
+        run: node scripts/release.mjs finalize --package initializer --version "$VERSION" --source-sha "$SOURCE_SHA"
