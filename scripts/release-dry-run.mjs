@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// Local, non-publishing release check: tag naming, pnpm publish --dry-run and
+// tarball contents for each manifest. Its limits are printed at the end.
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -129,6 +131,11 @@ async function main() {
 
   if (failed) process.exitCode = 1;
   else console.log("\nRelease dry-run passed for both packages.");
+  console.log(
+    "\nNot verified locally: that the release tag exists on origin, CI on the release commit, GitHub OIDC,\n" +
+      "the npm Trusted Publisher mapping, or provenance issuance. Only a real publish run proves OIDC;\n" +
+      "the Actions dry-run (node scripts/release.mjs dispatch --dry-run) runs the full gate set. See dev-docs/publishing.md.",
+  );
 }
 
 main().catch((error) => {
