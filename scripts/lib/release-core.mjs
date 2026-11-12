@@ -478,3 +478,271 @@ export function findStoredNpmCredentials({ env, npmrcFiles }) {
   }
   return problems;
 }
+
+// ---------------------------------------------------------------- release coordinator
+//
+// .github/workflows/release-coordinator.yml creates the release tag with the
+// run's GITHUB_TOKEN and then dispatches the package's existing publish
+// workflow explicitly. These functions decide what one coordinator run may do
+// from facts gathered by scripts/release.mjs.
+
+export const COORDINATOR_WORKFLOW = "release-coordinator.yml";
+// Job display name in both publish workflows; its conclusion tells whether an
+// earlier run already reached npm.
+export const PUBLISH_JOB_NAME = "Publish with OIDC";
+// The generated project manifest whose runtime range the published-runtime gate installs.
+export const INITIALIZER_TEMPLATE_MANIFEST = "packages/create-zudo-circuit-doc/templates/default/package.json";
+
+const ACTIVE_RUN_STATES = new Set(["queued", "in_progress", "waiting", "requested", "pending"]);
+
+/** Validate the coordinator's dispatch inputs before any network call. */
+export function parseCoordinatorInputs({ packageName, version, sha, dryRun, allowOlderSha, ref }) {
+  const config = packageConfig(String(packageName ?? "").trim());
+  const trimmedVersion = String(version ?? "").trim();
+  const trimmedSha = String(sha ?? "").trim();
+  if (ref !== "refs/heads/main") {
+    throw new ReleaseError(`The release coordinator runs only from main; this run's ref is ${JSON.stringify(ref)}.`);
+  }
+  if (!STABLE_VERSION_PATTERN.test(trimmedVersion)) {
+    throw new ReleaseError(`Version ${JSON.stringify(trimmedVersion)} is not a stable X.Y.Z version (no prerelease, no leading v).`);
+  }
+  if (!SHA_PATTERN.test(trimmedSha)) {
+    throw new ReleaseError(`sha must be a full 40-character lowercase commit SHA; received ${JSON.stringify(trimmedSha)}.`);
+  }
+  return {
+    packageName: config.packageName,
+    version: trimmedVersion,
+    sha: trimmedSha,
+    tag: config.tag(trimmedVersion),
+    dryRun: /^true$/iu.test(String(dryRun ?? "")),
+    allowOlderSha: /^true$/iu.test(String(allowOlderSha ?? "")),
+  };
+}
+
+/** Does the generated package CHANGELOG.md carry a dated entry for this version? */
+export function changelogHasEntry(markdown, version) {
+  const escaped = version.replace(/\./gu, "\\.");
+  return new RegExp(`^## \\[${escaped}\\] - \\d{4}-\\d{2}-\\d{2}\\s*$`, "mu").test(String(markdown ?? ""));
+}
+
+/**
+ * Reduce the publish-workflow runs whose ref is the tag to what matters for
+ * a resume: is one still running, and did any earlier run's publish job
+ * succeed (npm accepted an upload even if the run later failed)?
+ */
+export function summarizePublisherRuns(runs) {
+  const active = runs.filter((run) => ACTIVE_RUN_STATES.has(run.status));
+  const published = runs.filter((run) => run.publishJob?.conclusion === "success");
+  return { active, published, total: runs.length };
+}
+
+/**
+ * The initializer's published-runtime gate needs the runtime it was prepared
+ * with to be completely released first. `runtime` holds the runtime manifest
+ * version at the candidate commit and that version's release facts.
+ */
+export function assessRuntimeGate({ runtimeVersion, templateRange, remoteTag, registry, githubRelease }) {
+  const problems = [];
+  const expectedRange = `^${runtimeVersion}`;
+  if (templateRange !== expectedRange) {
+    problems.push(`initializer template selects runtime ${JSON.stringify(templateRange)}, not ${expectedRange} (the runtime manifest at this commit)`);
+  }
+  if (registry.state === "uncertain") {
+    throw new UncertainStateError(`npm state of @takazudo/zudo-circuit-doc@${runtimeVersion} is uncertain (${registry.reason}).`);
+  }
+  if (githubRelease.state === "uncertain") {
+    throw new UncertainStateError(`GitHub Release state for v${runtimeVersion} is uncertain (${githubRelease.reason}).`);
+  }
+  if (registry.state !== "present") problems.push(`runtime ${runtimeVersion} is not on npm yet; release the runtime first`);
+  if (!remoteTag) problems.push(`runtime tag v${runtimeVersion} does not exist`);
+  if (githubRelease.state !== "present") problems.push(`runtime v${runtimeVersion} has no GitHub Release yet; finish the runtime release first`);
+  return { ok: problems.length === 0, problems };
+}
+
+/**
+ * Decide one coordinator run. Throws (refuses) on anything inconsistent or
+ * uncertain; otherwise returns the single next action:
+ *
+ * - `create-tag`: tag absent, npm absent, candidate fully verified. Create the
+ *   tag at `sha`, then dispatch the publisher at the tag.
+ * - `dispatch-publish`: tag already at `sha`, npm definitely absent, no run in
+ *   flight and no earlier run's publish job succeeded. Dispatch at the tag.
+ * - `dispatch-finalize`: npm has the version, the GitHub Release is missing.
+ *   Dispatch at main (finalize-only; never republishes).
+ * - `wait`: a publisher run is in flight, or an earlier run's publish job
+ *   succeeded while npm does not show the version yet. Do nothing; rerun later.
+ * - `complete`: tag, npm and GitHub Release all present.
+ */
+export function planCoordinator(facts) {
+  const {
+    packageName,
+    version,
+    sha,
+    tag,
+    allowOlderSha = false,
+    mainHead,
+    inMain,
+    manifestVersion,
+    changelog,
+    generatedChangelogHasEntry,
+    ci,
+    remoteTag,
+    registry,
+    githubRelease,
+    publisherRuns = [],
+    runtimeGate = null,
+  } = facts;
+  const config = PACKAGES[packageName];
+  if (!config) throw new ReleaseError(`Unknown release package ${JSON.stringify(packageName)}.`);
+  if (tag !== config.tag(version)) throw new ReleaseError(`Tag ${tag} is not the ${packageName} tag for ${version}.`);
+
+  const base = { packageName, package: config.selector, version, sha, tag, mainHead, workflow: config.workflow };
+
+  // Candidate identity: the commit is on main and is this package's release
+  // commit for this version. A runtime version given to the initializer (or
+  // the reverse) fails here because the other manifest carries another version.
+  if (!inMain) throw new ReleaseError(`${sha} is not on main (not an ancestor of ${mainHead}).`);
+  if (manifestVersion !== version) {
+    throw new ReleaseError(`${config.manifest} at ${sha} is ${JSON.stringify(manifestVersion)}, not ${version}.`);
+  }
+  if (!changelog.ok) throw new ReleaseError(`Changelog page for ${config.selector} ${version} at ${sha}: ${changelog.problem}`);
+  if (!generatedChangelogHasEntry) {
+    throw new ReleaseError(`${config.packageDir}/CHANGELOG.md at ${sha} has no dated "## [${version}]" entry; run pnpm doc:build.`);
+  }
+
+  // Exact external state. Uncertain never counts as absence.
+  if (registry.state === "uncertain") {
+    throw new UncertainStateError(`npm state of ${config.selector}@${version} is uncertain (${registry.reason}); nothing was changed.`);
+  }
+  if (githubRelease.state === "uncertain") {
+    throw new UncertainStateError(`GitHub Release state for ${tag} is uncertain (${githubRelease.reason}); nothing was changed.`);
+  }
+
+  if (remoteTag) {
+    if (remoteTag.commit !== sha) {
+      throw new ReleaseError(
+        `Tag ${tag} already exists at ${remoteTag.commit}, not the requested ${sha}. A pushed tag is never moved; ` +
+          `resume with sha=${remoteTag.commit}, or release a new version.`,
+      );
+    }
+    if (registry.state === "present") {
+      if (githubRelease.state === "present") {
+        return { ...base, action: "complete", reason: `${tag} is tagged, on npm and has a GitHub Release; nothing to do.` };
+      }
+      return {
+        ...base,
+        action: "dispatch-finalize",
+        dispatchRef: "main",
+        reason: `${config.selector}@${version} is on npm but has no GitHub Release; dispatching a finalize-only run at main.`,
+      };
+    }
+    // npm definitely absent. A failed run alone is not proof of absence; an
+    // earlier run whose publish job succeeded means npm accepted an upload.
+    const runs = summarizePublisherRuns(publisherRuns);
+    if (runs.active.length > 0) {
+      return {
+        ...base,
+        action: "wait",
+        reason: `A ${config.workflow} run for ${tag} is still running (${runs.active.map((run) => run.url).join(", ")}); not dispatching another.`,
+      };
+    }
+    if (runs.published.length > 0) {
+      return {
+        ...base,
+        action: "wait",
+        reason:
+          `An earlier ${config.workflow} run's publish job succeeded (${runs.published.map((run) => run.url).join(", ")}) ` +
+          `but npm does not show ${version} yet. Never republish: rerun the coordinator later, and it will finalize once npm shows the version.`,
+      };
+    }
+    if (runtimeGate && !runtimeGate.ok) throw new ReleaseError(`Initializer gate: ${runtimeGate.problems.join("; ")}.`);
+    if (!ci.ok) throw new ReleaseError(`CI on ${sha} is not green: ${ci.problems.join("; ")}.`);
+    return {
+      ...base,
+      action: "dispatch-publish",
+      dispatchRef: tag,
+      reason: `Resuming ${tag} at its original commit: npm does not have ${version} and no earlier run published it.`,
+    };
+  }
+
+  // New release: no tag yet.
+  if (registry.state === "present") {
+    throw new ReleaseError(`${config.selector}@${version} is on npm but ${tag} is missing on origin; reconcile manually.`);
+  }
+  if (githubRelease.state === "present") {
+    throw new ReleaseError(`A GitHub Release for ${tag} exists without the tag; reconcile manually.`);
+  }
+  if (!ci.ok) throw new ReleaseError(`CI on ${sha} is not green: ${ci.problems.join("; ")}.`);
+  if (sha !== mainHead && !allowOlderSha) {
+    throw new ReleaseError(
+      `main has moved to ${mainHead} since ${sha}. The coordinator never swaps the candidate silently: ` +
+        `dispatch again with sha=${mainHead} once its push CI is green, or set allow_older_sha to tag ${sha} on purpose.`,
+    );
+  }
+  if (runtimeGate && !runtimeGate.ok) throw new ReleaseError(`Initializer gate: ${runtimeGate.problems.join("; ")}.`);
+  return {
+    ...base,
+    action: "create-tag",
+    dispatchRef: tag,
+    reason: `New release: tag ${tag} at ${sha}, then dispatch ${config.workflow} at the tag.`,
+  };
+}
+
+/**
+ * Interpret the refs API answer to `POST /git/refs` for a release tag.
+ * 201 created; 422 "Reference already exists" must be re-read by the caller
+ * (same SHA resumes, another SHA is refused). Anything else is a failure the
+ * caller reports with diagnostics.
+ */
+export function classifyTagCreate({ status, body }) {
+  if (status === 201) return { outcome: "created" };
+  const message = typeof body === "object" && body ? String(body.message ?? "") : String(body ?? "");
+  if (status === 422 && /reference already exists/iu.test(message)) return { outcome: "exists" };
+  return { outcome: "failed", message };
+}
+
+/** Decide after a 422 re-read: an existing tag at the same commit resumes, any other commit is refused. */
+export function resolveExistingTag({ tag, sha, remoteTag }) {
+  if (!remoteTag) throw new UncertainStateError(`GitHub said ${tag} exists, but origin does not list it; check again.`);
+  if (remoteTag.commit !== sha) {
+    throw new ReleaseError(`Tag ${tag} was created concurrently at ${remoteTag.commit}, not ${sha}; refusing. Never move a pushed tag.`);
+  }
+  return { outcome: "resumed" };
+}
+
+/**
+ * Human-readable diagnostics for a failed GitHub write (tag creation or a
+ * dispatch). States facts only; the cause of a 403 is not asserted.
+ */
+export function describeGithubWriteFailure({ operation, status, body, headers = {}, declaredPermissions, sha, mainHead, workflowDiff }) {
+  const lines = [`${operation} failed: HTTP ${status ?? "no response"}`];
+  if (body && typeof body === "object") {
+    if (body.message) lines.push(`GitHub message: ${body.message}`);
+    if (body.documentation_url) lines.push(`Documentation: ${body.documentation_url}`);
+    for (const error of body.errors ?? []) lines.push(`Detail: ${typeof error === "string" ? error : JSON.stringify(error)}`);
+  } else if (body) {
+    lines.push(`GitHub body: ${String(body).slice(0, 500)}`);
+  }
+  const accepted = headers["x-accepted-github-permissions"];
+  if (accepted) lines.push(`GitHub accepts these token permissions for this call: ${accepted}`);
+  if (headers["x-github-request-id"]) lines.push(`GitHub request id: ${headers["x-github-request-id"]}`);
+  if (declaredPermissions) lines.push(`This job's declared GITHUB_TOKEN permissions: ${declaredPermissions}`);
+  if (sha) {
+    lines.push(`Candidate SHA: ${sha}${mainHead ? (sha === mainHead ? " (= main HEAD)" : ` (main HEAD is ${mainHead})`) : ""}`);
+  }
+  if (workflowDiff) {
+    lines.push(
+      workflowDiff.length === 0
+        ? "Workflow files: identical between the candidate and main HEAD"
+        : `Workflow files that differ between the candidate and main HEAD: ${workflowDiff.join(", ")}`,
+    );
+  }
+  if (status === 403 || status === 401) {
+    lines.push(
+      "Cause not determined by this run. Possible owner checks: Settings → Actions → General → Workflow permissions, " +
+        "tag rulesets or protection, and whether GitHub restricts GITHUB_TOKEN refs on commits whose workflow files differ from main. " +
+        "Nothing was changed; this coordinator never retries with another credential.",
+    );
+  }
+  return lines;
+}
