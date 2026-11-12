@@ -1,0 +1,18 @@
+---
+title: 0.2.2
+description: Publish through npm Trusted Publishing and select runtime ^0.3.1.
+sidebar_position: 4
+pagination_next: null
+---
+
+Released: 2026-11-12
+
+Version 0.2.2 generates the same project as [0.2.1](./0.2.1.mdx) apart from the runtime range.
+
+## Other changes
+
+- Generated projects select [@takazudo/zudo-circuit-doc](../zudo-circuit-doc/0.3.1.mdx)
+  `^0.3.1`.
+- Publish from the tag-triggered GitHub Actions workflow through npm Trusted Publishing (GitHub
+  OIDC). No npm token is stored, and the package carries npm provenance that links the tarball to
+  its release tag and commit.

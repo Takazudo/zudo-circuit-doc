@@ -4,6 +4,18 @@ All notable changes to `create-zudo-circuit-doc` are documented in this file.
 
 The format is based on Keep a Changelog, and release notes are generated from the changelog MDX pages.
 
+## [0.2.2] - 2026-11-12
+
+Version 0.2.2 generates the same project as [0.2.1](#021---2026-11-07) apart from the runtime range.
+
+## Other changes
+
+- Generated projects select @takazudo/zudo-circuit-doc
+  `^0.3.1`.
+- Publish from the tag-triggered GitHub Actions workflow through npm Trusted Publishing (GitHub
+  OIDC). No npm token is stored, and the package carries npm provenance that links the tarball to
+  its release tag and commit.
+
 ## [0.2.1] - 2026-11-07
 
 Version 0.2.1 generates projects on zudo-doc 9.1.4 and switches new projects to Graphite,
