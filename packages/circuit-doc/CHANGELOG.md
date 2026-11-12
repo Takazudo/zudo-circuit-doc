@@ -4,6 +4,23 @@ All notable changes to `@takazudo/zudo-circuit-doc` are documented in this file.
 
 The format is based on Keep a Changelog, and release notes are generated from the changelog MDX pages.
 
+## [0.4.0] - 2026-11-12
+
+Version 0.4.0 moves the runtime onto the published zudo-doc 10.0.3 / ZFB 6.0.1 family, following
+[#174](https://github.com/Takazudo/zudo-circuit-doc/pull/174). Hosts must upgrade together with the
+runtime; see the 0.3 to 0.4 migration recipe.
+
+## Breaking changes
+
+- Require the zudo-doc 10.0.3 / ZFB 6.0.1 host family through runtime peer floors `^10.0.3` /
+  `^6.0.1`. Projects that are not ready to migrate their host should stay on runtime `^0.3.0`
+  with zudo-doc 9.1.x / ZFB 5.2.2.
+
+## Other changes
+
+- Develop and test the runtime against zudo-doc 10.0.3, history-server 10.0.3 and ZFB 6.0.1. The
+  public API and the Node 24 LTS requirement are unchanged from [0.3.1](#031---2026-11-12).
+
 ## [0.3.1] - 2026-11-12
 
 Version 0.3.1 changes how the runtime is published, not what it does. The public API, peer

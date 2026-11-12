@@ -1,0 +1,23 @@
+---
+title: 0.4.0
+description: zudo-doc 10.0.3 / ZFB 6.0.1 host family.
+sidebar_position: 5
+pagination_next: null
+---
+
+Released: 2026-11-12
+
+Version 0.4.0 moves the runtime onto the published zudo-doc 10.0.3 / ZFB 6.0.1 family, following
+[#174](https://github.com/Takazudo/zudo-circuit-doc/pull/174). Hosts must upgrade together with the
+runtime; see the [0.3 to 0.4 migration recipe](../../concepts/ownership-and-upgrades.mdx).
+
+## Breaking changes
+
+- Require the zudo-doc 10.0.3 / ZFB 6.0.1 host family through runtime peer floors `^10.0.3` /
+  `^6.0.1`. Projects that are not ready to migrate their host should stay on runtime `^0.3.0`
+  with zudo-doc 9.1.x / ZFB 5.2.2.
+
+## Other changes
+
+- Develop and test the runtime against zudo-doc 10.0.3, history-server 10.0.3 and ZFB 6.0.1. The
+  public API and the Node 24 LTS requirement are unchanged from [0.3.1](./0.3.1.mdx).
