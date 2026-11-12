@@ -63,13 +63,13 @@ The dependency versions below are exact-pinned across the whole repo — do not 
 
 | Package | Version |
 | --- | --- |
-| `@takazudo/zudo-doc`, `@takazudo/zudo-doc-history-server`, `create-zudo-doc` | 9.1.4 |
-| `@takazudo/zfb`, `@takazudo/zfb-runtime`, `@takazudo/zfb-md-wasm` | 5.2.2 |
+| `@takazudo/zudo-doc`, `@takazudo/zudo-doc-history-server`, `create-zudo-doc` | 10.0.3 |
+| `@takazudo/zfb`, `@takazudo/zfb-runtime`, `@takazudo/zfb-md-wasm` | 6.0.1 |
 | pnpm (`packageManager`, via corepack) | 11.5.2 |
 | Node | >=24 <25 (24 LTS) |
 | Python | >=3.10 (stdlib only) |
 
-**Integration gates:** upgrades must pass strict packed MDX registration, unchanged LED publication scans and browser verification. Issue #155 / PR #156 merged the earlier 6.2.0 / 4.5.0 migration and PR #157 moved to 7.0.0 / 4.5.2 and PR #158 to 8.0.0 / 5.0.1 and PR #161 to 9.1.0 / 5.1.5; 9.1.3 / 5.2.2 shipped in runtime 0.3.0, and the current family is 9.1.4 / 5.2.2 on Node 24 LTS, with every host on zudo-doc's default Graphite look (`themePack: "graphite"`). Publication remains separate. See ADR-021 through ADR-026 and `ZUDO_DEPS_PINS.md`.
+**Integration gates:** upgrades must pass strict packed MDX registration, unchanged LED publication scans and browser verification. Issue #155 / PR #156 merged the earlier 6.2.0 / 4.5.0 migration and PR #157 moved to 7.0.0 / 4.5.2 and PR #158 to 8.0.0 / 5.0.1 and PR #161 to 9.1.0 / 5.1.5; 9.1.3 / 5.2.2 shipped in runtime 0.3.0 and 9.1.4 / 5.2.2 followed; the current family is 10.0.3 / 6.0.1 on Node 24 LTS (doc hosts pin TypeScript 7 as create-zudo-doc 10 generates; the monorepo toolchain stays on TypeScript 5.9), with every host on zudo-doc's default Graphite look (`themePack: "graphite"`). Publication remains separate. See ADR-021 through ADR-027 and `ZUDO_DEPS_PINS.md`.
 
 ## Node type stripping
 

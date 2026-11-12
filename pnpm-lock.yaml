@@ -9,14 +9,14 @@ importers:
   .:
     devDependencies:
       '@takazudo/zfb':
-        specifier: 5.2.2
-        version: 5.2.2
+        specifier: 6.0.1
+        version: 6.0.1
       '@types/node':
         specifier: ^22.0.0
         version: 22.20.4
       create-zudo-doc:
-        specifier: 9.1.4
-        version: 9.1.4
+        specifier: 10.0.3
+        version: 10.0.3
       typescript:
         specifier: ^5.9.0
         version: 5.9.3
@@ -24,22 +24,22 @@ importers:
   doc:
     dependencies:
       '@takazudo/zfb':
-        specifier: 5.2.2
-        version: 5.2.2
+        specifier: 6.0.1
+        version: 6.0.1
       '@takazudo/zfb-md-wasm':
-        specifier: 5.2.2
-        version: 5.2.2
+        specifier: 6.0.1
+        version: 6.0.1
       '@takazudo/zfb-runtime':
-        specifier: 5.2.2
-        version: 5.2.2(@takazudo/zfb@5.2.2)
+        specifier: 6.0.1
+        version: 6.0.1(@takazudo/zfb@6.0.1)
       '@takazudo/zudo-doc':
-        specifier: 9.1.4
-        version: 9.1.4(@takazudo/zfb-md-wasm@5.2.2)(@takazudo/zfb-runtime@5.2.2(@takazudo/zfb@5.2.2))(@takazudo/zfb@5.2.2)(@takazudo/zudo-doc-history-server@9.1.4)(@types/node@22.20.4)(diff@8.0.4)(zod@4.6.5)
+        specifier: 10.0.3
+        version: 10.0.3(@takazudo/zfb-md-wasm@6.0.1)(@takazudo/zfb-runtime@6.0.1(@takazudo/zfb@6.0.1))(@takazudo/zfb@6.0.1)(@takazudo/zudo-doc-history-server@10.0.3)(@types/node@22.20.4)(diff@8.0.4)(zod@4.6.5)
       '@takazudo/zudo-doc-history-server':
-        specifier: 9.1.4
-        version: 9.1.4
+        specifier: 10.0.3
+        version: 10.0.3
       diff:
-        specifier: ^8.0.3
+        specifier: ^8.0.4 || ^9.0.0
         version: 8.0.4
       zod:
         specifier: ^4.3.6
@@ -49,8 +49,8 @@ importers:
         specifier: ^22.0.0
         version: 22.20.4
       typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
+        specifier: ^7.0.2
+        version: 7.0.2
 
   examples/empty:
     devDependencies:
@@ -61,25 +61,25 @@ importers:
   examples/empty/doc:
     dependencies:
       '@takazudo/zfb':
-        specifier: 5.2.2
-        version: 5.2.2
+        specifier: 6.0.1
+        version: 6.0.1
       '@takazudo/zfb-md-wasm':
-        specifier: 5.2.2
-        version: 5.2.2
+        specifier: 6.0.1
+        version: 6.0.1
       '@takazudo/zfb-runtime':
-        specifier: 5.2.2
-        version: 5.2.2(@takazudo/zfb@5.2.2)
+        specifier: 6.0.1
+        version: 6.0.1(@takazudo/zfb@6.0.1)
       '@takazudo/zudo-circuit-doc':
         specifier: workspace:*
         version: link:../../../packages/circuit-doc
       '@takazudo/zudo-doc':
-        specifier: 9.1.4
-        version: 9.1.4(@takazudo/zfb-md-wasm@5.2.2)(@takazudo/zfb-runtime@5.2.2(@takazudo/zfb@5.2.2))(@takazudo/zfb@5.2.2)(@takazudo/zudo-doc-history-server@9.1.4)(@types/node@22.20.4)(diff@8.0.4)(zod@4.6.5)
+        specifier: 10.0.3
+        version: 10.0.3(@takazudo/zfb-md-wasm@6.0.1)(@takazudo/zfb-runtime@6.0.1(@takazudo/zfb@6.0.1))(@takazudo/zfb@6.0.1)(@takazudo/zudo-doc-history-server@10.0.3)(@types/node@22.20.4)(diff@8.0.4)(zod@4.6.5)
       '@takazudo/zudo-doc-history-server':
-        specifier: 9.1.4
-        version: 9.1.4
+        specifier: 10.0.3
+        version: 10.0.3
       diff:
-        specifier: ^8.0.3
+        specifier: ^8.0.4 || ^9.0.0
         version: 8.0.4
       zod:
         specifier: ^4.3.6
@@ -89,8 +89,8 @@ importers:
         specifier: ^22.0.0
         version: 22.20.4
       typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
+        specifier: ^7.0.2
+        version: 7.0.2
 
   examples/minimal:
     devDependencies:
@@ -101,25 +101,25 @@ importers:
   examples/minimal/doc:
     dependencies:
       '@takazudo/zfb':
-        specifier: 5.2.2
-        version: 5.2.2
+        specifier: 6.0.1
+        version: 6.0.1
       '@takazudo/zfb-md-wasm':
-        specifier: 5.2.2
-        version: 5.2.2
+        specifier: 6.0.1
+        version: 6.0.1
       '@takazudo/zfb-runtime':
-        specifier: 5.2.2
-        version: 5.2.2(@takazudo/zfb@5.2.2)
+        specifier: 6.0.1
+        version: 6.0.1(@takazudo/zfb@6.0.1)
       '@takazudo/zudo-circuit-doc':
         specifier: workspace:*
         version: link:../../../packages/circuit-doc
       '@takazudo/zudo-doc':
-        specifier: 9.1.4
-        version: 9.1.4(@takazudo/zfb-md-wasm@5.2.2)(@takazudo/zfb-runtime@5.2.2(@takazudo/zfb@5.2.2))(@takazudo/zfb@5.2.2)(@takazudo/zudo-doc-history-server@9.1.4)(@types/node@22.20.4)(diff@8.0.4)(zod@4.6.5)
+        specifier: 10.0.3
+        version: 10.0.3(@takazudo/zfb-md-wasm@6.0.1)(@takazudo/zfb-runtime@6.0.1(@takazudo/zfb@6.0.1))(@takazudo/zfb@6.0.1)(@takazudo/zudo-doc-history-server@10.0.3)(@types/node@22.20.4)(diff@8.0.4)(zod@4.6.5)
       '@takazudo/zudo-doc-history-server':
-        specifier: 9.1.4
-        version: 9.1.4
+        specifier: 10.0.3
+        version: 10.0.3
       diff:
-        specifier: ^8.0.3
+        specifier: ^8.0.4 || ^9.0.0
         version: 8.0.4
       zod:
         specifier: ^4.3.6
@@ -129,8 +129,8 @@ importers:
         specifier: ^22.0.0
         version: 22.20.4
       typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
+        specifier: ^7.0.2
+        version: 7.0.2
 
   packages/circuit-doc:
     dependencies:
@@ -148,11 +148,11 @@ importers:
         version: 0.185.1
     devDependencies:
       '@takazudo/zfb':
-        specifier: 5.2.2
-        version: 5.2.2
+        specifier: 6.0.1
+        version: 6.0.1
       '@takazudo/zudo-doc':
-        specifier: 9.1.4
-        version: 9.1.4(@takazudo/zfb-md-wasm@5.2.2)(@takazudo/zfb-runtime@5.2.2(@takazudo/zfb@5.2.2))(@takazudo/zfb@5.2.2)(@takazudo/zudo-doc-history-server@9.1.4)(@types/node@22.20.4)(diff@8.0.4)(zod@4.6.5)
+        specifier: 10.0.3
+        version: 10.0.3(@takazudo/zfb-md-wasm@6.0.1)(@takazudo/zfb-runtime@6.0.1(@takazudo/zfb@6.0.1))(@takazudo/zfb@6.0.1)(@takazudo/zudo-doc-history-server@10.0.3)(@types/node@22.20.4)(diff@8.0.4)(zod@4.6.5)
       '@types/mdast':
         specifier: ^4.0.0
         version: 4.0.4
@@ -180,11 +180,13 @@ importers:
 
 packages:
 
-  '@clack/core@0.4.1':
-    resolution: {integrity: sha512-Pxhij4UXg8KSr7rPek6Zowm+5M22rbd2g1nfojHJkxp5YkFqiZ2+YLEM/XGVIzvGOcM0nqjIFxrpDwWRZYWYjA==}
+  '@clack/core@1.6.0':
+    resolution: {integrity: sha512-4GZynIB2IIe431odxesswvWTCP6orvqd6e2b07b3VFWBQRqUqIHc/EPIZwFoKS692QBp+ooPuXKaJV8g4kXuYA==}
+    engines: {node: '>= 20.12.0'}
 
-  '@clack/prompts@0.9.1':
-    resolution: {integrity: sha512-JIpyaboYZeWYlyP0H+OoPPxd6nqueG/CmN6ixBiNFsIDHREevjIf0n0Ohh5gr5C8pEDknzgvz+pIJ8dMhzWIeg==}
+  '@clack/prompts@1.9.0':
+    resolution: {integrity: sha512-tEj8X2No2A1c9NDnZECxiiJ8TP3vmFlN9tLlLeSaMqVW4tUmVG2R4qpv/eP4zymWxnymYLkLcIYVV0VcWj3RCQ==}
+    engines: {node: '>= 20.12.0'}
 
   '@dimforge/rapier3d-compat@0.12.0':
     resolution: {integrity: sha512-uekIGetywIgopfD97oDL5PfeezkFpNhwlzlaEYNOA0N6ghdsOvh/HYjSMek5Q2O1PYvRSDFcqFVJl4r4ZBwOow==}
@@ -479,66 +481,66 @@ packages:
       '@types/node':
         optional: true
 
-  '@takazudo/zfb-darwin-arm64@5.2.2':
-    resolution: {integrity: sha512-njlwotoobXC7790/0H2H9+N2Cyfku7Bb5aP44YnKg81k19EbgVYbf0f8W+pKCgCza/FuMjkNyivfF5vv1XKljQ==}
+  '@takazudo/zfb-darwin-arm64@6.0.1':
+    resolution: {integrity: sha512-ltlVe8syjwL+IwdYex+JnegNw4LlrGb8anjLwOPMIeNlVHzts59i0mpELYFqiG9YG5pYe8DPXl9pbvez0PZ1Cw==}
     cpu: [arm64]
     os: [darwin]
 
-  '@takazudo/zfb-darwin-x64@5.2.2':
-    resolution: {integrity: sha512-hwjA7DFw+pb29VRQKGEVzwAJ2cI2zpdgOyuqP01QKXRwPBcdtYjir+yfJnB+Avz3hrEDAA8fszubj4nO+m2sXg==}
+  '@takazudo/zfb-darwin-x64@6.0.1':
+    resolution: {integrity: sha512-2Zp46GlIUWRZh1MNG9uZ3eB8kpU75ICC2huB+ERoEQt8756c//W/ofdQwzAUgj7fvPhC1FHBdlKE2W3fhBV8Yw==}
     cpu: [x64]
     os: [darwin]
 
-  '@takazudo/zfb-linux-arm64-gnu@5.2.2':
-    resolution: {integrity: sha512-R9xqfn4YNeTZsAzYFwHE2f0TTlKbK+XjcoX7AsZEPrSV8PHzNob7Ybq4tl3KU7jC+Jafe95CD+fMCEevHegN1Q==}
+  '@takazudo/zfb-linux-arm64-gnu@6.0.1':
+    resolution: {integrity: sha512-OB1WP6L/E4KC2OKrILxRNSANQy+ZtG/elvTTNxhR8+aRvS7Nti5uSSueX1uURUpTEj9XtUM01TucXsh+F/Y7xA==}
     cpu: [arm64]
     os: [linux]
 
-  '@takazudo/zfb-linux-x64-gnu@5.2.2':
-    resolution: {integrity: sha512-u2LnlOT6dNKR4O3LnlItoDoGZySACNmnx1CGqFpq6xo63hJi8DYpqFF9Pl2lShZY97ldqnUUM8w0RgvYcvMv9Q==}
+  '@takazudo/zfb-linux-x64-gnu@6.0.1':
+    resolution: {integrity: sha512-BYK13/BZDRWdPqAA7W9ia7DzQCqTnMVmwkq9A7bf7Gs0lP8TblFKrpZH1/6I9AcRdeNaascHcgzJPjm6HHBp9w==}
     cpu: [x64]
     os: [linux]
 
-  '@takazudo/zfb-md-wasm@5.2.2':
-    resolution: {integrity: sha512-Kby/f0iDrGAfwGzvGB5c9Vf+yCgiKrRcB8TdukRHrVexW66E2KlnrO0oydqQtn++aw0/pxxeyMhWDpRg6Vg1MA==}
+  '@takazudo/zfb-md-wasm@6.0.1':
+    resolution: {integrity: sha512-eH9DZcA1s0t36/elBkSNQQtbygnk+3gS/FCqQtT84mzJTpYZpD/3nidogA0ycAj0W9f8CpPBkYF/eCIMa96M2A==}
     engines: {node: '>=20.0.0', pnpm: '>=10.0.0'}
 
-  '@takazudo/zfb-runtime@5.2.2':
-    resolution: {integrity: sha512-YmOKwYUlg7GHGcThzX7qWlHsWZG5SRrdW7OyNbuDHlpYY7Qv0O2s4ceyZME7H8ZpduRgJ9ZVcBKoEcCzYTs3dg==}
+  '@takazudo/zfb-runtime@6.0.1':
+    resolution: {integrity: sha512-89gYXHjwkbLfOQhlfHf3iM/WBu4gEoNiUyYNlZwVkxE4rkh7HZ87a/qZIiIkd2ZUnT1EjbLf9+dLjFha5jjIcw==}
     engines: {node: '>=24.0.0', pnpm: '>=10.0.0'}
     peerDependencies:
-      '@takazudo/zfb': 5.2.2
+      '@takazudo/zfb': 6.0.1
 
-  '@takazudo/zfb-slugify@5.2.2':
-    resolution: {integrity: sha512-9GVHxorcWmIFnlKhqLg4FjN55LzPEG30tneDG/+/0MMo+vnwSSX69HeuFOLI7ftOxkJQ+InuGFwW9akae9JqxA==}
+  '@takazudo/zfb-slugify@6.0.1':
+    resolution: {integrity: sha512-B28EVPayDCd0W/mZQTky+m7TmVNjGEmj6Ix28BhjZublNIEsHedcvaJB/yz2j9aMct+3gMVOVdhYBjkeoIbf4A==}
     engines: {node: '>=24.0.0', pnpm: '>=10.0.0'}
 
-  '@takazudo/zfb-win32-x64-msvc@5.2.2':
-    resolution: {integrity: sha512-HggP05ruJKpF2gnJgYIQvSgIUysiIDCWG9VhVWCVJV5RYDrPN3knREpggAhaOIi4QEhagWnaxOFQrffkdcE2KA==}
+  '@takazudo/zfb-win32-x64-msvc@6.0.1':
+    resolution: {integrity: sha512-LJzr9WlFELZTUaTFMGn1GDekgekX4bs88X5l+qzKh95GVEUtI02pb0peu9+QzIS+HI/Qne36eXeUJlEeOxpKzA==}
     cpu: [x64]
     os: [win32]
 
-  '@takazudo/zfb@5.2.2':
-    resolution: {integrity: sha512-BwBrNYgjMbOrWT6U9qlMXq/g1khVS89KUfUz/iy5cL0fctJoxCoEMUSuBuBi8foHyMiP+BEv3DC3ZW01WK500g==}
+  '@takazudo/zfb@6.0.1':
+    resolution: {integrity: sha512-ApV742DBH847yPpLHIpEfpx+mTr1pKX5SxQU76p9sImAH0rhC9Yvw9Exh0APzqLs2UVs/bFiUYzpJa1LrN9pKg==}
     engines: {node: '>=24.0.0', pnpm: '>=10.0.0'}
     hasBin: true
 
-  '@takazudo/zudo-doc-history-server@9.1.4':
-    resolution: {integrity: sha512-4bKqzyxSO/zSF8R0aKDNeUYRSr/mjWDsH8Xgf3BkPfN2Pq/AUGdoVqpqRnLUryKbkPdz9psLdJSAnSB5R3jjzQ==}
+  '@takazudo/zudo-doc-history-server@10.0.3':
+    resolution: {integrity: sha512-tCuY++1KYIUKAQJxiytvdWGAj6QbwsN/C/YYitrgIt5LdPgQpRXwISd9KuHAm62X51RNpCKm35fKzngk38jkMA==}
     hasBin: true
 
-  '@takazudo/zudo-doc@9.1.4':
-    resolution: {integrity: sha512-L6UAC3ZOi+YjYVBUGqr1t9tmxbSQr5UYJGYKFbxo5SpGiG5yHUojTJchHatTTgtufemNFAmnhY4ec1ojy+UR3w==}
+  '@takazudo/zudo-doc@10.0.3':
+    resolution: {integrity: sha512-olYXrDtZYQ6g17RhhIAFw39eFcpLpZJpzdWJArQQFpseUnDaHt4KxC3ZrkNrZcvow1gPwxVbHs+9MzsS5kC3RQ==}
     engines: {node: '>=24'}
     hasBin: true
     peerDependencies:
       '@modelcontextprotocol/sdk': 1.32.2
       '@takazudo/zdtp': ^0.5.2 || ^0.6.0 || ^0.7.0 || ^0.8.0 || ^0.9.0
-      '@takazudo/zfb': ^5.2.2
-      '@takazudo/zfb-md-wasm': ^5.2.2
-      '@takazudo/zfb-runtime': ^5.2.2
-      '@takazudo/zudo-doc-history-server': ^9.0.0
-      diff: ^8.0.0
+      '@takazudo/zfb': ^6.0.1
+      '@takazudo/zfb-md-wasm': ^6.0.1
+      '@takazudo/zfb-runtime': ^6.0.1
+      '@takazudo/zudo-doc-history-server': ^10.0.0
+      diff: ^8.0.0 || ^9.0.0
       katex: ^0.18.2 || ^0.19.0
       zod: ^4.3.6
     peerDependenciesMeta:
@@ -594,6 +596,126 @@ packages:
   '@types/webxr@0.5.24':
     resolution: {integrity: sha512-h8fgEd/DpoS9CBrjEQXR+dIDraopAEfu4wYVNY2tEPwk60stPWhvZMf4Foo5FakuQ7HFZoa8WceaWFervK2Ovg==}
 
+  '@typescript/typescript-aix-ppc64@7.0.2':
+    resolution: {integrity: sha512-MTKKkWB7p/0E9xi1d1tHtZ5PiLkGEMIq88pK2CubZjOsLtYTLqhgIgi6zepFa+9GHZ6h05NMCkQxGKiPXMxXtQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [ppc64]
+    os: [aix]
+
+  '@typescript/typescript-darwin-arm64@7.0.2':
+    resolution: {integrity: sha512-gowzar9MwS/aRWp6f3a4KUqzRjAZjOsmGNCM6LcTgXum+dBfgsBVMN+AgvOCCbguXyick6LJhpBszxMebJ8syA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@typescript/typescript-darwin-x64@7.0.2':
+    resolution: {integrity: sha512-SZ9xZInqApNlNGc9s0W1VSsktYSOe9cFqNOIqmN1Gs8SmkjKZYFt017G4VwPxASInODuAdbTW7sXiFUf893RgA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@typescript/typescript-freebsd-arm64@7.0.2':
+    resolution: {integrity: sha512-W5NH4y/J0plIIS5b2xvTEkU7JFxyqdMAOgf+Ilhl0vHQXKO5dZoxd+C/jEtq56c4F3wk71RB4BMRQ2XdI+bwYQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [freebsd]
+
+  '@typescript/typescript-freebsd-x64@7.0.2':
+    resolution: {integrity: sha512-UMGDx5sTpzNw3WiPebH7l90IWfJggEd+egHt/q6p7/Cm3zqoV7VxkGXt+3DxPIw8CcmvAB0j3sVVfbhX+M4Tpw==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [freebsd]
+
+  '@typescript/typescript-linux-arm64@7.0.2':
+    resolution: {integrity: sha512-Qh4eU4/y3yDjnfjjyPYihMj5/ODIlmt+Bzu17OI+fiSRDW57QmU5SiN63exPRNJPKUzcc1INa1NXdrJ+MqHjUQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [linux]
+
+  '@typescript/typescript-linux-arm@7.0.2':
+    resolution: {integrity: sha512-gffT3xPz9sR7j/YJExkyPntrI0P2EP9XbOyWzth2/Gs0RstK+90RBcO0ncXoXy/beYll1SXw846Nf2zdnEz0QQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm]
+    os: [linux]
+
+  '@typescript/typescript-linux-loong64@7.0.2':
+    resolution: {integrity: sha512-uEHck9i8hoAzXPiYRib1O7miOnz23SxIeVl6F4LXox+qov1K35jHcEW6VHKvZI+pyvl7fZEP4MCU5LYvIq1GuQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [loong64]
+    os: [linux]
+
+  '@typescript/typescript-linux-mips64el@7.0.2':
+    resolution: {integrity: sha512-R4KvAMnE43W5Qeqb0Ly56O3mWMWIAgsMyz36DCaycd5nbg/9kzm0liw3JocfRqyJY0KPmzFjbswozXyW0DnIYA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [mips64el]
+    os: [linux]
+
+  '@typescript/typescript-linux-ppc64@7.0.2':
+    resolution: {integrity: sha512-DORx5b3sd/4S7eayxm4FQv+A7CrkUIGRaHiwI8oiHTAI1fAPWhF4J0vAlkC8biAlHSVVwxMQ3tjZ2/DVbnQiiA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [ppc64]
+    os: [linux]
+
+  '@typescript/typescript-linux-riscv64@7.0.2':
+    resolution: {integrity: sha512-wf0jqEDOjrPRnKwYRyyJDRo11KMbvMFrU+q4zqKyChODBzvlkbhNQfKvLxQCcwTpdDaXSHZTVuh0JoCrKCUMHQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [riscv64]
+    os: [linux]
+
+  '@typescript/typescript-linux-s390x@7.0.2':
+    resolution: {integrity: sha512-IkwJc3L7yhytWd/ewjyxNDfOmswCm9GWMJT/ue/dU4aZNbwZeYAetq42VyLmsmSjvoX7z74X6ZaYCtzAr0EuGw==}
+    engines: {node: '>=16.20.0'}
+    cpu: [s390x]
+    os: [linux]
+
+  '@typescript/typescript-linux-x64@7.0.2':
+    resolution: {integrity: sha512-EYdf2cNg7rgCWJnxCdJ+F3V39O8ihb37eHAu1LK8oAFizgTQbPOK7zHHXbPt8rX24COqODXeI3sIf0fCXG7H/A==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [linux]
+
+  '@typescript/typescript-netbsd-arm64@7.0.2':
+    resolution: {integrity: sha512-+polYF4MF04aPpO5FTkHran9yUQDSXqy5GiSDKpsll5jy3l3+g9QLhpf39T+ePtefhXLOGrLl0QIjkQP6VnelA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [netbsd]
+
+  '@typescript/typescript-netbsd-x64@7.0.2':
+    resolution: {integrity: sha512-8YIT0EHM/3dq10ZOVF/A7pc/YSMtbcecct4rWtexrnSCHOPcpC2KTLXfTCR6vDpnSiY12heNb1GiN/wu+T/FyA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [netbsd]
+
+  '@typescript/typescript-openbsd-arm64@7.0.2':
+    resolution: {integrity: sha512-APT8+ClYnuYm1u9+kgGXoMj2VzWzcymwh2gNSQVySHfkRDGOTVkoWLjCmOQSaO+PoqQ57B0flRp9SA+7GnnkzQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [openbsd]
+
+  '@typescript/typescript-openbsd-x64@7.0.2':
+    resolution: {integrity: sha512-yX7s+Q0Dln0Dt9tEzZsAjXXR/+ytBM7AlglaqyeMPxQszJ1JhlJdZ6jLA+IzldHtflX81em7lDao1xXu+aRRkg==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [openbsd]
+
+  '@typescript/typescript-sunos-x64@7.0.2':
+    resolution: {integrity: sha512-dLJDGaLZ1D4HPQn62u1n8mBDkJREwMsAkCdkwd4Ieqw+x3TUyTsqY0YiBCtE6H6OzzgGk3iuZ3vFWRS+E8/d1g==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [sunos]
+
+  '@typescript/typescript-win32-arm64@7.0.2':
+    resolution: {integrity: sha512-Gyl1Vy6OsWesLzmq+EP0Fb7b4Nid5232AvcA2SFcdYreldpNtYFFofPjnt62y9hQy7VTaZp65ICJjuAQRaVcIQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@typescript/typescript-win32-x64@7.0.2':
+    resolution: {integrity: sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [win32]
+
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
 
@@ -616,8 +738,8 @@ packages:
     resolution: {integrity: sha512-ouuZd4/dm2Sw5Gmqy6bGyNNNe1qt9RpmxveLSO7KcgsTnU7RXfsw+/bukWGo1abgBiMAic068rclZsO4IWmmxQ==}
     engines: {node: '>= 12'}
 
-  create-zudo-doc@9.1.4:
-    resolution: {integrity: sha512-yoiDPpxzKXDLz+dE4QbSTYePRHE84FftJ/hC911+mP8WLeS/DWCh7+24EKuTH44hv4+RMg+Z4yrkyfsdjlgcXw==}
+  create-zudo-doc@10.0.3:
+    resolution: {integrity: sha512-kr8DJEI51TmnS/fAzeH5IQM2mRLBgXKjJp7R0KABS5fwdcuxr5EXk8FUCYIZ/Sg2tuhTNMMjNJoWgrwQXeo3Hw==}
     engines: {node: '>=24'}
     hasBin: true
 
@@ -644,8 +766,8 @@ packages:
     resolution: {integrity: sha512-DPi0FmjiSU5EvQV0++GFDOJ9ASQUVFh5kD+OzOnYdi7n3Wpm9hWWGfB/O2blfHcMVTL5WkQXSnRiK9makhrcnw==}
     engines: {node: '>=0.3.1'}
 
-  entities@8.1.0:
-    resolution: {integrity: sha512-kxL7msIffSuh9aaFAMD7rxAIuTRMAHMeBtgHW2yUdWw732ZNh4MehkF2gdjvtdmikkaIP9bFDDJOPlsvm7avrA==}
+  entities@9.0.0:
+    resolution: {integrity: sha512-oJFNDJg3kTPwAD1cNn2+WmUq4wFoo09npc3Ydf1D7ED4smRiWrsKnaLxykrTWgyGEcusc87P5dxlAleol9kpkg==}
     engines: {node: '>=20.19.0'}
 
   esbuild@0.28.2:
@@ -815,8 +937,8 @@ packages:
   parse-entities@4.0.2:
     resolution: {integrity: sha512-GG2AQYWoLgL877gQIKeRPGO1xF9+eG1ujIb5soS5gPvLQ1y2o8FL90w2QWNdf9I361Mpp7726c+lj3U0qK1uGw==}
 
-  parse5@8.0.1:
-    resolution: {integrity: sha512-z1e/HMG90obSGeidlli3hj7cbocou0/wa5HacvI3ASx34PecNjNQeaHNo5WIZpWofN9kgkqV1q5YvXe3F0FoPw==}
+  parse5@8.1.1:
+    resolution: {integrity: sha512-EcR/6WDcU7b2N3vQSxKALCk9lXGtUMQxXio008OEMBE0kavu/7JLfBEeFPzi43nMqVDSbEn3QCK+BMCc9zO//w==}
 
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
@@ -832,8 +954,9 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
-  sisteransi@1.0.5:
-    resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
+  sisteransi@2.0.0:
+    resolution: {integrity: sha512-2WCqLdt12eN6ehLI50S2/ZxoowXU3DD1KVPRyVP0WEsFahrGZZmCdq1K59qjJljMRIDTwx1D9YaRK+hDneBUMg==}
+    engines: {node: '>=20'}
 
   smol-toml@1.9.1:
     resolution: {integrity: sha512-j7WyPdf0CJoutMzMoPLF/bVXHtKZIT9Rb4eGeEbWw8X2t5oirjPgpL+OpaENZrILYaXqYwnVH+qgUwVbl+pUJQ==}
@@ -853,6 +976,11 @@ packages:
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
+    hasBin: true
+
+  typescript@7.0.2:
+    resolution: {integrity: sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==}
+    engines: {node: '>=16.20.0'}
     hasBin: true
 
   undici-types@6.21.0:
@@ -890,16 +1018,18 @@ packages:
 
 snapshots:
 
-  '@clack/core@0.4.1':
+  '@clack/core@1.6.0':
     dependencies:
-      picocolors: 1.1.1
-      sisteransi: 1.0.5
+      fast-string-width: 3.0.2
+      fast-wrap-ansi: 0.2.2
+      sisteransi: 2.0.0
 
-  '@clack/prompts@0.9.1':
+  '@clack/prompts@1.9.0':
     dependencies:
-      '@clack/core': 0.4.1
-      picocolors: 1.1.1
-      sisteransi: 1.0.5
+      '@clack/core': 1.6.0
+      fast-string-width: 3.0.2
+      fast-wrap-ansi: 0.2.2
+      sisteransi: 2.0.0
 
   '@dimforge/rapier3d-compat@0.12.0': {}
 
@@ -1100,19 +1230,19 @@ snapshots:
     optionalDependencies:
       '@types/node': 22.20.4
 
-  '@takazudo/zfb-darwin-arm64@5.2.2':
+  '@takazudo/zfb-darwin-arm64@6.0.1':
     optional: true
 
-  '@takazudo/zfb-darwin-x64@5.2.2':
+  '@takazudo/zfb-darwin-x64@6.0.1':
     optional: true
 
-  '@takazudo/zfb-linux-arm64-gnu@5.2.2':
+  '@takazudo/zfb-linux-arm64-gnu@6.0.1':
     optional: true
 
-  '@takazudo/zfb-linux-x64-gnu@5.2.2':
+  '@takazudo/zfb-linux-x64-gnu@6.0.1':
     optional: true
 
-  '@takazudo/zfb-md-wasm@5.2.2':
+  '@takazudo/zfb-md-wasm@6.0.1':
     dependencies:
       '@types/mdast': 4.0.4
       mdast-util-directive: 3.1.0
@@ -1120,37 +1250,37 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@takazudo/zfb-runtime@5.2.2(@takazudo/zfb@5.2.2)':
+  '@takazudo/zfb-runtime@6.0.1(@takazudo/zfb@6.0.1)':
     dependencies:
-      '@takazudo/zfb': 5.2.2
+      '@takazudo/zfb': 6.0.1
       hono: 4.13.9
 
-  '@takazudo/zfb-slugify@5.2.2': {}
+  '@takazudo/zfb-slugify@6.0.1': {}
 
-  '@takazudo/zfb-win32-x64-msvc@5.2.2':
+  '@takazudo/zfb-win32-x64-msvc@6.0.1':
     optional: true
 
-  '@takazudo/zfb@5.2.2':
+  '@takazudo/zfb@6.0.1':
     dependencies:
-      '@takazudo/zfb-slugify': 5.2.2
+      '@takazudo/zfb-slugify': 6.0.1
     optionalDependencies:
-      '@takazudo/zfb-darwin-arm64': 5.2.2
-      '@takazudo/zfb-darwin-x64': 5.2.2
-      '@takazudo/zfb-linux-arm64-gnu': 5.2.2
-      '@takazudo/zfb-linux-x64-gnu': 5.2.2
-      '@takazudo/zfb-win32-x64-msvc': 5.2.2
+      '@takazudo/zfb-darwin-arm64': 6.0.1
+      '@takazudo/zfb-darwin-x64': 6.0.1
+      '@takazudo/zfb-linux-arm64-gnu': 6.0.1
+      '@takazudo/zfb-linux-x64-gnu': 6.0.1
+      '@takazudo/zfb-win32-x64-msvc': 6.0.1
 
-  '@takazudo/zudo-doc-history-server@9.1.4': {}
+  '@takazudo/zudo-doc-history-server@10.0.3': {}
 
-  '@takazudo/zudo-doc@9.1.4(@takazudo/zfb-md-wasm@5.2.2)(@takazudo/zfb-runtime@5.2.2(@takazudo/zfb@5.2.2))(@takazudo/zfb@5.2.2)(@takazudo/zudo-doc-history-server@9.1.4)(@types/node@22.20.4)(diff@8.0.4)(zod@4.6.5)':
+  '@takazudo/zudo-doc@10.0.3(@takazudo/zfb-md-wasm@6.0.1)(@takazudo/zfb-runtime@6.0.1(@takazudo/zfb@6.0.1))(@takazudo/zfb@6.0.1)(@takazudo/zudo-doc-history-server@10.0.3)(@types/node@22.20.4)(diff@8.0.4)(zod@4.6.5)':
     dependencies:
       '@inquirer/prompts': 8.7.5(@types/node@22.20.4)
-      '@takazudo/zfb': 5.2.2
-      '@takazudo/zfb-runtime': 5.2.2(@takazudo/zfb@5.2.2)
+      '@takazudo/zfb': 6.0.1
+      '@takazudo/zfb-runtime': 6.0.1(@takazudo/zfb@6.0.1)
       esbuild: 0.28.2
       fs-extra: 11.4.1
       minimist: 1.2.8
-      parse5: 8.0.1
+      parse5: 8.1.1
       picocolors: 1.1.1
       pluralize: 8.0.0
       smol-toml: 1.9.1
@@ -1158,8 +1288,8 @@ snapshots:
       yaml: 2.9.1
       zod: 4.6.5
     optionalDependencies:
-      '@takazudo/zfb-md-wasm': 5.2.2
-      '@takazudo/zudo-doc-history-server': 9.1.4
+      '@takazudo/zfb-md-wasm': 6.0.1
+      '@takazudo/zudo-doc-history-server': 10.0.3
       diff: 8.0.4
     transitivePeerDependencies:
       - '@types/node'
@@ -1207,6 +1337,66 @@ snapshots:
 
   '@types/webxr@0.5.24': {}
 
+  '@typescript/typescript-aix-ppc64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-darwin-arm64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-darwin-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-freebsd-arm64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-freebsd-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-arm64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-arm@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-loong64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-mips64el@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-ppc64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-riscv64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-s390x@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-netbsd-arm64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-netbsd-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-openbsd-arm64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-openbsd-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-sunos-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-win32-arm64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-win32-x64@7.0.2':
+    optional: true
+
   ccount@2.0.1: {}
 
   character-entities-html4@2.1.0: {}
@@ -1221,9 +1411,9 @@ snapshots:
 
   cli-width@4.1.0: {}
 
-  create-zudo-doc@9.1.4:
+  create-zudo-doc@10.0.3:
     dependencies:
-      '@clack/prompts': 0.9.1
+      '@clack/prompts': 1.9.0
       fs-extra: 11.4.1
       minimist: 1.2.8
       picocolors: 1.1.1
@@ -1244,7 +1434,7 @@ snapshots:
 
   diff@8.0.4: {}
 
-  entities@8.1.0: {}
+  entities@9.0.0: {}
 
   esbuild@0.28.2:
     optionalDependencies:
@@ -1587,9 +1777,9 @@ snapshots:
       is-decimal: 2.0.1
       is-hexadecimal: 2.0.1
 
-  parse5@8.0.1:
+  parse5@8.1.1:
     dependencies:
-      entities: 8.1.0
+      entities: 9.0.0
 
   picocolors@1.1.1: {}
 
@@ -1599,7 +1789,7 @@ snapshots:
 
   signal-exit@4.1.0: {}
 
-  sisteransi@1.0.5: {}
+  sisteransi@2.0.0: {}
 
   smol-toml@1.9.1: {}
 
@@ -1617,6 +1807,29 @@ snapshots:
       fsevents: 2.3.3
 
   typescript@5.9.3: {}
+
+  typescript@7.0.2:
+    optionalDependencies:
+      '@typescript/typescript-aix-ppc64': 7.0.2
+      '@typescript/typescript-darwin-arm64': 7.0.2
+      '@typescript/typescript-darwin-x64': 7.0.2
+      '@typescript/typescript-freebsd-arm64': 7.0.2
+      '@typescript/typescript-freebsd-x64': 7.0.2
+      '@typescript/typescript-linux-arm': 7.0.2
+      '@typescript/typescript-linux-arm64': 7.0.2
+      '@typescript/typescript-linux-loong64': 7.0.2
+      '@typescript/typescript-linux-mips64el': 7.0.2
+      '@typescript/typescript-linux-ppc64': 7.0.2
+      '@typescript/typescript-linux-riscv64': 7.0.2
+      '@typescript/typescript-linux-s390x': 7.0.2
+      '@typescript/typescript-linux-x64': 7.0.2
+      '@typescript/typescript-netbsd-arm64': 7.0.2
+      '@typescript/typescript-netbsd-x64': 7.0.2
+      '@typescript/typescript-openbsd-arm64': 7.0.2
+      '@typescript/typescript-openbsd-x64': 7.0.2
+      '@typescript/typescript-sunos-x64': 7.0.2
+      '@typescript/typescript-win32-arm64': 7.0.2
+      '@typescript/typescript-win32-x64': 7.0.2
 
   undici-types@6.21.0: {}
 

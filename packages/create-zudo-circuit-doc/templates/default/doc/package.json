@@ -19,17 +19,17 @@
     "dev:circuit": "zudo-circuit-doc generate --watch --config ../circuit.config.ts"
   },
   "dependencies": {
-    "@takazudo/zfb": "5.2.2",
-    "@takazudo/zfb-runtime": "5.2.2",
-    "@takazudo/zfb-md-wasm": "5.2.2",
-    "@takazudo/zudo-doc": "9.1.4",
-    "@takazudo/zudo-doc-history-server": "9.1.4",
+    "@takazudo/zfb": "6.0.1",
+    "@takazudo/zfb-runtime": "6.0.1",
+    "@takazudo/zfb-md-wasm": "6.0.1",
+    "@takazudo/zudo-doc": "10.0.3",
+    "@takazudo/zudo-doc-history-server": "10.0.3",
     "@takazudo/zudo-circuit-doc": "^0.3.1",
     "zod": "^4.3.6",
-    "diff": "^8.0.3"
+    "diff": "^8.0.4 || ^9.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.0",
+    "typescript": "^7.0.2",
     "@types/node": "^22.0.0"
   }
 }

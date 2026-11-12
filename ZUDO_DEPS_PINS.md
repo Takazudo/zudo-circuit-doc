@@ -1,32 +1,34 @@
 # First-party dependency and scaffold provenance
 
-Recorded 2026-11-06 for the zudo-doc 9.1.4 update and Graphite adoption (ADR-026), on top of
-the 9.1.3 / 5.2.2 update from #161. Historical release notes and the frozen LED corpus retain
-their original pins. Runtime 0.3.0 and initializer 0.2.1 are published.
+Recorded 2026-11-12 for the zudo-doc 10.0.3 / ZFB 6.0.1 update (ADR-027), on top of the
+9.1.4 / 5.2.2 family (ADR-026). Historical release notes and the frozen LED corpus retain
+their original pins. Runtime 0.3.1 and initializer 0.2.2 are published; this family ships
+in the next runtime (0.4.0) and initializer releases.
 
 ## Published family
 
 | Package | Previous lockfile version | Selected version |
 | --- | --- | --- |
-| `@takazudo/zfb` | 5.2.2 | 5.2.2 |
-| `@takazudo/zfb-runtime` | 5.2.2 | 5.2.2 |
-| `@takazudo/zfb-md-wasm` | 5.2.2 | 5.2.2 |
-| `@takazudo/zudo-doc` | 9.1.3 | 9.1.4 |
-| `@takazudo/zudo-doc-history-server` | 9.1.3 | 9.1.4 |
-| `create-zudo-doc` (unscoped, root tool only) | 9.1.3 | 9.1.4 |
+| `@takazudo/zfb` | 5.2.2 | 6.0.1 |
+| `@takazudo/zfb-runtime` | 5.2.2 | 6.0.1 |
+| `@takazudo/zfb-md-wasm` | 5.2.2 | 6.0.1 |
+| `@takazudo/zudo-doc` | 9.1.4 | 10.0.3 |
+| `@takazudo/zudo-doc-history-server` | 9.1.4 | 10.0.3 |
+| `create-zudo-doc` (unscoped, root tool only) | 9.1.4 | 10.0.3 |
 
 All six targets are the `latest` stable releases, resolved from npm metadata (no stale-tag or
-graduation flags). zudo-doc 9.1.4 still requires the ZFB family at `^5.2.2` and its history
-peer (`^9.0.0`) stays satisfied. Development and host pins stay exact. Runtime peers stay at
-`@takazudo/zudo-doc: ^9.1.3` and `@takazudo/zfb: ^5.2.2`: the 9.1.4 package is byte-identical
-to 9.1.3 apart from its version and changelog, so raising the floor would buy nothing.
-Node stays on 24 LTS (`>=24 <25`), TypeScript 5.9, pnpm 11.5.2 and Python >=3.10.
+graduation flags). zudo-doc 10.0.3 requires the ZFB family at `^6.0.1` and history-server at
+`^10.0.0`, so the family moves together. Development and host pins stay exact. Runtime peers
+rise to `@takazudo/zudo-doc: ^10.0.3` and `@takazudo/zfb: ^6.0.1` (breaking for hosts on
+zudo-doc 9). Node stays on 24 LTS (`>=24 <25`), pnpm 11.5.2 and Python >=3.10. The monorepo
+toolchain stays on TypeScript 5.9; the doc hosts and the generated template pin TypeScript
+`^7.0.2` and `diff ^8.0.4 || ^9.0.0`, following create-zudo-doc 10's generator (parity-checked).
 
-The resolver scanned the same manifests as the 9.1.3 update. It proposed moving the
-initializer test fixture's `@takazudo/zudo-circuit-doc` range to `^0.3.0`; that was rejected
-because the test fixtures pin their own contracts. `workspace:*` contracts are preserved.
+The resolver again proposed moving the initializer test fixture's `@takazudo/zudo-circuit-doc`
+range (to `^0.3.1`); that was rejected because the test fixtures pin their own contracts.
+`workspace:*` contracts are preserved.
 
-The exact release-age exception becomes `@takazudo/zfb-slugify@5.2.2`, matching
+The exact release-age exception becomes `@takazudo/zfb-slugify@6.0.1`, matching
 ZFB's required dependency.
 
 ## create-zudo-doc scaffold
@@ -34,28 +36,45 @@ ZFB's required dependency.
 - repo: `zudolab/zudo-doc`
 - source: `packages/create-zudo-doc/templates/base/` and
   `packages/create-zudo-doc/src/scaffold.ts` (feature composition)
-- pinned: `054c1dabb5810afa24485a5431bce094b14fae21` (npm `gitHead` of `create-zudo-doc@9.1.4`;
-  the upstream repo was not reachable from the updating session, so tags were not re-verified)
-- package: `create-zudo-doc@9.1.4`
-- integrity: `sha512-yoiDPpxzKXDLz+dE4QbSTYePRHE84FftJ/hC911+mP8WLeS/DWCh7+24EKuTH44hv4+RMg+Z4yrkyfsdjlgcXw==`
-- updated: 2026-11-06
+- pinned: `c7210d5cbb26c3b765271b71c0c8effd01f54995` (npm `gitHead` of `create-zudo-doc@10.0.3`;
+  tags were not re-verified from the updating session)
+- package: `create-zudo-doc@10.0.3`
+- integrity: `sha512-kr8DJEI51TmnS/fAzeH5IQM2mRLBgXKjJp7R0KABS5fwdcuxr5EXk8FUCYIZ/Sg2tuhTNMMjNJoWgrwQXeo3Hw==`
+- updated: 2026-11-12
 - files: canonical `examples/empty/doc/{pages,tsconfig.json,src/styles/global.css,scripts/check-links.js}`;
   generated `packages/create-zudo-circuit-doc/templates/default`; corresponding
   minimal/documentation host glue; `scripts/lib/fixture-site.mjs`
 - sync: generate a separate reference with `generateUpstreamScaffold()` from
   `scripts/check-upstream-scaffold.mjs`, then run `pnpm sync:template`,
   `pnpm check:upstream-scaffold` and `pnpm check:template`
-- notes: exact parity against the published 9.1.4 generator passes without host-file
-  edits; the eleven default features are unchanged (`dist/constants.js` is byte-identical
-  to 9.1.3). Retain the eleven-feature selection, `DocHistoryBoundary`, circuit
+- notes: the 10.0.3 generator changes the comment on the docHistory-patched docs route
+  (`DocHistoryBoundary as DocHistory` from `@takazudo/zudo-doc/doc-history-area`) and the
+  generated `typescript`/`diff` pins; all four hosts take them. The eleven default features are
+  unchanged. Retain the eleven-feature selection, `DocHistoryBoundary`, circuit
   stylesheet after feature CSS, direct six-component MDX registry, islands route
   import and seed, local content/routes/header/sidebar, asset viewer, history
-  exclusions, strict links, generated-project install policy and the explicit
-  `themePack: "graphite"` with `themePacks: ["graphite"]` (the 9.x generator omits both;
-  the allowlist keeps the other packs out of the build, ADR-026).
-  The relative aliases and absence of `baseUrl` remain unchanged.
+  exclusions, strict links, generated-project install policy (`allowBuilds: esbuild: true`,
+  still written by the 10.x generator) and the explicit `themePack: "graphite"` with
+  `themePacks: ["graphite"]` (ADR-026). The relative aliases and absence of `baseUrl` remain unchanged.
 
 ## Impact assessment
+
+- zudo-doc 10.0.0: `themePack: "default"` becomes an alias of Graphite and Classic moves to
+  `classic`; `DEFAULT_THEME_PACK_SLUG` is replaced by `CLASSIC_THEME_PACK_SLUG`. Every host
+  already selects `graphite` explicitly and no code uses the removed constant: no change.
+- zudo-doc 10.0.0: requires ZFB 6.0.1 (Rolldown bundling; removed bundler selectors must stay
+  unset — none is set here) and history-server 10. 10.0.1 fixes the theme CLI's `themePack`
+  detection; 10.0.2 widens the optional `diff` peer to `^8 || ^9` and adopts ZDTP 0.9.4.
+- history-server 9.1.4 -> 10.0.3: no package-specific changes.
+- create-zudo-doc 9.1.4 -> 10.0.3: Classic slug `classic`; generated pins zudo-doc/history
+  `^10`, ZFB `^6.0.1`, TypeScript `^7.0.2`, `diff ^8.0.4 || ^9.0.0`, ZDTP 0.9.4. TypeScript 7
+  rejects command-line files beside a `tsconfig.json` (TS5112), so the packed-consumer strict
+  registration probe passes `--ignoreConfig`.
+- ZFB 5.2.2 -> 6.0.1: Rolldown bundler; transcluded files now honour `markdown.gfm`, math, CJK
+  and hard-break settings. The hosts do not transclude; the LED
+  publication scan is the gate for rendering changes.
+
+Previous update (9.1.3 -> 9.1.4, Graphite adoption):
 
 - zudo-doc 9.1.3 -> 9.1.4 and history-server 9.1.3 -> 9.1.4 change only their version and
   changelog (published tarball diff).

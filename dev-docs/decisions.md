@@ -575,3 +575,33 @@ shipped in initializer 0.2.1.
 
 No test, scanner policy, canary, frozen corpus or generated evidence is weakened.
 
+
+## ADR-027 — zudo-doc 10.0.3 / ZFB 6.0.1 family
+
+**Status:** Local build, typecheck, full test suites, template/scaffold parity, example host
+builds, the documentation build and the packed-consumer verification (`verify:pack`) verified
+on 2026-11-12; CI carries the LED corpus/scan and browser gates.
+
+Exact development/host pins become zudo-doc/history-server/create-zudo-doc 10.0.3 and
+ZFB/runtime/md-wasm 6.0.1. zudo-doc 10 requires the ZFB 6.0.1 family and history-server
+`^10.0.0`, so the six move together. Runtime peers rise to `@takazudo/zudo-doc ^10.0.3` and
+`@takazudo/zfb ^6.0.1`: a host on zudo-doc 9 no longer satisfies them, which makes this a
+breaking runtime release (0.4.0 under 0.x).
+
+zudo-doc 10 makes `themePack: "default"` an alias of Graphite and moves Classic to `classic`.
+Every host already sets `themePack: "graphite"` with `themePacks: ["graphite"]` (ADR-026), so
+nothing changes in rendering. ZFB 6 bundles with Rolldown; no host sets a bundler selector.
+create-zudo-doc 10 still writes `allowBuilds: esbuild: true`, so the generated workspace keeps it.
+
+create-zudo-doc 10 generates `typescript ^7.0.2` and `diff ^8.0.4 || ^9.0.0`, and the upstream
+parity check covers both. The documentation site, both examples and the generated template
+therefore follow the new generator: they pin TypeScript 7, and the comment on the patched docs route
+is refreshed. The monorepo's own toolchain (root and the two packages) stays on TypeScript 5.9.
+TypeScript 7 refuses command-line files next to a `tsconfig.json` (TS5112), so the strict
+public-registration probe in `scripts/lib/check-host-types.mjs` passes `--ignoreConfig`. The
+project-mode host typecheck that follows it is unchanged.
+
+ZFB 6 renders transcluded files with the project's GFM, math, CJK and hard-break settings. Hosts
+here do not transclude, and the frozen LED publication scan is the gate for any rendering change.
+
+No test, scanner policy, canary, frozen corpus or generated evidence is weakened.
