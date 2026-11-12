@@ -13,7 +13,8 @@ export async function checkHostTypes(hostDir) {
     '',
   ].join("\n"), { flag: "wx" });
   try {
-    await run(PNPM[0], [...PNPM.slice(1), "exec", "tsc", "--noEmit", "--strict",
+    // Hosts pin TypeScript 7 (create-zudo-doc 10), which refuses command-line files next to a tsconfig.json (TS5112) unless told to ignore it.
+    await run(PNPM[0], [...PNPM.slice(1), "exec", "tsc", "--ignoreConfig", "--noEmit", "--strict",
       "--module", "NodeNext", "--moduleResolution", "NodeNext", "--target", "ES2022",
       "--lib", "ES2022,DOM,DOM.Iterable", probe], docDir);
     await run(PNPM[0], [...PNPM.slice(1), "exec", "tsc", "--noEmit", "--project", "tsconfig.json"], docDir);
