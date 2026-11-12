@@ -273,7 +273,8 @@ async function cmdRegistryState(values) {
 async function cmdVerifyPublication(values) {
   const config = packageConfig(values.package);
   const version = values.version;
-  const state = await waitForPresence(config, version, waitSeconds(values, 600));
+  const deadline = Date.now() + waitSeconds(values, 600) * 1000;
+  const state = await waitForPresence(config, version, Math.max(0, (deadline - Date.now()) / 1000));
   if (state.state !== "present") {
     throw new UncertainStateError(
       `${config.selector}@${version} is not visible on npm yet (${state.state}${state.reason ? `: ${state.reason}` : ""}). ` +
@@ -283,9 +284,7 @@ async function cmdVerifyPublication(values) {
   let statement = null;
   const attestationsUrl = state.manifest.dist?.attestations?.url;
   if (attestationsUrl) {
-    const response = await httpJson(attestationsUrl, { headers: { Accept: "application/json" } });
-    if (response.status !== 200) throw new UncertainStateError(`Could not read attestations (${response.status ?? response.error}).`);
-    statement = extractProvenanceStatement(response.body);
+    statement = extractProvenanceStatement(await readAttestations(attestationsUrl, deadline));
   }
   const result = evaluatePublication({
     manifest: state.manifest,
@@ -304,6 +303,19 @@ async function cmdVerifyPublication(values) {
   );
   log(JSON.stringify(result, null, 2));
   if (result.verdict !== "oidc-verified") process.exitCode = 1;
+}
+
+// The attestations endpoint can 404 for a while after the packument already lists the version.
+async function readAttestations(url, deadline) {
+  for (;;) {
+    const response = await httpJson(url, { headers: { Accept: "application/json" } });
+    if (response.status === 200) return response.body;
+    if (Date.now() >= deadline) {
+      throw new UncertainStateError(`Could not read attestations (${response.status ?? response.error}).`);
+    }
+    log(`attestations ${url}: ${response.status ?? response.error}; retrying...`);
+    await sleep(15_000);
+  }
 }
 
 async function releaseNotesFor(config, version, sha) {
