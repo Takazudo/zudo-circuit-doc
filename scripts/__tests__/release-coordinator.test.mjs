@@ -15,6 +15,8 @@ import {
   planCoordinator,
   resolveExistingTag,
   summarizePublisherRuns,
+  templateRuntimeRange,
+  INITIALIZER_TEMPLATE_MANIFEST,
 } from "../lib/release-core.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -226,6 +228,14 @@ describe("initializer published-runtime gate", () => {
     assert.match(gate.problems[0], /selects runtime "\^0\.3\.1", not \^0\.4\.0/u);
     const exact = assessRuntimeGate({ runtimeVersion: "0.4.0", templateRange: "0.4.0", remoteTag: runtimeTag, registry: present, githubRelease: present });
     assert.equal(exact.ok, false);
+  });
+
+  test("reads the runtime range from the real initializer template", () => {
+    const template = JSON.parse(readFileSync(join(ROOT, INITIALIZER_TEMPLATE_MANIFEST), "utf8"));
+    const runtimeVersion = JSON.parse(readFileSync(join(ROOT, "packages/circuit-doc/package.json"), "utf8")).version;
+    assert.equal(templateRuntimeRange(template, "@takazudo/zudo-circuit-doc"), `^${runtimeVersion}`);
+    assert.equal(templateRuntimeRange({ dependencies: { "@takazudo/zudo-circuit-doc": "^1.0.0" } }, "@takazudo/zudo-circuit-doc"), "^1.0.0");
+    assert.equal(templateRuntimeRange({}, "@takazudo/zudo-circuit-doc"), null);
   });
 
   test("uncertain runtime state stops instead of guessing", () => {

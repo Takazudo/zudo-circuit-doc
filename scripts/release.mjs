@@ -35,6 +35,7 @@ import {
   parseCoordinatorInputs,
   planCoordinator,
   resolveExistingTag,
+  templateRuntimeRange,
   classifyRegistryResponse,
   evaluateCiRuns,
   evaluatePublication,
@@ -100,7 +101,7 @@ async function httpJson(url, { method = "GET", headers = {}, body } = {}) {
   try {
     response = await fetch(url, {
       method,
-      headers,
+      headers: body === undefined ? headers : { "Content-Type": "application/json", ...headers },
       body: body === undefined ? undefined : JSON.stringify(body),
       signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
     });
@@ -770,7 +771,7 @@ async function gatherCoordinatorFacts({ config, version, sha, tag, mainHead }) {
     const template = JSON.parse(fileAt(sha, INITIALIZER_TEMPLATE_MANIFEST) ?? "{}");
     runtimeGate = assessRuntimeGate({
       runtimeVersion,
-      templateRange: template.dependencies?.[runtime.selector] ?? null,
+      templateRange: templateRuntimeRange(template, runtime.selector),
       remoteTag: remoteTag(runtime.tag(runtimeVersion)),
       registry: await registryState(runtime, runtimeVersion),
       githubRelease: await githubReleaseState(runtime.tag(runtimeVersion)),
