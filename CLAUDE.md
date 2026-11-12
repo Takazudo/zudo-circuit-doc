@@ -34,7 +34,9 @@ Use `/l-make-release` to prepare a package release and follow the
 [publishing runbook](dev-docs/publishing.md), which is canonical. Codex uses the
 repository skill `.agents/skills/release/`; both drive the shared helper
 `node scripts/release.mjs`. Publishing uses npm Trusted Publishing (GitHub OIDC);
-no npm token is stored or needed. The documentation site deploys
+no npm token is stored or needed. Release tags are created by the
+`release-coordinator.yml` workflow on GitHub Actions, which then dispatches the
+publish workflow, so no session has to push a tag itself. The documentation site deploys
 automatically from `main` to [zudo-circuit-doc.zudolab.dev](https://zudo-circuit-doc.zudolab.dev);
 see [site deployment](dev-docs/site-deploy.md).
 

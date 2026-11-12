@@ -32,8 +32,11 @@ rules.
 
 Each package's own manifest is its version source; never bump the private root
 `package.json`. Stable npm `latest` only: no prerelease suffixes, no `next`.
-Publishing happens only in the tag-triggered workflow via npm Trusted
-Publishing (GitHub OIDC). No npm token exists or is needed. The skill never
+Publishing happens only in the package's publish workflow via npm Trusted
+Publishing (GitHub OIDC). The release tag is created by the **release
+coordinator** workflow (`release-coordinator.yml`) on GitHub Actions, which
+then dispatches the publish workflow; this skill never needs to push a tag. No
+npm token exists or is needed. The skill never
 runs `npm publish` / `pnpm publish` and never creates the GitHub Release
 itself; the workflow's `finalize` job does.
 
@@ -72,14 +75,22 @@ its `verdict=` and exit-75 rules. Otherwise run them directly.
 ## 1. Preflight and release mode
 
 For each selected package run
-`node scripts/release.mjs preflight --package <p>`. It checks Node/pnpm, a
-clean `main` equal to `origin/main`, origin, git push and GitHub auth, npm
-reachability, and binds HEAD to its manifest version, tag, push-event CI and
-exact npm state. Stop on any `FAIL` and report the failing lines. This
-skill pushes the release commit and tag with git, so its `info.gitPush` line
-must also read `available`. Bring a
-behind `main` current first; stop on divergence rather than guessing which tree
-to release. Pending or failed CI at HEAD is a stop.
+`node scripts/release.mjs preflight --package <p>` (in a Cloud session behind
+a proxy, prefix `NODE_USE_ENV_PROXY=1`). It checks Node/pnpm, a clean `main`
+equal to `origin/main`, origin, npm reachability and GitHub reads, and binds
+HEAD to its manifest version, tag, push-event CI and exact npm state. Stop on
+any `FAIL` and report the failing lines. Then record the capabilities from its
+`info` block; they are not failures on their own:
+
+- `gitPush`: `available` → push the release commit to `main`; otherwise
+  deliver it as a pull request and continue after the owner merges it.
+- `githubCredential` / `releasePath`: how to start the release coordinator.
+  In order: `request-release` through the API; else the GitHub MCP
+  `actions_run_trigger` tool, when this session has it (an unauthenticated
+  `gh` does not matter); else hand the owner the exact **Run workflow** inputs.
+
+Bring a behind `main` current first; stop on divergence rather than guessing
+which tree to release. Pending or failed CI at HEAD is a stop.
 
 Read the manifest version (`CUR`) and the latest tag in **the package's own
 namespace** (`git tag -l 'v*.*.*' --sort=-v:refname` for runtime,
@@ -194,40 +205,63 @@ diff, then:
 
 ```bash
 git commit -m "chore(release): <pkg> v<version>"
-BUMP_SHA=$(git rev-parse HEAD)
-git push origin main
+git push origin main   # or open a PR when preflight's gitPush is unavailable
 ```
 
-Wait for that commit's own push-event CI, then confirm the binding with
+`BUMP_SHA` is the release commit **as it exists on `main`**: the pushed
+commit, or the merge result after the owner merges the PR. Wait for that
+commit's own push-event CI, then confirm the binding with
 `node scripts/release.mjs preflight --package <p> --sha "$BUMP_SHA"`. Only
 push-event runs on exactly `BUMP_SHA` count; `pull_request` runs tested a merge
 tree and are listed as ignored. If CI fails, fix, commit, push, re-run the
 checks that cover the fix, and replace `BUMP_SHA` with the newly verified
 commit. Never tag a SHA whose CI did not pass.
 
-## 5. Tag, publish, verify
+## 5. Tag, publish, verify (release coordinator)
 
-Recheck: `registry-state --package <p> --version <v>` is `absent` and
-`git ls-remote origin refs/tags/<tag>` is empty. Then tag **`BUMP_SHA`** and
-push only that tag:
+The tag is created by `.github/workflows/release-coordinator.yml` on `main`,
+never by this skill. Inputs: `package` (`runtime`/`initializer`), `version`,
+`sha` = `BUMP_SHA` (full 40 characters), `dry_run`, `allow_older_sha`
+(leave false). publishing.md ("Release coordinator") lists every check and
+action.
 
-```bash
-git tag "<tag>" "$BUMP_SHA"
-git push origin "<tag>"
-node scripts/release.mjs ensure-run --package <p> --tag "<tag>"
-```
+1. **Dry run.** Start the coordinator with `dry_run: true`:
+   - API: `node scripts/release.mjs request-release --package <p> --version <v> --sha "$BUMP_SHA" --dry-run`
+   - else GitHub MCP: `actions_run_trigger` with `method: run_workflow`,
+     `owner: Takazudo`, `repo: zudo-circuit-doc`,
+     `workflow_id: release-coordinator.yml`, `ref: main`,
+     `inputs: {"package": "<p>", "version": "<v>", "sha": "<BUMP_SHA>", "dry_run": "true", "allow_older_sha": "false"}`.
+     Find the run with `actions_list` (`list_workflow_runs`,
+     `resource_id: release-coordinator.yml`, event `workflow_dispatch`) and
+     follow it with `actions_get` (`get_workflow_run`).
+   - else stop and give the owner the exact inputs for **Actions → Release
+     coordinator → Run workflow**.
 
-A pushed tag is the irreversible release boundary. `ensure-run` reports the
-publish run(s) for the tag, or dispatches one at the tag if none appears.
-Watch it with `gh run watch <run-id> --exit-status` (or the Actions page). A
-red run is not evidence of absence: go to [Failure recovery](#failure-recovery).
+   The `plan` job's summary must show action `create-tag` (or a resume
+   action). A refusal is a stop: report its reason. Never change `sha` to a
+   newer `main` commit on your own; if `main` moved, bind the new HEAD with
+   `preflight --sha` after its CI, and ask before using it.
+2. **Real run.** Start it again with the same inputs and `dry_run: false`.
+   This is the irreversible release boundary. The coordinator creates the
+   tag with its `GITHUB_TOKEN`, dispatches the publish workflow at the tag,
+   watches it, and reports npm, `trustedPublisher` and the GitHub Release.
+   Read back the coordinator run and the publisher run URL. A red run is not
+   evidence of absence: go to [Failure recovery](#failure-recovery).
+3. Verify with `node scripts/release.mjs status --package <p> --version <v>`.
+   It must show `npm: "present"`, a non-null `trustedPublisher`, a GitHub
+   Release URL, and `missing: []`. Report the npm URL, the coordinator and
+   publish run URLs, and the GitHub Release URL. In a combined run, start the
+   initializer only after this; the coordinator refuses an initializer whose
+   runtime release is incomplete. If the runtime does not reach npm, stop and
+   report why; the initializer can be released later with
+   `/l-make-release initializer`.
 
-Verify with `node scripts/release.mjs status --package <p> --version <v>`. It
-must show `npm: "present"`, a non-null `trustedPublisher`, a GitHub Release
-URL, and `missing: []`. Report the npm URL, publish run URL, and GitHub Release
-URL. In a combined run, start the initializer only after this. If the runtime
-does not reach npm, stop and report why; the initializer can be released later
-with `/l-make-release initializer`.
+A tag the coordinator could not create (403 or another error) is reported in
+its summary with GitHub's message, the token permissions and the candidate
+SHA; report those lines and the owner checks from publishing.md. Do not retry
+with another credential and do not change repository settings. The owner may
+tag from their own machine instead (`git tag` + `git push origin <tag>` +
+`ensure-run`), as their decision.
 
 After a package's first release is live, make a **separate docs commit** on
 `main` updating the unpublished-status notice in
@@ -247,25 +281,30 @@ revert it as one commit (`git revert --no-edit <BUMP_SHA>`) and push `main`;
 if later commits bury it, leave it and explain that a later release must
 supersede the prepared version. Do not rewrite shared history.
 
-After a tag push, treat the version as potentially live. Never delete, move,
+After the coordinator (or anyone) created the tag, treat the version as potentially live. Never delete, move,
 or recreate a pushed release tag. Run `status` and follow recovery. Retraction
 of an already published package is an owner decision outside this skill.
 
 ## Failure recovery
 
-After a tag push, start every recovery with
+After the tag exists, start every recovery with
 `node scripts/release.mjs status --package <p> --version <v> --sha <BUMP_SHA>`
 and act on its `missing` list using the table in publishing.md
 ("If a release step fails"). In short:
 
-- `missing: ["github-release"]`: npm has it. Run
+- `missing: ["github-release"]`: npm has it. Rerun the coordinator with the
+  same inputs (it plans `dispatch-finalize`), or
   `node scripts/release.mjs dispatch --package <p> --tag <tag> --ref main`
   (finalize-only run). Never republish.
 - `missing: ["publish", "github-release"]`: npm clearly lacks it. Read the
   failed run's log (`gh run view <run-id> --log-failed`), fix a transient or
-  OIDC-configuration cause, then retry only via
-  `dispatch --package <p> --tag <tag>` (ref = the tag). A code or workflow fix
+  OIDC-configuration cause, then retry by rerunning the coordinator with the
+  same inputs (it keeps the tag's original SHA and waits instead if an earlier
+  run's publish job succeeded), or `dispatch --package <p> --tag <tag>`
+  (ref = the tag). A code or workflow fix
   needs a new version. Pre-OIDC tags can only be finalized.
+- Coordinator `wait`: a run is in flight or npm has not shown an accepted
+  upload yet. Rerun later; never republish.
 - Uncertain state (exit 3, timeout, auth error) or an inconsistent-history
   error: stop. Never dispatch on a failed query; never move, delete, or
   recreate a pushed tag.

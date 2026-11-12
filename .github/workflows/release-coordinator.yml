@@ -1,0 +1,154 @@
+# Release coordinator: create a package's release tag from GitHub Actions and
+# explicitly start its existing publish workflow, so no caller needs to push a
+# tag with its own credential. Procedure and recovery: dev-docs/publishing.md.
+#
+# Jobs and their only permissions:
+#   plan      contents:read, actions:read   read-only facts and one action:
+#                                            create-tag | dispatch-publish |
+#                                            dispatch-finalize | wait | complete
+#   tag       contents:write                create refs/tags/<tag> at the SHA
+#                                            with GITHUB_TOKEN (same SHA resumes)
+#   dispatch  actions:write, contents:read  dispatch the publisher at the tag
+#                                            (publish) or main (finalize), then
+#                                            watch it and read npm/Release back
+#
+# A tag created with GITHUB_TOKEN never starts the publisher's tag-push
+# trigger, so `dispatch` always starts it explicitly. OIDC (id-token) stays in
+# the publish workflows' own publish job; this workflow has no npm access.
+# dry_run stops after `plan`: nothing is tagged, dispatched or written.
+
+name: Release coordinator
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: "Package to release"
+        type: choice
+        options:
+          - runtime
+          - initializer
+        required: true
+      version:
+        description: "Exact stable version in the package manifest (X.Y.Z, no v)"
+        type: string
+        required: true
+      sha:
+        description: "Full 40-character release commit SHA on main (kept as given; never swapped for a newer main)"
+        type: string
+        required: true
+      dry_run:
+        description: "Plan only: verify and report, create no tag and dispatch nothing"
+        type: boolean
+        default: true
+      allow_older_sha:
+        description: "Allow a new tag on a SHA that is no longer main HEAD (normally the CI-green main HEAD is required)"
+        type: boolean
+        default: false
+
+# One release at a time per package; never cancel a run that may be tagging or
+# watching a publish.
+concurrency:
+  group: release-coordinator-${{ inputs.package }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  plan:
+    name: Plan release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      tag: ${{ steps.plan.outputs.tag }}
+      sha: ${{ steps.plan.outputs.sha }}
+      action: ${{ steps.plan.outputs.action }}
+      dispatch_ref: ${{ steps.plan.outputs.dispatch_ref }}
+      act: ${{ steps.plan.outputs.act }}
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Verify candidate and plan
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_PACKAGE: ${{ inputs.package }}
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_SHA: ${{ inputs.sha }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+          INPUT_ALLOW_OLDER_SHA: ${{ inputs.allow_older_sha }}
+        run: node scripts/release.mjs coordinate-plan
+
+  tag:
+    name: Create release tag
+    needs: plan
+    if: needs.plan.outputs.act == 'true' && needs.plan.outputs.action == 'create-tag'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Create tag at the planned SHA
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE: ${{ inputs.package }}
+          TAG: ${{ needs.plan.outputs.tag }}
+          SHA: ${{ needs.plan.outputs.sha }}
+        run: node scripts/release.mjs coordinate-tag --package "$PACKAGE" --tag "$TAG" --sha "$SHA"
+
+  dispatch:
+    name: Dispatch publisher
+    needs: [plan, tag]
+    if: >-
+      always() && needs.plan.result == 'success' && needs.plan.outputs.act == 'true' &&
+      (needs.tag.result == 'success' || (needs.tag.result == 'skipped' && needs.plan.outputs.action != 'create-tag'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Dispatch, watch and read back
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE: ${{ inputs.package }}
+          TAG: ${{ needs.plan.outputs.tag }}
+          SHA: ${{ needs.plan.outputs.sha }}
+          DISPATCH_REF: ${{ needs.plan.outputs.dispatch_ref }}
+        run: >-
+          node scripts/release.mjs coordinate-dispatch --package "$PACKAGE"
+          --tag "$TAG" --sha "$SHA" --ref "$DISPATCH_REF" --wait 4800

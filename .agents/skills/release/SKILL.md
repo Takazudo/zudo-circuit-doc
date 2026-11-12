@@ -2,8 +2,9 @@
 name: release
 description: >-
   Release @takazudo/zudo-circuit-doc (runtime) and/or create-zudo-circuit-doc
-  (initializer) to npm through the tag-triggered Trusted Publishing (OIDC)
-  workflows, using scripts/release.mjs. Use when the task explicitly asks to
+  (initializer) to npm: the release-coordinator workflow creates the tag and
+  dispatches the Trusted Publishing (OIDC) workflows; scripts/release.mjs
+  checks and drives it. Use when the task explicitly asks to
   cut, publish, resume, or recover a release of either package, or to check a
   release's state.
 ---
@@ -21,8 +22,9 @@ commands (re-derive SHAs and versions in each command).
 
 ## Authorization: a real release needs explicit consent
 
-A pushed tag publishes to npm and cannot be undone. Push a release tag only
-when the task explicitly authorizes publishing the named package(s). Without
+A release tag publishes to npm and cannot be undone. Run the release
+coordinator with `dry_run: false` only when the task explicitly authorizes
+publishing the named package(s). Without
 that, do the read-only work (preflight, proposal, `status`) and stop with a
 proposal. Never create or run anything that publishes outside the workflows:
 no `npm publish`, `pnpm publish`, or `gh release create`.
@@ -45,9 +47,11 @@ no `npm publish`, `pnpm publish`, or `gh release create`.
 
 ## Procedure
 
-1. **Preflight.** `node scripts/release.mjs preflight --package <p>`. On any
-   `FAIL`, stop and report every `PASS`/`FAIL` capability line plus the `info`
-   block (heavy-guard, platform) verbatim.
+1. **Preflight.** `node scripts/release.mjs preflight --package <p>` (behind
+   an egress proxy: `NODE_USE_ENV_PROXY=1`). On any `FAIL`, stop and report
+   every `PASS`/`FAIL` line plus the `info` block verbatim. The `info` block
+   lists capabilities, not failures: `githubCredential`, `gitPush`,
+   `releasePath`, `heavyGuard`.
 2. **Judge and propose.** Commits since the package's latest namespace tag
    (see l-make-release for what counts). Check the exact proposed version with
    `node scripts/release.mjs registry-state --package <p> --version <v>`; it
@@ -67,36 +71,52 @@ no `npm publish`, `pnpm publish`, or `gh release create`.
    and `--fixture minimal`. Initializer:
    `corepack pnpm verify:pack --fixture empty --published-runtime`. Any
    failure: fix or stop; no tag.
-5. **Commit and push** only the release files as
-   `chore(release): <pkg> v<version>` to `main` (preflight's `gitPush` line
-   says whether that is possible; if not, open it as a pull request, and after
-   the owner merges it use the resulting `main` commit as `<sha>`). Wait for that commit's
-   push-event CI, then
-   `node scripts/release.mjs preflight --package <p> --sha <sha>` must pass.
-   Only push-event runs on that exact SHA count.
-6. **Tag (irreversible).** Recheck `registry-state` is `absent` and the tag is
-   not on origin. Create the tag on the verified SHA, using credentials the
-   task environment provides (never a workflow `GITHUB_TOKEN`; tags it creates
-   start no workflows):
-   - `git tag <tag> <sha> && git push origin <tag>`, or
-   - if `git push` is unavailable but preflight showed GitHub push permission:
-     `POST /repos/Takazudo/zudo-circuit-doc/git/refs` with
-     `{"ref":"refs/tags/<tag>","sha":"<sha>"}`.
-   If neither works, stop before tagging and hand over to the owner.
-7. **Ensure the run.** `node scripts/release.mjs ensure-run --package <p> --tag <tag>`.
-   It prints the run URL(s), or dispatches at the tag if no run appeared.
+5. **Commit and land** only the release files as
+   `chore(release): <pkg> v<version>` on `main`: push when preflight's
+   `gitPush` is `available`, otherwise open a pull request and, after the
+   owner merges it, use the resulting `main` commit as `<sha>`. Wait for that
+   commit's push-event CI, then
+   `node scripts/release.mjs preflight --package <p> --sha <sha>` must pass
+   (it also shows the coordinator's plan). Only push-event runs on that exact
+   SHA count.
+6. **Coordinator dry run.** Start `.github/workflows/release-coordinator.yml`
+   on `main` with inputs `package`, `version`, `sha` (full 40 characters),
+   `dry_run: true`, `allow_older_sha: false`, using the first available path:
+   - `node scripts/release.mjs request-release --package <p> --version <v> --sha <sha> --dry-run`
+     (needs a GitHub credential that can dispatch workflows);
+   - a GitHub MCP / connector tool that runs a workflow (`run_workflow` on
+     `release-coordinator.yml`, ref `main`, inputs as strings), then read the
+     run back;
+   - otherwise stop and hand the owner the exact inputs for **Actions →
+     Release coordinator → Run workflow**.
+   The plan must be `create-tag` (or a resume action). A refusal is a stop.
+   Never push a tag from the task environment and never swap `sha` for a
+   newer `main` commit on your own.
+7. **Coordinator real run (irreversible).** Same inputs with
+   `dry_run: false`. The coordinator creates the tag with its own
+   `GITHUB_TOKEN`, dispatches the publish workflow at the tag, watches it, and
+   reports npm, `trustedPublisher` and the GitHub Release. Record the
+   coordinator and publisher run URLs. If tag creation or dispatch fails, the
+   run summary has GitHub's status, message, permissions and candidate facts;
+   report them, do not retry with another credential, and do not change
+   settings.
 8. **Verify.** `node scripts/release.mjs status --package <p> --version <v>`
    must show `npm: "present"`, non-null `trustedPublisher`, a GitHub Release
    URL, and `missing: []`. The workflow's `finalize` job creates the Release.
-9. Initializer next, if its rules require it.
+9. Initializer next, if its rules require it. The coordinator refuses the
+   initializer until the runtime it was prepared with is on npm, tagged and
+   released.
 
 ## Recovery
 
 Start with `node scripts/release.mjs status --package <p> --version <v> --sha <sha>`
-and follow the `missing` table in publishing.md. `["github-release"]` →
-`dispatch --package <p> --tag <tag> --ref main`. `["publish", "github-release"]`
-→ read the failed run, fix the cause, `dispatch --package <p> --tag <tag>`
-(ref = tag). Never republish an existing version, never move, delete, or
+and follow the `missing` table in publishing.md. Rerunning the coordinator with
+the same inputs is always safe: it finalizes (`["github-release"]`), resumes a
+publish at the tag's original SHA (`["publish", "github-release"]`, after the
+failed run's cause is fixed), waits while a run is in flight or an accepted
+upload is not visible yet, or reports `complete`. Without a coordinator path:
+`dispatch --package <p> --tag <tag> --ref main` (finalize) or
+`dispatch --package <p> --tag <tag>` (publish, ref = tag). Never republish an existing version, never move, delete, or
 recreate a pushed tag. Uncertain registry or GitHub state is a stop, never
 absence.
 
@@ -108,8 +128,8 @@ State the outcome precisely; these are not the same thing:
   non-null `trustedPublisher`. Only this proves Trusted Publishing.
 - **Finalize/skip:** the version already existed; the run only created or kept
   the Release.
-- **Dry run** (`pnpm release:dry-run` or `dispatch --dry-run`): gates only;
-  nothing published.
+- **Dry run** (`pnpm release:dry-run`, `dispatch --dry-run`, or a coordinator
+  `dry_run: true` plan): checks only; nothing tagged or published.
 - **Public read:** `registry-state`/`status` saw the version; says nothing
   about how it was published.
 

@@ -18,12 +18,23 @@ import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 
 import {
+  COORDINATOR_WORKFLOW,
+  INITIALIZER_TEMPLATE_MANIFEST,
+  PACKAGES,
+  PUBLISH_JOB_NAME,
   REGISTRY,
   REPOSITORY,
   ReleaseError,
   UncertainStateError,
   admitRelease,
+  assessRuntimeGate,
+  changelogHasEntry,
   changelogToReleaseNotes,
+  classifyTagCreate,
+  describeGithubWriteFailure,
+  parseCoordinatorInputs,
+  planCoordinator,
+  resolveExistingTag,
   classifyRegistryResponse,
   evaluateCiRuns,
   evaluatePublication,
@@ -103,7 +114,7 @@ async function httpJson(url, { method = "GET", headers = {}, body } = {}) {
   } catch {
     // Keep the raw text; callers classify it.
   }
-  return { status: response.status, body: parsed, error: null };
+  return { status: response.status, body: parsed, headers: Object.fromEntries(response.headers), error: null };
 }
 
 // ---------------------------------------------------------------- npm registry
@@ -133,8 +144,12 @@ async function waitForPresence(config, version, waitSeconds) {
 // ---------------------------------------------------------------- GitHub REST
 
 let cachedToken;
+// Set by preflight when no credential exists or GitHub rejects it: public
+// reads (runs, releases) then go out unauthenticated so the candidate report
+// still works; writes keep requiring a real credential.
+let anonymousReads = false;
 function githubToken({ required = true } = {}) {
-  if (cachedToken !== undefined) return cachedToken;
+  if (cachedToken !== undefined && (cachedToken || !required)) return cachedToken;
   cachedToken = process.env.GH_TOKEN || process.env.GITHUB_TOKEN || null;
   if (!cachedToken) {
     const result = run("gh", ["auth", "token"], { allowFailure: true });
@@ -151,12 +166,14 @@ function repository() {
 }
 
 async function github(pathname, options = {}) {
-  const token = githubToken();
+  const method = options.method ?? "GET";
+  const anonymous = anonymousReads && method === "GET";
+  const token = anonymous ? null : githubToken();
   return httpJson(`https://api.github.com${pathname}`, {
     ...options,
     headers: {
       Accept: "application/vnd.github+json",
-      Authorization: `Bearer ${token}`,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       "X-GitHub-Api-Version": "2022-11-28",
       ...options.headers,
     },
@@ -416,6 +433,10 @@ async function cmdPreflight(values) {
   const config = values.package ? packageConfig(values.package) : null;
   const checks = [];
   const rootManifest = JSON.parse(readFileSync(path.join(ROOT, "package.json"), "utf8"));
+  const explicitSha = values.sha || null;
+  if (explicitSha && !/^[0-9a-f]{40}$/u.test(explicitSha)) {
+    throw new ReleaseError(`--sha must be a full 40-character lowercase commit SHA; received ${JSON.stringify(explicitSha)}.`);
+  }
 
   checks.push(
     check("node >=24 <25", () => {
@@ -433,65 +454,103 @@ async function cmdPreflight(values) {
       return version;
     }),
   );
-  checks.push(check("git work tree clean", () => {
-    const status = git(["status", "--porcelain"]).stdout.trim();
-    if (status) throw new Error("uncommitted changes present");
-    return "clean";
-  }));
-  checks.push(check("branch main == origin/main", () => {
-    git(["fetch", "--quiet", "--tags", "origin"]);
-    const branch = git(["branch", "--show-current"]).stdout.trim();
-    const head = git(["rev-parse", "HEAD"]).stdout.trim();
-    const upstream = git(["rev-parse", "origin/main"]).stdout.trim();
-    if (branch !== "main") throw new Error(`on ${branch || "detached HEAD"}`);
-    if (head !== upstream) throw new Error(`HEAD ${head} != origin/main ${upstream}`);
-    return head;
-  }));
   checks.push(check("origin is the release repository", () => {
     const url = git(["remote", "get-url", "origin"]).stdout.trim();
     if (!url.replace(/\.git$/u, "").endsWith(REPOSITORY)) throw new Error(url);
     return url;
   }));
-  // Capability, not a requirement: without git push, the release commit lands
-  // through a merged PR and the tag through the GitHub refs API.
-  const pushProbe = git(["push", "--dry-run", "origin", "HEAD:refs/heads/main"], { allowFailure: true });
-  const gitPush = pushProbe.status === 0 ? "available" : `unavailable (${pushProbe.stderr.trim().split("\n").pop()})`;
+  let mainHead = null;
+  checks.push(check("fetch origin main", () => {
+    git(["fetch", "--quiet", "--tags", "origin", "+refs/heads/main:refs/remotes/origin/main"]);
+    mainHead = git(["rev-parse", "origin/main"]).stdout.trim();
+    return mainHead;
+  }));
+  // Local preparation needs a clean main checkout; binding an explicit
+  // --sha (e.g. a release commit merged through a PR) does not.
+  const localTree = [
+    check("git work tree clean", () => {
+      const status = git(["status", "--porcelain"]).stdout.trim();
+      if (status) throw new Error("uncommitted changes present");
+      return "clean";
+    }),
+    check("branch main == origin/main", () => {
+      const branch = git(["branch", "--show-current"]).stdout.trim();
+      const head = git(["rev-parse", "HEAD"]).stdout.trim();
+      if (branch !== "main") throw new Error(`on ${branch || "detached HEAD"}`);
+      if (head !== mainHead) throw new Error(`HEAD ${head} != origin/main ${mainHead}`);
+      return head;
+    }),
+  ];
+  if (explicitSha) {
+    for (const item of localTree) item.label += " (informational with --sha)";
+  } else {
+    checks.push(...localTree);
+  }
 
   const registryPing = await httpJson(`${REGISTRY}/-/ping`);
   checks.push({ label: "npm registry reachable", ok: registryPing.status === 200, detail: registryPing.status ?? String(registryPing.error) });
 
-  let tokenOk = false;
-  try {
-    githubToken();
-    tokenOk = true;
-    const repo = await github(`/repos/${repository()}`);
-    const permissions = repo.body?.permissions ?? {};
-    checks.push({ label: "GitHub API auth", ok: repo.status === 200, detail: repo.status });
-    checks.push({ label: "GitHub push permission (tag ref, dispatch)", ok: Boolean(permissions.push), detail: JSON.stringify(permissions) });
-  } catch (error) {
-    checks.push({ label: "GitHub API auth", ok: false, detail: error.message });
-  }
+  // GitHub: a credential is a capability, not a requirement. Reads fall back
+  // to anonymous access (the repository is public); writes need a credential
+  // or another dispatch path (GitHub MCP, the Actions UI).
+  const credential = await probeGithubCredential();
+  if (!credential.valid) anonymousReads = true;
+  const repo = await github(`/repos/${repository()}`);
+  checks.push({
+    label: `GitHub API reads (${credential.valid ? "authenticated" : "anonymous"})`,
+    ok: repo.status === 200,
+    detail: `${repo.status ?? String(repo.error)}${repo.status !== 200 && repo.body?.message ? `: ${repo.body.message}` : ""}`,
+  });
 
+  const pushProbe = git(["push", "--dry-run", "origin", "HEAD:refs/heads/main"], { allowFailure: true });
+  const gitPush = pushProbe.status === 0 ? "available" : `unavailable (${pushProbe.stderr.trim().split("\n").pop()})`;
   const heavyGuard = process.env.HOME ? path.join(process.env.HOME, ".claude/scripts/heavy-guard.sh") : null;
+  const canDispatchViaApi = credential.valid && credential.permissions?.push === true;
   const info = {
     platform: `${os.platform()} ${os.arch()}`,
+    githubCredential: credential.summary,
     gitPush,
-    tagPath: gitPush === "available" ? "git push origin <tag>" : "GitHub refs API (POST /repos/{repo}/git/refs), then ensure-run",
+    releasePath: canDispatchViaApi
+      ? "release coordinator via API: node scripts/release.mjs request-release ..."
+      : "release coordinator via GitHub MCP actions_run_trigger if this session has it, otherwise Actions UI → Release coordinator → Run workflow",
+    releaseCommitPath: gitPush === "available" ? "git push origin main" : "pull request merged by the owner",
     heavyGuard: heavyGuard && existsSync(heavyGuard) ? "available (Mac resource admission)" : "not present; run heavy gates directly",
   };
+  // Node's fetch ignores HTTPS_PROXY unless NODE_USE_ENV_PROXY=1; behind an
+  // egress proxy (Cloud sessions) GitHub calls otherwise bypass it.
+  if ((process.env.HTTPS_PROXY || process.env.https_proxy) && process.env.NODE_USE_ENV_PROXY !== "1") {
+    info.proxy = "HTTPS_PROXY is set but NODE_USE_ENV_PROXY is not 1; rerun with NODE_USE_ENV_PROXY=1 so fetch uses the proxy";
+  }
+  for (const item of explicitSha ? localTree : []) info[item.label] = `${item.ok ? "yes" : "no"}: ${item.detail}`;
 
   const candidate = {};
-  if (config && tokenOk) {
-    const sha = values.sha || git(["rev-parse", "HEAD"]).stdout.trim();
-    const version = manifestVersionAt(config, sha);
-    const tag = config.tag(version);
-    const ci = evaluateCiRuns({ runs: await listRunsForSha(sha), sha });
-    Object.assign(candidate, { package: config.selector, sha, version, tag, ci });
-    candidate.tagOnOrigin = remoteTag(tag);
-    candidate.registry = await registryState(config, version);
-    delete candidate.registry.manifest;
-    checks.push({ label: `CI on ${sha.slice(0, 12)} (push runs only)`, ok: ci.ok, detail: ci.problems.join("; ") || ci.counted.join(", ") });
-    checks.push({ label: "npm state known", ok: candidate.registry.state !== "uncertain", detail: candidate.registry.state });
+  if (config && mainHead && repo.status === 200) {
+    const sha = explicitSha || git(["rev-parse", "HEAD"]).stdout.trim();
+    try {
+      const version = manifestVersionAt(config, sha);
+      const tag = config.tag(version);
+      const facts = await gatherCoordinatorFacts({ config, version, sha, tag, mainHead });
+      Object.assign(candidate, { package: config.selector, sha, version, tag, ci: facts.ci, tagOnOrigin: facts.remoteTag, npm: facts.registry.state });
+      checks.push({ label: `CI on ${sha.slice(0, 12)} (push runs only)`, ok: facts.ci.ok, detail: facts.ci.problems.join("; ") || facts.ci.counted.join(", ") });
+      checks.push({ label: "npm state known", ok: facts.registry.state !== "uncertain", detail: facts.registry.reason ?? facts.registry.state });
+      let plan;
+      try {
+        plan = planCoordinator({ ...facts, allowOlderSha: Boolean(values["allow-older-sha"]) });
+        candidate.coordinator = { action: plan.action, reason: plan.reason };
+      } catch (error) {
+        candidate.coordinator = { refused: error.message };
+      }
+      // An explicit --sha asks "can the coordinator release this commit?".
+      if (explicitSha) {
+        checks.push({
+          label: "release coordinator would accept this candidate",
+          ok: Boolean(plan),
+          detail: plan ? `${plan.action}: ${plan.reason}` : candidate.coordinator.refused,
+        });
+      }
+    } catch (error) {
+      checks.push({ label: `candidate ${sha.slice(0, 12)}`, ok: false, detail: error.message });
+    }
   }
 
   for (const item of checks) log(`${item.ok ? "PASS" : "FAIL"}  ${item.label}: ${item.detail}`);
@@ -499,7 +558,22 @@ async function cmdPreflight(values) {
   if (checks.some((item) => !item.ok)) process.exitCode = 1;
 }
 
+/** Try the configured GitHub credential without failing: missing, rejected, or valid with its repo permissions. */
+async function probeGithubCredential() {
+  const source = process.env.GH_TOKEN ? "GH_TOKEN" : process.env.GITHUB_TOKEN ? "GITHUB_TOKEN" : "gh auth token";
+  const token = githubToken({ required: false });
+  if (!token) return { valid: false, summary: "none (no GH_TOKEN/GITHUB_TOKEN, gh not authenticated)" };
+  const response = await github(`/repos/${repository()}`);
+  if (response.status === 200) {
+    const permissions = response.body?.permissions ?? {};
+    return { valid: true, permissions, summary: `valid via ${source}; repo permissions ${JSON.stringify(permissions)}` };
+  }
+  const message = response.body?.message ? `: ${response.body.message}` : "";
+  return { valid: false, summary: `rejected via ${source} (HTTP ${response.status ?? response.error}${message})` };
+}
+
 async function cmdStatus(values) {
+
   const config = packageConfig(values.package);
   const version = values.version || manifestVersionAt(config, "HEAD");
   const tag = config.tag(version);
@@ -532,30 +606,50 @@ async function cmdStatus(values) {
   );
 }
 
+async function listDispatchRuns(workflow, query = "") {
+  const runs = await github(`/repos/${repository()}/actions/workflows/${workflow}/runs?event=workflow_dispatch&per_page=50${query}`);
+  if (runs.status !== 200) throw new UncertainStateError(`Could not list ${workflow} runs (HTTP ${runs.status ?? runs.error}).`);
+  return runs.body.workflow_runs;
+}
+
+/**
+ * Dispatch one workflow and read the new run back. Runs that existed before
+ * the dispatch are excluded, so a concurrent run at the same ref is not
+ * mistaken for ours. Returns the run, or throws with diagnostics.
+ */
+async function dispatchWorkflowRun({ workflow, ref, inputs, diagnostics = {} }) {
+  const before = new Set((await listDispatchRuns(workflow)).map((run) => run.id));
+  const startedAt = new Date(Date.now() - 5_000).toISOString().replace(/\.\d{3}Z$/u, "Z");
+  const response = await github(`/repos/${repository()}/actions/workflows/${workflow}/dispatches`, {
+    method: "POST",
+    body: { ref, inputs },
+  });
+  if (response.status !== 204) {
+    const lines = describeGithubWriteFailure({ operation: `Dispatch ${workflow} at ${ref}`, ...response, ...diagnostics });
+    writeSummary(["### Dispatch failed", "", ...lines.map((line) => `- ${line}`)].join("\n"));
+    throw new ReleaseError(lines.join("\n"), { code: "DISPATCH_FAILED" });
+  }
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    await sleep(3_000);
+    const runs = await listDispatchRuns(workflow, `&created=${encodeURIComponent(`>=${startedAt}`)}`);
+    const found = runs.find((candidate) => candidate.head_branch === ref && !before.has(candidate.id));
+    if (found) return found;
+  }
+  throw new UncertainStateError(
+    `Dispatch of ${workflow} at ${ref} was accepted (HTTP 204) but no run appeared yet; check the Actions tab before dispatching again.`,
+  );
+}
+
 async function cmdDispatch(values) {
   const config = packageConfig(values.package);
   const tag = values.tag;
   const ref = values.ref || tag;
-  const startedAt = new Date(Date.now() - 5_000).toISOString().replace(/\.\d{3}Z$/u, "Z");
-  const response = await github(`/repos/${repository()}/actions/workflows/${config.workflow}/dispatches`, {
-    method: "POST",
-    body: { ref, inputs: { tag, dry_run: values["dry-run"] ? "true" : "false" } },
+  const found = await dispatchWorkflowRun({
+    workflow: config.workflow,
+    ref,
+    inputs: { tag, dry_run: values["dry-run"] ? "true" : "false" },
   });
-  if (response.status !== 204) throw new ReleaseError(`Dispatch failed (HTTP ${response.status ?? response.error}).`);
-  for (let attempt = 0; attempt < 20; attempt += 1) {
-    await sleep(3_000);
-    const runs = await github(
-      `/repos/${repository()}/actions/workflows/${config.workflow}/runs?event=workflow_dispatch&per_page=20&created=${encodeURIComponent(`>=${startedAt}`)}`,
-    );
-    if (runs.status !== 200) throw new UncertainStateError(`Could not list dispatched runs (HTTP ${runs.status ?? runs.error}).`);
-    // Match the ref we dispatched; a concurrent dispatch at another ref is not ours.
-    const found = runs.body.workflow_runs.find((candidate) => candidate.head_branch === ref);
-    if (found) {
-      log(JSON.stringify({ runId: found.id, url: found.html_url, ref, tag, dryRun: Boolean(values["dry-run"]) }));
-      return;
-    }
-  }
-  throw new UncertainStateError("Dispatch was accepted but no run appeared yet; check the Actions tab before dispatching again.");
+  log(JSON.stringify({ runId: found.id, url: found.html_url, ref, tag, dryRun: Boolean(values["dry-run"]) }));
 }
 
 /**
@@ -585,7 +679,344 @@ async function cmdEnsureRun(values) {
   await cmdDispatch({ package: values.package, tag });
 }
 
+// ---------------------------------------------------------------- release coordinator
+
+const COORDINATOR_MAIN_REF = "refs/release-coordinator/main";
+
+/** Fetch origin main into a private ref and make sure the candidate commit is present locally. */
+function fetchMainAndCandidate(sha) {
+  git(["fetch", "--quiet", "--no-tags", "origin", `+refs/heads/main:${COORDINATOR_MAIN_REF}`]);
+  const mainHead = git(["rev-parse", COORDINATOR_MAIN_REF]).stdout.trim();
+  if (git(["cat-file", "-e", `${sha}^{commit}`], { allowFailure: true }).status !== 0) {
+    git(["fetch", "--quiet", "--no-tags", "origin", sha], { allowFailure: true });
+  }
+  return mainHead;
+}
+
+function isAncestor(sha, mainHead) {
+  const result = git(["merge-base", "--is-ancestor", sha, mainHead], { allowFailure: true });
+  if (result.status === 0) return true;
+  if (result.status === 1) return false;
+  throw new ReleaseError(`Commit ${sha} is not available from origin: ${result.stderr.trim()}`);
+}
+
+function fileAt(sha, file) {
+  const result = git(["show", `${sha}:${file}`], { allowFailure: true });
+  return result.status === 0 ? result.stdout : null;
+}
+
+function workflowDiff(sha, mainHead) {
+  const result = git(["diff", "--name-only", sha, mainHead, "--", ".github/workflows"], { allowFailure: true });
+  return result.status === 0 ? result.stdout.split("\n").filter(Boolean) : null;
+}
+
+/** Publish-workflow runs whose ref is the tag, each with its publish job's conclusion. */
+async function publisherRunsForTag(config, tag) {
+  const response = await github(
+    `/repos/${repository()}/actions/workflows/${config.workflow}/runs?branch=${encodeURIComponent(tag)}&per_page=100`,
+  );
+  if (response.status !== 200) throw new UncertainStateError(`Could not list ${config.workflow} runs for ${tag} (HTTP ${response.status ?? response.error}).`);
+  const runs = [];
+  for (const runInfo of response.body.workflow_runs.filter((r) => r.head_branch === tag)) {
+    const jobs = await github(`/repos/${repository()}/actions/runs/${runInfo.id}/jobs?filter=all&per_page=100`);
+    if (jobs.status !== 200) throw new UncertainStateError(`Could not read jobs of run ${runInfo.html_url} (HTTP ${jobs.status ?? jobs.error}).`);
+    const publishJob = jobs.body.jobs.find((job) => job.name === PUBLISH_JOB_NAME) ?? null;
+    runs.push({
+      id: runInfo.id,
+      url: runInfo.html_url,
+      event: runInfo.event,
+      status: runInfo.status,
+      conclusion: runInfo.conclusion,
+      headSha: runInfo.head_sha,
+      publishJob: publishJob ? { status: publishJob.status, conclusion: publishJob.conclusion } : null,
+    });
+  }
+  return runs;
+}
+
+/** Every fact planCoordinator needs for one candidate. Read-only. */
+async function gatherCoordinatorFacts({ config, version, sha, tag, mainHead }) {
+  const inMain = isAncestor(sha, mainHead);
+  const manifestText = fileAt(sha, config.manifest);
+  const manifestVersion = manifestText ? JSON.parse(manifestText).version : null;
+
+  const page = `${config.changelogDir}/${version}.mdx`;
+  const pageText = fileAt(sha, page);
+  let changelog;
+  if (pageText === null) {
+    changelog = { ok: false, problem: `${page} does not exist` };
+  } else {
+    try {
+      changelogToReleaseNotes(pageText, { packageName: config.packageName });
+      changelog = { ok: true };
+    } catch (error) {
+      changelog = { ok: false, problem: error.message };
+    }
+  }
+  const generatedChangelogHasEntry = changelogHasEntry(fileAt(sha, `${config.packageDir}/CHANGELOG.md`), version);
+
+  const ci = evaluateCiRuns({ runs: await listRunsForSha(sha), sha });
+  const peeled = remoteTag(tag);
+  const registry = await registryState(config, version);
+  const githubRelease = await githubReleaseState(tag);
+  const publisherRuns = peeled && registry.state === "absent" ? await publisherRunsForTag(config, tag) : [];
+
+  let runtimeGate = null;
+  if (config.packageName === "initializer") {
+    const runtime = PACKAGES.runtime;
+    const runtimeVersion = JSON.parse(fileAt(sha, runtime.manifest)).version;
+    const template = JSON.parse(fileAt(sha, INITIALIZER_TEMPLATE_MANIFEST) ?? "{}");
+    runtimeGate = assessRuntimeGate({
+      runtimeVersion,
+      templateRange: template.dependencies?.[runtime.selector] ?? null,
+      remoteTag: remoteTag(runtime.tag(runtimeVersion)),
+      registry: await registryState(runtime, runtimeVersion),
+      githubRelease: await githubReleaseState(runtime.tag(runtimeVersion)),
+    });
+  }
+
+  return {
+    packageName: config.packageName,
+    version,
+    sha,
+    tag,
+    mainHead,
+    inMain,
+    manifestVersion,
+    changelog,
+    generatedChangelogHasEntry,
+    ci,
+    remoteTag: peeled,
+    registry: registry.state === "present" ? { state: "present", trustedPublisher: registry.manifest?._npmUser?.trustedPublisher ?? null } : registry,
+    githubRelease: githubRelease.state === "present" ? { state: "present", url: githubRelease.release.html_url } : githubRelease,
+    publisherRuns,
+    runtimeGate,
+  };
+}
+
+function coordinatorInputsFromEnv() {
+  return parseCoordinatorInputs({
+    packageName: process.env.INPUT_PACKAGE,
+    version: process.env.INPUT_VERSION,
+    sha: process.env.INPUT_SHA,
+    dryRun: process.env.INPUT_DRY_RUN,
+    allowOlderSha: process.env.INPUT_ALLOW_OLDER_SHA,
+    ref: process.env.GITHUB_REF,
+  });
+}
+
+/** Coordinator `plan` job: read-only facts and the one next action. */
+async function cmdCoordinatePlan() {
+  const inputs = coordinatorInputsFromEnv();
+  const config = PACKAGES[inputs.packageName];
+  const mainHead = fetchMainAndCandidate(inputs.sha);
+  const facts = await gatherCoordinatorFacts({ config, version: inputs.version, sha: inputs.sha, tag: inputs.tag, mainHead });
+  const summaryHead = [
+    `### Release coordinator: ${config.selector}@${inputs.version}${inputs.dryRun ? " (dry run)" : ""}`,
+    "",
+    "| Fact | Value |",
+    "| --- | --- |",
+    `| Candidate SHA | \`${inputs.sha}\` |`,
+    `| main HEAD | \`${mainHead}\`${mainHead === inputs.sha ? " (same)" : ""} |`,
+    `| On main | ${facts.inMain} |`,
+    `| Manifest version at SHA | ${facts.manifestVersion} |`,
+    `| Changelog page | ${facts.changelog.ok ? "finalized" : facts.changelog.problem} |`,
+    `| Generated CHANGELOG.md entry | ${facts.generatedChangelogHasEntry} |`,
+    `| Push CI on SHA | ${facts.ci.ok ? "green" : facts.ci.problems.join("; ")} |`,
+    `| Tag \`${inputs.tag}\` | ${facts.remoteTag ? `exists at \`${facts.remoteTag.commit}\`` : "absent"} |`,
+    `| npm | ${facts.registry.state}${facts.registry.reason ? ` (${facts.registry.reason})` : ""} |`,
+    `| GitHub Release | ${facts.githubRelease.url ?? facts.githubRelease.state} |`,
+    `| Publisher runs at the tag | ${facts.publisherRuns.map((r) => `[${r.status}/${r.conclusion ?? "-"}, publish ${r.publishJob?.conclusion ?? "-"}](${r.url})`).join(", ") || "none"} |`,
+    ...(facts.runtimeGate ? [`| Runtime gate | ${facts.runtimeGate.ok ? "runtime released" : facts.runtimeGate.problems.join("; ")} |`] : []),
+    "",
+  ];
+  let plan;
+  try {
+    plan = planCoordinator({ ...facts, allowOlderSha: inputs.allowOlderSha });
+  } catch (error) {
+    writeSummary([...summaryHead, `**Refused:** ${error.message}`, "", "Nothing was changed."].join("\n"));
+    throw error;
+  }
+  const willAct = !inputs.dryRun && ["create-tag", "dispatch-publish", "dispatch-finalize"].includes(plan.action);
+  writeOutputs({
+    package: inputs.packageName,
+    version: inputs.version,
+    sha: inputs.sha,
+    tag: inputs.tag,
+    action: plan.action,
+    dispatch_ref: plan.dispatchRef ?? "",
+    main_head: mainHead,
+    act: willAct ? "true" : "false",
+  });
+  writeSummary(
+    [
+      ...summaryHead,
+      `**Action:** \`${plan.action}\`${inputs.dryRun ? " — dry run: not performed; nothing was changed" : ""}`,
+      "",
+      plan.reason,
+    ].join("\n"),
+  );
+  log(JSON.stringify({ dryRun: inputs.dryRun, plan, facts }, null, 2));
+}
+
+/** Coordinator `tag` job: create the tag with the job's GITHUB_TOKEN, idempotently. */
+async function cmdCoordinateTag(values) {
+  const config = packageConfig(values.package);
+  const { tag, sha } = values;
+  if (parseReleaseTag(tag)?.packageName !== config.packageName) throw new ReleaseError(`${tag} is not a ${config.packageName} tag.`);
+  // Recheck right before the irreversible step.
+  const registry = await registryState(config, parseReleaseTag(tag).version);
+  if (registry.state !== "absent") {
+    throw new UncertainStateError(`npm state of ${config.selector} for ${tag} is ${registry.state} just before tagging; not tagging.`);
+  }
+  const existing = remoteTag(tag);
+  if (existing) {
+    resolveExistingTag({ tag, sha, remoteTag: existing });
+    log(`Tag ${tag} already exists at ${sha}; resuming.`);
+    writeSummary(`Tag \`${tag}\` already existed at \`${sha}\`; resumed without writing.`);
+    return;
+  }
+  const response = await github(`/repos/${repository()}/git/refs`, { method: "POST", body: { ref: `refs/tags/${tag}`, sha } });
+  const result = classifyTagCreate(response);
+  if (result.outcome === "created") {
+    log(`Created tag ${tag} at ${sha}.`);
+    writeSummary(`Created tag \`${tag}\` at \`${sha}\` with the job's GITHUB_TOKEN.`);
+    return;
+  }
+  if (result.outcome === "exists") {
+    resolveExistingTag({ tag, sha, remoteTag: remoteTag(tag) });
+    log(`Tag ${tag} appeared concurrently at ${sha}; resuming.`);
+    return;
+  }
+  const mainHead = fetchMainAndCandidate(sha);
+  const lines = describeGithubWriteFailure({
+    operation: `Create ${tag} at ${sha}`,
+    ...response,
+    declaredPermissions: "contents: write",
+    sha,
+    mainHead,
+    workflowDiff: workflowDiff(sha, mainHead),
+  });
+  writeSummary(["### Tag creation failed", "", ...lines.map((line) => `- ${line}`)].join("\n"));
+  throw new ReleaseError(lines.join("\n"), { code: "TAG_CREATE_FAILED" });
+}
+
+const TERMINAL_RUN = new Set(["completed"]);
+
+/**
+ * Coordinator `dispatch` job: start the package's publish workflow at the
+ * given ref (unless a run for the tag is already in flight), watch it, and
+ * report the exact npm / provenance / GitHub Release state afterwards.
+ */
+async function cmdCoordinateDispatch(values) {
+  const config = packageConfig(values.package);
+  const { tag } = values;
+  const ref = values.ref;
+  const version = parseReleaseTag(tag)?.version;
+  if (parseReleaseTag(tag)?.packageName !== config.packageName) throw new ReleaseError(`${tag} is not a ${config.packageName} tag.`);
+  if (ref !== tag && ref !== "main") throw new ReleaseError(`Dispatch ref must be the tag (publish) or main (finalize); got ${ref}.`);
+  const peeled = remoteTag(tag);
+  if (!peeled) throw new ReleaseError(`Tag ${tag} does not exist on origin; nothing to dispatch.`);
+  if (values.sha && peeled.commit !== values.sha) throw new ReleaseError(`Tag ${tag} peels to ${peeled.commit}, not ${values.sha}.`);
+
+  // A GITHUB_TOKEN tag never starts the tag-push trigger; if a run at the tag
+  // exists anyway (or a previous coordinator dispatched one), watch it.
+  let target = null;
+  if (ref === tag) {
+    const runs = await publisherRunsForTag(config, tag);
+    target = runs.find((run) => !TERMINAL_RUN.has(run.status)) ?? null;
+    if (runs.some((run) => run.publishJob?.conclusion === "success")) {
+      throw new ReleaseError(`An earlier run for ${tag} already published; not dispatching again. Rerun the coordinator later to finalize.`);
+    }
+  }
+  if (target) {
+    log(`A ${config.workflow} run for ${tag} is already in flight: ${target.url}; watching it instead of dispatching.`);
+  } else {
+    const mainHead = fetchMainAndCandidate(peeled.commit);
+    const found = await dispatchWorkflowRun({
+      workflow: config.workflow,
+      ref,
+      inputs: { tag, dry_run: "false" },
+      diagnostics: { declaredPermissions: "actions: write, contents: read", sha: peeled.commit, mainHead },
+    });
+    target = { id: found.id, url: found.html_url };
+    log(`Dispatched ${config.workflow} at ${ref} for ${tag}: ${target.url}`);
+  }
+  writeSummary(`Publisher run for \`${tag}\` (ref \`${ref}\`): ${target.url}`);
+  writeOutputs({ run_url: target.url });
+
+  const deadline = Date.now() + waitSeconds(values, 4800) * 1000;
+  let runInfo;
+  for (;;) {
+    const response = await github(`/repos/${repository()}/actions/runs/${target.id}`);
+    if (response.status === 200) {
+      runInfo = response.body;
+      if (TERMINAL_RUN.has(runInfo.status)) break;
+    }
+    if (Date.now() >= deadline) {
+      throw new UncertainStateError(`Publisher run ${target.url} has not finished yet; watch it and rerun the coordinator afterwards.`);
+    }
+    await sleep(30_000);
+  }
+  const jobs = await github(`/repos/${repository()}/actions/runs/${target.id}/jobs?filter=latest&per_page=100`);
+  const jobLines = jobs.status === 200 ? jobs.body.jobs.map((job) => `${job.name}: ${job.conclusion ?? job.status}`) : [`jobs unavailable (HTTP ${jobs.status})`];
+  const registry = await registryState(config, version);
+  const release = await githubReleaseState(tag);
+  const state = {
+    run: target.url,
+    conclusion: runInfo.conclusion,
+    jobs: jobLines,
+    npm: registry.state,
+    trustedPublisher: registry.manifest?._npmUser?.trustedPublisher ?? null,
+    integrity: registry.manifest?.dist?.integrity ?? null,
+    githubRelease: release.state === "present" ? release.release.html_url : release.state,
+  };
+  writeSummary(
+    [
+      `### Publisher result: ${config.selector}@${version}`,
+      "",
+      `Run: ${target.url} — **${runInfo.conclusion}**`,
+      ...jobLines.map((line) => `- ${line}`),
+      "",
+      `npm: ${state.npm}; trustedPublisher: ${state.trustedPublisher ? JSON.stringify(state.trustedPublisher) : "none"}; GitHub Release: ${state.githubRelease}`,
+      "",
+      runInfo.conclusion === "success"
+        ? "The publish workflow's own confirm job is the provenance check of record."
+        : "A failed run is not proof that npm lacks the version. Rerun the coordinator with the same inputs: it reconciles npm and earlier runs and only finalizes or resumes what is missing.",
+    ].join("\n"),
+  );
+  log(JSON.stringify(state, null, 2));
+  if (runInfo.conclusion !== "success") throw new ReleaseError(`Publisher run ${target.url} concluded ${runInfo.conclusion}.`);
+}
+
+/** Ask GitHub Actions to run the coordinator (needs a credential that may dispatch workflows). */
+async function cmdRequestRelease(values) {
+  const config = packageConfig(values.package);
+  const inputs = parseCoordinatorInputs({
+    packageName: config.packageName,
+    version: values.version,
+    sha: values.sha,
+    dryRun: values["dry-run"] ? "true" : "false",
+    allowOlderSha: values["allow-older-sha"] ? "true" : "false",
+    ref: "refs/heads/main",
+  });
+  const found = await dispatchWorkflowRun({
+    workflow: COORDINATOR_WORKFLOW,
+    ref: "main",
+    inputs: {
+      package: inputs.packageName,
+      version: inputs.version,
+      sha: inputs.sha,
+      dry_run: String(inputs.dryRun),
+      allow_older_sha: String(inputs.allowOlderSha),
+    },
+    diagnostics: { sha: inputs.sha },
+  });
+  log(JSON.stringify({ runId: found.id, url: found.html_url, ...inputs }, null, 2));
+}
+
 function tarballIntegrity(file) {
+
   return `sha512-${createHash("sha512").update(readFileSync(file)).digest("base64")}`;
 }
 
@@ -639,6 +1070,10 @@ const COMMANDS = {
   status: { fn: cmdStatus, required: ["package"] },
   dispatch: { fn: cmdDispatch, required: ["package", "tag"] },
   "ensure-run": { fn: cmdEnsureRun, required: ["package", "tag"] },
+  "request-release": { fn: cmdRequestRelease, required: ["package", "version", "sha"] },
+  "coordinate-plan": { fn: cmdCoordinatePlan, required: [] },
+  "coordinate-tag": { fn: cmdCoordinateTag, required: ["package", "tag", "sha"] },
+  "coordinate-dispatch": { fn: cmdCoordinateDispatch, required: ["package", "tag", "ref"] },
   "tarball-info": { fn: cmdTarballInfo, required: ["package", "version", "tarball"] },
   "publish-preflight": { fn: cmdPublishPreflight, required: ["tarball", "integrity"] },
 };
@@ -646,7 +1081,10 @@ const COMMANDS = {
 const USAGE = `Usage: node scripts/release.mjs <command> [options]
 
 Commands (see dev-docs/publishing.md):
-  preflight [--package p] [--sha SHA]       capability + candidate/CI binding report
+  preflight [--package p] [--sha SHA] [--allow-older-sha]
+                                            capability + candidate/CI binding report
+  request-release --package p --version V --sha SHA [--dry-run] [--allow-older-sha]
+                                            run the release coordinator workflow on main
   status --package p [--version V] [--sha SHA]  tag / npm / GitHub Release state and missing steps
   registry-state --package p --version V    exact npm state (exit 3 = uncertain)
   release-notes --package p --version V [--ref SHA]
@@ -655,6 +1093,7 @@ Commands (see dev-docs/publishing.md):
   verify-publication --package p --version V --tag T --source-sha SHA [--integrity SRI] [--wait S]
   finalize --package p --version V [--source-sha SHA] [--wait S]   idempotent GitHub Release
   admit --package p                          (publish workflows only)
+  coordinate-plan | coordinate-tag | coordinate-dispatch   (release coordinator only)
   tarball-info --package p --version V --tarball F   (publish workflows only)
   publish-preflight --tarball F --integrity SRI      (publish workflows only)
 
@@ -681,6 +1120,7 @@ async function main() {
       wait: { type: "string" },
       tarball: { type: "string" },
       "dry-run": { type: "boolean" },
+      "allow-older-sha": { type: "boolean" },
     },
     strict: true,
   });
