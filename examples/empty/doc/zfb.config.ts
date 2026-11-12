@@ -13,7 +13,7 @@ const site = zudoDoc({
   base: "/",
   // ADR-020: templates set the locale explicitly.
   defaultLocale: "en",
-  // Graphite is zudo-doc 9's default look; the allowlist keeps the other packs out of the build.
+  // Graphite is zudo-doc's default look; the allowlist keeps the other packs out of the build.
   themePack: "graphite",
   themePacks: ["graphite"],
   llmsTxt: true,
