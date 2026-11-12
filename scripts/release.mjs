@@ -720,7 +720,9 @@ async function publisherRunsForTag(config, tag) {
   for (const runInfo of response.body.workflow_runs.filter((r) => r.head_branch === tag)) {
     const jobs = await github(`/repos/${repository()}/actions/runs/${runInfo.id}/jobs?filter=all&per_page=100`);
     if (jobs.status !== 200) throw new UncertainStateError(`Could not read jobs of run ${runInfo.html_url} (HTTP ${jobs.status ?? jobs.error}).`);
-    const publishJob = jobs.body.jobs.find((job) => job.name === PUBLISH_JOB_NAME) ?? null;
+    // filter=all spans every attempt; a success in any attempt means npm accepted an upload.
+    const publishJobs = jobs.body.jobs.filter((job) => job.name === PUBLISH_JOB_NAME);
+    const publishJob = publishJobs.find((job) => job.conclusion === "success") ?? publishJobs.at(-1) ?? null;
     runs.push({
       id: runInfo.id,
       url: runInfo.html_url,
@@ -919,29 +921,28 @@ async function cmdCoordinateDispatch(values) {
   if (!peeled) throw new ReleaseError(`Tag ${tag} does not exist on origin; nothing to dispatch.`);
   if (values.sha && peeled.commit !== values.sha) throw new ReleaseError(`Tag ${tag} peels to ${peeled.commit}, not ${values.sha}.`);
 
-  // A GITHUB_TOKEN tag never starts the tag-push trigger; if a run at the tag
-  // exists anyway (or a previous coordinator dispatched one), watch it.
-  let target = null;
+  // A GITHUB_TOKEN tag never starts the tag-push trigger. If a run at the tag
+  // appeared since `plan` anyway, stop: it may be a dry run (inputs are not
+  // visible through the runs API), so it is neither watched nor duplicated.
   if (ref === tag) {
     const runs = await publisherRunsForTag(config, tag);
-    target = runs.find((run) => !TERMINAL_RUN.has(run.status)) ?? null;
+    const active = runs.find((run) => !TERMINAL_RUN.has(run.status));
+    if (active) {
+      throw new ReleaseError(`A ${config.workflow} run for ${tag} started since planning (${active.url}); not dispatching. Rerun the coordinator after it finishes.`);
+    }
     if (runs.some((run) => run.publishJob?.conclusion === "success")) {
       throw new ReleaseError(`An earlier run for ${tag} already published; not dispatching again. Rerun the coordinator later to finalize.`);
     }
   }
-  if (target) {
-    log(`A ${config.workflow} run for ${tag} is already in flight: ${target.url}; watching it instead of dispatching.`);
-  } else {
-    const mainHead = fetchMainAndCandidate(peeled.commit);
-    const found = await dispatchWorkflowRun({
-      workflow: config.workflow,
-      ref,
-      inputs: { tag, dry_run: "false" },
-      diagnostics: { declaredPermissions: "actions: write, contents: read", sha: peeled.commit, mainHead },
-    });
-    target = { id: found.id, url: found.html_url };
-    log(`Dispatched ${config.workflow} at ${ref} for ${tag}: ${target.url}`);
-  }
+  const mainHead = fetchMainAndCandidate(peeled.commit);
+  const found = await dispatchWorkflowRun({
+    workflow: config.workflow,
+    ref,
+    inputs: { tag, dry_run: "false" },
+    diagnostics: { declaredPermissions: "actions: write, contents: read", sha: peeled.commit, mainHead },
+  });
+  const target = { id: found.id, url: found.html_url };
+  log(`Dispatched ${config.workflow} at ${ref} for ${tag}: ${target.url}`);
   writeSummary(`Publisher run for \`${tag}\` (ref \`${ref}\`): ${target.url}`);
   writeOutputs({ run_url: target.url });
 

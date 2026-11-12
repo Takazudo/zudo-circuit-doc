@@ -370,6 +370,8 @@ describe("release-coordinator.yml", () => {
     assert.match(jobs.plan, /INPUT_DRY_RUN: \$\{\{ inputs\.dry_run \}\}/u);
     assert.match(jobs.tag, /if: needs\.plan\.outputs\.act == 'true' && needs\.plan\.outputs\.action == 'create-tag'/u);
     assert.match(jobs.dispatch, /needs\.plan\.outputs\.act == 'true'/u);
+    assert.match(jobs.dispatch, /!cancelled\(\) && needs\.plan\.result == 'success'/u);
+    assert.doesNotMatch(jobs.dispatch, /always\(\)/u);
     assert.match(jobs.dispatch, /needs\.tag\.result == 'success' \|\| \(needs\.tag\.result == 'skipped' && needs\.plan\.outputs\.action != 'create-tag'\)/u);
   });
 

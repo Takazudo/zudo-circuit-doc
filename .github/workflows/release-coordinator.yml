@@ -46,8 +46,8 @@ on:
         type: boolean
         default: false
 
-# One release at a time per package; never cancel a run that may be tagging or
-# watching a publish.
+# One release at a time per package; a running coordinator is never cancelled
+# by a newer submission (GitHub still replaces an older *pending* one).
 concurrency:
   group: release-coordinator-${{ inputs.package }}
   cancel-in-progress: false
@@ -123,7 +123,7 @@ jobs:
     name: Dispatch publisher
     needs: [plan, tag]
     if: >-
-      always() && needs.plan.result == 'success' && needs.plan.outputs.act == 'true' &&
+      !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.act == 'true' &&
       (needs.tag.result == 'success' || (needs.tag.result == 'skipped' && needs.plan.outputs.action != 'create-tag'))
     runs-on: ubuntu-latest
     timeout-minutes: 90
