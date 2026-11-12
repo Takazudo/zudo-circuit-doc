@@ -4,6 +4,20 @@ All notable changes to `@takazudo/zudo-circuit-doc` are documented in this file.
 
 The format is based on Keep a Changelog, and release notes are generated from the changelog MDX pages.
 
+## [0.3.1] - 2026-11-12
+
+Version 0.3.1 changes how the runtime is published, not what it does. The public API, peer
+floors (`^9.1.3` / `^5.2.2`) and Node 24 LTS requirement are unchanged from
+[0.3.0](#030---2026-11-06).
+
+## Other changes
+
+- Publish from the tag-triggered GitHub Actions workflow through npm Trusted Publishing (GitHub
+  OIDC). No npm token is stored, and the package carries npm provenance that links the tarball to
+  its release tag and commit.
+- Develop and test the runtime against zudo-doc 9.1.4, the version that
+  create-zudo-circuit-doc 0.2.1 generates.
+
 ## [0.3.0] - 2026-11-06
 
 Version 0.3.0 moves the runtime onto the published zudo-doc 9.1.3 / ZFB 5.2.2 family, following
