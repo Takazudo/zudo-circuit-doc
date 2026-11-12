@@ -536,6 +536,15 @@ export function summarizePublisherRuns(runs) {
   return { active, published, total: runs.length };
 }
 
+/** The runtime range a generated project installs; the template lists it under devDependencies. */
+export function templateRuntimeRange(manifest, selector) {
+  for (const field of ["dependencies", "devDependencies", "peerDependencies"]) {
+    const range = manifest?.[field]?.[selector];
+    if (range) return range;
+  }
+  return null;
+}
+
 /**
  * The initializer's published-runtime gate needs the runtime it was prepared
  * with to be completely released first. `runtime` holds the runtime manifest
