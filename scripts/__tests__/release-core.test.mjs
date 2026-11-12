@@ -14,6 +14,7 @@ import {
   integrityToSha512Hex,
   parseReleaseTag,
   peelRemoteTag,
+  makeLatestFor,
   planGithubRelease,
   planResume,
   resolveRequestedTag,
@@ -228,6 +229,17 @@ describe("GitHub Release finalization", () => {
     assert.deepEqual(planGithubRelease({ existing: { state: "absent" }, tag: "v1.2.3" }), { action: "create" });
     const existing = { state: "present", release: { tag_name: "v1.2.3", draft: false, prerelease: false, html_url: "u" } };
     assert.deepEqual(planGithubRelease({ existing, tag: "v1.2.3" }), { action: "keep", url: "u" });
+  });
+
+  test("a backfilled older version does not take the Latest label", () => {
+    const remoteTags = ["v0.1.0", "v0.2.0", "v0.3.0", "v0.10.0-rc.1", "create-zudo-circuit-doc-v0.9.0", "unrelated"];
+    assert.equal(makeLatestFor({ tag: "v0.2.0", remoteTags }), "false");
+    assert.equal(makeLatestFor({ tag: "v0.3.0", remoteTags }), "true");
+    assert.equal(makeLatestFor({ tag: "v0.3.1", remoteTags: [...remoteTags, "v0.3.1"] }), "true");
+    assert.equal(makeLatestFor({ tag: "create-zudo-circuit-doc-v0.9.0", remoteTags }), "true");
+    assert.equal(makeLatestFor({ tag: "create-zudo-circuit-doc-v0.2.1", remoteTags }), "false");
+    assert.equal(makeLatestFor({ tag: "v0.9.0", remoteTags: ["v0.10.0"] }), "false");
+    assert.throws(() => makeLatestFor({ tag: "main", remoteTags }), /not a release tag/u);
   });
 
   test("drafts, prereleases and uncertain lookups stop instead of being rewritten", () => {

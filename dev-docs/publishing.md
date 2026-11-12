@@ -161,7 +161,9 @@ counts as absence.
 
 A dispatch at an older tag runs *that tag's* workflow file. Tags cut before the OIDC migration
 (`v0.3.0` and `create-zudo-circuit-doc-v0.2.1` and earlier) contain the retired token workflow, so
-they can only be finalized, from `main`. If a package needs a code or workflow fix, release a new
+they can only be finalized, from `main`. A Release created for an older version than its
+package's newest tag is created with `make_latest: false`, so a backfill never takes the
+"Latest" label. If a package needs a code or workflow fix, release a new
 version; never repoint the existing tag.
 
 ## Owner setup: npm Trusted Publishing

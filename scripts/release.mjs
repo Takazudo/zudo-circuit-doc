@@ -30,6 +30,7 @@ import {
   extractProvenanceStatement,
   findStoredNpmCredentials,
   inspectPackedManifest,
+  makeLatestFor,
   packageConfig,
   peelRemoteTag,
   planGithubRelease,
@@ -170,6 +171,18 @@ async function githubReleaseState(tag) {
 }
 
 // ---------------------------------------------------------------- git facts
+
+function remoteReleaseTags() {
+  const result = git(["ls-remote", "--tags", "--refs", "origin"], { allowFailure: true });
+  if (result.status !== 0) {
+    throw new UncertainStateError(`git ls-remote origin failed: ${result.stderr.trim()}`);
+  }
+  return result.stdout
+    .split(/\r?\n/u)
+    .map((line) => line.trim().split(/\s+/u)[1])
+    .filter((ref) => ref?.startsWith("refs/tags/"))
+    .map((ref) => ref.slice("refs/tags/".length));
+}
 
 function remoteTag(tag) {
   const result = git(["ls-remote", "origin", `refs/tags/${tag}`, `refs/tags/${tag}^{}`], { allowFailure: true });
@@ -332,7 +345,14 @@ async function cmdFinalize(values) {
   const notes = await releaseNotesFor(config, version, peeled.commit);
   const response = await github(`/repos/${repository()}/releases`, {
     method: "POST",
-    body: { tag_name: tag, name: releaseTitle(config.packageName, version), body: notes, draft: false, prerelease: false },
+    body: {
+      tag_name: tag,
+      name: releaseTitle(config.packageName, version),
+      body: notes,
+      draft: false,
+      prerelease: false,
+      make_latest: makeLatestFor({ tag, remoteTags: remoteReleaseTags() }),
+    },
   });
   if (response.status === 201) {
     log(`Created GitHub Release ${response.body.html_url}`);

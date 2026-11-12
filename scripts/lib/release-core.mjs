@@ -371,6 +371,30 @@ export function planGithubRelease({ existing, tag }) {
 }
 
 /**
+ * GitHub labels a newly created Release "Latest" unless `make_latest` says
+ * otherwise, so backfilling an older version must not take that label from a
+ * newer release in the same package namespace.
+ */
+export function makeLatestFor({ tag, remoteTags }) {
+  const target = parseReleaseTag(tag);
+  if (!target) throw new ReleaseError(`${JSON.stringify(tag)} is not a release tag.`);
+  const newer = remoteTags
+    .map((name) => parseReleaseTag(name))
+    .filter((parsed) => parsed && parsed.packageName === target.packageName)
+    .some((parsed) => compareVersions(parsed.version, target.version) > 0);
+  return newer ? "false" : "true";
+}
+
+function compareVersions(a, b) {
+  const left = a.split(".").map(Number);
+  const right = b.split(".").map(Number);
+  for (let index = 0; index < 3; index += 1) {
+    if (left[index] !== right[index]) return left[index] - right[index];
+  }
+  return 0;
+}
+
+/**
  * Executed-CI binding for a candidate commit. Only push-event runs whose
  * head SHA is the candidate count: a pull_request run tested a merge tree,
  * which is a different tree from the commit that would be tagged.
